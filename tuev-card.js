@@ -1,4 +1,4 @@
-// TÜV Card bundled b58
+// TÜV Card bundled b59
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -368,7 +368,7 @@ const GROUP_ACCENT_COLORS = [
     "#42a5f5",
     "#66bb6a",
     "#ffa726",
-    "#ab58bc",
+    "#ab59bc",
     "#26c6da",
     "#ef5350",
     "#8d6e63"
@@ -5025,7 +5025,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b58
+// TÜV Card source entry b59
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5241,7 +5241,9 @@ class TuevCard extends HTMLElement {
         this.querySelectorAll("[data-confirm-entity]").forEach((button) => {
             const entityId = button.getAttribute("data-confirm-entity");
 
-            button.addEventListener("click", async () => {
+            button.addEventListener("click", async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 await this.confirmPassed(entityId);
             });
         });
@@ -5743,7 +5745,7 @@ class TuevCard extends HTMLElement {
         const statusColor = {
             valid: "var(--success-color, #43a047)",
             due: "var(--warning-color, #ffa000)",
-            expired: "var(--error-color, #db5837)"
+            expired: "var(--error-color, #db5937)"
         }[status] || "var(--secondary-text-color)";
 
         const huLabel = month && year
@@ -5945,20 +5947,16 @@ class TuevCard extends HTMLElement {
 
         this.hass = this._hass;
 
-        if (this._config.show_badge === false) {
+        if (this.config.show_badge === false) {
             ui.confirmServiceScheduled = true;
 
             window.setTimeout(() => {
-                this.finishDelayedConfirmation(entityId, ui);
+                this.callConfirmPassedService(entityId, ui);
             }, 1450);
 
             return;
         }
 
-        await this.callConfirmPassedService(entityId, ui);
-    }
-
-    async finishDelayedConfirmation(entityId, ui) {
         await this.callConfirmPassedService(entityId, ui);
     }
 
