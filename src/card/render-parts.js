@@ -1,4 +1,4 @@
-import { renderBadge } from "../badge/renderer.js?v=b64";
+import { renderBadge } from "../badge/renderer.js?v=b65";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -67,133 +67,6 @@ export function renderVehicleHeader({
                     ${plate}
                 </div>
             `}
-        </div>
-    `;
-}
-
-export function getOverlayStyleOptions({ badgeSize, compact }) {
-    const overlayScale = badgeSize <= 115
-        ? "tiny"
-        : badgeSize <= 140
-            ? "small"
-            : "normal";
-
-    return {
-        minWidth: {
-            tiny: 104,
-            small: 122,
-            normal: compact ? 145 : 170
-        }[overlayScale],
-        maxWidth: {
-            tiny: 126,
-            small: 150,
-            normal: compact ? 180 : 220
-        }[overlayScale],
-        padding: {
-            tiny: "7px",
-            small: "8px",
-            normal: compact ? "10px" : "12px"
-        }[overlayScale],
-        gap: {
-            tiny: "5px",
-            small: "6px",
-            normal: compact ? "7px" : "9px"
-        }[overlayScale],
-        titleSize: {
-            tiny: "11px",
-            small: "12px",
-            normal: compact ? "14px" : "16px"
-        }[overlayScale],
-        textSize: {
-            tiny: "10px",
-            small: "11px",
-            normal: compact ? "12px" : "13px"
-        }[overlayScale],
-        buttonPadding: {
-            tiny: "5px 9px",
-            small: "6px 10px",
-            normal: compact ? "7px 12px" : "8px 15px"
-        }[overlayScale],
-        buttonFontSize: {
-            tiny: "10px",
-            small: "11px",
-            normal: compact ? "12px" : "13px"
-        }[overlayScale]
-    };
-}
-
-export function renderConfirmOverlay({
-    entityId,
-    ui,
-    showSuccess,
-    overlayTitle,
-    overlayText,
-    buttonText,
-    style
-}) {
-    return `
-        <div
-            style="
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 5;
-                min-width: ${style.minWidth}px;
-                max-width: ${style.maxWidth}px;
-                padding: ${style.padding};
-                border-radius: 16px;
-                background: rgba(20, 20, 20, 0.62);
-                border: 1px solid rgba(255, 255, 255, 0.20);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
-                backdrop-filter: blur(6px);
-                -webkit-backdrop-filter: blur(6px);
-                color: white;
-                text-align: center;
-                display: flex;
-                flex-direction: column;
-                gap: ${style.gap};
-                align-items: center;
-                transition:
-                    opacity 0.5s ease,
-                    transform 0.3s ease;
-            "
-        >
-            <div style="
-                font-size: ${style.titleSize};
-                font-weight: 700;
-                line-height: 1.15;
-            ">
-                ${overlayTitle}
-            </div>
-
-            <div style="
-                font-size: ${style.textSize};
-                opacity: 0.9;
-                line-height: 1.2;
-            ">
-                ${overlayText}
-            </div>
-
-            <button
-                data-confirm-entity="${entityId}"
-                ${ui.confirming || showSuccess ? "disabled" : ""}
-                style="
-                    border: none;
-                    border-radius: 999px;
-                    padding: ${style.buttonPadding};
-                    background: ${showSuccess ? "var(--success-color, #43a047)" : "var(--primary-color)"};
-                    color: var(--text-primary-color);
-                    font-size: ${style.buttonFontSize};
-                    font-weight: 700;
-                    cursor: ${ui.confirming || showSuccess ? "default" : "pointer"};
-                    white-space: nowrap;
-                    opacity: ${ui.confirming ? "0.75" : "1"};
-                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.30);
-                "
-            >
-                ${buttonText}
-            </button>
         </div>
     `;
 }
@@ -324,7 +197,6 @@ function renderStampLines(text) {
 export function renderCompactConfirmPanel({
     entityId,
     ui,
-    showSuccess,
     overlayTitle,
     actionText,
     compact,

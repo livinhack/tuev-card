@@ -1,12 +1,12 @@
-// TÜV Card source entry b64
+// TÜV Card source entry b65
 
-import { localize } from "./translations/index.js?v=b64";
-import { normalizeCardConfig } from "./card/config.js?v=b64";
-import { findFirstTuevEntity } from "./card/entities.js?v=b64";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b64";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b64";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b64";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b64";
+import { localize } from "./translations/index.js?v=b65";
+import { normalizeCardConfig } from "./card/config.js?v=b65";
+import { findFirstTuevEntity } from "./card/entities.js?v=b65";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b65";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b65";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b65";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b65";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b64";
+} from "./card/render-parts.js?v=b65";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b64";
-import { TuevCardEditor } from "./editor/editor.js?v=b64";
+} from "./plate/renderer.js?v=b65";
+import { TuevCardEditor } from "./editor/editor.js?v=b65";
 
 window.customCards = window.customCards || [];
 
@@ -732,7 +732,7 @@ class TuevCard extends HTMLElement {
         const statusColor = {
             valid: "var(--success-color, #43a047)",
             due: "var(--warning-color, #ffa000)",
-            expired: "var(--error-color, #db6437)"
+            expired: "var(--error-color, #db6537)"
         }[status] || "var(--secondary-text-color)";
 
         const huLabel = month && year
@@ -759,19 +759,11 @@ class TuevCard extends HTMLElement {
             rotation
         });
 
-        const showSuccess = Date.now() < (ui.showSuccessUntil || 0);
-        const showConfirmOverlay = pending || ui.confirming || showSuccess;
         const isExpired = entity.state === "expired" || attr.status === "expired";
 
         const statusOverlayTitle = isExpired
             ? this.localize("overlay.expired")
             : this.localize("overlay.due");
-
-        const overlayTitle = ui.confirming
-            ? this.localize("overlay.updating")
-            : showSuccess
-                ? this.localize("overlay.updated")
-                : statusOverlayTitle;
 
         const displayBadge = ui.frozenBadge
             ? ui.frozenBadge
@@ -795,7 +787,6 @@ class TuevCard extends HTMLElement {
             ? renderCompactConfirmPanel({
                 entityId,
                 ui,
-                showSuccess,
                 overlayTitle: statusOverlayTitle,
                 actionText: this.localize("overlay.hu_passed_question"),
                 compact,

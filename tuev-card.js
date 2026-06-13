@@ -1,4 +1,4 @@
-// TÜV Card bundled b64
+// TÜV Card bundled b65
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -11,13 +11,9 @@ const en = {
         "overlay.updated": "Updated",
         "overlay.expired": "Inspection expired!",
         "overlay.due": "Inspection due!",
-        "overlay.updating_text": "Calculating new sticker.",
-        "overlay.updated_text": "New sticker applied.",
-        "overlay.question": "Inspection passed?",
         "overlay.hu_passed_question": "HU passed?",
         "button.wait": "Please wait",
         "button.done": "Done",
-        "button.confirm": "Confirm",
 
         "details.next_inspection": "Next inspection",
         "status.valid": "valid",
@@ -102,13 +98,9 @@ const de = {
         "overlay.updated": "Aktualisiert",
         "overlay.expired": "TÜV abgelaufen!",
         "overlay.due": "TÜV fällig!",
-        "overlay.updating_text": "Neue Plakette wird berechnet.",
-        "overlay.updated_text": "Neue Plakette übernommen.",
-        "overlay.question": "Prüfung bestanden?",
         "overlay.hu_passed_question": "HU bestanden?",
         "button.wait": "Bitte warten",
         "button.done": "Fertig",
-        "button.confirm": "Bestätigen",
 
         "details.next_inspection": "Nächste HU",
         "status.valid": "gültig",
@@ -368,7 +360,7 @@ const GROUP_ACCENT_COLORS = [
     "#42a5f5",
     "#66bb6a",
     "#ffa726",
-    "#ab64bc",
+    "#ab65bc",
     "#26c6da",
     "#ef5350",
     "#8d6e63"
@@ -1523,133 +1515,6 @@ function renderVehicleHeader({
     `;
 }
 
-function getOverlayStyleOptions({ badgeSize, compact }) {
-    const overlayScale = badgeSize <= 115
-        ? "tiny"
-        : badgeSize <= 140
-            ? "small"
-            : "normal";
-
-    return {
-        minWidth: {
-            tiny: 104,
-            small: 122,
-            normal: compact ? 145 : 170
-        }[overlayScale],
-        maxWidth: {
-            tiny: 126,
-            small: 150,
-            normal: compact ? 180 : 220
-        }[overlayScale],
-        padding: {
-            tiny: "7px",
-            small: "8px",
-            normal: compact ? "10px" : "12px"
-        }[overlayScale],
-        gap: {
-            tiny: "5px",
-            small: "6px",
-            normal: compact ? "7px" : "9px"
-        }[overlayScale],
-        titleSize: {
-            tiny: "11px",
-            small: "12px",
-            normal: compact ? "14px" : "16px"
-        }[overlayScale],
-        textSize: {
-            tiny: "10px",
-            small: "11px",
-            normal: compact ? "12px" : "13px"
-        }[overlayScale],
-        buttonPadding: {
-            tiny: "5px 9px",
-            small: "6px 10px",
-            normal: compact ? "7px 12px" : "8px 15px"
-        }[overlayScale],
-        buttonFontSize: {
-            tiny: "10px",
-            small: "11px",
-            normal: compact ? "12px" : "13px"
-        }[overlayScale]
-    };
-}
-
-function renderConfirmOverlay({
-    entityId,
-    ui,
-    showSuccess,
-    overlayTitle,
-    overlayText,
-    buttonText,
-    style
-}) {
-    return `
-        <div
-            style="
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 5;
-                min-width: ${style.minWidth}px;
-                max-width: ${style.maxWidth}px;
-                padding: ${style.padding};
-                border-radius: 16px;
-                background: rgba(20, 20, 20, 0.62);
-                border: 1px solid rgba(255, 255, 255, 0.20);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
-                backdrop-filter: blur(6px);
-                -webkit-backdrop-filter: blur(6px);
-                color: white;
-                text-align: center;
-                display: flex;
-                flex-direction: column;
-                gap: ${style.gap};
-                align-items: center;
-                transition:
-                    opacity 0.5s ease,
-                    transform 0.3s ease;
-            "
-        >
-            <div style="
-                font-size: ${style.titleSize};
-                font-weight: 700;
-                line-height: 1.15;
-            ">
-                ${overlayTitle}
-            </div>
-
-            <div style="
-                font-size: ${style.textSize};
-                opacity: 0.9;
-                line-height: 1.2;
-            ">
-                ${overlayText}
-            </div>
-
-            <button
-                data-confirm-entity="${entityId}"
-                ${ui.confirming || showSuccess ? "disabled" : ""}
-                style="
-                    border: none;
-                    border-radius: 999px;
-                    padding: ${style.buttonPadding};
-                    background: ${showSuccess ? "var(--success-color, #43a047)" : "var(--primary-color)"};
-                    color: var(--text-primary-color);
-                    font-size: ${style.buttonFontSize};
-                    font-weight: 700;
-                    cursor: ${ui.confirming || showSuccess ? "default" : "pointer"};
-                    white-space: nowrap;
-                    opacity: ${ui.confirming ? "0.75" : "1"};
-                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.30);
-                "
-            >
-                ${buttonText}
-            </button>
-        </div>
-    `;
-}
-
 function renderVehicleDetails({ showDetails, compact, huLabel, statusColor, statusLabel }) {
     if (!showDetails) {
         return "";
@@ -1776,7 +1641,6 @@ function renderStampLines(text) {
 function renderCompactConfirmPanel({
     entityId,
     ui,
-    showSuccess,
     overlayTitle,
     actionText,
     compact,
@@ -1996,7 +1860,7 @@ function renderBadgeArea({
     `;
 }
 
-return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVehicleHeader, getOverlayStyleOptions: getOverlayStyleOptions, renderConfirmOverlay: renderConfirmOverlay, renderVehicleDetails: renderVehicleDetails, renderBadgeLayer: renderBadgeLayer, renderCrossfadeLayer: renderCrossfadeLayer, renderCompactConfirmPanel: renderCompactConfirmPanel, renderBadgeArea: renderBadgeArea };
+return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVehicleHeader, renderVehicleDetails: renderVehicleDetails, renderBadgeLayer: renderBadgeLayer, renderCrossfadeLayer: renderCrossfadeLayer, renderCompactConfirmPanel: renderCompactConfirmPanel, renderBadgeArea: renderBadgeArea };
 
 })();
 
@@ -5061,7 +4925,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b64
+// TÜV Card source entry b65
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5781,7 +5645,7 @@ class TuevCard extends HTMLElement {
         const statusColor = {
             valid: "var(--success-color, #43a047)",
             due: "var(--warning-color, #ffa000)",
-            expired: "var(--error-color, #db6437)"
+            expired: "var(--error-color, #db6537)"
         }[status] || "var(--secondary-text-color)";
 
         const huLabel = month && year
@@ -5808,19 +5672,11 @@ class TuevCard extends HTMLElement {
             rotation
         });
 
-        const showSuccess = Date.now() < (ui.showSuccessUntil || 0);
-        const showConfirmOverlay = pending || ui.confirming || showSuccess;
         const isExpired = entity.state === "expired" || attr.status === "expired";
 
         const statusOverlayTitle = isExpired
             ? this.localize("overlay.expired")
             : this.localize("overlay.due");
-
-        const overlayTitle = ui.confirming
-            ? this.localize("overlay.updating")
-            : showSuccess
-                ? this.localize("overlay.updated")
-                : statusOverlayTitle;
 
         const displayBadge = ui.frozenBadge
             ? ui.frozenBadge
@@ -5844,7 +5700,6 @@ class TuevCard extends HTMLElement {
             ? renderCompactConfirmPanel({
                 entityId,
                 ui,
-                showSuccess,
                 overlayTitle: statusOverlayTitle,
                 actionText: this.localize("overlay.hu_passed_question"),
                 compact,

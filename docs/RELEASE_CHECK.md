@@ -160,3 +160,8 @@ See `docs/B62_STAMP_ANIMATION_REBUILD.md` for the rebuilt no-badge stamp confirm
 ## b64 stamp with badge trial
 
 See `docs/B64_STAMP_WITH_BADGE_TRIAL.md`.
+
+
+## b65 stamp confirm cleanup
+
+See `docs/B65_STAMP_CONFIRM_FINAL_CLEANUP.md` for the cleanup that made the stamp-based confirmation flow the single confirm UI and removed the unused legacy dialog/button helpers.
