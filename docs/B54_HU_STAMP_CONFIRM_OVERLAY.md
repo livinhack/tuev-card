@@ -1,4 +1,4 @@
-# b64 HU stamp confirm overlay
+# b54 HU stamp confirm overlay
 
 `b64` experiments with a stamp-style confirmation overlay for the compact `show_badge: false` layout.
 

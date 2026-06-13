@@ -19,6 +19,7 @@ The card displays one or more vehicles with TÜV/HU badge, next inspection date,
 - Sorting by name, plate, due date, or status
 - Optional vehicle groups with individual colors and sorting
 - Floating editor panels for display options, group colors, and manual-sort confirmation
+- Stamp-style HU confirmation flow for due/expired vehicles
 
 ---
 
@@ -143,6 +144,10 @@ The visual editor supports:
 
 The native Home Assistant editor preview may be narrower than the final dashboard card. Manual `4` and `auto` are therefore shown conservatively in the editor preview. The final dashboard uses the real available card width.
 
+### HU confirmation stamp
+
+When a vehicle is due or expired, the card uses a stamp-style HU confirmation overlay. The green `HU passed?` stamp field is the action area. After clicking it, a checkmark is drawn, the warning stamp fades out, the action stamp fades out, and the existing `tuev_reminder.confirm_passed` service flow runs afterwards. This behavior is used both with and without the TÜV sticker.
+
 ---
 
 ### Options
@@ -155,7 +160,7 @@ The native Home Assistant editor preview may be narrower than the final dashboar
 | `columns` | `auto` | `auto`, `1`, `2`, `3`, or `4`; treated as a maximum/limit |
 | `sort` | `name` | Ungrouped sorting: `name`, `plate`, `due_date`, or `status` |
 | `sort_direction` | `asc` | Ungrouped sort direction: `asc` or `desc` |
-| `show_badge` | `true` | Show the TÜV sticker. Set to `false` for a more compact card while keeping status/details visible. Due/expired confirmation is shown as a floating panel, so the card height does not jump. |
+| `show_badge` | `true` | Show the TÜV sticker. Set to `false` for a more compact card while keeping status/details visible. Due/expired confirmation uses the same stamp-style HU confirmation overlay and does not change the card height. |
 | `show_details` | `true` | Show next HU and status |
 | `plate_style` | `text` | `text` or `plate` |
 
@@ -283,6 +288,7 @@ Die Card zeigt ein oder mehrere Fahrzeuge mit TÜV/HU-Plakette, nächstem Prüft
 - Sortierung nach Name, Kennzeichen, HU-Datum oder Status
 - Optionale Fahrzeuggruppen mit eigenen Farben und eigener Sortierung
 - Schwebende Editor-Menüs für Darstellung, Gruppenfarben und Bestätigung beim Verwerfen manueller Sortierung
+- Stempelartige HU-Bestätigung für fällige/abgelaufene Fahrzeuge
 
 ---
 
@@ -407,6 +413,10 @@ Der visuelle Editor unterstützt:
 
 Die native Home-Assistant-Editor-Vorschau kann schmaler sein als die endgültige Dashboard-Card. Manuell `4` und `auto` werden in der Editor-Vorschau deshalb konservativ dargestellt. Im Dashboard nutzt die Card die tatsächlich verfügbare Breite.
 
+### HU-Bestätigungsstempel
+
+Wenn ein Fahrzeug fällig oder abgelaufen ist, nutzt die Card einen stempelartigen HU-Bestätigungs-Overlay. Das grüne Feld `HU bestanden?` ist die Aktionsfläche. Nach dem Klick wird ein Haken gezeichnet, der Warnstempel blendet aus, der Aktionsstempel blendet aus, und anschließend läuft der bestehende `tuev_reminder.confirm_passed`-Serviceablauf. Dieses Verhalten gilt sowohl mit als auch ohne TÜV-Plakette.
+
 ---
 
 ### Optionen
@@ -419,7 +429,7 @@ Die native Home-Assistant-Editor-Vorschau kann schmaler sein als die endgültige
 | `columns` | `auto` | `auto`, `1`, `2`, `3` oder `4`; wird als Maximum/Begrenzung behandelt |
 | `sort` | `name` | Sortierung ungruppierter Fahrzeuge: `name`, `plate`, `due_date` oder `status` |
 | `sort_direction` | `asc` | Sortierrichtung ungruppierter Fahrzeuge: `asc` oder `desc` |
-| `show_badge` | `true` | TÜV-Plakette anzeigen. Mit `false` wird die Card kompakter, Status/Details bleiben sichtbar. Die Bestätigung bei fälligem/abgelaufenem TÜV erscheint dann schwebend, damit die Card-Höhe nicht springt. |
+| `show_badge` | `true` | TÜV-Plakette anzeigen. Mit `false` wird die Card kompakter, Status/Details bleiben sichtbar. Die Bestätigung bei fälligem/abgelaufenem TÜV nutzt denselben stempelartigen HU-Bestätigungs-Overlay und verändert die Card-Höhe nicht. |
 | `show_details` | `true` | Nächste HU und Status anzeigen |
 | `plate_style` | `text` | `text` oder `plate` |
 

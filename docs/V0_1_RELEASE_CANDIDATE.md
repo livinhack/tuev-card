@@ -1,15 +1,13 @@
-# TÜV Card b64 release notes
+# TÜV Card v0.1 / post-v0.1 development notes
 
-Current checked version: `b64`.
-
-This document records the first semantic test release milestone. `b64` is based on the confirmed `b42` release candidate and the `b43` repository cleanup checkpoint.
+Current checked version: `b66`.
 
 ## Release status
 
-- First semantic test release: `b64`.
-- Not actively advertised as a public launch yet.
-- Intended as a stable technical baseline for further testing through HACS.
-- No UI, renderer, editor, HACS naming, or runtime behavior changes were intentionally introduced during the final version switch.
+- `v0.1.0` was prepared as the initial technical test release.
+- Later `bXX` checkpoints continue as internal development/test builds.
+- `b65` finalized the stamp-based HU confirmation flow as the single confirm UI.
+- `b66` documents that flow and updates release checks/README wording.
 
 ## Current stable baseline
 
@@ -20,49 +18,32 @@ This document records the first semantic test release milestone. `b64` is based 
 - Graphical license plates are available only when `EuroPlate.ttf` is reachable.
 - There is no graphical system-font fallback for license plates.
 - Group title editing should keep focus while typing.
-- Display, color, and manual-sort confirmation floating panels are currently stable.
+- Display, color, and manual-sort confirmation floating panels are stable.
+- Due/expired HU confirmation uses the stamp-style overlay for both `show_badge: true` and `show_badge: false`.
 
-## Must-have checks before publishing the GitHub Release
+## Confirmed HU confirmation behavior
 
-- Confirm the package version is `0.1.1-b64`.
-- Confirm the generated bundle header says `TÜV Card bundled b64`.
-- Confirm HACS uses `tuev-card.js` from the repository root.
-- Confirm README installation paths match the root-bundle HACS structure.
-- Confirm NOTICE/license notes are acceptable for the current state.
-- Run `npm run build`.
-- Run `npm run check`.
+1. Click/tap the green `HU bestanden?` / `HU passed?` stamp.
+2. The checkmark is drawn.
+3. The red/orange warning stamp fades out.
+4. The green HU action stamp fades out.
+5. The existing `tuev_reminder.confirm_passed` flow runs afterwards.
 
-## Functional smoke test
-
-- Confirm Firefox, Chrome, and the Home Assistant Android app all behave consistently when `EuroPlate.ttf` is missing.
-- Confirm Firefox, Chrome, and the Home Assistant Android app all show graphical plates when `EuroPlate.ttf` is reachable.
-- Confirm the editor can create, rename, color, sort, and delete groups without focus loss or stale state.
-- Confirm dashboard save/reload keeps group order, group colors, sort modes, and display options.
-- Confirm no browser-console errors appear on normal card load, editor open, or popover interactions.
-
-## Explicitly deferred until after b64
+## Deferred ideas
 
 - Plate Renderer v2 based on FZV Anlage 4.
-- Replacing manual `EuroPlate.ttf` installation with bundled GL-Nummernschild fonts.
+- Replacing manual `EuroPlate.ttf` installation with bundled GL-Nummernschild fonts, after license/NOTICE review.
 - Mittelschrift/Engschrift selection.
 - Seasonal, two-line, motorcycle, interchangeable, or other special plate types.
 - Group-specific display overrides.
-- Compact mode / option to hide the TÜV badge.
-- Optional side-by-side group layout for small groups.
-- README screenshots and final image assets. Screenshots should be added late, after the UI is stable.
+- Compact mode refinements.
+- Optional side-by-side group layout for small groups only.
+- README screenshots and final image assets, late in the release process.
 
-## Known product decisions
+## Product decisions
 
 - Code and file names stay English.
 - User-facing labels are handled through translations.
-- ZIP/version numbering continues for future generated ZIPs after the release.
+- ZIP/version numbering continues for generated ZIPs.
 - Save/transition checkpoints should be created before the conversation or version chain gets too long.
 - Graphical license plates require a real plate font. System-font rendering is intentionally not used for graphical plates.
-
-## Release flow
-
-1. Copy this `b64` ZIP into the repository.
-2. Commit and push with GitHub Desktop.
-3. Create a GitHub Release with tag `b64`.
-4. Use the release title `b64 - Initial test release`.
-5. Let HACS discover the update, or use **Informationen aktualisieren** for an immediate manual check.

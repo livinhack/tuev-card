@@ -1,6 +1,6 @@
-# b64 handoff checkpoint
+# b50 handoff checkpoint
 
-Current checkpoint: `b64`.
+Current checkpoint: `b50`.
 
 This checkpoint exists because the project reached the planned 50-version reminder point. It is intended as a safe handoff and continuation marker before adding more features.
 

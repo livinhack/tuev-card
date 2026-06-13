@@ -1,6 +1,6 @@
 # Responsive / Browser Test Checklist
 
-Current checked version: `b64`.
+Current checked version: `b66`.
 
 This checklist is for validating the TÜV Card across Home Assistant views, browsers, and the Android companion app. It is intentionally a manual smoke-test document; it does not change card behavior.
 
@@ -26,7 +26,7 @@ Test each environment in these dashboard contexts:
 The loaded resource should be:
 
 ```yaml
-url: /hacsfiles/tuev-card/tuev-card.js?v=b64
+url: /hacsfiles/tuev-card/tuev-card.js?v=b66
 type: module
 ```
 
@@ -50,7 +50,7 @@ type: custom:tuev-card
 - Vehicle name is visible.
 - Status is visible and translated.
 - TÜV badge renders.
-- Due/expired state blur and confirmation overlay still work.
+- Due/expired stamp-style HU confirmation overlay still works.
 - No new console errors appear on first load.
 
 ## Layout / columns

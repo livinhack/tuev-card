@@ -1,69 +1,59 @@
 # TÜV Card release check
 
-Current checked version: `b64`.
+Current checked version: `b66`.
 
-## b64 release note
+## Current release/checkpoint note
 
-`b64` is the first semantic test release. It is based on the confirmed release-candidate and repository-cleanup checkpoints and should not introduce new runtime behavior compared with the tested candidate state.
+`b66` is a documentation checkpoint after the `b65` cleanup that finalized the stamp-based HU confirmation flow. It should not introduce UI or runtime behavior changes.
 
-This release keeps the current EuroPlate rule unchanged:
+The current EuroPlate rule remains unchanged:
 
 - Graphical plates are only available when `EuroPlate.ttf` is reachable.
 - No graphical system-font fallback is used.
 
-## Local test install
+## HACS / root bundle
 
-Copy these files/folders into the local test resource folder, for example `/config/www/community/tuev-card/`:
-
-```text
-tuev-card.js
-```
-
-For source-level modular debugging, copy `src/` as well and point the resource to `src/tuev-card-entry.js`.
-
-Reload the Lovelace resource with a fresh cache-buster, for example:
-
-```text
-/local/community/tuev-card/tuev-card.js?v=b64
-```
-
-## HACS release install
-
-The current repository configuration uses the generated root bundle:
+The repository uses the generated root bundle:
 
 ```text
 tuev-card.js
 ```
 
-Important files for a HACS release package:
+HACS should load:
 
 ```text
-tuev-card.js
-hacs.json
-README.md
-LICENSE
-NOTICE.md
-package.json
-package-lock.json
-scripts/build-bundle.mjs
-src/
+/hacsfiles/tuev-card/tuev-card.js?v=b66
+```
+
+The dashboard card type remains:
+
+```yaml
+type: custom:tuev-card
+```
+
+These old names should not return:
+
+```text
+tuev-card-test.js
+dist/tuev-card.js
+/hacsfiles/tuev-card-test/
 ```
 
 ## Versioning
 
-The package version for this release is:
+The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b64"
+"version": "0.1.1-b66"
 ```
 
-The GitHub Release tag should be:
+The internal GitHub Release tag can be:
 
 ```text
-b64
+b66
 ```
 
-See `docs/VERSIONING_AND_RELEASE_PREP.md` and `docs/HACS_RELEASE_FLOW.md` for the release/update trigger checklist.
+For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
 
 ## Build/check commands
 
@@ -79,89 +69,55 @@ node scripts/build-bundle.mjs
 node scripts/check-js.mjs
 ```
 
-## Post naming migration checks
-
-Verify that HACS and Home Assistant load the production file directly from the repository root:
-
-```text
-/config/www/community/tuev-card/tuev-card.js
-/hacsfiles/tuev-card/tuev-card.js?v=b64
-```
-
-Make sure these old names are not present in the installed HACS folder or Lovelace resource configuration:
-
-```text
-tuev-card-test.js
-dist/tuev-card.js
-/hacsfiles/tuev-card-test/
-```
-
-The dashboard card type remains unchanged:
-
-```yaml
-type: custom:tuev-card
-```
-
 ## Functional smoke test
 
 - Add/remove ungrouped entities.
 - Add all new TÜV entities.
-- Open display panel; click column chips and checkboxes.
-- Open color picker; select multiple colors.
+- Open the display panel; click column chips and checkboxes.
+- Open the color picker; select multiple colors.
 - Switch manual group sorting to an automatic mode and confirm/cancel the discard dialog.
-- Sort ungrouped entities by name, plate, HU, status.
+- Sort ungrouped entities by name, plate, HU, and status.
 - Check grouped and ungrouped dashboard rendering.
-- Verify graphical license plates with reachable `EuroPlate.ttf`; verify text rendering when `EuroPlate.ttf` is missing or unreachable.
+- Verify graphical license plates with reachable `EuroPlate.ttf`.
+- Verify plain text plates when `EuroPlate.ttf` is missing or unreachable.
 
-## Responsive / Browser test
+## HU stamp confirmation smoke test
 
-See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home Assistant view checklist introduced during the release-candidate phase.
+Test both display modes:
 
+```yaml
+show_badge: true
+show_badge: false
+```
 
-## b64 handoff checkpoint
+For due and expired vehicles:
 
-See `docs/B50_HANDOFF_CHECKPOINT.md` for the 50-version continuation checkpoint.
+- The red/orange TÜV status stamp is visible.
+- The green `HU bestanden?` / `HU passed?` stamp field is clickable.
+- The checkmark starts drawing immediately after the click.
+- The red/orange status stamp fades out.
+- The green action stamp fades out.
+- The `tuev_reminder.confirm_passed` service runs afterwards.
+- The card does not change size because the confirmation overlay is present.
+- No old dialog/button confirmation overlay appears.
 
+## Responsive / browser test
 
-## b64 restore note
+See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home Assistant view checklist.
 
-The no-badge confirmation overlay was restored to the b50/b49 baseline after b51/b52 did not improve the layout. See `docs/B53_RESTORE_B50_CONFIRM_OVERLAY.md`.
+## Related checkpoint docs
 
-
-## b64 note
-
-`b64` tunes only the background/contrast and rotation of the stamp-style confirmation overlay for `show_badge: false`. The b55 frame and typography concept remain unchanged.
-
-## b64 stamp animation note
-
-See `docs/B57_STAMP_CONFIRM_ANIMATION.md` for the no-badge stamp confirmation animation tuning.
-
-## b64 cleanup and stamp click fix
-
-`b64` fixes the stamp confirmation click/service flow after the b58 animation work. It also removes a small obsolete wrapper in the delayed confirmation path. No layout, renderer, editor or EuroPlate behavior was intentionally changed.
-
-See `docs/B59_CLEANUP_AND_STAMP_CLICK_FIX.md`.
-
-
-## b64 stamp animation sequence
-
-See `docs/B60_STAMP_ANIMATION_SEQUENCE.md` for the fixed stamp confirmation animation sequence.
-
-
-## b64 stamp animation rebuild
-
-See `docs/B62_STAMP_ANIMATION_REBUILD.md` for the rebuilt no-badge stamp confirmation animation.
-
-## b64 stamp flash fix
-
-`b64` fixes the short flash after the no-badge HU stamp confirmation animation. The overlay is now hidden before the delayed service call, so a re-render cannot restart the faded-out stamp animation.
-
-
-## b64 stamp with badge trial
-
-See `docs/B64_STAMP_WITH_BADGE_TRIAL.md`.
-
-
-## b65 stamp confirm cleanup
-
-See `docs/B65_STAMP_CONFIRM_FINAL_CLEANUP.md` for the cleanup that made the stamp-based confirmation flow the single confirm UI and removed the unused legacy dialog/button helpers.
+- `docs/B50_HANDOFF_CHECKPOINT.md`
+- `docs/B53_RESTORE_B50_CONFIRM_OVERLAY.md`
+- `docs/B54_HU_STAMP_CONFIRM_OVERLAY.md`
+- `docs/B55_STAMP_READABILITY_TUNING.md`
+- `docs/B56_STAMP_BACKGROUND_TUNING.md`
+- `docs/B57_STAMP_CONFIRM_ANIMATION.md`
+- `docs/B59_CLEANUP_AND_STAMP_CLICK_FIX.md`
+- `docs/B60_STAMP_ANIMATION_SEQUENCE.md`
+- `docs/B61_STAMP_ANIMATION_NO_SUCCESS_FLASH.md`
+- `docs/B62_STAMP_ANIMATION_REBUILD.md`
+- `docs/B63_STAMP_FLASH_FIX.md`
+- `docs/B64_STAMP_WITH_BADGE_TRIAL.md`
+- `docs/B65_STAMP_CONFIRM_FINAL_CLEANUP.md`
+- `docs/B66_STAMP_CONFIRM_DOCS.md`

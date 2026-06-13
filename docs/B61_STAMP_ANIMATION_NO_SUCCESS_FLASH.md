@@ -1,4 +1,4 @@
-# b64 – Stamp animation without success color flash
+# b61 – Stamp animation without success color flash
 
 This patch keeps the no-badge HU confirmation stamp in its warning/action colors during the local animation.
 

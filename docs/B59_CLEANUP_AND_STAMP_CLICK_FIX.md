@@ -1,4 +1,4 @@
-# b64 cleanup and stamp click fix
+# b59 cleanup and stamp click fix
 
 `b64` is a targeted cleanup and bug-fix checkpoint after the stamp confirmation overlay work.
 

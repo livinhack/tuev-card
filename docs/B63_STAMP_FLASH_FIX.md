@@ -1,4 +1,4 @@
-# b64 stamp flash fix
+# b63 stamp flash fix
 
 `b64` fixes a short visual flash that could appear after the `show_badge: false` stamp-confirm animation finished and before Home Assistant applied the service result.
 
