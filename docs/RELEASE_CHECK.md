@@ -1,10 +1,10 @@
 # TÜV Card release check
 
-Current checked version: `b67`.
+Current checked version: `b69`.
 
 ## Current release/checkpoint note
 
-`b67` is a concept/documentation checkpoint for later group-specific display overrides. It should not introduce UI or runtime behavior changes.
+`b69` is a concept/documentation checkpoint for later group-specific display overrides. It should not introduce UI or runtime behavior changes.
 
 The current EuroPlate rule remains unchanged:
 
@@ -22,7 +22,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b67
+/hacsfiles/tuev-card/tuev-card.js?v=b69
 ```
 
 The dashboard card type remains:
@@ -44,13 +44,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b67"
+"version": "0.1.1-b69"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b67
+b69
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.

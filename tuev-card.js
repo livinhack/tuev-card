@@ -1,4 +1,4 @@
-// TÜV Card bundled b66
+// TÜV Card bundled b69
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1644,13 +1644,17 @@ function renderCompactConfirmPanel({
     overlayTitle,
     actionText,
     compact,
-    expired
+    expired,
+    withBadge = false
 }) {
     if (ui.confirmStampHidden) {
         return "";
     }
 
     const confirming = ui.confirming;
+    const badgeCompactText = withBadge && compact;
+    const warningFontSize = badgeCompactText ? "8.6px" : (compact ? "10px" : "11px");
+    const actionFontSize = badgeCompactText ? "7.8px" : (compact ? "9px" : "10px");
     const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
     const stampColor = frozenExpired
         ? "var(--error-color, #db5337)"
@@ -1739,9 +1743,9 @@ function renderCompactConfirmPanel({
                     color-mix(in srgb, ${stampColor} 18%, rgba(0, 0, 0, 0.78));
                 color: color-mix(in srgb, ${stampColor} 78%, white 22%);
                 font-family: 'Arial Narrow', 'DIN Condensed', 'Bahnschrift SemiCondensed', sans-serif;
-                font-size: ${compact ? "10px" : "11px"};
+                font-size: ${warningFontSize};
                 font-weight: 900;
-                line-height: 0.92;
+                line-height: ${badgeCompactText ? "0.86" : "0.92"};
                 letter-spacing: 0.28px;
                 text-transform: uppercase;
                 text-align: center;
@@ -1784,9 +1788,9 @@ function renderCompactConfirmPanel({
                         color-mix(in srgb, ${actionColor} 18%, rgba(0, 0, 0, 0.76));
                     color: color-mix(in srgb, ${actionColor} 76%, white 24%);
                     font-family: 'Arial Narrow', 'DIN Condensed', 'Bahnschrift SemiCondensed', sans-serif;
-                    font-size: ${compact ? "9px" : "10px"};
+                    font-size: ${actionFontSize};
                     font-weight: 900;
-                    line-height: 0.94;
+                    line-height: ${badgeCompactText ? "0.88" : "0.94"};
                     letter-spacing: 0.18px;
                     text-transform: uppercase;
                     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75), 0 0 5px rgba(0, 0, 0, 0.35);
@@ -4925,7 +4929,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b67
+// TÜV Card source entry b69
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5703,7 +5707,8 @@ class TuevCard extends HTMLElement {
                 overlayTitle: statusOverlayTitle,
                 actionText: this.localize("overlay.hu_passed_question"),
                 compact,
-                expired: isExpired
+                expired: isExpired,
+                withBadge: showBadge
             })
             : "";
 

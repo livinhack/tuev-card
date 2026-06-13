@@ -1,12 +1,12 @@
-// TÜV Card source entry b67
+// TÜV Card source entry b69
 
-import { localize } from "./translations/index.js?v=b67";
-import { normalizeCardConfig } from "./card/config.js?v=b67";
-import { findFirstTuevEntity } from "./card/entities.js?v=b67";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b67";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b67";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b67";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b67";
+import { localize } from "./translations/index.js?v=b69";
+import { normalizeCardConfig } from "./card/config.js?v=b69";
+import { findFirstTuevEntity } from "./card/entities.js?v=b69";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b69";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b69";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b69";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b69";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b67";
+} from "./card/render-parts.js?v=b69";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b67";
-import { TuevCardEditor } from "./editor/editor.js?v=b67";
+} from "./plate/renderer.js?v=b69";
+import { TuevCardEditor } from "./editor/editor.js?v=b69";
 
 window.customCards = window.customCards || [];
 
@@ -790,7 +790,8 @@ class TuevCard extends HTMLElement {
                 overlayTitle: statusOverlayTitle,
                 actionText: this.localize("overlay.hu_passed_question"),
                 compact,
-                expired: isExpired
+                expired: isExpired,
+                withBadge: showBadge
             })
             : "";
 
