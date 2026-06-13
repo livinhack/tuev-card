@@ -1,4 +1,4 @@
-# b72 – Group display overrides runtime + editor
+# b73 – Group display overrides runtime + editor
 
 This version turns the previously documented group display concept into a working first implementation.
 

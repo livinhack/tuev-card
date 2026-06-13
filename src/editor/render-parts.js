@@ -1,5 +1,5 @@
-import { getGroupAccentColor } from "../card/groups.js?v=b72";
-import { renderButton } from "./buttons.js?v=b72";
+import { getGroupAccentColor } from "../card/groups.js?v=b73";
+import { renderButton } from "./buttons.js?v=b73";
 export function renderEntitySection({
     selectedEntityIds,
     unselectedEntities,
@@ -11,6 +11,7 @@ export function renderEntitySection({
     searchText,
     sort,
     sortDirection,
+    displayOptionsTarget,
     localize,
     getEntityLabel,
     escapeHtml
@@ -23,7 +24,7 @@ export function renderEntitySection({
                         <span>${localize("editor.entities")}</span>
                         <span class="tuev-editor-entity-count">${formatGroupEntityCount(selectedEntityIds.length, localize)}</span>
                     </div>
-                    ${renderUngroupedSortControls({ sort, sortDirection, localize })}
+                    ${renderUngroupedSortControls({ sort, sortDirection, displayOptionsTarget, localize })}
                 </div>
 
                 <div style="
@@ -102,9 +103,10 @@ export function renderEntitySection({
     `;
 }
 
-function renderUngroupedSortControls({ sort, sortDirection, localize }) {
+function renderUngroupedSortControls({ sort, sortDirection, displayOptionsTarget, localize }) {
     const activeSort = sort === "config" || !sort ? "name" : sort;
     const direction = sortDirection === "desc" ? "desc" : "asc";
+    const isDisplayOpen = displayOptionsTarget === "global";
     const sortOptions = [
         ["name", localize("editor.sort_name_short"), "A"],
         ["plate", localize("editor.sort_plate_short"), "▭"],
@@ -114,6 +116,16 @@ function renderUngroupedSortControls({ sort, sortDirection, localize }) {
 
     return `
         <div class="tuev-editor-ungrouped-sort-row" aria-label="${localize("editor.sort")}">
+            <span class="tuev-editor-display-toggle-wrap">
+                <button
+                    class="tuev-editor-sort-chip tuev-editor-display-eye"
+                    type="button"
+                    data-display-options-toggle="global"
+                    aria-pressed="${isDisplayOpen ? "true" : "false"}"
+                    aria-label="${localize("editor.display_options")}" 
+                    title="${localize("editor.display_options")}"
+                >👁</button>
+            </span>
             ${sortOptions.map(([value, label, icon]) => `
                 <button
                     class="tuev-editor-sort-chip"
@@ -247,23 +259,6 @@ function renderEntityPickerList({ unselectedEntities, localize, getEntityLabel }
     `).join("");
 }
 
-export function renderDisplayOptionsSection({
-    displayOptionsOpen,
-    localize
-}) {
-    return `
-        <div class="tuev-editor-display-menu ${displayOptionsOpen ? "is-open" : ""}">
-            <button
-                id="toggleDisplayOptions"
-                class="tuev-editor-display-badge tuev-editor-pill-button"
-                type="button"
-                title="${localize("editor.display_options")}"
-                aria-label="${localize("editor.display_options")}"
-            >${localize("editor.display_badge")}</button>
-        </div>
-    `;
-}
-
 export function renderGroupsSection({
     groups,
     pickerOpenKey,
@@ -271,6 +266,7 @@ export function renderGroupsSection({
     searchText,
     pendingGroupSort,
     openGroupColorId,
+    displayOptionsTarget,
     localize,
     getEntityLabel,
     escapeHtml
@@ -312,6 +308,7 @@ export function renderGroupsSection({
                     searchText,
                     pendingGroupSort,
                     openGroupColorId,
+                    displayOptionsTarget,
                     localize,
                     getEntityLabel,
                     escapeHtml
@@ -339,6 +336,7 @@ function renderGroupEditor({
     searchText,
     pendingGroupSort,
     openGroupColorId,
+    displayOptionsTarget,
     localize,
     getEntityLabel,
     escapeHtml
@@ -360,7 +358,7 @@ function renderGroupEditor({
                     placeholder="${localize("editor.group_title")}"
                 >
 
-                ${renderGroupSortControls({ group, pendingGroupSort, localize })}
+                ${renderGroupSortControls({ group, pendingGroupSort, displayOptionsTarget, localize })}
 
                 <div class="tuev-editor-group-actions">
                     <button class="tuev-editor-icon-button" type="button" data-group-up="${group.id}" ${index === 0 ? "disabled" : ""} title="${localize("editor.move_group_up")}">↑</button>
@@ -381,7 +379,6 @@ function renderGroupEditor({
                     <span>${formatGroupEntityCount(entityCount, localize)}</span>
                 </div>
             </div>
-            ${renderGroupDisplayOptions({ group, localize })}
             <div class="tuev-editor-group-entities">
                 ${renderGroupEntityChips({
                     group,
@@ -486,10 +483,11 @@ function renderGroupDisplayColumnChip(groupId, value, columns, label, localize) 
     `;
 }
 
-function renderGroupSortControls({ group, pendingGroupSort, localize }) {
+function renderGroupSortControls({ group, pendingGroupSort, displayOptionsTarget, localize }) {
     const sort = group.sort || "manual";
     const direction = group.sort_direction || "asc";
-    const pendingSort = pendingGroupSort?.groupId === group.id ? pendingGroupSort.sort : "";
+    const isDisplayOpen = displayOptionsTarget === group.id;
+    const hasCustomDisplay = Boolean(group.display);
     const sortOptions = [
         ["name", localize("editor.sort_name_short"), "A"],
         ["plate", localize("editor.sort_plate_short"), "▭"],
@@ -500,6 +498,16 @@ function renderGroupSortControls({ group, pendingGroupSort, localize }) {
 
     return `
         <div class="tuev-editor-group-sort-row" aria-label="${localize("editor.group_sort")}">
+            <span class="tuev-editor-display-toggle-wrap">
+                <button
+                    class="tuev-editor-sort-chip tuev-editor-display-eye ${hasCustomDisplay ? "has-custom-display" : ""}"
+                    type="button"
+                    data-display-options-toggle="${group.id}"
+                    aria-pressed="${(isDisplayOpen || hasCustomDisplay) ? "true" : "false"}"
+                    aria-label="${localize("editor.display_options")}" 
+                    title="${localize("editor.display_options")}"
+                >👁</button>
+            </span>
             ${sortOptions.map(([value, label, icon]) => `
                 <button
                     class="tuev-editor-sort-chip"

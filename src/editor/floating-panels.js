@@ -1,4 +1,4 @@
-import { GROUP_ACCENT_COLORS, getGroupAccentColor } from "../card/groups.js?v=b72";
+import { GROUP_ACCENT_COLORS, getGroupAccentColor } from "../card/groups.js?v=b73";
 
 function clampPanelPosition(anchor = {}, width = 360) {
     const margin = 8;
@@ -102,6 +102,7 @@ export function renderFloatingPanelStyles() {
 
 export function renderEditorFloatingPanels({
     displayOptionsOpen,
+    displayOptionsTarget,
     displayAnchor,
     showColumnSetting,
     columns,
@@ -117,14 +118,27 @@ export function renderEditorFloatingPanels({
     const panels = [];
 
     if (displayOptionsOpen) {
-        panels.push(renderDisplayOptionsPopover({
-            anchor: displayAnchor,
-            showColumnSetting,
-            columns,
-            config,
-            canRenderPlate,
-            localize
-        }));
+        if (displayOptionsTarget === "global") {
+            panels.push(renderDisplayOptionsPopover({
+                anchor: displayAnchor,
+                showColumnSetting,
+                columns,
+                config,
+                canRenderPlate,
+                localize
+            }));
+        } else {
+            const groupIndex = (groups || []).findIndex((candidate) => candidate.id === displayOptionsTarget);
+            const group = groupIndex >= 0 ? groups[groupIndex] : null;
+            if (group) {
+                panels.push(renderGroupDisplayOptionsPopover({
+                    group,
+                    groupIndex,
+                    anchor: displayAnchor,
+                    localize
+                }));
+            }
+        }
     }
 
     if (openGroupColorId) {
@@ -229,6 +243,85 @@ function renderDisplayColumnChip(value, currentColumns, label, localize) {
             type="button"
             data-display-columns="${value}"
             aria-pressed="${currentColumns === value ? "true" : "false"}"
+            title="${localize("editor.columns")}: ${label}"
+        >${label}</button>
+    `;
+}
+
+function renderGroupDisplayOptionsPopover({ group, groupIndex, anchor, localize }) {
+    const display = group.display || null;
+    const enabled = Boolean(display);
+    const columns = String(display?.columns || "auto");
+    const showBadge = display?.show_badge !== false;
+    const showDetails = display?.show_details !== false;
+    const accentColor = getGroupAccentColor(group, groupIndex || 0);
+    const width = 360;
+    const horizontalPosition = clampPanelPosition(anchor, width);
+    const estimatedHeight = enabled ? 210 : 72;
+    const verticalPosition = resolveVerticalPanelPosition(anchor, estimatedHeight);
+
+    return `
+        <div
+            class="tuev-editor-floating-panel tuev-editor-display-popover tuev-editor-group-display-popover"
+            data-placement="${verticalPosition.placement}"
+            style="left: ${horizontalPosition.left}px; top: ${verticalPosition.top}px; --tuev-group-accent: ${accentColor};"
+        >
+            <label class="tuev-editor-group-display-toggle">
+                <input
+                    type="checkbox"
+                    data-group-display-enabled="${group.id}"
+                    ${enabled ? "checked" : ""}
+                >
+                ${localize("editor.group_display_custom")}
+            </label>
+
+            ${enabled ? `
+                <div class="tuev-editor-group-display-panel">
+                    <div class="tuev-editor-group-display-row">
+                        <span>${localize("editor.columns")}</span>
+                        <div class="tuev-editor-group-display-chips">
+                            ${renderGroupDisplayColumnChip(group.id, "1", columns, localize("editor.columns_1_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "2", columns, localize("editor.columns_2_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "3", columns, localize("editor.columns_3_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "4", columns, localize("editor.columns_4_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "auto", columns, localize("editor.columns_fill"), localize)}
+                        </div>
+                    </div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            data-group-display-show-badge="${group.id}"
+                            ${showBadge ? "checked" : ""}
+                        >
+                        ${localize("editor.show_badge")}
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            data-group-display-show-details="${group.id}"
+                            ${showDetails ? "checked" : ""}
+                        >
+                        ${localize("editor.show_details")}
+                    </label>
+                    <button
+                        class="tuev-editor-group-display-reset"
+                        type="button"
+                        data-group-display-reset="${group.id}"
+                    >${localize("editor.group_display_use_global")}</button>
+                </div>
+            ` : ""}
+        </div>
+    `;
+}
+
+function renderGroupDisplayColumnChip(groupId, value, columns, label, localize) {
+    return `
+        <button
+            class="tuev-editor-display-chip tuev-editor-group-display-chip"
+            type="button"
+            data-group-display-columns="${groupId}"
+            data-columns="${value}"
+            aria-pressed="${columns === value ? "true" : "false"}"
             title="${localize("editor.columns")}: ${label}"
         >${label}</button>
     `;

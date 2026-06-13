@@ -1,4 +1,4 @@
-// TÜV Card bundled b72
+// TÜV Card bundled b73
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2474,6 +2474,7 @@ function renderEntitySection({
     searchText,
     sort,
     sortDirection,
+    displayOptionsTarget,
     localize,
     getEntityLabel,
     escapeHtml
@@ -2486,7 +2487,7 @@ function renderEntitySection({
                         <span>${localize("editor.entities")}</span>
                         <span class="tuev-editor-entity-count">${formatGroupEntityCount(selectedEntityIds.length, localize)}</span>
                     </div>
-                    ${renderUngroupedSortControls({ sort, sortDirection, localize })}
+                    ${renderUngroupedSortControls({ sort, sortDirection, displayOptionsTarget, localize })}
                 </div>
 
                 <div style="
@@ -2565,9 +2566,10 @@ function renderEntitySection({
     `;
 }
 
-function renderUngroupedSortControls({ sort, sortDirection, localize }) {
+function renderUngroupedSortControls({ sort, sortDirection, displayOptionsTarget, localize }) {
     const activeSort = sort === "config" || !sort ? "name" : sort;
     const direction = sortDirection === "desc" ? "desc" : "asc";
+    const isDisplayOpen = displayOptionsTarget === "global";
     const sortOptions = [
         ["name", localize("editor.sort_name_short"), "A"],
         ["plate", localize("editor.sort_plate_short"), "▭"],
@@ -2577,6 +2579,16 @@ function renderUngroupedSortControls({ sort, sortDirection, localize }) {
 
     return `
         <div class="tuev-editor-ungrouped-sort-row" aria-label="${localize("editor.sort")}">
+            <span class="tuev-editor-display-toggle-wrap">
+                <button
+                    class="tuev-editor-sort-chip tuev-editor-display-eye"
+                    type="button"
+                    data-display-options-toggle="global"
+                    aria-pressed="${isDisplayOpen ? "true" : "false"}"
+                    aria-label="${localize("editor.display_options")}" 
+                    title="${localize("editor.display_options")}"
+                >👁</button>
+            </span>
             ${sortOptions.map(([value, label, icon]) => `
                 <button
                     class="tuev-editor-sort-chip"
@@ -2710,23 +2722,6 @@ function renderEntityPickerList({ unselectedEntities, localize, getEntityLabel }
     `).join("");
 }
 
-function renderDisplayOptionsSection({
-    displayOptionsOpen,
-    localize
-}) {
-    return `
-        <div class="tuev-editor-display-menu ${displayOptionsOpen ? "is-open" : ""}">
-            <button
-                id="toggleDisplayOptions"
-                class="tuev-editor-display-badge tuev-editor-pill-button"
-                type="button"
-                title="${localize("editor.display_options")}"
-                aria-label="${localize("editor.display_options")}"
-            >${localize("editor.display_badge")}</button>
-        </div>
-    `;
-}
-
 function renderGroupsSection({
     groups,
     pickerOpenKey,
@@ -2734,6 +2729,7 @@ function renderGroupsSection({
     searchText,
     pendingGroupSort,
     openGroupColorId,
+    displayOptionsTarget,
     localize,
     getEntityLabel,
     escapeHtml
@@ -2775,6 +2771,7 @@ function renderGroupsSection({
                     searchText,
                     pendingGroupSort,
                     openGroupColorId,
+                    displayOptionsTarget,
                     localize,
                     getEntityLabel,
                     escapeHtml
@@ -2802,6 +2799,7 @@ function renderGroupEditor({
     searchText,
     pendingGroupSort,
     openGroupColorId,
+    displayOptionsTarget,
     localize,
     getEntityLabel,
     escapeHtml
@@ -2823,7 +2821,7 @@ function renderGroupEditor({
                     placeholder="${localize("editor.group_title")}"
                 >
 
-                ${renderGroupSortControls({ group, pendingGroupSort, localize })}
+                ${renderGroupSortControls({ group, pendingGroupSort, displayOptionsTarget, localize })}
 
                 <div class="tuev-editor-group-actions">
                     <button class="tuev-editor-icon-button" type="button" data-group-up="${group.id}" ${index === 0 ? "disabled" : ""} title="${localize("editor.move_group_up")}">↑</button>
@@ -2844,7 +2842,6 @@ function renderGroupEditor({
                     <span>${formatGroupEntityCount(entityCount, localize)}</span>
                 </div>
             </div>
-            ${renderGroupDisplayOptions({ group, localize })}
             <div class="tuev-editor-group-entities">
                 ${renderGroupEntityChips({
                     group,
@@ -2949,10 +2946,11 @@ function renderGroupDisplayColumnChip(groupId, value, columns, label, localize) 
     `;
 }
 
-function renderGroupSortControls({ group, pendingGroupSort, localize }) {
+function renderGroupSortControls({ group, pendingGroupSort, displayOptionsTarget, localize }) {
     const sort = group.sort || "manual";
     const direction = group.sort_direction || "asc";
-    const pendingSort = pendingGroupSort?.groupId === group.id ? pendingGroupSort.sort : "";
+    const isDisplayOpen = displayOptionsTarget === group.id;
+    const hasCustomDisplay = Boolean(group.display);
     const sortOptions = [
         ["name", localize("editor.sort_name_short"), "A"],
         ["plate", localize("editor.sort_plate_short"), "▭"],
@@ -2963,6 +2961,16 @@ function renderGroupSortControls({ group, pendingGroupSort, localize }) {
 
     return `
         <div class="tuev-editor-group-sort-row" aria-label="${localize("editor.group_sort")}">
+            <span class="tuev-editor-display-toggle-wrap">
+                <button
+                    class="tuev-editor-sort-chip tuev-editor-display-eye ${hasCustomDisplay ? "has-custom-display" : ""}"
+                    type="button"
+                    data-display-options-toggle="${group.id}"
+                    aria-pressed="${(isDisplayOpen || hasCustomDisplay) ? "true" : "false"}"
+                    aria-label="${localize("editor.display_options")}" 
+                    title="${localize("editor.display_options")}"
+                >👁</button>
+            </span>
             ${sortOptions.map(([value, label, icon]) => `
                 <button
                     class="tuev-editor-sort-chip"
@@ -3082,7 +3090,7 @@ function renderGroupEntityPicker({ group, unselectedEntities, searchText, locali
     `;
 }
 
-return { renderEntitySection: renderEntitySection, renderDisplayOptionsSection: renderDisplayOptionsSection, renderGroupsSection: renderGroupsSection };
+return { renderEntitySection: renderEntitySection, renderGroupsSection: renderGroupsSection };
 
 })();
 
@@ -3442,6 +3450,12 @@ function renderEditorStyles() {
                 font-weight: 600;
             }
 
+            .tuev-editor-display-toggle-wrap {
+                display: inline-flex;
+                align-items: center;
+                flex: 0 0 auto;
+            }
+
             .tuev-editor-ungrouped-sort-row {
                 display: flex;
                 flex-wrap: nowrap;
@@ -3484,6 +3498,26 @@ function renderEditorStyles() {
                 border-color: var(--tuev-group-accent, var(--primary-color));
                 opacity: 1;
                 box-shadow: 0 0 0 1px color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 24%, transparent) inset;
+            }
+
+            .tuev-editor-display-eye {
+                font-size: 14px;
+            }
+
+            .tuev-editor-display-eye.has-custom-display,
+            .tuev-editor-display-eye[aria-pressed="true"] {
+                border-color: var(--tuev-group-accent, var(--primary-color));
+                background: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 34%, var(--secondary-background-color));
+                box-shadow:
+                    0 0 0 1px color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 22%, transparent) inset,
+                    0 0 12px color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 28%, transparent);
+                opacity: 1;
+            }
+
+            .tuev-editor-ungrouped-sort-row .tuev-editor-display-eye[aria-pressed="true"] {
+                border-color: var(--primary-color);
+                background: color-mix(in srgb, var(--primary-color) 24%, var(--secondary-background-color));
+                box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 18%, transparent) inset;
             }
 
             .tuev-editor-sort-direction {
@@ -3554,7 +3588,7 @@ function renderEditorStyles() {
             }
 
             .tuev-editor-group-display-panel {
-                margin-top: 9px;
+                margin-top: 4px;
                 display: flex;
                 flex-direction: column;
                 gap: 9px;
@@ -3913,6 +3947,7 @@ function renderFloatingPanelStyles() {
 
 function renderEditorFloatingPanels({
     displayOptionsOpen,
+    displayOptionsTarget,
     displayAnchor,
     showColumnSetting,
     columns,
@@ -3928,14 +3963,27 @@ function renderEditorFloatingPanels({
     const panels = [];
 
     if (displayOptionsOpen) {
-        panels.push(renderDisplayOptionsPopover({
-            anchor: displayAnchor,
-            showColumnSetting,
-            columns,
-            config,
-            canRenderPlate,
-            localize
-        }));
+        if (displayOptionsTarget === "global") {
+            panels.push(renderDisplayOptionsPopover({
+                anchor: displayAnchor,
+                showColumnSetting,
+                columns,
+                config,
+                canRenderPlate,
+                localize
+            }));
+        } else {
+            const groupIndex = (groups || []).findIndex((candidate) => candidate.id === displayOptionsTarget);
+            const group = groupIndex >= 0 ? groups[groupIndex] : null;
+            if (group) {
+                panels.push(renderGroupDisplayOptionsPopover({
+                    group,
+                    groupIndex,
+                    anchor: displayAnchor,
+                    localize
+                }));
+            }
+        }
     }
 
     if (openGroupColorId) {
@@ -4045,6 +4093,85 @@ function renderDisplayColumnChip(value, currentColumns, label, localize) {
     `;
 }
 
+function renderGroupDisplayOptionsPopover({ group, groupIndex, anchor, localize }) {
+    const display = group.display || null;
+    const enabled = Boolean(display);
+    const columns = String(display?.columns || "auto");
+    const showBadge = display?.show_badge !== false;
+    const showDetails = display?.show_details !== false;
+    const accentColor = getGroupAccentColor(group, groupIndex || 0);
+    const width = 360;
+    const horizontalPosition = clampPanelPosition(anchor, width);
+    const estimatedHeight = enabled ? 210 : 72;
+    const verticalPosition = resolveVerticalPanelPosition(anchor, estimatedHeight);
+
+    return `
+        <div
+            class="tuev-editor-floating-panel tuev-editor-display-popover tuev-editor-group-display-popover"
+            data-placement="${verticalPosition.placement}"
+            style="left: ${horizontalPosition.left}px; top: ${verticalPosition.top}px; --tuev-group-accent: ${accentColor};"
+        >
+            <label class="tuev-editor-group-display-toggle">
+                <input
+                    type="checkbox"
+                    data-group-display-enabled="${group.id}"
+                    ${enabled ? "checked" : ""}
+                >
+                ${localize("editor.group_display_custom")}
+            </label>
+
+            ${enabled ? `
+                <div class="tuev-editor-group-display-panel">
+                    <div class="tuev-editor-group-display-row">
+                        <span>${localize("editor.columns")}</span>
+                        <div class="tuev-editor-group-display-chips">
+                            ${renderGroupDisplayColumnChip(group.id, "1", columns, localize("editor.columns_1_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "2", columns, localize("editor.columns_2_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "3", columns, localize("editor.columns_3_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "4", columns, localize("editor.columns_4_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "auto", columns, localize("editor.columns_fill"), localize)}
+                        </div>
+                    </div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            data-group-display-show-badge="${group.id}"
+                            ${showBadge ? "checked" : ""}
+                        >
+                        ${localize("editor.show_badge")}
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            data-group-display-show-details="${group.id}"
+                            ${showDetails ? "checked" : ""}
+                        >
+                        ${localize("editor.show_details")}
+                    </label>
+                    <button
+                        class="tuev-editor-group-display-reset"
+                        type="button"
+                        data-group-display-reset="${group.id}"
+                    >${localize("editor.group_display_use_global")}</button>
+                </div>
+            ` : ""}
+        </div>
+    `;
+}
+
+function renderGroupDisplayColumnChip(groupId, value, columns, label, localize) {
+    return `
+        <button
+            class="tuev-editor-display-chip tuev-editor-group-display-chip"
+            type="button"
+            data-group-display-columns="${groupId}"
+            data-columns="${value}"
+            aria-pressed="${columns === value ? "true" : "false"}"
+            title="${localize("editor.columns")}: ${label}"
+        >${label}</button>
+    `;
+}
+
 function renderColorPopover({ group, groups, anchor, localize }) {
     const groupIndex = groups.findIndex((candidate) => candidate.id === group.id);
     const accentColor = getGroupAccentColor(group, groupIndex);
@@ -4105,7 +4232,7 @@ const { getAvailableTuevEntities, getEntityLabel, sortEntityIds } = __m_src_card
 const { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } = __m_src_card_groups_js;
 const { checkPlateFontAvailable, ensurePlateFont } = __m_src_plate_renderer_js;
 const { getColumnLabel } = __m_src_editor_columns_js;
-const { renderDisplayOptionsSection, renderEntitySection, renderGroupsSection } = __m_src_editor_render_parts_js;
+const { renderEntitySection, renderGroupsSection } = __m_src_editor_render_parts_js;
 const { renderEditorStyles } = __m_src_editor_styles_js;
 const { renderEditorFloatingPanels } = __m_src_editor_floating_panels_js;
 
@@ -4114,6 +4241,7 @@ class TuevCardEditor extends HTMLElement {
         const openGroupColorId = this._openGroupColorId;
         const displayOptionsOpen = this._displayOptionsOpen === true;
         const displayOptionsAnchor = this._displayOptionsAnchor;
+        const displayOptionsTarget = this._displayOptionsTarget;
         const colorPopoverAnchor = this._colorPopoverAnchor;
         const sortConfirmAnchor = this._sortConfirmAnchor;
 
@@ -4129,8 +4257,11 @@ class TuevCardEditor extends HTMLElement {
         this._openGroupColorId = this._draftGroups.some((group) => group.id === openGroupColorId)
             ? openGroupColorId
             : null;
-        this._displayOptionsOpen = displayOptionsOpen;
-        this._displayOptionsAnchor = displayOptionsAnchor || null;
+        this._displayOptionsTarget = this.isValidDisplayOptionsTarget(displayOptionsTarget)
+            ? displayOptionsTarget
+            : null;
+        this._displayOptionsOpen = displayOptionsOpen && Boolean(this._displayOptionsTarget);
+        this._displayOptionsAnchor = this._displayOptionsOpen ? (displayOptionsAnchor || null) : null;
         this._colorPopoverAnchor = this._openGroupColorId ? (colorPopoverAnchor || null) : null;
         this._sortConfirmAnchor = sortConfirmAnchor || null;
         this._draggedGroupEntity = null;
@@ -4161,6 +4292,7 @@ class TuevCardEditor extends HTMLElement {
         const clickedInsideEditor = path.includes(this) || (target instanceof Node && this.contains(target));
 
         const clickedInsideFloatingControl = hasClass("tuev-editor-display-menu")
+            || hasClass("tuev-editor-display-toggle-wrap")
             || hasClass("tuev-editor-color-toggle-wrap")
             || hasClass("tuev-editor-floating-layer")
             || hasClass("tuev-editor-floating-panel");
@@ -4174,6 +4306,7 @@ class TuevCardEditor extends HTMLElement {
         if (this._displayOptionsOpen) {
             this._displayOptionsOpen = false;
             this._displayOptionsAnchor = null;
+            this._displayOptionsTarget = null;
             shouldRender = true;
         }
 
@@ -4292,6 +4425,18 @@ class TuevCardEditor extends HTMLElement {
             });
     }
 
+    isValidDisplayOptionsTarget(target) {
+        if (!target) {
+            return false;
+        }
+
+        if (target === "global") {
+            return true;
+        }
+
+        return this._draftGroups?.some((group) => group.id === target) === true;
+    }
+
     render() {
         if (!this._config) {
             return;
@@ -4337,14 +4482,10 @@ class TuevCardEditor extends HTMLElement {
                     searchText: this._searchText,
                     sort: this._config.sort,
                     sortDirection: this._config.sort_direction,
+                    displayOptionsTarget: this._displayOptionsOpen ? this._displayOptionsTarget : null,
                     localize: (key) => this.localize(key),
                     getEntityLabel: (entityId) => this.getEntityLabel(entityId),
                     escapeHtml: (value) => this.escapeHtml(value)
-                })}
-
-                ${renderDisplayOptionsSection({
-                    displayOptionsOpen: this._displayOptionsOpen,
-                    localize: (key) => this.localize(key)
                 })}
 
                 ${renderGroupsSection({
@@ -4354,6 +4495,7 @@ class TuevCardEditor extends HTMLElement {
                     searchText: this._searchText,
                     pendingGroupSort: this._pendingGroupSort,
                     openGroupColorId: this._openGroupColorId,
+                    displayOptionsTarget: this._displayOptionsOpen ? this._displayOptionsTarget : null,
                     localize: (key) => this.localize(key),
                     getEntityLabel: (entityId) => this.getEntityLabel(entityId),
                     escapeHtml: (value) => this.escapeHtml(value)
@@ -4362,6 +4504,7 @@ class TuevCardEditor extends HTMLElement {
 
                 ${renderEditorFloatingPanels({
                 displayOptionsOpen: this._displayOptionsOpen,
+                displayOptionsTarget: this._displayOptionsTarget,
                 displayAnchor: this._displayOptionsAnchor,
                 showColumnSetting,
                 columns: this._config.columns,
@@ -4574,6 +4717,8 @@ class TuevCardEditor extends HTMLElement {
                 const groupId = button.getAttribute("data-toggle-group-picker");
                 this._pickerOpen = false;
                 this._displayOptionsOpen = false;
+                this._displayOptionsTarget = null;
+                this._displayOptionsAnchor = null;
                 this._pickerOpenKey = this._pickerOpenKey === groupId ? null : groupId;
                 this._searchText = "";
                 this.render();
@@ -4719,17 +4864,22 @@ class TuevCardEditor extends HTMLElement {
             });
         });
 
-        this.querySelector("#toggleDisplayOptions")?.addEventListener("click", (event) => {
-            const willOpen = !this._displayOptionsOpen;
-            this._displayOptionsOpen = willOpen;
-            this._displayOptionsAnchor = willOpen ? this.getPopoverAnchor(event.currentTarget) : null;
-            this._pickerOpen = false;
-            this._pickerOpenKey = null;
-            this._openGroupColorId = null;
-            this._colorPopoverAnchor = null;
-            this._pendingGroupSort = null;
-            this._sortConfirmAnchor = null;
-            this.render();
+        this.querySelectorAll("[data-display-options-toggle]").forEach((button) => {
+            button.addEventListener("click", (event) => {
+                const target = button.getAttribute("data-display-options-toggle") || "global";
+                const willOpen = !(this._displayOptionsOpen && this._displayOptionsTarget === target);
+
+                this._displayOptionsOpen = willOpen;
+                this._displayOptionsTarget = willOpen ? target : null;
+                this._displayOptionsAnchor = willOpen ? this.getPopoverAnchor(event.currentTarget) : null;
+                this._pickerOpen = false;
+                this._pickerOpenKey = null;
+                this._openGroupColorId = null;
+                this._colorPopoverAnchor = null;
+                this._pendingGroupSort = null;
+                this._sortConfirmAnchor = null;
+                this.render();
+            });
         });
 
         this.querySelectorAll("[data-display-columns]").forEach((button) => {
@@ -5225,7 +5375,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b72
+// TÜV Card source entry b73
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

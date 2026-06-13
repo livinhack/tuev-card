@@ -1,27 +1,27 @@
-import { localize } from "../translations/index.js?v=b72";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b72";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b72";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b72";
+import { localize } from "../translations/index.js?v=b73";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b73";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b73";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b73";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b72";
+} from "../plate/renderer.js?v=b73";
 import {
     getColumnLabel
-} from "./columns.js?v=b72";
+} from "./columns.js?v=b73";
 import {
-    renderDisplayOptionsSection,
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b72";
-import { renderEditorStyles } from "./styles.js?v=b72";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b72";
+} from "./render-parts.js?v=b73";
+import { renderEditorStyles } from "./styles.js?v=b73";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b73";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
         const openGroupColorId = this._openGroupColorId;
         const displayOptionsOpen = this._displayOptionsOpen === true;
         const displayOptionsAnchor = this._displayOptionsAnchor;
+        const displayOptionsTarget = this._displayOptionsTarget;
         const colorPopoverAnchor = this._colorPopoverAnchor;
         const sortConfirmAnchor = this._sortConfirmAnchor;
 
@@ -37,8 +37,11 @@ export class TuevCardEditor extends HTMLElement {
         this._openGroupColorId = this._draftGroups.some((group) => group.id === openGroupColorId)
             ? openGroupColorId
             : null;
-        this._displayOptionsOpen = displayOptionsOpen;
-        this._displayOptionsAnchor = displayOptionsAnchor || null;
+        this._displayOptionsTarget = this.isValidDisplayOptionsTarget(displayOptionsTarget)
+            ? displayOptionsTarget
+            : null;
+        this._displayOptionsOpen = displayOptionsOpen && Boolean(this._displayOptionsTarget);
+        this._displayOptionsAnchor = this._displayOptionsOpen ? (displayOptionsAnchor || null) : null;
         this._colorPopoverAnchor = this._openGroupColorId ? (colorPopoverAnchor || null) : null;
         this._sortConfirmAnchor = sortConfirmAnchor || null;
         this._draggedGroupEntity = null;
@@ -69,6 +72,7 @@ export class TuevCardEditor extends HTMLElement {
         const clickedInsideEditor = path.includes(this) || (target instanceof Node && this.contains(target));
 
         const clickedInsideFloatingControl = hasClass("tuev-editor-display-menu")
+            || hasClass("tuev-editor-display-toggle-wrap")
             || hasClass("tuev-editor-color-toggle-wrap")
             || hasClass("tuev-editor-floating-layer")
             || hasClass("tuev-editor-floating-panel");
@@ -82,6 +86,7 @@ export class TuevCardEditor extends HTMLElement {
         if (this._displayOptionsOpen) {
             this._displayOptionsOpen = false;
             this._displayOptionsAnchor = null;
+            this._displayOptionsTarget = null;
             shouldRender = true;
         }
 
@@ -200,6 +205,18 @@ export class TuevCardEditor extends HTMLElement {
             });
     }
 
+    isValidDisplayOptionsTarget(target) {
+        if (!target) {
+            return false;
+        }
+
+        if (target === "global") {
+            return true;
+        }
+
+        return this._draftGroups?.some((group) => group.id === target) === true;
+    }
+
     render() {
         if (!this._config) {
             return;
@@ -245,14 +262,10 @@ export class TuevCardEditor extends HTMLElement {
                     searchText: this._searchText,
                     sort: this._config.sort,
                     sortDirection: this._config.sort_direction,
+                    displayOptionsTarget: this._displayOptionsOpen ? this._displayOptionsTarget : null,
                     localize: (key) => this.localize(key),
                     getEntityLabel: (entityId) => this.getEntityLabel(entityId),
                     escapeHtml: (value) => this.escapeHtml(value)
-                })}
-
-                ${renderDisplayOptionsSection({
-                    displayOptionsOpen: this._displayOptionsOpen,
-                    localize: (key) => this.localize(key)
                 })}
 
                 ${renderGroupsSection({
@@ -262,6 +275,7 @@ export class TuevCardEditor extends HTMLElement {
                     searchText: this._searchText,
                     pendingGroupSort: this._pendingGroupSort,
                     openGroupColorId: this._openGroupColorId,
+                    displayOptionsTarget: this._displayOptionsOpen ? this._displayOptionsTarget : null,
                     localize: (key) => this.localize(key),
                     getEntityLabel: (entityId) => this.getEntityLabel(entityId),
                     escapeHtml: (value) => this.escapeHtml(value)
@@ -270,6 +284,7 @@ export class TuevCardEditor extends HTMLElement {
 
                 ${renderEditorFloatingPanels({
                 displayOptionsOpen: this._displayOptionsOpen,
+                displayOptionsTarget: this._displayOptionsTarget,
                 displayAnchor: this._displayOptionsAnchor,
                 showColumnSetting,
                 columns: this._config.columns,
@@ -482,6 +497,8 @@ export class TuevCardEditor extends HTMLElement {
                 const groupId = button.getAttribute("data-toggle-group-picker");
                 this._pickerOpen = false;
                 this._displayOptionsOpen = false;
+                this._displayOptionsTarget = null;
+                this._displayOptionsAnchor = null;
                 this._pickerOpenKey = this._pickerOpenKey === groupId ? null : groupId;
                 this._searchText = "";
                 this.render();
@@ -627,17 +644,22 @@ export class TuevCardEditor extends HTMLElement {
             });
         });
 
-        this.querySelector("#toggleDisplayOptions")?.addEventListener("click", (event) => {
-            const willOpen = !this._displayOptionsOpen;
-            this._displayOptionsOpen = willOpen;
-            this._displayOptionsAnchor = willOpen ? this.getPopoverAnchor(event.currentTarget) : null;
-            this._pickerOpen = false;
-            this._pickerOpenKey = null;
-            this._openGroupColorId = null;
-            this._colorPopoverAnchor = null;
-            this._pendingGroupSort = null;
-            this._sortConfirmAnchor = null;
-            this.render();
+        this.querySelectorAll("[data-display-options-toggle]").forEach((button) => {
+            button.addEventListener("click", (event) => {
+                const target = button.getAttribute("data-display-options-toggle") || "global";
+                const willOpen = !(this._displayOptionsOpen && this._displayOptionsTarget === target);
+
+                this._displayOptionsOpen = willOpen;
+                this._displayOptionsTarget = willOpen ? target : null;
+                this._displayOptionsAnchor = willOpen ? this.getPopoverAnchor(event.currentTarget) : null;
+                this._pickerOpen = false;
+                this._pickerOpenKey = null;
+                this._openGroupColorId = null;
+                this._colorPopoverAnchor = null;
+                this._pendingGroupSort = null;
+                this._sortConfirmAnchor = null;
+                this.render();
+            });
         });
 
         this.querySelectorAll("[data-display-columns]").forEach((button) => {

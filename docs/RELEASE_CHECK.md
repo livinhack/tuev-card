@@ -1,10 +1,21 @@
 # TÜV Card release check
 
-Current checked version: `b72`.
+Current checked version: `b73`.
 
 ## Current release/checkpoint note
 
-`b72` is a tiny UI tuning release for the compact badge stamp checkbox position. It should not introduce logic changes.
+`b73` integrates display settings into round eye badges next to the sort badges.
+
+- Ungrouped/global display is opened via an eye badge in the ungrouped header.
+- Group-specific display is opened via an eye badge in each group header.
+- The two-line group header layout is preserved.
+- The runtime behavior from b72 remains unchanged.
+
+See also:
+
+```text
+docs/B73_DISPLAY_EYE_BADGE_EDITOR.md
+```
 
 The current EuroPlate rule remains unchanged:
 
@@ -22,7 +33,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b72
+/hacsfiles/tuev-card/tuev-card.js?v=b73
 ```
 
 The dashboard card type remains:
@@ -44,13 +55,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b72"
+"version": "0.1.1-b73"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b70
+b73
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
@@ -124,16 +135,16 @@ See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home A
 - `docs/B67_GROUP_DISPLAY_OVERRIDES_CONCEPT.md`
 
 
-## b72 note
+## b73 note
 
 See `docs/B70_BADGE_STAMP_FRAME_TEXT_TUNING.md` for the compact badge stamp text/frame tuning.
 
 
-## b72 note
+## b73 note
 
 Small visual tuning for compact badge stamp checkbox placement. See `docs/B71_BADGE_STAMP_CHECKBOX_OFFSET.md`.
 
-## b72 group display overrides
+## b73 group display overrides
 
 - Group-level `display` overrides are now active for runtime rendering and in the visual editor.
 - Supported first-scope overrides: `columns`, `show_badge`, `show_details`.

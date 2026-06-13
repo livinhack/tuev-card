@@ -352,6 +352,12 @@ export function renderEditorStyles() {
                 font-weight: 600;
             }
 
+            .tuev-editor-display-toggle-wrap {
+                display: inline-flex;
+                align-items: center;
+                flex: 0 0 auto;
+            }
+
             .tuev-editor-ungrouped-sort-row {
                 display: flex;
                 flex-wrap: nowrap;
@@ -394,6 +400,26 @@ export function renderEditorStyles() {
                 border-color: var(--tuev-group-accent, var(--primary-color));
                 opacity: 1;
                 box-shadow: 0 0 0 1px color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 24%, transparent) inset;
+            }
+
+            .tuev-editor-display-eye {
+                font-size: 14px;
+            }
+
+            .tuev-editor-display-eye.has-custom-display,
+            .tuev-editor-display-eye[aria-pressed="true"] {
+                border-color: var(--tuev-group-accent, var(--primary-color));
+                background: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 34%, var(--secondary-background-color));
+                box-shadow:
+                    0 0 0 1px color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 22%, transparent) inset,
+                    0 0 12px color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 28%, transparent);
+                opacity: 1;
+            }
+
+            .tuev-editor-ungrouped-sort-row .tuev-editor-display-eye[aria-pressed="true"] {
+                border-color: var(--primary-color);
+                background: color-mix(in srgb, var(--primary-color) 24%, var(--secondary-background-color));
+                box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 18%, transparent) inset;
             }
 
             .tuev-editor-sort-direction {
@@ -464,7 +490,7 @@ export function renderEditorStyles() {
             }
 
             .tuev-editor-group-display-panel {
-                margin-top: 9px;
+                margin-top: 4px;
                 display: flex;
                 flex-direction: column;
                 gap: 9px;
