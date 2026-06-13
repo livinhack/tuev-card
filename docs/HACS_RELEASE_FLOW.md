@@ -1,6 +1,6 @@
 # HACS release / update trigger flow
 
-Current checked version: `b59`.
+Current checked version: `b60`.
 
 This document captures the manual release flow that was tested with the intermediate `b39` upload/release trigger.
 It is meant as a practical checklist for later `v0.1.x` releases.
@@ -43,7 +43,7 @@ b43: v0.1 must-fix audit
 For the final public version, prefer semantic tags such as:
 
 ```text
-b59
+b60
 v0.1.1
 ```
 
@@ -94,6 +94,6 @@ A later helper BAT can automate the local parts:
 The GitHub Release itself can still be created in the browser unless GitHub CLI is added later.
 
 
-## b59 versioning preparation
+## b60 versioning preparation
 
-See `docs/VERSIONING_AND_RELEASE_PREP.md` before creating the first semantic `b59` release.
+See `docs/VERSIONING_AND_RELEASE_PREP.md` before creating the first semantic `b60` release.

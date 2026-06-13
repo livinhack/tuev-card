@@ -1,13 +1,13 @@
-# b59 handoff checkpoint
+# b60 handoff checkpoint
 
-Current checkpoint: `b59`.
+Current checkpoint: `b60`.
 
 This checkpoint exists because the project reached the planned 50-version reminder point. It is intended as a safe handoff and continuation marker before adding more features.
 
 ## Current confirmed working base
 
 - `b49` was confirmed as a good UI state for the compact floating confirmation panel when `show_badge: false`.
-- `b59` should not intentionally change UI behavior or runtime logic.
+- `b60` should not intentionally change UI behavior or runtime logic.
 - The HACS/root-bundle naming remains:
   - bundle: `tuev-card.js` in the repository root
   - HACS resource: `/hacsfiles/tuev-card/tuev-card.js`
@@ -33,7 +33,7 @@ This checkpoint exists because the project reached the planned 50-version remind
 
 ## Recommended next steps
 
-1. Continue from `b59` if the current chat or context becomes too long.
+1. Continue from `b60` if the current chat or context becomes too long.
 2. Avoid large refactors without a specific reason.
 3. For the next feature step, prefer a small isolated change.
 4. Keep incrementing ZIP versions after every generated ZIP.

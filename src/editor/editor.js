@@ -1,21 +1,21 @@
-import { localize } from "../translations/index.js?v=b59";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b59";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b59";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b59";
+import { localize } from "../translations/index.js?v=b60";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b60";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b60";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b60";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b59";
+} from "../plate/renderer.js?v=b60";
 import {
     getColumnLabel
-} from "./columns.js?v=b59";
+} from "./columns.js?v=b60";
 import {
     renderDisplayOptionsSection,
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b59";
-import { renderEditorStyles } from "./styles.js?v=b59";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b59";
+} from "./render-parts.js?v=b60";
+import { renderEditorStyles } from "./styles.js?v=b60";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b60";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
