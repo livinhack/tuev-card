@@ -1,4 +1,4 @@
-import { renderBadge } from "../badge/renderer.js?v=b62";
+import { renderBadge } from "../badge/renderer.js?v=b63";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -330,6 +330,10 @@ export function renderCompactConfirmPanel({
     compact,
     expired
 }) {
+    if (ui.confirmStampHidden) {
+        return "";
+    }
+
     const confirming = ui.confirming;
     const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
     const stampColor = frozenExpired

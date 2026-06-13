@@ -1,4 +1,4 @@
-// TÜV Card bundled b61
+// TÜV Card bundled b63
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -368,7 +368,7 @@ const GROUP_ACCENT_COLORS = [
     "#42a5f5",
     "#66bb6a",
     "#ffa726",
-    "#ab62bc",
+    "#ab63bc",
     "#26c6da",
     "#ef5350",
     "#8d6e63"
@@ -826,6 +826,7 @@ function getEntityUiState(uiStateByEntity, entityId) {
             confirmFinishScheduled: false,
             confirmServiceScheduled: false,
             confirmStampExpired: null,
+            confirmStampHidden: false,
             frozenBadge: null,
             crossfadeBadge: null,
             showSuccessUntil: 0
@@ -840,6 +841,7 @@ function resetEntityUiStateAfterError(ui) {
     ui.confirmFinishScheduled = false;
     ui.confirmServiceScheduled = false;
     ui.confirmStampExpired = null;
+    ui.confirmStampHidden = false;
     ui.frozenBadge = null;
     ui.crossfadeBadge = null;
 }
@@ -849,6 +851,7 @@ function startEntityConfirmation(ui, badge) {
     ui.confirmFinishScheduled = false;
     ui.confirmServiceScheduled = false;
     ui.confirmStampExpired = typeof badge.stampExpired === "boolean" ? badge.stampExpired : null;
+    ui.confirmStampHidden = false;
     ui.confirmStartedAt = Date.now();
     ui.crossfadeBadge = null;
     ui.frozenBadge = {
@@ -1779,6 +1782,10 @@ function renderCompactConfirmPanel({
     compact,
     expired
 }) {
+    if (ui.confirmStampHidden) {
+        return "";
+    }
+
     const confirming = ui.confirming;
     const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
     const stampColor = frozenExpired
@@ -5054,7 +5061,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b62
+// TÜV Card source entry b63
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5774,7 +5781,7 @@ class TuevCard extends HTMLElement {
         const statusColor = {
             valid: "var(--success-color, #43a047)",
             due: "var(--warning-color, #ffa000)",
-            expired: "var(--error-color, #db6237)"
+            expired: "var(--error-color, #db6337)"
         }[status] || "var(--secondary-text-color)";
 
         const huLabel = month && year
@@ -5981,8 +5988,16 @@ class TuevCard extends HTMLElement {
             ui.confirmServiceScheduled = true;
 
             window.setTimeout(() => {
+                ui.confirmStampHidden = true;
+
+                if (this._hass) {
+                    this.hass = this._hass;
+                }
+            }, 1980);
+
+            window.setTimeout(() => {
                 this.callConfirmPassedService(entityId, ui);
-            }, 2100);
+            }, 2160);
 
             return;
         }

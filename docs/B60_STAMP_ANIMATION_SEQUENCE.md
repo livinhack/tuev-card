@@ -1,4 +1,4 @@
-# b62 – Stamp animation sequence fix
+# b63 – Stamp animation sequence fix
 
 This change keeps the previous stamp stamp look and fixes the confirmation animation timing for `show_badge: false`.
 

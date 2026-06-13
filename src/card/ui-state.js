@@ -12,6 +12,7 @@ export function getEntityUiState(uiStateByEntity, entityId) {
             confirmFinishScheduled: false,
             confirmServiceScheduled: false,
             confirmStampExpired: null,
+            confirmStampHidden: false,
             frozenBadge: null,
             crossfadeBadge: null,
             showSuccessUntil: 0
@@ -26,6 +27,7 @@ export function resetEntityUiStateAfterError(ui) {
     ui.confirmFinishScheduled = false;
     ui.confirmServiceScheduled = false;
     ui.confirmStampExpired = null;
+    ui.confirmStampHidden = false;
     ui.frozenBadge = null;
     ui.crossfadeBadge = null;
 }
@@ -35,6 +37,7 @@ export function startEntityConfirmation(ui, badge) {
     ui.confirmFinishScheduled = false;
     ui.confirmServiceScheduled = false;
     ui.confirmStampExpired = typeof badge.stampExpired === "boolean" ? badge.stampExpired : null;
+    ui.confirmStampHidden = false;
     ui.confirmStartedAt = Date.now();
     ui.crossfadeBadge = null;
     ui.frozenBadge = {
