@@ -1,4 +1,4 @@
-# b57 Stamp background tuning
+# b58 Stamp background tuning
 
 Based on b55.
 
