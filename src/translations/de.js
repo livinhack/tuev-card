@@ -76,5 +76,7 @@ export const de = {
         "editor.discard_manual_sort": "Manuelle Sortierung verwerfen?",
         "editor.cancel": "Abbrechen",
         "editor.yes": "Ja",
+        "editor.group_display_custom": "Eigene Darstellung für diese Gruppe",
+        "editor.group_display_use_global": "Globale Darstellung verwenden",
         "editor.sort": "Sortierung"
 };

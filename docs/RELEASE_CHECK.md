@@ -1,10 +1,10 @@
 # TÜV Card release check
 
-Current checked version: `b71`.
+Current checked version: `b72`.
 
 ## Current release/checkpoint note
 
-`b71` is a tiny UI tuning release for the compact badge stamp checkbox position. It should not introduce logic changes.
+`b72` is a tiny UI tuning release for the compact badge stamp checkbox position. It should not introduce logic changes.
 
 The current EuroPlate rule remains unchanged:
 
@@ -22,7 +22,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b71
+/hacsfiles/tuev-card/tuev-card.js?v=b72
 ```
 
 The dashboard card type remains:
@@ -44,7 +44,7 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b71"
+"version": "0.1.1-b72"
 ```
 
 The internal GitHub Release tag can be:
@@ -124,11 +124,17 @@ See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home A
 - `docs/B67_GROUP_DISPLAY_OVERRIDES_CONCEPT.md`
 
 
-## b71 note
+## b72 note
 
 See `docs/B70_BADGE_STAMP_FRAME_TEXT_TUNING.md` for the compact badge stamp text/frame tuning.
 
 
-## b71 note
+## b72 note
 
 Small visual tuning for compact badge stamp checkbox placement. See `docs/B71_BADGE_STAMP_CHECKBOX_OFFSET.md`.
+
+## b72 group display overrides
+
+- Group-level `display` overrides are now active for runtime rendering and in the visual editor.
+- Supported first-scope overrides: `columns`, `show_badge`, `show_details`.
+- `plate_style` remains global for now because graphical plates depend on EuroPlate availability.

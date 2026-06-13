@@ -448,6 +448,82 @@ export function renderEditorStyles() {
                 opacity: 0.68;
             }
 
+            .tuev-editor-group-display-options {
+                padding: 10px 13px 0 16px;
+                border-top: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 16%, transparent);
+            }
+
+            .tuev-editor-group-display-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                color: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 72%, var(--primary-text-color));
+            }
+
+            .tuev-editor-group-display-panel {
+                margin-top: 9px;
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+                padding: 10px;
+                border-radius: 11px;
+                border: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 24%, var(--divider-color));
+                background: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 8%, var(--secondary-background-color));
+            }
+
+            .tuev-editor-group-display-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .tuev-editor-group-display-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                justify-content: flex-end;
+            }
+
+            .tuev-editor-group-display-panel label {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .tuev-editor-group-display-chip {
+                min-width: 31px;
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+
+            .tuev-editor-group-display-reset {
+                align-self: flex-start;
+                border: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 30%, var(--divider-color));
+                border-radius: 999px;
+                background: transparent;
+                color: var(--primary-text-color);
+                cursor: pointer;
+                padding: 6px 10px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .tuev-editor-group-display-reset:hover,
+            .tuev-editor-group-display-reset:focus-visible {
+                background: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 16%, transparent);
+                border-color: var(--tuev-group-accent, var(--primary-color));
+            }
+
             .tuev-editor-group-entities {
                 display: flex;
                 flex-wrap: wrap;

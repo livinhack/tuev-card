@@ -1,6 +1,6 @@
 # TÜV Card v0.1 / post-v0.1 development notes
 
-Current checked version: `b71`.
+Current checked version: `b72`.
 
 ## Release status
 

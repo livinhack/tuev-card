@@ -1,21 +1,21 @@
-import { localize } from "../translations/index.js?v=b71";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b71";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b71";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b71";
+import { localize } from "../translations/index.js?v=b72";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b72";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b72";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b72";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b71";
+} from "../plate/renderer.js?v=b72";
 import {
     getColumnLabel
-} from "./columns.js?v=b71";
+} from "./columns.js?v=b72";
 import {
     renderDisplayOptionsSection,
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b71";
-import { renderEditorStyles } from "./styles.js?v=b71";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b71";
+} from "./render-parts.js?v=b72";
+import { renderEditorStyles } from "./styles.js?v=b72";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b72";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -426,6 +426,51 @@ export class TuevCardEditor extends HTMLElement {
             });
         });
 
+        this.querySelectorAll("[data-group-display-enabled]").forEach((input) => {
+            input.addEventListener("change", () => {
+                this.setGroupDisplayEnabled(
+                    input.getAttribute("data-group-display-enabled"),
+                    input.checked
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-columns]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this.setGroupDisplayOverride(
+                    button.getAttribute("data-group-display-columns"),
+                    "columns",
+                    button.getAttribute("data-columns")
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-show-badge]").forEach((input) => {
+            input.addEventListener("change", () => {
+                this.setGroupDisplayOverride(
+                    input.getAttribute("data-group-display-show-badge"),
+                    "show_badge",
+                    input.checked
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-show-details]").forEach((input) => {
+            input.addEventListener("change", () => {
+                this.setGroupDisplayOverride(
+                    input.getAttribute("data-group-display-show-details"),
+                    "show_details",
+                    input.checked
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-reset]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this.resetGroupDisplayOverride(button.getAttribute("data-group-display-reset"));
+            });
+        });
+
         this.querySelectorAll("[data-group-down]").forEach((button) => {
             button.addEventListener("click", () => {
                 this.moveGroup(button.getAttribute("data-group-down"), 1);
@@ -612,6 +657,78 @@ export class TuevCardEditor extends HTMLElement {
         this.querySelector("#showDetails")?.addEventListener("change", () => {
             this.updateConfig();
         });
+    }
+
+    setGroupDisplayEnabled(groupId, enabled) {
+        if (!groupId) {
+            return;
+        }
+
+        this._draftGroups = this._draftGroups.map((group) => {
+            if (group.id !== groupId) {
+                return group;
+            }
+
+            if (!enabled) {
+                const { display, ...rest } = group;
+                return rest;
+            }
+
+            return {
+                ...group,
+                display: group.display || {
+                    columns: this._config.columns || "auto"
+                }
+            };
+        });
+
+        this.applyDraftConfig();
+        this.render();
+    }
+
+    setGroupDisplayOverride(groupId, key, value) {
+        if (!groupId || !["columns", "show_badge", "show_details"].includes(key)) {
+            return;
+        }
+
+        const normalizedValue = key === "columns"
+            ? (["1", "2", "3", "4", "auto"].includes(String(value)) ? String(value) : "auto")
+            : Boolean(value);
+
+        this._draftGroups = this._draftGroups.map((group) => {
+            if (group.id !== groupId) {
+                return group;
+            }
+
+            return {
+                ...group,
+                display: {
+                    ...(group.display || {}),
+                    [key]: normalizedValue
+                }
+            };
+        });
+
+        this.applyDraftConfig();
+        this.render();
+    }
+
+    resetGroupDisplayOverride(groupId) {
+        if (!groupId) {
+            return;
+        }
+
+        this._draftGroups = this._draftGroups.map((group) => {
+            if (group.id !== groupId) {
+                return group;
+            }
+
+            const { display, ...rest } = group;
+            return rest;
+        });
+
+        this.applyDraftConfig();
+        this.render();
     }
 
     setUngroupedSort(sort) {

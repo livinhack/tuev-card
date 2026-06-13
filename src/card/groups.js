@@ -1,4 +1,4 @@
-import { getEntityIdsFromConfig, sortEntityIds } from "./entities.js?v=b71";
+import { getEntityIdsFromConfig, sortEntityIds } from "./entities.js?v=b72";
 
 export const GROUP_SORTS = ["name", "plate", "due_date", "status", "manual"];
 export const GROUP_SORT_DIRECTIONS = ["asc", "desc"];
@@ -32,6 +32,29 @@ export function normalizeGroupColor(color) {
 export function getGroupAccentColor(group, index = 0) {
     return normalizeGroupColor(group?.color) || GROUP_ACCENT_COLORS[index % GROUP_ACCENT_COLORS.length];
 }
+export function normalizeGroupDisplay(display = {}) {
+    if (!display || typeof display !== "object" || Array.isArray(display)) {
+        return null;
+    }
+
+    const normalized = {};
+    const columns = String(display.columns || "").trim();
+
+    if (["auto", "1", "2", "3", "4"].includes(columns)) {
+        normalized.columns = columns;
+    }
+
+    if (typeof display.show_badge === "boolean") {
+        normalized.show_badge = display.show_badge;
+    }
+
+    if (typeof display.show_details === "boolean") {
+        normalized.show_details = display.show_details;
+    }
+
+    return Object.keys(normalized).length > 0 ? normalized : null;
+}
+
 
 function normalizeEntityList(entities = []) {
     if (!Array.isArray(entities)) {
@@ -86,6 +109,7 @@ export function normalizeGroups(groups = []) {
         const color = normalizeGroupColor(group?.color);
         const sort = normalizeGroupSort(group?.sort);
         const sortDirection = normalizeGroupSortDirection(group?.sort_direction);
+        const display = normalizeGroupDisplay(group?.display);
 
         return {
             id,
@@ -93,6 +117,7 @@ export function normalizeGroups(groups = []) {
             ...(color ? { color } : {}),
             ...(sort !== "manual" ? { sort } : {}),
             ...(sort !== "manual" && sortDirection !== "asc" ? { sort_direction: sortDirection } : {}),
+            ...(display ? { display } : {}),
             entities
         };
     }).filter((group) => group.title || group.entities.length > 0);
@@ -152,6 +177,7 @@ export function getEntitySections(config = {}, hass) {
         id: group.id,
         title: group.title,
         color: getGroupAccentColor(group, index),
+        display: group.display || null,
         entityIds: sortGroupEntityIds(group, hass),
         grouped: true
     })).filter((section) => section.entityIds.length > 0);

@@ -1,12 +1,12 @@
-// TÜV Card source entry b71
+// TÜV Card source entry b72
 
-import { localize } from "./translations/index.js?v=b71";
-import { normalizeCardConfig } from "./card/config.js?v=b71";
-import { findFirstTuevEntity } from "./card/entities.js?v=b71";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b71";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b71";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b71";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b71";
+import { localize } from "./translations/index.js?v=b72";
+import { normalizeCardConfig } from "./card/config.js?v=b72";
+import { findFirstTuevEntity } from "./card/entities.js?v=b72";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b72";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b72";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b72";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b72";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b71";
+} from "./card/render-parts.js?v=b72";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b71";
-import { TuevCardEditor } from "./editor/editor.js?v=b71";
+} from "./plate/renderer.js?v=b72";
+import { TuevCardEditor } from "./editor/editor.js?v=b72";
 
 window.customCards = window.customCards || [];
 
@@ -561,6 +561,20 @@ class TuevCard extends HTMLElement {
         return getEntityUiState(this._entityUiState, entityId);
     }
 
+    getSectionDisplayConfig(section = {}) {
+        const display = section.display || {};
+
+        return {
+            columns: display.columns || this.config.columns,
+            show_badge: typeof display.show_badge === "boolean"
+                ? display.show_badge
+                : this.config.show_badge,
+            show_details: typeof display.show_details === "boolean"
+                ? display.show_details
+                : this.config.show_details
+        };
+    }
+
     renderSections(hass, sections, layoutContext) {
         const renderSection = (section) => {
             const entityIds = section.entityIds.filter((entityId) => hass.states[entityId]);
@@ -570,10 +584,12 @@ class TuevCard extends HTMLElement {
             }
 
             const sectionIsMulti = entityIds.length > 1;
+            const sectionDisplay = this.getSectionDisplayConfig(section);
+            const sectionColumns = sectionDisplay.columns || layoutContext.requestedColumns || this.config.columns;
             const layout = calculateLayoutInfo({
                 cardWidth: layoutContext.layoutWidth,
                 isMulti: sectionIsMulti,
-                requestedColumns: layoutContext.requestedColumns || this.config.columns
+                requestedColumns: sectionColumns
             });
             const automaticBadgeSize = calculateAutomaticBadgeSize({
                 isMulti: sectionIsMulti,
@@ -601,7 +617,8 @@ class TuevCard extends HTMLElement {
                         automaticBadgeSize,
                         layout,
                         sharedPlateLayout,
-                        layoutContext.previewContext === true
+                        layoutContext.previewContext === true,
+                        sectionDisplay
                     )).join("")}
                 </div>
             `;
@@ -705,7 +722,7 @@ class TuevCard extends HTMLElement {
         `;
     }
 
-    renderVehicle(hass, entityId, compact, automaticBadgeSize, layout, sharedPlateLayout, previewPlateTuning = false) {
+    renderVehicle(hass, entityId, compact, automaticBadgeSize, layout, sharedPlateLayout, previewPlateTuning = false, displayConfig = null) {
         const entity = hass.states[entityId];
 
         if (!entity) {
@@ -720,8 +737,8 @@ class TuevCard extends HTMLElement {
         const month = Number(attr.month || 1);
         const year = Number(attr.year || new Date().getFullYear());
         const status = attr.status || entity.state || "";
-        const showDetails = this.config.show_details !== false;
-        const showBadge = this.config.show_badge !== false;
+        const showDetails = (displayConfig?.show_details ?? this.config.show_details) !== false;
+        const showBadge = (displayConfig?.show_badge ?? this.config.show_badge) !== false;
 
         const statusLabel = {
             valid: this.localize("status.valid"),

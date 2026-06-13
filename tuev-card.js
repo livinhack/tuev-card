@@ -1,4 +1,4 @@
-// TÜV Card bundled b71
+// TÜV Card bundled b72
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -81,6 +81,8 @@ const en = {
         "editor.discard_manual_sort": "Discard manual sorting?",
         "editor.cancel": "Cancel",
         "editor.yes": "Yes",
+        "editor.group_display_custom": "Custom display for this group",
+        "editor.group_display_use_global": "Use global display",
         "editor.sort": "Sorting"
 };
 
@@ -168,6 +170,8 @@ const de = {
         "editor.discard_manual_sort": "Manuelle Sortierung verwerfen?",
         "editor.cancel": "Abbrechen",
         "editor.yes": "Ja",
+        "editor.group_display_custom": "Eigene Darstellung für diese Gruppe",
+        "editor.group_display_use_global": "Globale Darstellung verwenden",
         "editor.sort": "Sortierung"
 };
 
@@ -385,6 +389,29 @@ function normalizeGroupColor(color) {
 function getGroupAccentColor(group, index = 0) {
     return normalizeGroupColor(group?.color) || GROUP_ACCENT_COLORS[index % GROUP_ACCENT_COLORS.length];
 }
+function normalizeGroupDisplay(display = {}) {
+    if (!display || typeof display !== "object" || Array.isArray(display)) {
+        return null;
+    }
+
+    const normalized = {};
+    const columns = String(display.columns || "").trim();
+
+    if (["auto", "1", "2", "3", "4"].includes(columns)) {
+        normalized.columns = columns;
+    }
+
+    if (typeof display.show_badge === "boolean") {
+        normalized.show_badge = display.show_badge;
+    }
+
+    if (typeof display.show_details === "boolean") {
+        normalized.show_details = display.show_details;
+    }
+
+    return Object.keys(normalized).length > 0 ? normalized : null;
+}
+
 
 function normalizeEntityList(entities = []) {
     if (!Array.isArray(entities)) {
@@ -439,6 +466,7 @@ function normalizeGroups(groups = []) {
         const color = normalizeGroupColor(group?.color);
         const sort = normalizeGroupSort(group?.sort);
         const sortDirection = normalizeGroupSortDirection(group?.sort_direction);
+        const display = normalizeGroupDisplay(group?.display);
 
         return {
             id,
@@ -446,6 +474,7 @@ function normalizeGroups(groups = []) {
             ...(color ? { color } : {}),
             ...(sort !== "manual" ? { sort } : {}),
             ...(sort !== "manual" && sortDirection !== "asc" ? { sort_direction: sortDirection } : {}),
+            ...(display ? { display } : {}),
             entities
         };
     }).filter((group) => group.title || group.entities.length > 0);
@@ -505,6 +534,7 @@ function getEntitySections(config = {}, hass) {
         id: group.id,
         title: group.title,
         color: getGroupAccentColor(group, index),
+        display: group.display || null,
         entityIds: sortGroupEntityIds(group, hass),
         grouped: true
     })).filter((section) => section.entityIds.length > 0);
@@ -540,7 +570,7 @@ function getGroupLabel(group, fallback) {
     return String(group?.title || "").trim() || fallback || group?.id || "Group";
 }
 
-return { GROUP_SORTS: GROUP_SORTS, GROUP_SORT_DIRECTIONS: GROUP_SORT_DIRECTIONS, GROUP_ACCENT_COLORS: GROUP_ACCENT_COLORS, normalizeGroupSort: normalizeGroupSort, normalizeGroupSortDirection: normalizeGroupSortDirection, normalizeGroupColor: normalizeGroupColor, getGroupAccentColor: getGroupAccentColor, normalizeGroups: normalizeGroups, getGroupedEntityIdsFromConfig: getGroupedEntityIdsFromConfig, getUngroupedEntityIdsFromConfig: getUngroupedEntityIdsFromConfig, getAllEntityIdsFromConfig: getAllEntityIdsFromConfig, sortGroupEntityIds: sortGroupEntityIds, getEntitySections: getEntitySections, getNewGroupTitle: getNewGroupTitle, createGroup: createGroup, getGroupLabel: getGroupLabel };
+return { GROUP_SORTS: GROUP_SORTS, GROUP_SORT_DIRECTIONS: GROUP_SORT_DIRECTIONS, GROUP_ACCENT_COLORS: GROUP_ACCENT_COLORS, normalizeGroupSort: normalizeGroupSort, normalizeGroupSortDirection: normalizeGroupSortDirection, normalizeGroupColor: normalizeGroupColor, getGroupAccentColor: getGroupAccentColor, normalizeGroupDisplay: normalizeGroupDisplay, normalizeGroups: normalizeGroups, getGroupedEntityIdsFromConfig: getGroupedEntityIdsFromConfig, getUngroupedEntityIdsFromConfig: getUngroupedEntityIdsFromConfig, getAllEntityIdsFromConfig: getAllEntityIdsFromConfig, sortGroupEntityIds: sortGroupEntityIds, getEntitySections: getEntitySections, getNewGroupTitle: getNewGroupTitle, createGroup: createGroup, getGroupLabel: getGroupLabel };
 
 })();
 
@@ -2814,6 +2844,7 @@ function renderGroupEditor({
                     <span>${formatGroupEntityCount(entityCount, localize)}</span>
                 </div>
             </div>
+            ${renderGroupDisplayOptions({ group, localize })}
             <div class="tuev-editor-group-entities">
                 ${renderGroupEntityChips({
                     group,
@@ -2845,6 +2876,76 @@ function renderGroupEditor({
                 }) : ""}
             </div>
         </div>
+    `;
+}
+
+function renderGroupDisplayOptions({ group, localize }) {
+    const display = group.display || null;
+    const enabled = Boolean(display);
+    const columns = String(display?.columns || "auto");
+    const showBadge = display?.show_badge !== false;
+    const showDetails = display?.show_details !== false;
+
+    return `
+        <div class="tuev-editor-group-display-options">
+            <label class="tuev-editor-group-display-toggle">
+                <input
+                    type="checkbox"
+                    data-group-display-enabled="${group.id}"
+                    ${enabled ? "checked" : ""}
+                >
+                ${localize("editor.group_display_custom")}
+            </label>
+
+            ${enabled ? `
+                <div class="tuev-editor-group-display-panel">
+                    <div class="tuev-editor-group-display-row">
+                        <span>${localize("editor.columns")}</span>
+                        <div class="tuev-editor-group-display-chips">
+                            ${renderGroupDisplayColumnChip(group.id, "1", columns, localize("editor.columns_1_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "2", columns, localize("editor.columns_2_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "3", columns, localize("editor.columns_3_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "4", columns, localize("editor.columns_4_short"), localize)}
+                            ${renderGroupDisplayColumnChip(group.id, "auto", columns, localize("editor.columns_fill"), localize)}
+                        </div>
+                    </div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            data-group-display-show-badge="${group.id}"
+                            ${showBadge ? "checked" : ""}
+                        >
+                        ${localize("editor.show_badge")}
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            data-group-display-show-details="${group.id}"
+                            ${showDetails ? "checked" : ""}
+                        >
+                        ${localize("editor.show_details")}
+                    </label>
+                    <button
+                        class="tuev-editor-group-display-reset"
+                        type="button"
+                        data-group-display-reset="${group.id}"
+                    >${localize("editor.group_display_use_global")}</button>
+                </div>
+            ` : ""}
+        </div>
+    `;
+}
+
+function renderGroupDisplayColumnChip(groupId, value, columns, label, localize) {
+    return `
+        <button
+            class="tuev-editor-display-chip tuev-editor-group-display-chip"
+            type="button"
+            data-group-display-columns="${groupId}"
+            data-columns="${value}"
+            aria-pressed="${columns === value ? "true" : "false"}"
+            title="${localize("editor.columns")}: ${label}"
+        >${label}</button>
     `;
 }
 
@@ -3435,6 +3536,82 @@ function renderEditorStyles() {
             .tuev-editor-chip.is-dragging {
                 cursor: grabbing;
                 opacity: 0.68;
+            }
+
+            .tuev-editor-group-display-options {
+                padding: 10px 13px 0 16px;
+                border-top: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 16%, transparent);
+            }
+
+            .tuev-editor-group-display-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                color: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 72%, var(--primary-text-color));
+            }
+
+            .tuev-editor-group-display-panel {
+                margin-top: 9px;
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+                padding: 10px;
+                border-radius: 11px;
+                border: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 24%, var(--divider-color));
+                background: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 8%, var(--secondary-background-color));
+            }
+
+            .tuev-editor-group-display-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .tuev-editor-group-display-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                justify-content: flex-end;
+            }
+
+            .tuev-editor-group-display-panel label {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .tuev-editor-group-display-chip {
+                min-width: 31px;
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+
+            .tuev-editor-group-display-reset {
+                align-self: flex-start;
+                border: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 30%, var(--divider-color));
+                border-radius: 999px;
+                background: transparent;
+                color: var(--primary-text-color);
+                cursor: pointer;
+                padding: 6px 10px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .tuev-editor-group-display-reset:hover,
+            .tuev-editor-group-display-reset:focus-visible {
+                background: color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 16%, transparent);
+                border-color: var(--tuev-group-accent, var(--primary-color));
             }
 
             .tuev-editor-group-entities {
@@ -4341,6 +4518,51 @@ class TuevCardEditor extends HTMLElement {
             });
         });
 
+        this.querySelectorAll("[data-group-display-enabled]").forEach((input) => {
+            input.addEventListener("change", () => {
+                this.setGroupDisplayEnabled(
+                    input.getAttribute("data-group-display-enabled"),
+                    input.checked
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-columns]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this.setGroupDisplayOverride(
+                    button.getAttribute("data-group-display-columns"),
+                    "columns",
+                    button.getAttribute("data-columns")
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-show-badge]").forEach((input) => {
+            input.addEventListener("change", () => {
+                this.setGroupDisplayOverride(
+                    input.getAttribute("data-group-display-show-badge"),
+                    "show_badge",
+                    input.checked
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-show-details]").forEach((input) => {
+            input.addEventListener("change", () => {
+                this.setGroupDisplayOverride(
+                    input.getAttribute("data-group-display-show-details"),
+                    "show_details",
+                    input.checked
+                );
+            });
+        });
+
+        this.querySelectorAll("[data-group-display-reset]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this.resetGroupDisplayOverride(button.getAttribute("data-group-display-reset"));
+            });
+        });
+
         this.querySelectorAll("[data-group-down]").forEach((button) => {
             button.addEventListener("click", () => {
                 this.moveGroup(button.getAttribute("data-group-down"), 1);
@@ -4527,6 +4749,78 @@ class TuevCardEditor extends HTMLElement {
         this.querySelector("#showDetails")?.addEventListener("change", () => {
             this.updateConfig();
         });
+    }
+
+    setGroupDisplayEnabled(groupId, enabled) {
+        if (!groupId) {
+            return;
+        }
+
+        this._draftGroups = this._draftGroups.map((group) => {
+            if (group.id !== groupId) {
+                return group;
+            }
+
+            if (!enabled) {
+                const { display, ...rest } = group;
+                return rest;
+            }
+
+            return {
+                ...group,
+                display: group.display || {
+                    columns: this._config.columns || "auto"
+                }
+            };
+        });
+
+        this.applyDraftConfig();
+        this.render();
+    }
+
+    setGroupDisplayOverride(groupId, key, value) {
+        if (!groupId || !["columns", "show_badge", "show_details"].includes(key)) {
+            return;
+        }
+
+        const normalizedValue = key === "columns"
+            ? (["1", "2", "3", "4", "auto"].includes(String(value)) ? String(value) : "auto")
+            : Boolean(value);
+
+        this._draftGroups = this._draftGroups.map((group) => {
+            if (group.id !== groupId) {
+                return group;
+            }
+
+            return {
+                ...group,
+                display: {
+                    ...(group.display || {}),
+                    [key]: normalizedValue
+                }
+            };
+        });
+
+        this.applyDraftConfig();
+        this.render();
+    }
+
+    resetGroupDisplayOverride(groupId) {
+        if (!groupId) {
+            return;
+        }
+
+        this._draftGroups = this._draftGroups.map((group) => {
+            if (group.id !== groupId) {
+                return group;
+            }
+
+            const { display, ...rest } = group;
+            return rest;
+        });
+
+        this.applyDraftConfig();
+        this.render();
     }
 
     setUngroupedSort(sort) {
@@ -4931,7 +5225,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b71
+// TÜV Card source entry b72
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5480,6 +5774,20 @@ class TuevCard extends HTMLElement {
         return getEntityUiState(this._entityUiState, entityId);
     }
 
+    getSectionDisplayConfig(section = {}) {
+        const display = section.display || {};
+
+        return {
+            columns: display.columns || this.config.columns,
+            show_badge: typeof display.show_badge === "boolean"
+                ? display.show_badge
+                : this.config.show_badge,
+            show_details: typeof display.show_details === "boolean"
+                ? display.show_details
+                : this.config.show_details
+        };
+    }
+
     renderSections(hass, sections, layoutContext) {
         const renderSection = (section) => {
             const entityIds = section.entityIds.filter((entityId) => hass.states[entityId]);
@@ -5489,10 +5797,12 @@ class TuevCard extends HTMLElement {
             }
 
             const sectionIsMulti = entityIds.length > 1;
+            const sectionDisplay = this.getSectionDisplayConfig(section);
+            const sectionColumns = sectionDisplay.columns || layoutContext.requestedColumns || this.config.columns;
             const layout = calculateLayoutInfo({
                 cardWidth: layoutContext.layoutWidth,
                 isMulti: sectionIsMulti,
-                requestedColumns: layoutContext.requestedColumns || this.config.columns
+                requestedColumns: sectionColumns
             });
             const automaticBadgeSize = calculateAutomaticBadgeSize({
                 isMulti: sectionIsMulti,
@@ -5520,7 +5830,8 @@ class TuevCard extends HTMLElement {
                         automaticBadgeSize,
                         layout,
                         sharedPlateLayout,
-                        layoutContext.previewContext === true
+                        layoutContext.previewContext === true,
+                        sectionDisplay
                     )).join("")}
                 </div>
             `;
@@ -5624,7 +5935,7 @@ class TuevCard extends HTMLElement {
         `;
     }
 
-    renderVehicle(hass, entityId, compact, automaticBadgeSize, layout, sharedPlateLayout, previewPlateTuning = false) {
+    renderVehicle(hass, entityId, compact, automaticBadgeSize, layout, sharedPlateLayout, previewPlateTuning = false, displayConfig = null) {
         const entity = hass.states[entityId];
 
         if (!entity) {
@@ -5639,8 +5950,8 @@ class TuevCard extends HTMLElement {
         const month = Number(attr.month || 1);
         const year = Number(attr.year || new Date().getFullYear());
         const status = attr.status || entity.state || "";
-        const showDetails = this.config.show_details !== false;
-        const showBadge = this.config.show_badge !== false;
+        const showDetails = (displayConfig?.show_details ?? this.config.show_details) !== false;
+        const showBadge = (displayConfig?.show_badge ?? this.config.show_badge) !== false;
 
         const statusLabel = {
             valid: this.localize("status.valid"),
