@@ -1,4 +1,4 @@
-# b63 stamp animation rebuild
+# b64 stamp animation rebuild
 
 This build rebuilds the `show_badge: false` HU stamp confirmation animation instead of patching the previous sequence.
 

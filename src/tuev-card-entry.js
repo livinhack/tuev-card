@@ -1,31 +1,29 @@
-// TÜV Card source entry b63
+// TÜV Card source entry b64
 
-import { localize } from "./translations/index.js?v=b63";
-import { normalizeCardConfig } from "./card/config.js?v=b63";
-import { findFirstTuevEntity } from "./card/entities.js?v=b63";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b63";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b63";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b63";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b63";
+import { localize } from "./translations/index.js?v=b64";
+import { normalizeCardConfig } from "./card/config.js?v=b64";
+import { findFirstTuevEntity } from "./card/entities.js?v=b64";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b64";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b64";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b64";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b64";
 import {
-    getOverlayStyleOptions,
     renderBadgeArea,
     renderCompactConfirmPanel,
     renderBadgeLayer,
-    renderConfirmOverlay,
     renderCrossfadeLayer,
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b63";
+} from "./card/render-parts.js?v=b64";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b63";
-import { TuevCardEditor } from "./editor/editor.js?v=b63";
+} from "./plate/renderer.js?v=b64";
+import { TuevCardEditor } from "./editor/editor.js?v=b64";
 
 window.customCards = window.customCards || [];
 
@@ -734,7 +732,7 @@ class TuevCard extends HTMLElement {
         const statusColor = {
             valid: "var(--success-color, #43a047)",
             due: "var(--warning-color, #ffa000)",
-            expired: "var(--error-color, #db6337)"
+            expired: "var(--error-color, #db6437)"
         }[status] || "var(--secondary-text-color)";
 
         const huLabel = month && year
@@ -775,25 +773,11 @@ class TuevCard extends HTMLElement {
                 ? this.localize("overlay.updated")
                 : statusOverlayTitle;
 
-        const overlayText = ui.confirming
-            ? this.localize("overlay.updating_text")
-            : showSuccess
-                ? this.localize("overlay.updated_text")
-                : this.localize("overlay.question");
-
-        const buttonText = ui.confirming
-            ? this.localize("button.wait")
-            : showSuccess
-                ? this.localize("button.done")
-                : this.localize("button.confirm");
-
         const displayBadge = ui.frozenBadge
             ? ui.frozenBadge
             : { year, rotation, blurred };
         const badgeSize = automaticBadgeSize;
         const plateLayout = sharedPlateLayout;
-        const overlayStyle = getOverlayStyleOptions({ badgeSize, compact });
-
         const header = renderVehicleHeader({
             compact,
             vehicleName,
@@ -807,16 +791,20 @@ class TuevCard extends HTMLElement {
             })
         });
 
-        const overlay = showConfirmOverlay
-            ? renderConfirmOverlay({
+        const stampConfirmOverlay = (pending || ui.confirming)
+            ? renderCompactConfirmPanel({
                 entityId,
                 ui,
                 showSuccess,
-                overlayTitle,
-                overlayText,
-                buttonText,
-                style: overlayStyle
+                overlayTitle: statusOverlayTitle,
+                actionText: this.localize("overlay.hu_passed_question"),
+                compact,
+                expired: isExpired
             })
+            : "";
+
+        const overlay = showBadge
+            ? stampConfirmOverlay
             : "";
 
         const badgeArea = showBadge
@@ -828,16 +816,8 @@ class TuevCard extends HTMLElement {
             })
             : "";
 
-        const compactConfirmPanel = !showBadge && (pending || ui.confirming)
-            ? renderCompactConfirmPanel({
-                entityId,
-                ui,
-                showSuccess,
-                overlayTitle: statusOverlayTitle,
-                actionText: this.localize("overlay.hu_passed_question"),
-                compact,
-                expired: isExpired
-            })
+        const compactConfirmPanel = !showBadge
+            ? stampConfirmOverlay
             : "";
 
         const details = renderVehicleDetails({
@@ -937,25 +917,19 @@ class TuevCard extends HTMLElement {
 
         this.hass = this._hass;
 
-        if (this.config.show_badge === false) {
-            ui.confirmServiceScheduled = true;
+        ui.confirmServiceScheduled = true;
 
-            window.setTimeout(() => {
-                ui.confirmStampHidden = true;
+        window.setTimeout(() => {
+            ui.confirmStampHidden = true;
 
-                if (this._hass) {
-                    this.hass = this._hass;
-                }
-            }, 1980);
+            if (this._hass) {
+                this.hass = this._hass;
+            }
+        }, 1980);
 
-            window.setTimeout(() => {
-                this.callConfirmPassedService(entityId, ui);
-            }, 2160);
-
-            return;
-        }
-
-        await this.callConfirmPassedService(entityId, ui);
+        window.setTimeout(() => {
+            this.callConfirmPassedService(entityId, ui);
+        }, 2160);
     }
 
     async callConfirmPassedService(entityId, ui) {
