@@ -1,4 +1,4 @@
-// TÜV Card bundled b69
+// TÜV Card bundled b71
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1823,6 +1823,7 @@ function renderCompactConfirmPanel({
                     line-height: 1;
                     background: rgba(0, 0, 0, 0.24);
                     overflow: visible;
+                    transform: translateX(${badgeCompactText ? "3.5px" : "0"});
                 ">
                     <svg viewBox="0 0 18 18" width="${compact ? "17" : "19"}" height="${compact ? "17" : "19"}" aria-hidden="true" style="display: block; overflow: visible;">
                         <path
@@ -4930,7 +4931,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b70
+// TÜV Card source entry b71
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

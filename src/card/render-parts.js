@@ -1,4 +1,4 @@
-import { renderBadge } from "../badge/renderer.js?v=b70";
+import { renderBadge } from "../badge/renderer.js?v=b71";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -379,6 +379,7 @@ export function renderCompactConfirmPanel({
                     line-height: 1;
                     background: rgba(0, 0, 0, 0.24);
                     overflow: visible;
+                    transform: translateX(${badgeCompactText ? "3.5px" : "0"});
                 ">
                     <svg viewBox="0 0 18 18" width="${compact ? "17" : "19"}" height="${compact ? "17" : "19"}" aria-hidden="true" style="display: block; overflow: visible;">
                         <path
