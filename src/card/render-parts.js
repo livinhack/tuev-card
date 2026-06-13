@@ -1,4 +1,4 @@
-import { renderBadge } from "../badge/renderer.js?v=b61";
+import { renderBadge } from "../badge/renderer.js?v=b62";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -241,23 +241,6 @@ export function renderVehicleDetails({ showDetails, compact, huLabel, statusColo
 
 export function renderBadgeLayer(badge, size) {
     return `
-        <style>
-            @keyframes tuevStampCheckDraw {
-                0% { stroke-dashoffset: 32; opacity: 0; }
-                12% { opacity: 1; }
-                100% { stroke-dashoffset: 0; opacity: 1; }
-            }
-
-            @keyframes tuevStampWarningFade {
-                0%, 45% { opacity: 0.92; }
-                100% { opacity: 0.08; }
-            }
-
-            @keyframes tuevStampActionFade {
-                0%, 65% { opacity: 0.92; }
-                100% { opacity: 0; }
-            }
-        </style>
         <div style="
             position: absolute;
             inset: 0;
@@ -278,23 +261,6 @@ export function renderCrossfadeLayer(crossfade, size) {
     }
 
     return `
-        <style>
-            @keyframes tuevStampCheckDraw {
-                0% { stroke-dashoffset: 32; opacity: 0.25; }
-                16% { opacity: 1; }
-                100% { stroke-dashoffset: 0; opacity: 1; }
-            }
-
-            @keyframes tuevStampWarningFade {
-                0%, 38% { opacity: 0.92; }
-                100% { opacity: 0.12; }
-            }
-
-            @keyframes tuevStampActionFade {
-                0%, 58% { opacity: 0.92; }
-                100% { opacity: 0; }
-            }
-        </style>
         <div style="
             position: absolute;
             inset: 0;
@@ -364,16 +330,62 @@ export function renderCompactConfirmPanel({
     compact,
     expired
 }) {
-    const acknowledged = ui.confirming;
     const confirming = ui.confirming;
-    const stampColor = expired
+    const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
+    const stampColor = frozenExpired
         ? "var(--error-color, #db5337)"
         : "var(--warning-color, #ffa000)";
     const actionColor = "var(--success-color, #2e9d43)";
     const stampLines = renderStampLines(overlayTitle);
     const actionLines = renderStampLines(actionText);
+    const warningAnimation = confirming
+        ? "tuevStampB62WarningFade 680ms ease 760ms forwards"
+        : "none";
+    const actionAnimation = confirming
+        ? "tuevStampB62ActionFade 620ms ease 1320ms forwards"
+        : "none";
+    const checkAnimation = confirming
+        ? "tuevStampB62CheckDraw 680ms cubic-bezier(.2, .88, .18, 1) 0ms forwards"
+        : "none";
 
     return `
+        <style>
+            @keyframes tuevStampB62CheckDraw {
+                0% {
+                    stroke-dashoffset: 1;
+                    opacity: 0.2;
+                }
+                12% {
+                    opacity: 1;
+                }
+                100% {
+                    stroke-dashoffset: 0;
+                    opacity: 1;
+                }
+            }
+
+            @keyframes tuevStampB62WarningFade {
+                0%, 36% {
+                    opacity: 0.92;
+                    filter: saturate(1.18) brightness(1);
+                }
+                100% {
+                    opacity: 0;
+                    filter: saturate(0.88) brightness(0.72);
+                }
+            }
+
+            @keyframes tuevStampB62ActionFade {
+                0%, 48% {
+                    opacity: 0.92;
+                    filter: saturate(1.18) brightness(1);
+                }
+                100% {
+                    opacity: 0;
+                    filter: saturate(0.88) brightness(0.76);
+                }
+            }
+        </style>
         <div style="
             position: absolute;
             left: 50%;
@@ -418,7 +430,7 @@ export function renderCompactConfirmPanel({
                 overflow: hidden;
                 pointer-events: none;
                 backdrop-filter: blur(2.2px) saturate(1.18);
-                animation: ${confirming ? "tuevStampWarningFade 560ms ease 620ms forwards" : "none"};
+                animation: ${warningAnimation};
             ">
                 <span style="position: absolute; left: 10%; top: -3px; width: 20px; height: 6px; background: rgba(0, 0, 0, 0.60); transform: rotate(-7deg); opacity: 0.34;"></span>
                 <span style="position: absolute; right: 16%; bottom: -3px; width: 26px; height: 5px; background: rgba(0, 0, 0, 0.62); transform: rotate(5deg); opacity: 0.32;"></span>
@@ -430,7 +442,7 @@ export function renderCompactConfirmPanel({
 
             <button
                 data-confirm-entity="${entityId}"
-                ${acknowledged ? "disabled" : ""}
+                ${confirming ? "disabled" : ""}
                 style="
                     position: relative;
                     transform: translateX(${compact ? "9px" : "13px"}) rotate(14deg);
@@ -458,12 +470,12 @@ export function renderCompactConfirmPanel({
                     letter-spacing: 0.18px;
                     text-transform: uppercase;
                     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75), 0 0 5px rgba(0, 0, 0, 0.35);
-                    cursor: ${acknowledged ? "default" : "pointer"};
-                    opacity: ${acknowledged ? "0.94" : "0.92"};
+                    cursor: ${confirming ? "default" : "pointer"};
+                    opacity: 0.92;
                     pointer-events: auto;
                     box-shadow: 0 0 10px color-mix(in srgb, ${actionColor} 28%, transparent);
                     backdrop-filter: blur(2.2px) saturate(1.18);
-                    animation: ${confirming ? "tuevStampActionFade 520ms ease 1220ms forwards" : "none"};
+                    animation: ${actionAnimation};
                 "
             >
                 <span style="
@@ -476,27 +488,27 @@ export function renderCompactConfirmPanel({
                 ">${actionLines}</span>
                 <span style="
                     flex: 0 0 auto;
-                    width: ${compact ? "16px" : "18px"};
-                    height: ${compact ? "16px" : "18px"};
+                    width: ${compact ? "17px" : "19px"};
+                    height: ${compact ? "17px" : "19px"};
                     border-radius: 2px;
-                    border: 1.6px solid currentColor;
+                    border: 1.7px solid currentColor;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
                     line-height: 1;
-                    background: ${acknowledged ? "color-mix(in srgb, currentColor 28%, transparent)" : "rgba(0, 0, 0, 0.22)"};
-                    transition: transform 160ms ease, background 160ms ease;
-                    transform: ${acknowledged ? "scale(1.06)" : "scale(1)"};
+                    background: rgba(0, 0, 0, 0.24);
+                    overflow: visible;
                 ">
-                    <svg viewBox="0 0 16 16" width="${compact ? "15" : "17"}" height="${compact ? "15" : "17"}" aria-hidden="true" style="display: block; overflow: visible;">
+                    <svg viewBox="0 0 18 18" width="${compact ? "17" : "19"}" height="${compact ? "17" : "19"}" aria-hidden="true" style="display: block; overflow: visible;">
                         <path
-                            d="M3.1 8.5 L6.4 11.7 L13.3 3.8"
+                            pathLength="1"
+                            d="M3.1 9.5 L7.0 13.0 L15.2 4.3"
                             fill="none"
                             stroke="currentColor"
-                            stroke-width="2.8"
+                            stroke-width="2.9"
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            style="stroke-dasharray: 32; stroke-dashoffset: ${confirming ? "32" : "32"}; opacity: ${confirming ? "1" : "0"}; animation: ${confirming ? "tuevStampCheckDraw 520ms cubic-bezier(.22, .9, .2, 1) 80ms forwards" : "none"}; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.5));"
+                            style="stroke-dasharray: 1; stroke-dashoffset: ${confirming ? "1" : "1"}; opacity: ${confirming ? "1" : "0"}; animation: ${checkAnimation}; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.58)) drop-shadow(0 0 4px color-mix(in srgb, currentColor 55%, transparent));"
                         />
                     </svg>
                 </span>

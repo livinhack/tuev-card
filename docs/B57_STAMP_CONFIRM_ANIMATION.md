@@ -1,4 +1,4 @@
-# b61 – Stamp confirmation animation
+# b62 – Stamp confirmation animation
 
 This checkpoint tunes the stamp-style confirmation overlay introduced for `show_badge: false`.
 

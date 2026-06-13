@@ -1,6 +1,6 @@
-# b61 cleanup and stamp click fix
+# b62 cleanup and stamp click fix
 
-`b61` is a targeted cleanup and bug-fix checkpoint after the stamp confirmation overlay work.
+`b62` is a targeted cleanup and bug-fix checkpoint after the stamp confirmation overlay work.
 
 ## Why this checkpoint exists
 
