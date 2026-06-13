@@ -50,6 +50,7 @@ entities:
 
 ## Possible later enhancements
 
+- Optional group-specific display overrides, see `docs/B67_GROUP_DISPLAY_OVERRIDES_CONCEPT.md`.
 - Collapse/expand groups.
 - Hide empty groups.
 - Optional group descriptions.

@@ -1,13 +1,13 @@
 # TÜV Card v0.1 / post-v0.1 development notes
 
-Current checked version: `b66`.
+Current checked version: `b67`.
 
 ## Release status
 
 - `v0.1.0` was prepared as the initial technical test release.
 - Later `bXX` checkpoints continue as internal development/test builds.
 - `b65` finalized the stamp-based HU confirmation flow as the single confirm UI.
-- `b66` documents that flow and updates release checks/README wording.
+- `b67` documents that flow and updates release checks/README wording.
 
 ## Current stable baseline
 
