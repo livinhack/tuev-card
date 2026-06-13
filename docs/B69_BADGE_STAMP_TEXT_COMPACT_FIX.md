@@ -1,4 +1,4 @@
-# b69 - Badge stamp text compact fix
+# b70 - Badge stamp text compact fix
 
 Basis: b67.
 

@@ -1653,8 +1653,8 @@ function renderCompactConfirmPanel({
 
     const confirming = ui.confirming;
     const badgeCompactText = withBadge && compact;
-    const warningFontSize = badgeCompactText ? "8.6px" : (compact ? "10px" : "11px");
-    const actionFontSize = badgeCompactText ? "7.8px" : (compact ? "9px" : "10px");
+    const warningFontSize = badgeCompactText ? "8.2px" : (compact ? "10px" : "11px");
+    const actionFontSize = badgeCompactText ? "7.0px" : (compact ? "9px" : "10px");
     const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
     const stampColor = frozenExpired
         ? "var(--error-color, #db5337)"
@@ -1717,21 +1717,21 @@ function renderCompactConfirmPanel({
             transform: translate(-50%, -50%) rotate(-18deg);
             z-index: 6;
             width: max-content;
-            max-width: min(96%, ${compact ? "154px" : "178px"});
+            max-width: min(98%, ${compact ? (withBadge ? "168px" : "154px") : "178px"});
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: ${compact ? "3px" : "4px"};
+            gap: ${badgeCompactText ? "4px" : (compact ? "3px" : "4px")};
             pointer-events: none;
             filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.48));
         ">
             <div style="
                 position: relative;
                 box-sizing: border-box;
-                min-width: ${compact ? "62px" : "72px"};
+                min-width: ${badgeCompactText ? "74px" : (compact ? "62px" : "72px")};
                 max-width: 100%;
-                padding: ${compact ? "4px 8px 5px" : "5px 10px 6px"};
+                padding: ${badgeCompactText ? "4px 10px 5px" : (compact ? "4px 8px 5px" : "5px 10px 6px")};
                 border: 2px solid color-mix(in srgb, ${stampColor} 88%, transparent);
                 outline: 1px dashed color-mix(in srgb, ${stampColor} 64%, transparent);
                 outline-offset: -4px;
@@ -1745,8 +1745,8 @@ function renderCompactConfirmPanel({
                 font-family: 'Arial Narrow', 'DIN Condensed', 'Bahnschrift SemiCondensed', sans-serif;
                 font-size: ${warningFontSize};
                 font-weight: 900;
-                line-height: ${badgeCompactText ? "0.86" : "0.92"};
-                letter-spacing: 0.28px;
+                line-height: ${badgeCompactText ? "0.90" : "0.92"};
+                letter-spacing: ${badgeCompactText ? "0.12px" : "0.28px"};
                 text-transform: uppercase;
                 text-align: center;
                 text-shadow: 0 1px 1px rgba(0, 0, 0, 0.78), 0 0 5px rgba(0, 0, 0, 0.35);
@@ -1759,7 +1759,7 @@ function renderCompactConfirmPanel({
                 <span style="position: absolute; left: 10%; top: -3px; width: 20px; height: 6px; background: rgba(0, 0, 0, 0.60); transform: rotate(-7deg); opacity: 0.34;"></span>
                 <span style="position: absolute; right: 16%; bottom: -3px; width: 26px; height: 5px; background: rgba(0, 0, 0, 0.62); transform: rotate(5deg); opacity: 0.32;"></span>
                 <span style="position: absolute; left: 46%; top: 47%; width: 31px; height: 2px; background: rgba(0, 0, 0, 0.50); transform: rotate(-10deg); opacity: 0.22;"></span>
-                <span style="position: relative; z-index: 1; display: inline-flex; flex-direction: column; align-items: center; gap: 1px; white-space: nowrap;">
+                <span style="position: relative; z-index: 1; display: flex; width: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 1px; white-space: nowrap; text-align: center;">
                     ${stampLines}
                 </span>
             </div>
@@ -1773,10 +1773,11 @@ function renderCompactConfirmPanel({
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: ${compact ? "5px" : "6px"};
+                    gap: ${badgeCompactText ? "5px" : (compact ? "5px" : "6px")};
                     max-width: 100%;
+                    min-width: ${badgeCompactText ? "82px" : "0"};
                     box-sizing: border-box;
-                    padding: ${compact ? "4px 6px" : "5px 8px"};
+                    padding: ${badgeCompactText ? "4px 8px" : (compact ? "4px 6px" : "5px 8px")};
                     border-radius: 4px;
                     border: 2px solid color-mix(in srgb, ${actionColor} 88%, transparent);
                     outline: 1px dashed color-mix(in srgb, ${actionColor} 62%, transparent);
@@ -1790,8 +1791,8 @@ function renderCompactConfirmPanel({
                     font-family: 'Arial Narrow', 'DIN Condensed', 'Bahnschrift SemiCondensed', sans-serif;
                     font-size: ${actionFontSize};
                     font-weight: 900;
-                    line-height: ${badgeCompactText ? "0.88" : "0.94"};
-                    letter-spacing: 0.18px;
+                    line-height: ${badgeCompactText ? "0.86" : "0.94"};
+                    letter-spacing: ${badgeCompactText ? "0.08px" : "0.18px"};
                     text-transform: uppercase;
                     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75), 0 0 5px rgba(0, 0, 0, 0.35);
                     cursor: ${confirming ? "default" : "pointer"};
@@ -4929,7 +4930,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b69
+// TÜV Card source entry b70
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

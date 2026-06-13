@@ -1,4 +1,4 @@
-import { getEntityIdsFromConfig, sortEntityIds } from "./entities.js?v=b69";
+import { getEntityIdsFromConfig, sortEntityIds } from "./entities.js?v=b70";
 
 export const GROUP_SORTS = ["name", "plate", "due_date", "status", "manual"];
 export const GROUP_SORT_DIRECTIONS = ["asc", "desc"];

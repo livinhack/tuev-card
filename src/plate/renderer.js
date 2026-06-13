@@ -3,7 +3,7 @@ import {
     ensurePlateFont,
     injectPlateFont,
     isPlateFontLoaded
-} from "./font.js?v=b69";
+} from "./font.js?v=b70";
 
 export {
     checkPlateFontAvailable,

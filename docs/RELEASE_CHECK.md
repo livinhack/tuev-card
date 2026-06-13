@@ -1,10 +1,10 @@
 # TÜV Card release check
 
-Current checked version: `b69`.
+Current checked version: `b70`.
 
 ## Current release/checkpoint note
 
-`b69` is a concept/documentation checkpoint for later group-specific display overrides. It should not introduce UI or runtime behavior changes.
+`b70` is a concept/documentation checkpoint for later group-specific display overrides. It should not introduce UI or runtime behavior changes.
 
 The current EuroPlate rule remains unchanged:
 
@@ -22,7 +22,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b69
+/hacsfiles/tuev-card/tuev-card.js?v=b70
 ```
 
 The dashboard card type remains:
@@ -44,13 +44,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b69"
+"version": "0.1.1-b70"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b69
+b70
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
@@ -122,3 +122,8 @@ See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home A
 - `docs/B65_STAMP_CONFIRM_FINAL_CLEANUP.md`
 - `docs/B66_STAMP_CONFIRM_DOCS.md`
 - `docs/B67_GROUP_DISPLAY_OVERRIDES_CONCEPT.md`
+
+
+## b70 note
+
+See `docs/B70_BADGE_STAMP_FRAME_TEXT_TUNING.md` for the compact badge stamp text/frame tuning.

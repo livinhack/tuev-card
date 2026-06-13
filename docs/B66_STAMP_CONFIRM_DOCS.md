@@ -1,6 +1,6 @@
-# b69 – Stamp confirm documentation update
+# b70 – Stamp confirm documentation update
 
-`b69` documents the confirmed stamp-style HU confirmation flow after the `b65` cleanup.
+`b70` documents the confirmed stamp-style HU confirmation flow after the `b65` cleanup.
 
 ## Scope
 
