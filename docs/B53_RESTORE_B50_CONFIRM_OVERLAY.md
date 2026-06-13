@@ -1,4 +1,4 @@
-# b60 Restore b50 confirm overlay baseline
+# b61 Restore b50 confirm overlay baseline
 
 This checkpoint intentionally returns the no-badge confirmation overlay behavior to the confirmed b50/b49 UI baseline.
 

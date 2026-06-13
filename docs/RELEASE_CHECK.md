@@ -1,10 +1,10 @@
 # TÜV Card release check
 
-Current checked version: `b60`.
+Current checked version: `b61`.
 
-## b60 release note
+## b61 release note
 
-`b60` is the first semantic test release. It is based on the confirmed release-candidate and repository-cleanup checkpoints and should not introduce new runtime behavior compared with the tested candidate state.
+`b61` is the first semantic test release. It is based on the confirmed release-candidate and repository-cleanup checkpoints and should not introduce new runtime behavior compared with the tested candidate state.
 
 This release keeps the current EuroPlate rule unchanged:
 
@@ -24,7 +24,7 @@ For source-level modular debugging, copy `src/` as well and point the resource t
 Reload the Lovelace resource with a fresh cache-buster, for example:
 
 ```text
-/local/community/tuev-card/tuev-card.js?v=b60
+/local/community/tuev-card/tuev-card.js?v=b61
 ```
 
 ## HACS release install
@@ -54,13 +54,13 @@ src/
 The package version for this release is:
 
 ```json
-"version": "0.1.1-b60"
+"version": "0.1.1-b61"
 ```
 
 The GitHub Release tag should be:
 
 ```text
-b60
+b61
 ```
 
 See `docs/VERSIONING_AND_RELEASE_PREP.md` and `docs/HACS_RELEASE_FLOW.md` for the release/update trigger checklist.
@@ -85,7 +85,7 @@ Verify that HACS and Home Assistant load the production file directly from the r
 
 ```text
 /config/www/community/tuev-card/tuev-card.js
-/hacsfiles/tuev-card/tuev-card.js?v=b60
+/hacsfiles/tuev-card/tuev-card.js?v=b61
 ```
 
 Make sure these old names are not present in the installed HACS folder or Lovelace resource configuration:
@@ -118,31 +118,31 @@ type: custom:tuev-card
 See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home Assistant view checklist introduced during the release-candidate phase.
 
 
-## b60 handoff checkpoint
+## b61 handoff checkpoint
 
 See `docs/B50_HANDOFF_CHECKPOINT.md` for the 50-version continuation checkpoint.
 
 
-## b60 restore note
+## b61 restore note
 
 The no-badge confirmation overlay was restored to the b50/b49 baseline after b51/b52 did not improve the layout. See `docs/B53_RESTORE_B50_CONFIRM_OVERLAY.md`.
 
 
-## b60 note
+## b61 note
 
-`b60` tunes only the background/contrast and rotation of the stamp-style confirmation overlay for `show_badge: false`. The b55 frame and typography concept remain unchanged.
+`b61` tunes only the background/contrast and rotation of the stamp-style confirmation overlay for `show_badge: false`. The b55 frame and typography concept remain unchanged.
 
-## b60 stamp animation note
+## b61 stamp animation note
 
 See `docs/B57_STAMP_CONFIRM_ANIMATION.md` for the no-badge stamp confirmation animation tuning.
 
-## b60 cleanup and stamp click fix
+## b61 cleanup and stamp click fix
 
-`b60` fixes the stamp confirmation click/service flow after the b58 animation work. It also removes a small obsolete wrapper in the delayed confirmation path. No layout, renderer, editor or EuroPlate behavior was intentionally changed.
+`b61` fixes the stamp confirmation click/service flow after the b58 animation work. It also removes a small obsolete wrapper in the delayed confirmation path. No layout, renderer, editor or EuroPlate behavior was intentionally changed.
 
 See `docs/B59_CLEANUP_AND_STAMP_CLICK_FIX.md`.
 
 
-## b60 stamp animation sequence
+## b61 stamp animation sequence
 
 See `docs/B60_STAMP_ANIMATION_SEQUENCE.md` for the fixed stamp confirmation animation sequence.

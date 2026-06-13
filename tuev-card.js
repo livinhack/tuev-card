@@ -1,4 +1,4 @@
-// TÜV Card bundled b60
+// TÜV Card bundled b61
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -368,7 +368,7 @@ const GROUP_ACCENT_COLORS = [
     "#42a5f5",
     "#66bb6a",
     "#ffa726",
-    "#ab60bc",
+    "#ab61bc",
     "#26c6da",
     "#ef5350",
     "#8d6e63"
@@ -1687,6 +1687,23 @@ function renderVehicleDetails({ showDetails, compact, huLabel, statusColor, stat
 
 function renderBadgeLayer(badge, size) {
     return `
+        <style>
+            @keyframes tuevStampCheckDraw {
+                0% { stroke-dashoffset: 32; opacity: 0; }
+                12% { opacity: 1; }
+                100% { stroke-dashoffset: 0; opacity: 1; }
+            }
+
+            @keyframes tuevStampWarningFade {
+                0%, 45% { opacity: 0.92; }
+                100% { opacity: 0.08; }
+            }
+
+            @keyframes tuevStampActionFade {
+                0%, 65% { opacity: 0.92; }
+                100% { opacity: 0; }
+            }
+        </style>
         <div style="
             position: absolute;
             inset: 0;
@@ -1793,14 +1810,12 @@ function renderCompactConfirmPanel({
     compact,
     expired
 }) {
-    const acknowledged = ui.confirming || showSuccess;
-    const confirming = ui.confirming && !showSuccess;
-    const stampColor = showSuccess
-        ? "var(--success-color, #43a047)"
-        : expired
-            ? "var(--error-color, #db5337)"
-            : "var(--warning-color, #ffa000)";
-    const actionColor = showSuccess ? "var(--success-color, #43a047)" : "var(--success-color, #2e9d43)";
+    const acknowledged = ui.confirming;
+    const confirming = ui.confirming;
+    const stampColor = expired
+        ? "var(--error-color, #db5337)"
+        : "var(--warning-color, #ffa000)";
+    const actionColor = "var(--success-color, #2e9d43)";
     const stampLines = renderStampLines(overlayTitle);
     const actionLines = renderStampLines(actionText);
 
@@ -1845,7 +1860,7 @@ function renderCompactConfirmPanel({
                 text-transform: uppercase;
                 text-align: center;
                 text-shadow: 0 1px 1px rgba(0, 0, 0, 0.78), 0 0 5px rgba(0, 0, 0, 0.35);
-                opacity: ${showSuccess ? "0.94" : "0.92"};
+                opacity: 0.92;
                 overflow: hidden;
                 pointer-events: none;
                 backdrop-filter: blur(2.2px) saturate(1.18);
@@ -1919,19 +1934,17 @@ function renderCompactConfirmPanel({
                     transition: transform 160ms ease, background 160ms ease;
                     transform: ${acknowledged ? "scale(1.06)" : "scale(1)"};
                 ">
-                    ${acknowledged ? `
-                        <svg viewBox="0 0 16 16" width="${compact ? "15" : "17"}" height="${compact ? "15" : "17"}" aria-hidden="true" style="display: block; overflow: visible;">
-                            <path
-                                d="M3.1 8.5 L6.4 11.7 L13.3 3.8"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2.8"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                style="stroke-dasharray: 30; stroke-dashoffset: ${confirming ? "30" : "0"}; animation: ${confirming ? "tuevStampCheckDraw 560ms cubic-bezier(.22, .9, .2, 1) forwards" : "none"}; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.5));"
-                            />
-                        </svg>
-                    ` : ""}
+                    <svg viewBox="0 0 16 16" width="${compact ? "15" : "17"}" height="${compact ? "15" : "17"}" aria-hidden="true" style="display: block; overflow: visible;">
+                        <path
+                            d="M3.1 8.5 L6.4 11.7 L13.3 3.8"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="stroke-dasharray: 32; stroke-dashoffset: ${confirming ? "32" : "32"}; opacity: ${confirming ? "1" : "0"}; animation: ${confirming ? "tuevStampCheckDraw 520ms cubic-bezier(.22, .9, .2, 1) 80ms forwards" : "none"}; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.5));"
+                        />
+                    </svg>
                 </span>
             </button>
         </div>
@@ -5026,7 +5039,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b60
+// TÜV Card source entry b61
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5746,7 +5759,7 @@ class TuevCard extends HTMLElement {
         const statusColor = {
             valid: "var(--success-color, #43a047)",
             due: "var(--warning-color, #ffa000)",
-            expired: "var(--error-color, #db6037)"
+            expired: "var(--error-color, #db6137)"
         }[status] || "var(--secondary-text-color)";
 
         const huLabel = month && year
@@ -5840,7 +5853,7 @@ class TuevCard extends HTMLElement {
             })
             : "";
 
-        const compactConfirmPanel = !showBadge && showConfirmOverlay
+        const compactConfirmPanel = !showBadge && (pending || ui.confirming)
             ? renderCompactConfirmPanel({
                 entityId,
                 ui,
@@ -5953,7 +5966,7 @@ class TuevCard extends HTMLElement {
 
             window.setTimeout(() => {
                 this.callConfirmPassedService(entityId, ui);
-            }, 1850);
+            }, 2050);
 
             return;
         }
