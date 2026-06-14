@@ -1,4 +1,4 @@
-// TÜV Card bundled b93
+// TÜV Card bundled b94
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2183,7 +2183,14 @@ const FZV_ONE_LINE = Object.freeze({
     key: "oneLine",
     maxWidth: 520,
     height: 110,
-    widthBands: Object.freeze([340, 380, 420, 460, 480, 520]),
+    // Official law names 520 mm as the one-line maximum, but no one-line
+    // minimum. For rendering short plates we use practical manufacturer bands:
+    // Mittelschrift generally starts at 340 mm, while Engschrift listings can
+    // reach 320 mm. These bands select the outer physical plate size only.
+    // They never scale individual glyphs or seals.
+    widthBandsMtl: Object.freeze([340, 380, 420, 460, 480, 520]),
+    widthBandsEng: Object.freeze([320, 340, 380, 420, 480, 520]),
+    motorcycleWidthBands: Object.freeze([180, 190, 200, 210, 220]),
     // Anlage-4 Maße: 110 mm Außenhöhe inklusive schwarzem Rand.
     // 4,5 mm Randband je Seite ergibt eine nutzbare weiße Innenfläche von 101 mm.
     borderBand: 4.5,
@@ -2191,26 +2198,32 @@ const FZV_ONE_LINE = Object.freeze({
     cornerRadius: 7,
     euro: Object.freeze({
         width: 45,
-        // The official sketch labels the Euro field height as 98 mm, but real
-        // plates usually do not show a white light edge around the blue field.
-        // We therefore fill the full white inner height while keeping the legal
-        // 45 mm width and all text/seal coordinates in the Anlage-4 grid.
+        // The legal sketch marks a 98 mm Euro field, but most real plates do
+        // not show the optional bright top/bottom light edge. The renderer
+        // therefore fills the full white inner height; all coordinates still
+        // remain fixed in the 110 mm outer plate model.
         height: 101,
         starRingDiameter: 30,
         countryFontSize: 20
     }),
     minimumSideGap: 8,
-    // Anlage-4 one-line pattern dimensions. These are layout advances/cells,
-    // not browser-measured glyph widths. The glyphs are centred in these cells.
-    sealZoneWidth: 65.5,
+    // Anlage-4 one-line pattern dimensions. These are physical cells in mm,
+    // not browser-measured glyph widths. Glyphs are centred in fixed cells.
+    sealZoneWidthMtl: 65.5,
+    sealZoneWidthEng: 58,
+    sealZoneWidthMax: 67.5,
     huDiameter: 35,
-    authorityDiameter: 45,
+    authorityDiameter: 35,
+    authorityOuterDiameter: 45,
+    sealVerticalGap: 5,
     textTopGap: 13,
     fontHeight: 75,
     letterAdvance: 47.5,
     digitAdvance: 44.5,
     charGap: 8,
-    recognitionGroupGap: 24
+    charGapMax: 10,
+    recognitionGroupGap: 24,
+    recognitionGroupGapMax: 30
 });
 
 const FONT_PROFILES = Object.freeze({
@@ -2395,11 +2408,12 @@ function buildOneLineLayoutsForBands(parsed, fontVariant, options = {}) {
     const prefixWidth = measureBoxesWidth(prefixBoxes, font);
     const recognitionWidth = measureTextSegmentsWidth(recognitionSegments);
     const hasSealColumn = Boolean(parsed.prefix && parsed.recognition);
-    const sealZoneWidth = hasSealColumn ? layout.sealZoneWidth : 0;
+    const sealZoneWidth = hasSealColumn ? getSealZoneWidth(font, layout) : 0;
     const textAndSealWidth = prefixWidth + sealZoneWidth + recognitionWidth;
     const rawMinimumWidth = getOpenLeftBoundary(layout) + textAndSealWidth + layout.minimumSideGap * 2 + layout.borderBand;
-    const preferredMinimumBand = parsed.clean.length >= 8 ? layout.maxWidth : layout.widthBands[0];
-    const candidateBands = layout.widthBands.filter((band) => band >= preferredMinimumBand);
+    const widthBands = getWidthBandsForFont(font, layout);
+    const preferredMinimumBand = parsed.clean.length >= 8 ? layout.maxWidth : widthBands[0];
+    const candidateBands = widthBands.filter((band) => band >= preferredMinimumBand);
     const bands = candidateBands.length ? candidateBands : [layout.maxWidth];
 
     return bands.map((band) => buildOneLineLayoutForBand({
@@ -2417,6 +2431,15 @@ function buildOneLineLayoutsForBands(parsed, fontVariant, options = {}) {
         width: band,
         options
     }));
+}
+
+
+function getWidthBandsForFont(font, layout = FZV_ONE_LINE) {
+    return font.role === "eng" ? layout.widthBandsEng : layout.widthBandsMtl;
+}
+
+function getSealZoneWidth(font, layout = FZV_ONE_LINE) {
+    return font.role === "eng" ? layout.sealZoneWidthEng : layout.sealZoneWidthMtl;
 }
 
 function buildOneLineLayoutForBand({
@@ -2707,11 +2730,12 @@ function renderEuroField(layout, inner) {
 
 function renderSealColumn(analysis, options) {
     const { layout, sealX } = analysis;
-    // One-line pattern: smaller HU field above the larger authority seal.
-    // Both are placed in the 75 mm vertical text band with 13 mm top/bottom
-    // clearance in the 110 mm outer height. Coordinates are absolute mm.
+    // One-line pattern: two fixed 35 mm seal circles in the 75 mm character
+    // band, separated by the remaining 5 mm vertical clearance. The authority
+    // seal also reserves a subtle 45 mm outer embossing area without imitating
+    // an official seal graphic.
     const huY = layout.textTopGap + layout.huDiameter / 2;
-    const authorityY = layout.height - layout.textTopGap - layout.authorityDiameter / 2;
+    const authorityY = huY + layout.huDiameter / 2 + layout.sealVerticalGap + layout.authorityDiameter / 2;
 
     return `
         <g>
@@ -2726,19 +2750,22 @@ function renderSealColumn(analysis, options) {
             ${renderAuthoritySeal({
                 x: sealX,
                 y: authorityY,
-                diameter: layout.authorityDiameter
+                diameter: layout.authorityDiameter,
+                outerDiameter: layout.authorityOuterDiameter
             })}
         </g>
     `;
 }
 
-function renderAuthoritySeal({ x, y, diameter }) {
+function renderAuthoritySeal({ x, y, diameter, outerDiameter }) {
     const r = diameter / 2;
+    const outerR = Number(outerDiameter || diameter) / 2;
 
     return `
         <g opacity="0.96">
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="1"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.66).toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="0.8" opacity="0.85"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${outerR.toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="1" opacity="0.72"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="0.9"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.66).toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="0.75" opacity="0.85"/>
             <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.22).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
         </g>
     `;
@@ -5786,7 +5813,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b93
+// TÜV Card source entry b94
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
