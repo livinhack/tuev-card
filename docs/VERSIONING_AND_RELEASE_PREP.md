@@ -18,7 +18,7 @@ HANDOVER.md
 The generated bundle should start with:
 
 ```text
-// TÜV Card bundled b88
+// TÜV Card bundled b89
 ```
 
 ## HACS metadata

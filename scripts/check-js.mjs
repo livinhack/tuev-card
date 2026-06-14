@@ -31,6 +31,7 @@ function collectJavaScriptFiles(directory) {
 
 collectJavaScriptFiles(resolve(root, "src"));
 collectJavaScriptFiles(resolve(root, "scripts"));
+collectJavaScriptFiles(resolve(root, "tools"));
 
 const uniqueFiles = [...new Set(files)];
 let hasError = false;

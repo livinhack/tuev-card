@@ -1,105 +1,128 @@
-# TÜV Reminder Card - Übergabeprotokoll b88
+# TÜV Reminder Card - Übergabeprotokoll b89
 
 ## Kurzstand
 
 - Projekt: Home Assistant Lovelace Card `tuev-card` für die Integration `tuev_reminder`.
-- Neuer Stand: `0.1.1-b88`.
-- Neuer ZIP-Name: `tuev-card-full-b88-physical-plate-renderer-v2.zip`.
-- Ausgangspunkt: `tuev-card-full-b87-hacs-dist-bundle-font-assets.zip`.
-- Fokus b88: Start des Kennzeichenrenderer-v2 mit physischem, mm-orientiertem einzeiligen Standardkennzeichenmodell.
+- Neuer Stand: `0.1.1-b89`.
+- Neuer ZIP-Name: `tuev-card-full-b89-plate-renderer-law-lab.zip`.
+- Ausgangspunkt: `tuev-card-full-b88-physical-plate-renderer-v2.zip`.
+- Fokus b89: b88-Renderer nicht weiter in der Card verschlimmern, sondern einen unabhängigen Live-Server-Kennzeichenrenderer nach FZV-Anlage-4-Regelbasis aufbauen.
 
-## Direkt vor b88 bestätigte Punkte
+## Direkt vor b89 bestätigte Punkte
 
 - b79 Overlay in Einzelspalte: bestanden.
 - b82 Editor-Gruppenfunktionen: bestanden.
 - b81 Floating Panels / Sortier-Bestätigungsdialog: bestanden.
 - b82 Button-Aktivzustände und „Alle hinzufügen“: bestanden.
 - b83 README auf Endnutzer-Level: erledigt.
-- b84/b85 GL-Font-/Renderer-Grundlage: vorhanden.
-- b86 README-Fontblock entfernt und HACS-Fontpfad vorbereitet.
 - b87 HACS-Auslieferung über `dist/`: bestätigt, Fonts kommen nach Update über HACS im Card-Ordner an.
+- b88 physischer Card-Renderer: visuell nicht akzeptabel; Screenshot zeigte, dass Layout/Text/Siegel/Skalierung noch nicht stimmen.
 
-## Wichtige Entscheidung b88
+## Wichtige Entscheidung b89
 
-Der grafische Kennzeichenrenderer wird nicht weiter durch frei geschätzte Pixelgeometrie aufgebaut, sondern zuerst als normnahes physisches Modell in mm-ähnlichen SVG-Koordinaten erzeugt. Danach skaliert die Card das Kennzeichen wie bisher über die gemeinsame Card-Skalierung.
+Der neue gesetzes-/maßbasierte Renderer wird zunächst **außerhalb der Card** entwickelt und getestet. Die Card selbst wird vorerst wieder auf den letzten kompakten GL-/EuroPlate-Rendererpfad zurückgesetzt, damit HACS-Tests nicht weiter vom unfertigen b88-Renderer blockiert werden.
 
-Grundregel:
-
-```text
-Kennzeicheninhalt -> physisches Kennzeichenmodell -> intrinsische SVG-Größe
-                  -> breitestes Kennzeichen bestimmt Card-Skalierung
-                  -> alle Kennzeichen derselben Card nutzen dieselbe Zielhöhe
-```
-
-Für Siegel gilt:
+Ziel:
 
 ```text
-echte Maße/Positionen: ja
-echte Behörden-/Landessiegelgrafik: nein
-neutrale Behördensiegel-Platzhalter: ja
-HU-Plakette als TÜV-Reminder-Element: ja, zunächst vereinfacht und klein skaliert
+1. Standalone Renderer-Lab mit Eingabefeld und Regel-/Maßanalyse bauen
+2. Werte im Browser/VS Code Live Server visuell abstimmen
+3. Erst danach den geprüften Kern in die Card übernehmen
 ```
 
-## Was b88 geändert hat
+## Was b89 geändert hat
 
-### Neuer physischer Layout-Layer
+### Standalone Renderer-Lab neu
 
-- Neue Datei: `src/plate/physical-layout.js`
-- Enthält ein einzeiliges Standardkennzeichenmodell:
-  - Höhe: 110 mm-ähnliche Einheiten
-  - Maximalbreite: 520
-  - Mindestbreite: 255
-  - Eurofeld
-  - Außenrand
-  - Textzone
-  - Siegelspalte
-  - Positionen für HU-Plakette und Behördensiegel-Platzhalter
-  - getrennte Schriftgrößen/Spacing für GL-Mittelschrift und GL-Engschrift
-  - automatische Engschrift-Neuberechnung, wenn Mittelschrift-Inhalt die maximale einzeilige Breite überschreiten würde
-
-### GL-Renderer umgebaut
-
-- Datei: `src/plate/renderer.js`
-- GL-Schriften nutzen jetzt den neuen physischen Layoutpfad.
-- Bei Kennzeichen mit Leerzeichen wird gerendert als:
+Neuer Ordner:
 
 ```text
-[Eurofeld] [Ortskennung] [HU/Behörden-Platzhalter] [Erkennungsnummer]
+tools/plate-renderer-lab/
 ```
 
-- Beispiel: `GL AB 1234`
-  - `GL` links der Siegelspalte
-  - `AB 1234` rechts der Siegelspalte
-- Bei Kennzeichen ohne Leerzeichen wird weiterhin ein einzelner Textblock gerendert.
-- Behördensiegelstelle ist neutral grau/silbern und absichtlich nicht amtlich.
-- HU-Stelle rendert eine kleine vereinfachte TÜV-Reminder-Plakette:
-  - Jahresfarbe aus dem bestehenden TÜV-Farbzyklus
-  - Rotation aus dem Fahrzeugmonat
-  - kleine Ticks und Jahreszahl
-- Der bestehende TÜV-Plakettenrenderer für die große Card-Plakette wurde nicht verändert.
-- EuroPlate bleibt nur Legacy-Fallback.
-- Es gibt weiterhin keinen Systemschrift-Fallback.
+Enthalten:
 
-### Card-Anbindung
+```text
+index.html
+app.js
+plate-renderer-core.js
+styles.css
+README.md
+fonts/README.md
+```
 
-- Datei: `src/tuev-card-entry.js`
-- Der Plate-Renderer bekommt jetzt zusätzlich:
-  - `huYear: year`
-  - `huRotation: rotation`
-- Dadurch kann die Mini-HU-Plakette im Kennzeichen dieselbe Jahresfarbe und Monatsrotation nutzen wie das Fahrzeug.
+Nutzung:
+
+1. `tools/plate-renderer-lab/index.html` mit VS Code Live Server öffnen.
+2. Falls nötig Fontdateien für den Live-Server-Test lokal bereitstellen:
+
+```text
+tools/plate-renderer-lab/fonts/GL-Nummernschild-Mtl.ttf
+tools/plate-renderer-lab/fonts/GL-Nummernschild-Eng.ttf
+```
+
+Alternativ versucht das Lab auch:
+
+```text
+../../fonts/GL-Nummernschild-Mtl.ttf
+../../fonts/GL-Nummernschild-Eng.ttf
+```
+
+Das ChatGPT-ZIP enthält weiterhin keine Font-Binärdateien.
+
+### Im Lab umgesetzte Regelbasis
+
+- einzeilige Kennzeichen: 520 × 110 mm Maximalmaß
+- zweizeilige Kennzeichen: 340 × 200 mm Maximalmaß, 280 mm bei zwei-/dreirädrigen Kraftfahrzeugen als Regelhinweis
+- Kraftradkennzeichen: 180–220 × 200 mm
+- verkleinerte zweizeilige Kennzeichen: 255 × 130 mm
+- Eurofeldprofile:
+  - einzeilig: 45 × 88 mm
+  - zweizeilig/Kraftrad: 40 × 88 mm
+  - verkleinert zweizeilig: 35 × 56 mm
+- Schriftprofile:
+  - Mittelschrift 75 mm
+  - Engschrift 75 mm
+  - verkleinerte Mittelschrift 49 mm
+- Regelprüfung für:
+  - allgemeine Kennzeichen
+  - Oldtimer H
+  - Elektro E
+  - Saison
+  - Elektro + Saison
+  - Wechselkennzeichen
+  - Kurzzeitkennzeichen
+  - Ausfuhrkennzeichen
+  - rote Kennzeichen
+  - grüne Kennzeichen
+- neutrale Behördensiegel-Platzhalter
+- kleine generische HU-Plakette als TÜV-Reminder-Element
+- Debug-Maßlinien und Analyse-Tabelle
+
+Wichtig: Echte Behörden-/Landessiegelgrafiken, Wappen, Druckstücknummern oder amtliche Sicherheitsmerkmale werden bewusst nicht nachgebaut.
+
+### Card-Runtime zurück auf stabileren Rendererpfad
+
+- `src/plate/renderer.js` wurde auf den kompakten b87-GL-/EuroPlate-Pfad zurückgesetzt und auf `?v=b89` aktualisiert.
+- `src/plate/physical-layout.js` aus b88 wurde entfernt.
+- Die Card nutzt damit noch **nicht** den neuen Lab-Renderer.
+- Der große TÜV-Plakettenrenderer bleibt unverändert.
+
+### Check erweitert
+
+- `scripts/check-js.mjs` prüft jetzt auch JavaScript-Dateien unter `tools/`.
 
 ### Versionierung
 
-- `package.json`: `0.1.1-b88`
-- `package-lock.json`: `0.1.1-b88`
-- `src/**/*.js`: Import-Querymarker `?v=b88`
-- `src/tuev-card-entry.js`: `// TÜV Card source entry b88`
-- `dist/tuev-card.js`: `// TÜV Card bundled b88`
+- `package.json`: `0.1.1-b89`
+- `package-lock.json`: `0.1.1-b89`
+- `src/**/*.js`: Import-Querymarker `?v=b89`
+- `src/tuev-card-entry.js`: `// TÜV Card source entry b89`
+- `dist/tuev-card.js`: `// TÜV Card bundled b89`
 
 ### Neue Doku
 
-- `docs/B88_PHYSICAL_PLATE_RENDERER_V2.md`
-- Aktive Release-/Repo-Dokus auf b88 aktualisiert.
+- `docs/B89_PLATE_RENDERER_LAW_LAB.md`
 
 ## Nicht geändert
 
@@ -109,12 +132,9 @@ HU-Plakette als TÜV-Reminder-Element: ja, zunächst vereinfacht und klein skali
 - Keine alten Plaketten-/Ziffern-Experimente übernommen.
 - Keine Systemschrift als grafischer Kennzeichenfallback.
 - Keine echten amtlichen Siegelgrafiken.
-- Keine zweizeiligen Kennzeichen.
-- Keine Saison-/Wechsel-/Sonderkennzeichen.
+- Keine Integration des neuen Lab-Renderers in die Card.
 
-## Font-/HACS-Regel ab b88
-
-Das ChatGPT-ZIP enthält weiterhin keine Font-Binärdateien (`.ttf`, `.otf`, `.woff`, `.woff2`).
+## Font-/HACS-Regel ab b89
 
 Im echten lokalen GitHub-Repository sollen die Fontdateien erhalten bleiben:
 
@@ -123,7 +143,7 @@ fonts/GL-Nummernschild-Mtl.ttf
 fonts/GL-Nummernschild-Eng.ttf
 ```
 
-Beim Build werden sie nach `dist/fonts/` gespiegelt. HACS installiert die Inhalte aus `dist/`, sodass Home Assistant danach diese Pfade haben sollte:
+Beim Build werden sie nach `dist/fonts/` gespiegelt. HACS installiert die Inhalte aus `dist/`, sodass Home Assistant danach diese Pfade hat:
 
 ```text
 /config/www/community/tuev-card/tuev-card.js
@@ -147,68 +167,63 @@ npm run build
 npm run check
 ```
 
-Erwartet:
+Zusätzlich kann das Lab direkt mit VS Code Live Server geöffnet werden:
 
 ```text
-dist/tuev-card.js
-dist/fonts/GL-Nummernschild-Mtl.ttf
-dist/fonts/GL-Nummernschild-Eng.ttf
+tools/plate-renderer-lab/index.html
 ```
 
-Wenn das ChatGPT-ZIP übernommen wird, aber die lokalen `.ttf`-Dateien bereits im Root-`fonts/`-Ordner liegen, danach `npm run build` ausführen, damit sie nach `dist/fonts/` gespiegelt werden.
+## Testanweisung für b89
 
-## Testanweisung für b88
-
-1. b88 in den lokalen GitHub-Ordner übernehmen, ohne lokale `.ttf`-Dateien aus `fonts/` zu löschen.
-2. `npm run build` ausführen.
-3. Commit + Push.
-4. In HACS Update/Redownload ausführen.
-5. Dashboard mit normaler HACS-Resource laden.
-6. Grafische Kennzeichen testen, besonders:
+1. b89 in den lokalen GitHub-Ordner übernehmen, ohne lokale `.ttf`-Dateien aus `fonts/` zu löschen.
+2. `npm run build` und `npm run check` ausführen.
+3. Für Renderer-Arbeit zuerst `tools/plate-renderer-lab/index.html` mit Live Server öffnen.
+4. Beispiele testen:
 
 ```text
+WIL CL 212
+BKS R 95
+TR A 77
+S AB 1234
+DA CI 500
+HH EV 204E
 K A 1
-TR LR 123
-GL AB 1234
-M MW 9999
 ```
 
-7. Prüfen:
-   - Ist die Siegelspalte zwischen Ortskennung und restlichem Kennzeichen an der richtigen Stelle?
-   - Ist das neutrale Behördensiegel unauffällig genug?
-   - Ist die Mini-HU-Plakette erkennbar oder zu unruhig?
-   - Skaliert das breiteste Kennzeichen die übrigen Kennzeichen derselben Card sauber mit?
-   - Gibt es Unterschiede zwischen Firefox, Chrome und Android-App?
+5. Im Lab prüfen:
+   - stimmt die physische Breite?
+   - passt Mittelschrift/Engschrift-Umschaltung?
+   - sitzen Eurofeld, Text und Siegelplätze plausibel?
+   - ist die Mini-HU-Plakette zu unruhig oder brauchbar?
+   - welche Werte sollen später in die Card übernommen werden?
 
-## Aktuelle Todo-Liste nach b88
+## Aktuelle Todo-Liste nach b89
 
 ### Direkt als nächstes
 
-1. b88 Renderer per Screenshot prüfen.
-2. b89 Renderer-Feintuning:
-   - Textgröße / Baseline
-   - Zeichenabstand
-   - Siegelspaltenbreite
-   - HU-Mini-Plakette vs. einfache farbige Fläche entscheiden
-   - Mindestbreite kurzer Kennzeichen prüfen
+1. Renderer-Lab visuell prüfen.
+2. Gesetzes-/Maßwerte im Lab weiter nachziehen:
+   - einzeiliges Standardkennzeichen exakt abstimmen
+   - danach zweizeilig/Kraftrad/verkleinert
+   - dann Saison/Kurzzeit/Ausfuhr/Wechsel optisch verfeinern
+3. Erst nach Freigabe den Lab-Kern in `src/plate/renderer.js` übernehmen.
 
 ### Danach
 
-3. Renderer-Stabilität Firefox / Chrome / Android-App prüfen.
-4. GL-Mittelschrift/Engschrift-Werte finalisieren.
-5. Release Candidate vorbereiten, falls Card stabil genug.
-6. Danach Integrationsarchitektur V3.
+4. Card-weite Skalierungsregel wieder anwenden:
+   - breitestes Kennzeichen bestimmt Spaltenbreite
+   - alle Kennzeichen derselben Card auf daraus entstehende Zielhöhe
+5. Firefox / Chrome / Android-App prüfen.
+6. Release Candidate vorbereiten, falls Card stabil genug.
+7. Danach Integrationsarchitektur V3.
 
 ### Später
 
 - Preview-Darstellung an aktuelles Kennzeichenrendering angleichen.
-- Zweizeilige Kennzeichen.
-- Saisonkennzeichen.
-- Wechselkennzeichen.
-- Grüne Kennzeichen.
+- Sonderkennzeichen weiter ausbauen.
 - Option TÜV-Plakette ausblenden / Compact-Card.
 - Gruppen nebeneinander ggf. weiter verfeinern, falls Praxisfälle auffallen.
 
 ## Fortsetzungshinweis für neuen Chat
 
-Bitte mit `tuev-card-full-b88-physical-plate-renderer-v2.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. Stand: b79 Overlay bestanden, Editor-Gruppenfunktionen bestanden, Floating Panels bestanden, b81 Sortier-Bestätigungsdialog modal bestanden, b82 Button-Zustände und „Alle hinzufügen“ bestanden, b83 README auf Endnutzer-Level, b84/b85 GL-Font-/Renderer-Grundlage, b86 Fontblock entfernt, b87 HACS-Auslieferung auf `dist/` bestätigt, b88 startet den physischen einzeiligen Kennzeichenrenderer-v2. Das ChatGPT-ZIP enthält keine Font-Binärdateien; im echten lokalen GitHub-Repo müssen `fonts/GL-Nummernschild-Mtl.ttf` und `fonts/GL-Nummernschild-Eng.ttf` erhalten bleiben und per `npm run build` nach `dist/fonts/` gespiegelt werden. Nächster Schritt: b88 per Screenshot prüfen und in b89 Rendererwerte feinjustieren. TÜV-Plakettenrenderer nicht unnötig ändern. Systemschrift-Fallback bleibt ausgeschlossen. Echte Behörden-/Landessiegelgrafik wird nicht nachgebaut; nur neutrale Platzhalter sind vorgesehen.
+Bitte mit `tuev-card-full-b89-plate-renderer-law-lab.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. Stand: b79 Overlay bestanden, Editor-Gruppenfunktionen bestanden, Floating Panels bestanden, b81 Sortier-Bestätigungsdialog modal bestanden, b82 Button-Zustände und „Alle hinzufügen“ bestanden, b83 README auf Endnutzer-Level, b87 HACS-Auslieferung auf `dist/` bestätigt, b88 Card-Renderer war visuell nicht akzeptabel. b89 setzt die Card zurück auf den kompakten GL-/EuroPlate-Pfad und legt ein unabhängiges VS-Code-Live-Server-Renderer-Lab unter `tools/plate-renderer-lab/` an. Nächster Schritt: Lab visuell prüfen und dort die Gesetzes-/Maßwerte finalisieren, bevor der neue Renderer wieder in die Card übernommen wird. TÜV-Plakettenrenderer nicht unnötig ändern. Systemschrift-Fallback bleibt ausgeschlossen. Echte Behörden-/Landessiegelgrafik wird nicht nachgebaut; nur neutrale Platzhalter sind vorgesehen.

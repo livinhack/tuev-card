@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TÜV Card Kennzeichen-Renderer-Lab</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Kennzeichen-Renderer-Lab</h1>
+    <p>Standalone-Test nach FZV Anlage 4, ohne Home Assistant. Für VS Code Live Server.</p>
+  </header>
+
+  <main>
+    <section class="panel controls-panel">
+      <form id="controls">
+        <label>
+          Kennzeichen
+          <input id="plate" name="plate" value="DA CI 500" autocomplete="off" />
+        </label>
+
+        <div id="examples" class="examples"></div>
+
+        <div class="grid two">
+          <label>
+            Kennzeichenart
+            <select name="kind">
+              <option value="general">Allgemein</option>
+              <option value="oldtimer">Oldtimer H</option>
+              <option value="electric">Elektro E</option>
+              <option value="season">Saison</option>
+              <option value="electricSeason">Elektro + Saison</option>
+              <option value="exchange">Wechselkennzeichen</option>
+              <option value="shortTerm">Kurzzeit</option>
+              <option value="export">Ausfuhr</option>
+              <option value="red">Rotes Kennzeichen</option>
+              <option value="green">Grünes Kennzeichen</option>
+            </select>
+          </label>
+
+          <label>
+            Bauart
+            <select name="layout">
+              <option value="oneLine">Einzeilig</option>
+              <option value="twoLine">Zweizeilig</option>
+              <option value="motorcycle">Kraftrad</option>
+              <option value="smallTwoLine">Verkleinert zweizeilig</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid three">
+          <label>
+            Saison von
+            <input name="seasonStart" type="number" min="1" max="12" value="4" />
+          </label>
+          <label>
+            Saison bis
+            <input name="seasonEnd" type="number" min="1" max="12" value="10" />
+          </label>
+          <label>
+            Ablaufdatum
+            <input name="expiry" value="01.01.30" />
+          </label>
+        </div>
+
+        <div class="grid three">
+          <label>
+            HU-Jahr
+            <input name="huYear" type="number" min="2020" max="2045" value="2026" />
+          </label>
+          <label>
+            HU-Monat
+            <input name="huMonth" type="number" min="1" max="12" value="2" />
+          </label>
+          <label>
+            Zoom
+            <input name="scale" type="number" min="0.5" max="3" step="0.1" value="1.6" />
+          </label>
+        </div>
+
+        <label class="checkbox">
+          <input name="debug" type="checkbox" checked />
+          Debug-Maßlinien anzeigen
+        </label>
+      </form>
+    </section>
+
+    <section class="panel preview-panel">
+      <div id="status" class="status"></div>
+      <div id="output" class="preview"></div>
+    </section>
+
+    <section class="panel metrics-panel">
+      <h2>Analyse</h2>
+      <table><tbody id="metrics"></tbody></table>
+      <h2>Schriftvarianten</h2>
+      <table>
+        <thead><tr><th>Schrift</th><th>Größe</th><th>Status</th><th>Rohbreite</th></tr></thead>
+        <tbody id="variants"></tbody>
+      </table>
+    </section>
+
+    <section class="panel rules-panel">
+      <h2>Umgesetzte Regelbasis</h2>
+      <ul id="rules"></ul>
+      <p class="small">Quelle: <a id="source" href="#" target="_blank" rel="noreferrer">FZV Anlage 4</a>. Echte amtliche Siegelgrafiken werden bewusst nicht nachgebildet.</p>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
