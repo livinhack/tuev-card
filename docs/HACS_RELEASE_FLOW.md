@@ -1,6 +1,6 @@
 # HACS release / update trigger flow
 
-Current checked version: `b76`.
+Current checked version: `b79`.
 
 This document captures the manual release flow that was tested with the intermediate `b39` upload/release trigger.
 It is meant as a practical checklist for later `v0.1.x` releases.

@@ -3,7 +3,9 @@ import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const version = "b75";
+const packageJson = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
+const versionMatch = String(packageJson.version || "").match(/-(b\d+)$/);
+const version = versionMatch ? versionMatch[1] : packageJson.version;
 const entry = resolve(root, "src/tuev-card-entry.js");
 const moduleIds = new Map();
 const modules = [];

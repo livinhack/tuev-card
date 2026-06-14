@@ -1,12 +1,12 @@
 # Release check
 
-Current checkpoint: `b76`
+Current checkpoint: `b79`
 
 `b75` polishes the group display override editor path after the eye-badge integration. It keeps runtime behavior unchanged and removes stale inline group-display editor code. See `docs/B74_GROUP_DISPLAY_POLISH.md`.
 
 # TÜV Card release check
 
-Current checked version: `b76`.
+Current checked version: `b79`.
 
 ## Current release/checkpoint note
 
@@ -39,7 +39,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b76
+/hacsfiles/tuev-card/tuev-card.js?v=b79
 ```
 
 The dashboard card type remains:
@@ -61,7 +61,7 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b76"
+"version": "0.1.1-b79"
 ```
 
 The internal GitHub Release tag can be:

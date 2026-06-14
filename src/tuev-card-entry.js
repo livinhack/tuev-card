@@ -1,12 +1,12 @@
-// TÜV Card source entry b77
+// TÜV Card source entry b79
 
-import { localize } from "./translations/index.js?v=b78";
-import { normalizeCardConfig } from "./card/config.js?v=b78";
-import { findFirstTuevEntity } from "./card/entities.js?v=b78";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b78";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b78";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b78";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b78";
+import { localize } from "./translations/index.js?v=b79";
+import { normalizeCardConfig } from "./card/config.js?v=b79";
+import { findFirstTuevEntity } from "./card/entities.js?v=b79";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b79";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b79";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b79";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b79";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b78";
+} from "./card/render-parts.js?v=b79";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b78";
-import { TuevCardEditor } from "./editor/editor.js?v=b78";
+} from "./plate/renderer.js?v=b79";
+import { TuevCardEditor } from "./editor/editor.js?v=b79";
 
 window.customCards = window.customCards || [];
 
@@ -918,7 +918,9 @@ class TuevCard extends HTMLElement {
                 actionText: this.localize("overlay.hu_passed_question"),
                 compact,
                 expired: isExpired,
-                withBadge: showBadge
+                withBadge: showBadge,
+                badgeSize,
+                layoutColumns: layout.effectiveColumns
             })
             : "";
 

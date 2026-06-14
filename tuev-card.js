@@ -1,4 +1,4 @@
-// TÜV Card bundled b75
+// TÜV Card bundled b79
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1688,17 +1688,26 @@ function renderCompactConfirmPanel({
     actionText,
     compact,
     expired,
-    withBadge = false
+    withBadge = false,
+    badgeSize = 0,
+    layoutColumns = 1
 }) {
     if (ui.confirmStampHidden) {
         return "";
     }
 
     const confirming = ui.confirming;
-    const badgeCompactText = withBadge && compact;
-    const badgeSpaciousText = withBadge && !compact;
-    const warningFontSize = badgeCompactText ? "8.2px" : (badgeSpaciousText ? "12.6px" : (compact ? "10px" : "11px"));
-    const actionFontSize = badgeCompactText ? "7.0px" : (badgeSpaciousText ? "10.8px" : (compact ? "9px" : "10px"));
+    const safeBadgeSize = Number(badgeSize) || 0;
+    const effectiveColumns = Number(layoutColumns) || 1;
+    const badgeSingleColumn = withBadge && effectiveColumns <= 1;
+    const badgeCompactText = withBadge && compact && !badgeSingleColumn;
+    const badgeSpaciousText = withBadge && !badgeCompactText;
+    const badgeScale = badgeSingleColumn
+        ? Math.min(1.42, Math.max(1.14, safeBadgeSize / 170))
+        : 1;
+    const px = (value) => `${Math.round(value * badgeScale * 10) / 10}px`;
+    const warningFontSize = badgeCompactText ? "8.2px" : (badgeSpaciousText ? px(12.8) : (compact ? "10px" : "11px"));
+    const actionFontSize = badgeCompactText ? "7.0px" : (badgeSpaciousText ? px(10.9) : (compact ? "9px" : "10px"));
     const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
     const stampColor = frozenExpired
         ? "var(--error-color, #db5337)"
@@ -1761,21 +1770,21 @@ function renderCompactConfirmPanel({
             transform: translate(-50%, -50%) rotate(-18deg);
             z-index: 6;
             width: max-content;
-            max-width: min(98%, ${compact ? (withBadge ? "168px" : "154px") : (badgeSpaciousText ? "218px" : "178px")});
+            max-width: min(98%, ${badgeSingleColumn ? px(Math.min(236, Math.max(196, safeBadgeSize * 0.98))) : (compact ? (withBadge ? "168px" : "154px") : (badgeSpaciousText ? "218px" : "178px"))});
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: ${badgeCompactText ? "4px" : (compact ? "3px" : "4px")};
+            gap: ${badgeCompactText ? "4px" : (badgeSingleColumn ? px(5.5) : (compact ? "3px" : "4px"))};
             pointer-events: none;
             filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.48));
         ">
             <div style="
                 position: relative;
                 box-sizing: border-box;
-                min-width: ${badgeCompactText ? "74px" : (badgeSpaciousText ? "104px" : (compact ? "62px" : "72px"))};
+                min-width: ${badgeCompactText ? "74px" : (badgeSingleColumn ? px(116) : (badgeSpaciousText ? "104px" : (compact ? "62px" : "72px")))};
                 max-width: 100%;
-                padding: ${badgeCompactText ? "4px 10px 5px" : (badgeSpaciousText ? "6px 13px 7px" : (compact ? "4px 8px 5px" : "5px 10px 6px"))};
+                padding: ${badgeCompactText ? "4px 10px 5px" : (badgeSingleColumn ? `${px(6)} ${px(15)} ${px(7)}` : (badgeSpaciousText ? "6px 13px 7px" : (compact ? "4px 8px 5px" : "5px 10px 6px")))};
                 border: 2px solid color-mix(in srgb, ${stampColor} 88%, transparent);
                 outline: 1px dashed color-mix(in srgb, ${stampColor} 64%, transparent);
                 outline-offset: -4px;
@@ -1790,7 +1799,7 @@ function renderCompactConfirmPanel({
                 font-size: ${warningFontSize};
                 font-weight: 900;
                 line-height: ${badgeCompactText ? "0.90" : (badgeSpaciousText ? "0.94" : "0.92")};
-                letter-spacing: ${badgeCompactText ? "0.12px" : (badgeSpaciousText ? "0.34px" : "0.28px")};
+                letter-spacing: ${badgeCompactText ? "0.12px" : (badgeSingleColumn ? px(0.34) : (badgeSpaciousText ? "0.34px" : "0.28px"))};
                 text-transform: uppercase;
                 text-align: center;
                 text-shadow: 0 1px 1px rgba(0, 0, 0, 0.78), 0 0 5px rgba(0, 0, 0, 0.35);
@@ -1813,15 +1822,15 @@ function renderCompactConfirmPanel({
                 ${confirming ? "disabled" : ""}
                 style="
                     position: relative;
-                    transform: translateX(${compact ? "9px" : (badgeSpaciousText ? "17px" : "13px")}) rotate(14deg);
+                    transform: translateX(${badgeSingleColumn ? px(18) : (compact ? "9px" : (badgeSpaciousText ? "17px" : "13px"))}) rotate(14deg);
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: ${badgeCompactText ? "5px" : (badgeSpaciousText ? "7px" : (compact ? "5px" : "6px"))};
+                    gap: ${badgeCompactText ? "5px" : (badgeSingleColumn ? px(7) : (badgeSpaciousText ? "7px" : (compact ? "5px" : "6px")))};
                     max-width: 100%;
-                    min-width: ${badgeCompactText ? "82px" : (badgeSpaciousText ? "118px" : "0")};
+                    min-width: ${badgeCompactText ? "82px" : (badgeSingleColumn ? px(130) : (badgeSpaciousText ? "118px" : "0"))};
                     box-sizing: border-box;
-                    padding: ${badgeCompactText ? "4px 8px" : (badgeSpaciousText ? "6px 10px" : (compact ? "4px 6px" : "5px 8px"))};
+                    padding: ${badgeCompactText ? "4px 8px" : (badgeSingleColumn ? `${px(6)} ${px(11)}` : (badgeSpaciousText ? "6px 10px" : (compact ? "4px 6px" : "5px 8px")))};
                     border-radius: 4px;
                     border: 2px solid color-mix(in srgb, ${actionColor} 88%, transparent);
                     outline: 1px dashed color-mix(in srgb, ${actionColor} 62%, transparent);
@@ -1836,7 +1845,7 @@ function renderCompactConfirmPanel({
                     font-size: ${actionFontSize};
                     font-weight: 900;
                     line-height: ${badgeCompactText ? "0.86" : (badgeSpaciousText ? "0.96" : "0.94")};
-                    letter-spacing: ${badgeCompactText ? "0.08px" : (badgeSpaciousText ? "0.22px" : "0.18px")};
+                    letter-spacing: ${badgeCompactText ? "0.08px" : (badgeSingleColumn ? px(0.24) : (badgeSpaciousText ? "0.22px" : "0.18px"))};
                     text-transform: uppercase;
                     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75), 0 0 5px rgba(0, 0, 0, 0.35);
                     cursor: ${confirming ? "default" : "pointer"};
@@ -1857,8 +1866,8 @@ function renderCompactConfirmPanel({
                 ">${actionLines}</span>
                 <span style="
                     flex: 0 0 auto;
-                    width: ${compact ? "17px" : (badgeSpaciousText ? "21px" : "19px")};
-                    height: ${compact ? "17px" : (badgeSpaciousText ? "21px" : "19px")};
+                    width: ${badgeSingleColumn ? px(22) : (compact ? "17px" : (badgeSpaciousText ? "21px" : "19px"))};
+                    height: ${badgeSingleColumn ? px(22) : (compact ? "17px" : (badgeSpaciousText ? "21px" : "19px"))};
                     border-radius: 2px;
                     border: 1.7px solid currentColor;
                     display: inline-flex;
@@ -1869,7 +1878,7 @@ function renderCompactConfirmPanel({
                     overflow: visible;
                     transform: translateX(${badgeCompactText ? "3.5px" : "0"});
                 ">
-                    <svg viewBox="0 0 18 18" width="${compact ? "17" : (badgeSpaciousText ? "21" : "19")}" height="${compact ? "17" : (badgeSpaciousText ? "21" : "19")}" aria-hidden="true" style="display: block; overflow: visible;">
+                    <svg viewBox="0 0 18 18" width="${badgeSingleColumn ? Math.round(22 * badgeScale) : (compact ? "17" : (badgeSpaciousText ? "21" : "19"))}" height="${badgeSingleColumn ? Math.round(22 * badgeScale) : (compact ? "17" : (badgeSpaciousText ? "21" : "19"))}" aria-hidden="true" style="display: block; overflow: visible;">
                         <path
                             pathLength="1"
                             d="M3.1 9.5 L7.0 13.0 L15.2 4.3"
@@ -5392,7 +5401,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b77
+// TÜV Card source entry b79
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -6298,7 +6307,9 @@ class TuevCard extends HTMLElement {
                 actionText: this.localize("overlay.hu_passed_question"),
                 compact,
                 expired: isExpired,
-                withBadge: showBadge
+                withBadge: showBadge,
+                badgeSize,
+                layoutColumns: layout.effectiveColumns
             })
             : "";
 
