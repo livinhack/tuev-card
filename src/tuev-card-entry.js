@@ -1,12 +1,12 @@
-// TÜV Card source entry b75
+// TÜV Card source entry b76
 
-import { localize } from "./translations/index.js?v=b75";
-import { normalizeCardConfig } from "./card/config.js?v=b75";
-import { findFirstTuevEntity } from "./card/entities.js?v=b75";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b75";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b75";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b75";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b75";
+import { localize } from "./translations/index.js?v=b76";
+import { normalizeCardConfig } from "./card/config.js?v=b76";
+import { findFirstTuevEntity } from "./card/entities.js?v=b76";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b76";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b76";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b76";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b76";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b75";
+} from "./card/render-parts.js?v=b76";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b75";
-import { TuevCardEditor } from "./editor/editor.js?v=b75";
+} from "./plate/renderer.js?v=b76";
+import { TuevCardEditor } from "./editor/editor.js?v=b76";
 
 window.customCards = window.customCards || [];
 
@@ -756,7 +756,16 @@ class TuevCard extends HTMLElement {
             const columnCount = getInlineGroupColumnCount(run.length);
 
             if (columnCount <= 1) {
-                return run.map((section) => renderSection(section)).join("");
+                return `
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: ${groupRowGap}px;
+                        min-width: 0;
+                    ">
+                        ${run.map((section) => renderSection(section)).join("")}
+                    </div>
+                `;
             }
 
             const sectionCardWidth = getInlineGroupCardWidth(columnCount);
@@ -766,17 +775,26 @@ class TuevCard extends HTMLElement {
                 rows.push(run.slice(index, index + columnCount));
             }
 
-            return rows.map((row) => `
+            return `
                 <div style="
-                    display: grid;
-                    grid-template-columns: repeat(${row.length}, minmax(0, 1fr));
-                    gap: 22px ${groupRowGap}px;
-                    align-items: start;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 22px;
                     min-width: 0;
                 ">
-                    ${row.map((section) => renderSection(section, { cardWidth: sectionCardWidth })).join("")}
+                    ${rows.map((row) => `
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(${row.length}, minmax(0, 1fr));
+                            gap: 22px ${groupRowGap}px;
+                            align-items: start;
+                            min-width: 0;
+                        ">
+                            ${row.map((section) => renderSection(section, { cardWidth: sectionCardWidth })).join("")}
+                        </div>
+                    `).join("")}
                 </div>
-            `).join("");
+            `;
         };
 
         const renderedSections = [];

@@ -748,8 +748,11 @@ function calculateLayoutInfo({ cardWidth, isMulti, requestedColumns }) {
 
 function calculateAutomaticBadgeSize({ isMulti, effectiveColumns, tileWidth }) {
     if (!isMulti) {
-        const dynamicSize = Math.floor((Number(tileWidth) || 250) - 18);
-        return clamp(dynamicSize, 170, 250);
+        const safeTileWidth = Number(tileWidth) || 250;
+        const dynamicSize = Math.floor(safeTileWidth - 18);
+        const minimumSize = safeTileWidth < 188 ? 80 : 170;
+
+        return clamp(dynamicSize, minimumSize, 250);
     }
 
     const safety = effectiveColumns <= 2 ? 18 : 14;
@@ -5362,7 +5365,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b75
+// TÜV Card source entry b76
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -6106,7 +6109,16 @@ class TuevCard extends HTMLElement {
             const columnCount = getInlineGroupColumnCount(run.length);
 
             if (columnCount <= 1) {
-                return run.map((section) => renderSection(section)).join("");
+                return `
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: ${groupRowGap}px;
+                        min-width: 0;
+                    ">
+                        ${run.map((section) => renderSection(section)).join("")}
+                    </div>
+                `;
             }
 
             const sectionCardWidth = getInlineGroupCardWidth(columnCount);
@@ -6116,17 +6128,26 @@ class TuevCard extends HTMLElement {
                 rows.push(run.slice(index, index + columnCount));
             }
 
-            return rows.map((row) => `
+            return `
                 <div style="
-                    display: grid;
-                    grid-template-columns: repeat(${row.length}, minmax(0, 1fr));
-                    gap: 22px ${groupRowGap}px;
-                    align-items: start;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 22px;
                     min-width: 0;
                 ">
-                    ${row.map((section) => renderSection(section, { cardWidth: sectionCardWidth })).join("")}
+                    ${rows.map((row) => `
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(${row.length}, minmax(0, 1fr));
+                            gap: 22px ${groupRowGap}px;
+                            align-items: start;
+                            min-width: 0;
+                        ">
+                            ${row.map((section) => renderSection(section, { cardWidth: sectionCardWidth })).join("")}
+                        </div>
+                    `).join("")}
                 </div>
-            `).join("");
+            `;
         };
 
         const renderedSections = [];
