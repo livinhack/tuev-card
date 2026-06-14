@@ -1,4 +1,4 @@
-// TÜV Card bundled b92
+// TÜV Card bundled b93
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2184,27 +2184,33 @@ const FZV_ONE_LINE = Object.freeze({
     maxWidth: 520,
     height: 110,
     widthBands: Object.freeze([340, 380, 420, 460, 480, 520]),
-    // The outside dimensions include the black rim. The rim is not additional
-    // layout space. The white face is modelled separately inside the rim band.
+    // Anlage-4 Maße: 110 mm Außenhöhe inklusive schwarzem Rand.
+    // 4,5 mm Randband je Seite ergibt eine nutzbare weiße Innenfläche von 101 mm.
     borderBand: 4.5,
     borderStroke: 4.5,
     cornerRadius: 7,
     euro: Object.freeze({
         width: 45,
-        height: 98,
+        // The official sketch labels the Euro field height as 98 mm, but real
+        // plates usually do not show a white light edge around the blue field.
+        // We therefore fill the full white inner height while keeping the legal
+        // 45 mm width and all text/seal coordinates in the Anlage-4 grid.
+        height: 101,
         starRingDiameter: 30,
         countryFontSize: 20
     }),
     minimumSideGap: 8,
-    // In the one-line FZV pattern the plakette area between the district
-    // letters and the recognition number spans roughly 63.5–67.5 mm.
+    // Anlage-4 one-line pattern dimensions. These are layout advances/cells,
+    // not browser-measured glyph widths. The glyphs are centred in these cells.
     sealZoneWidth: 65.5,
     huDiameter: 35,
     authorityDiameter: 45,
-    // 13 + 75 + 13 = the 101 mm white usable area of the 110 mm plate.
     textTopGap: 13,
     fontHeight: 75,
-    recognitionGroupGap: 26
+    letterAdvance: 47.5,
+    digitAdvance: 44.5,
+    charGap: 8,
+    recognitionGroupGap: 24
 });
 
 const FONT_PROFILES = Object.freeze({
@@ -2212,29 +2218,19 @@ const FONT_PROFILES = Object.freeze({
         role: "mtl",
         label: "Mittelschrift 75 mm",
         fontSize: 75,
-        charGap: 8.5,
-        yOffset: 1.2,
-        fallback: Object.freeze({
-            digit: 44.5,
-            wide: 47.5,
-            narrow: 20,
-            default: 47.5,
-            space: 0
-        })
+        letterAdvance: 47.5,
+        digitAdvance: 44.5,
+        charGap: 8,
+        yOffset: 1.2
     }),
     eng: Object.freeze({
         role: "eng",
         label: "Engschrift 75 mm",
         fontSize: 75,
-        charGap: 8.2,
-        yOffset: 1.2,
-        fallback: Object.freeze({
-            digit: 39,
-            wide: 41,
-            narrow: 17,
-            default: 41,
-            space: 0
-        })
+        letterAdvance: 40.5,
+        digitAdvance: 38.5,
+        charGap: 8,
+        yOffset: 1.2
     })
 });
 
@@ -2503,7 +2499,7 @@ function getOpenLeftBoundary(layout = FZV_ONE_LINE) {
 function measureTextBoxes(text, fontVariant, font) {
     return Array.from(String(text || "")).map((char) => ({
         char,
-        width: measureCharacterWidth(char, fontVariant, font)
+        width: getAnlage4Advance(char, font)
     }));
 }
 
@@ -2544,46 +2540,15 @@ function measureTextSegmentsWidth(segments) {
     return segments.reduce((sum, segment) => sum + (segment.gapBefore || 0) + (segment.width || 0), 0);
 }
 
-function measureCharacterWidth(char, fontVariant, font) {
-    const measured = measureCharacterWithCanvas(char, fontVariant, font);
-
-    if (measured > 0) {
-        return measured;
-    }
-
+function getAnlage4Advance(char, font) {
     if (/[0-9]/.test(char)) {
-        return font.fallback.digit;
+        return font.digitAdvance;
     }
 
-    if ("MWÄÖÜ".includes(char)) {
-        return font.fallback.wide;
-    }
-
-    if ("IJ1".includes(char)) {
-        return font.fallback.narrow;
-    }
-
-    return font.fallback.default;
-}
-
-function measureCharacterWithCanvas(char, fontVariant, font) {
-    if (typeof document === "undefined" || typeof document.createElement !== "function") {
-        return 0;
-    }
-
-    if (!measureCanvas) {
-        measureCanvas = document.createElement("canvas");
-    }
-
-    const context = measureCanvas.getContext?.("2d");
-
-    if (!context || typeof context.measureText !== "function") {
-        return 0;
-    }
-
-    context.font = `${fontVariant.weight || 400} ${font.fontSize}px "${fontVariant.family}"`;
-
-    return context.measureText(char).width || 0;
+    // Anlage 4 gives the cell-like advances in the sample dimension chain.
+    // We keep even narrow glyphs such as I centred in the full letter cell so
+    // the legal spacing model, not browser text metrics, determines layout.
+    return font.letterAdvance;
 }
 
 function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
@@ -2684,8 +2649,6 @@ function renderCharacterRun({ boxes, x, y, font, className }) {
                 class="${className}"
                 x="${center.toFixed(2)}"
                 y="${y.toFixed(2)}"
-                textLength="${box.width.toFixed(2)}"
-                lengthAdjust="spacingAndGlyphs"
                 fill="${PLATE_EDGE_COLOR}"
             >${escapeHtml(box.char)}</text>
         `;
@@ -2712,15 +2675,16 @@ function renderTextSegments({ segments, x, y, font, className }) {
 function renderEuroField(layout, inner) {
     const euro = layout.euro;
     const x = inner.x;
-    const y = (layout.height - euro.height) / 2;
+    const y = inner.y;
+    const height = inner.height;
     const centerX = x + euro.width / 2;
-    const starCenterY = y + euro.height * 0.30;
+    const starCenterY = y + height * 0.30;
     const ringRadius = euro.starRingDiameter / 2 * 0.74;
-    const countryY = y + euro.height - 15;
+    const countryY = y + height - 16;
 
     return `
         <g>
-            <rect x="${x}" y="${y}" width="${euro.width}" height="${euro.height}" fill="${EU_BLUE}"/>
+            <rect x="${x}" y="${y}" width="${euro.width}" height="${height}" fill="${EU_BLUE}"/>
             ${Array.from({ length: 12 }, (_, index) => {
                 const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
                 const starX = centerX + Math.cos(angle) * ringRadius;
@@ -2742,12 +2706,12 @@ function renderEuroField(layout, inner) {
 }
 
 function renderSealColumn(analysis, options) {
-    const { layout, inner, sealX } = analysis;
-    // One-line pattern: smaller HU field above the larger authority seal. The
-    // diameters come from the Anlage-4 pattern dimensions: HU 35 mm, authority
-    // seal 45 mm. They are centred in the 101 mm white face with a small gap.
-    const huY = inner.y + 30.5;
-    const authorityY = inner.y + 74.5;
+    const { layout, sealX } = analysis;
+    // One-line pattern: smaller HU field above the larger authority seal.
+    // Both are placed in the 75 mm vertical text band with 13 mm top/bottom
+    // clearance in the 110 mm outer height. Coordinates are absolute mm.
+    const huY = layout.textTopGap + layout.huDiameter / 2;
+    const authorityY = layout.height - layout.textTopGap - layout.authorityDiameter / 2;
 
     return `
         <g>
@@ -5822,7 +5786,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b92
+// TÜV Card source entry b93
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
