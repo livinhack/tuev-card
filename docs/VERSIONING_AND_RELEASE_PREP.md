@@ -1,90 +1,54 @@
-# TÜV Card versioning and release preparation
+# Versioning and release prep
 
-Current checked version: `b84`.
+Current checked version: `b87`.
 
-The project currently uses internal `bXX` checkpoint labels for ZIP/test handoffs. A future public release should use semantic tags such as `v0.1.x` or later.
+## Version files
 
-## Current development checkpoint
-
-```json
-"version": "0.1.1-b84"
-```
-
-The generated root bundle should start with:
+For each new b-version, update:
 
 ```text
-TÜV Card bundled b84
+package.json
+package-lock.json
+src/**/*.js import query markers
+src/tuev-card-entry.js source marker
+dist/tuev-card.js bundle header after build
+HANDOVER.md
 ```
 
-## HACS file naming
+The generated bundle should start with:
 
-The HACS filename stays unchanged:
+```text
+// TÜV Card bundled b87
+```
+
+## HACS metadata
+
+`hacs.json` should keep:
 
 ```json
 {
-  "filename": "tuev-card.js",
-  "content_in_root": true
+  "filename": "tuev-card.js"
 }
 ```
 
-The dashboard resource should use the root bundle:
+Do not set `content_in_root: true` while using the `dist` asset layout.
+
+## Resource URL
+
+The dashboard resource remains:
 
 ```yaml
 url: /hacsfiles/tuev-card/tuev-card.js
 type: module
 ```
 
-## Internal checkpoint flow
+Do not add cachebusters for normal HACS installation docs.
 
-1. Start from the latest confirmed ZIP checkpoint.
-2. Increment the `bXX` version.
-3. Update `package.json`, `package-lock.json`, source import query markers, and source/bundle headers.
-4. Run:
-
-```bash
-npm run build
-npm run check
-```
-
-5. Create a new ZIP with the matching version number.
-6. Update `HANDOVER.md` fully.
-
-## Later public release flow
-
-1. Start from a confirmed release-candidate checkpoint.
-2. Change the package version to the chosen semantic version.
-3. Run build/check.
-4. Commit and push with GitHub Desktop.
-5. Create a GitHub Release with the semantic tag.
-6. Let HACS discover the update, or use **Informationen aktualisieren** for immediate testing.
-
-## What should not change accidentally
-
-Do not rename the card type:
-
-```yaml
-type: custom:tuev-card
-```
-
-Do not reintroduce old file names:
+## Build output
 
 ```text
-tuev-card-test.js
 dist/tuev-card.js
+dist/fonts/
 ```
 
-Do not change the current EuroPlate rule until the bundled-font replacement is intentionally implemented:
-
-```text
-Graphical license plates require reachable supported plate font.
-No graphical system-font fallback.
-```
-
-## Deferred after b84
-
-- GL-Fontpaket/Lizenz prüfen.
-- Plate Renderer v2 planen und ggf. implementieren.
-- Mittelschrift / Engschrift selection.
-- Integration Architecture V3.
-- Compact mode / hide TÜV badge.
-- README screenshots.
+`npm run build` recreates `dist/` and copies root `fonts/` to `dist/fonts/`.

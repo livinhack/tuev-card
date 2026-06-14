@@ -1,12 +1,19 @@
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, resolve, relative, dirname } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const files = [resolve(root, "tuev-card.js")];
+const files = [];
+const distBundle = resolve(root, "dist/tuev-card.js");
+
+if (existsSync(distBundle)) {
+  files.push(distBundle);
+}
 
 function collectJavaScriptFiles(directory) {
+  if (!existsSync(directory)) return;
+
   for (const entry of readdirSync(directory)) {
     const path = join(directory, entry);
     const stat = statSync(path);

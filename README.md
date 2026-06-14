@@ -40,7 +40,7 @@ After installing or updating, reload the dashboard. In the Home Assistant app or
 
 ### Manual installation
 
-Copy the card files to:
+Copy the contents of the `dist` folder to:
 
 ```text
 /config/www/community/tuev-card/

@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve, relative } from "node:path";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { dirname, resolve, relative, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -7,6 +7,8 @@ const packageJson = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8
 const versionMatch = String(packageJson.version || "").match(/-(b\d+)$/);
 const version = versionMatch ? versionMatch[1] : packageJson.version;
 const entry = resolve(root, "src/tuev-card-entry.js");
+const dist = resolve(root, "dist");
+const bundlePath = resolve(dist, "tuev-card.js");
 const moduleIds = new Map();
 const modules = [];
 
@@ -100,6 +102,25 @@ function transformModule(path, isEntry) {
   return `${code}\nreturn { ${exports.join(", ")} };\n`;
 }
 
+function copyDirectoryContents(sourceDir, targetDir) {
+  if (!existsSync(sourceDir)) return;
+
+  mkdirSync(targetDir, { recursive: true });
+
+  for (const entryName of readdirSync(sourceDir)) {
+    const sourcePath = join(sourceDir, entryName);
+    const targetPath = join(targetDir, entryName);
+    const stat = statSync(sourcePath);
+
+    if (stat.isDirectory()) {
+      copyDirectoryContents(sourcePath, targetPath);
+      continue;
+    }
+
+    copyFileSync(sourcePath, targetPath);
+  }
+}
+
 collect(entry);
 
 let bundled = `// TÜV Card bundled ${version}\n`;
@@ -111,4 +132,7 @@ for (const path of modules) {
   bundled += `\n// ---- ${rel} ----\nconst ${id} = (() => {\n${transformModule(path, path === entry)}\n})();\n`;
 }
 
-writeFileSync(resolve(root, "tuev-card.js"), bundled);
+rmSync(dist, { recursive: true, force: true });
+mkdirSync(dist, { recursive: true });
+writeFileSync(bundlePath, bundled);
+copyDirectoryContents(resolve(root, "fonts"), resolve(dist, "fonts"));

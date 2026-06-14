@@ -1,99 +1,71 @@
 # HACS release / update trigger flow
 
-Current checked version: `b84`.
+Current checked version: `b87`.
 
-This document captures the manual release flow that was tested with the intermediate `b39` upload/release trigger.
-It is meant as a practical checklist for later `v0.1.x` releases.
+## Delivery layout
 
-## What was verified with b39
-
-- A pushed repository change can be published as a GitHub Release.
-- HACS can be forced to re-check the repository with **Informationen aktualisieren** / **Update information**.
-- The update path is based on the root bundle:
+The repository now uses a `dist` delivery layout for HACS because the card needs non-JS assets for bundled GL-Nummernschild fonts.
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js
+dist/
+  tuev-card.js
+  fonts/
+    GL-Nummernschild-Mtl.ttf
+    GL-Nummernschild-Eng.ttf
 ```
 
-- The dashboard card type remains:
+The Lovelace resource remains:
 
 ```yaml
-type: custom:tuev-card
+url: /hacsfiles/tuev-card/tuev-card.js
+type: module
 ```
+
+The resource URL does not include `dist`; HACS installs the contents of `dist` into the card folder.
+
+## Local build before commit
+
+1. Keep the GL font files in root `fonts/`:
+
+```text
+fonts/GL-Nummernschild-Mtl.ttf
+fonts/GL-Nummernschild-Eng.ttf
+```
+
+2. Run:
+
+```bash
+npm run build
+npm run check
+```
+
+3. Confirm that `dist/tuev-card.js` and `dist/fonts/` exist.
 
 ## Manual release flow with GitHub Desktop
 
-1. Copy the new ZIP contents into the local repository folder.
-2. Open GitHub Desktop.
-3. Review the changed files.
-4. Commit to `main`, for example:
+1. Copy the new ZIP contents into the local repository folder without deleting local font binaries.
+2. Run `npm run build` so the local fonts are mirrored into `dist/fonts/`.
+3. Run `npm run check`.
+4. Open GitHub Desktop.
+5. Review the changed files, especially `dist/tuev-card.js` and `dist/fonts/`.
+6. Commit to `main`.
+7. Push origin.
+8. Create a GitHub Release or let HACS use the default branch while testing.
+9. In Home Assistant/HACS, use **Update information** or redownload the repository for immediate testing.
 
-```text
-b43: v0.1 must-fix audit
-```
+## Expected installed files
 
-5. Push origin.
-6. Open the repository on GitHub in the browser.
-7. Open **Releases**.
-8. Choose **Draft a new release**.
-9. Create or select the tag for the new version.
-10. Set target to `main`.
-11. Publish the release.
-
-For the final public version, prefer semantic tags such as:
-
-```text
-b64
-v0.1.1
-```
-
-For internal test releases, temporary tags such as `b39`, `b43`, ... are acceptable.
-
-## HACS update check in Home Assistant
-
-After publishing the GitHub Release:
-
-1. Open HACS.
-2. Use **Informationen aktualisieren** / **Update information** when testing immediately.
-3. For normal releases, wait and let HACS discover the update automatically.
-4. Check Home Assistant **Settings → Updates**.
-
-## Important repository requirements
-
-`hacs.json` must continue to point to the root bundle:
-
-```json
-{
-  "filename": "tuev-card.js",
-  "content_in_root": true
-}
-```
-
-The installed HACS folder should contain:
+After HACS installs or redownloads the card, the Home Assistant folder should contain:
 
 ```text
 /config/www/community/tuev-card/tuev-card.js
+/config/www/community/tuev-card/fonts/GL-Nummernschild-Mtl.ttf
+/config/www/community/tuev-card/fonts/GL-Nummernschild-Eng.ttf
 ```
 
-It should not require or install these old paths:
+The fonts should be reachable at:
 
 ```text
-tuev-card-test.js
-dist/tuev-card.js
-/hacsfiles/tuev-card-test/
+/hacsfiles/tuev-card/fonts/GL-Nummernschild-Mtl.ttf
+/hacsfiles/tuev-card/fonts/GL-Nummernschild-Eng.ttf
 ```
-
-## Later BAT idea
-
-A later helper BAT can automate the local parts:
-
-- run `npm run build`
-- run `npm run check`
-- optionally stage/commit/push with Git
-
-The GitHub Release itself can still be created in the browser unless GitHub CLI is added later.
-
-
-## b64 versioning preparation
-
-See `docs/VERSIONING_AND_RELEASE_PREP.md` before creating the first semantic `b64` release.

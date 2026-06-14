@@ -89,10 +89,10 @@ echo  Build und Check erfolgreich abgeschlossen.
 echo ========================================
 echo.
 
-if exist "tuev-card.js" (
-    echo Aktualisiert: tuev-card.js
+if exist "dist\tuev-card.js" (
+    echo Aktualisiert: dist\tuev-card.js
 ) else (
-    echo HINWEIS: Keine erwartete Bundle-Datei im Projektroot gefunden.
+    echo HINWEIS: Keine erwartete Bundle-Datei unter dist gefunden.
     echo Bitte pruefe package.json und scripts\build-bundle.mjs.
 )
 

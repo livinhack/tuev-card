@@ -1,0 +1,27 @@
+GL-Nummernschild font license notes
+===================================
+
+Source package checked from FontSpace user-provided ZIP:
+- info.txt: license: Freeware
+- link: https://www.fontspace.com/gl-nummernschild-font-f12469
+
+Bundled upstream readme excerpts in this folder:
+- GL-Nummernschild-Mtl-readme.txt
+- GL-Nummernschild-Eng-readme.txt
+
+License text from the upstream readmes:
+
+These fonts are free softwares.
+Unlimited permission is granted to use, copy, and distribute it, with or without modification, either commercially and noncommercially.
+THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
+
+Copyright / attribution:
+(C)2009-2011 Gutenberg Labo, All rights reserved. http://gutenberg.sourceforge.jp/
+"FE-Mittelschrift" and "FE-Engschrift" designed by Karlgeorg Hoefer.
+Font made by Gutenberg Labo, 2009.
+
+Note for this generated development ZIP:
+The font binary files themselves are not included in this generated ZIP. Place compatible font files in this folder when building or packaging a release that includes them.
+Expected file names:
+- GL-Nummernschild-Mtl.ttf
+- GL-Nummernschild-Eng.ttf
