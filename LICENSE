@@ -17,9 +17,10 @@ Additional notices
 Some non-code artwork/data files may be distributed under separate licenses.
 See NOTICE.md and the files in LICENSES/ for attribution and license details.
 
-EuroPlate.ttf
--------------
+License plate fonts
+-------------------
 
-EuroPlate.ttf is not included in this package. Graphical license plates require the user to
-provide their own copy at /config/www/EuroPlate.ttf. Users are responsible for ensuring that
-their use of EuroPlate.ttf is permitted by its license.
+No license plate font files are included in this development package. Graphical license
+plates require the user to provide a supported GL-Nummernschild font file or a legacy
+EuroPlate.ttf file. Users are responsible for ensuring that their use of those font files
+is permitted by the relevant license.

@@ -47,21 +47,35 @@ If the bundled digit paths are treated as an adaptation of the Wikimedia Commons
 the digit artwork/data in `src/badge/digits.js` should be distributed under CC BY-SA 4.0.
 The surrounding software code remains licensed separately under AGPL-3.0-or-later.
 
-## EuroPlate.ttf
+## GL-Nummernschild
 
-`EuroPlate.ttf` is not included in this repository or package.
+The card can render graphical German-style license plates with GL-Nummernschild by Gutenberg Labo.
 
-Graphical license plate rendering requires the user to manually provide the font file at:
+Expected runtime font file names:
 
 ```text
-/config/www/EuroPlate.ttf
+fonts/GL-Nummernschild-Mtl.ttf
+fonts/GL-Nummernschild-Eng.ttf
 ```
 
-The card checks availability through:
+License/readme notes are kept in:
+
+```text
+fonts/LICENSE.GL-Nummernschild.txt
+fonts/GL-Nummernschild-Mtl-readme.txt
+fonts/GL-Nummernschild-Eng-readme.txt
+```
+
+The upstream readmes state that unlimited permission is granted to use, copy, and distribute the fonts, with or without modification, commercially and noncommercially, and that the fonts are provided "AS IS" without warranty.
+
+This generated development ZIP contains the license/readme notes only, not the font binary files.
+
+## EuroPlate.ttf legacy fallback
+
+`EuroPlate.ttf` is not included in this repository or package. The renderer still recognizes it as a legacy fallback at:
 
 ```text
 /local/EuroPlate.ttf
 ```
 
-Users are responsible for ensuring their own use of `EuroPlate.ttf` complies with that font's
-license. The card falls back to plain text license plates when the font is unavailable.
+GL-Nummernschild is preferred when available. The card falls back to plain text license plates when no valid plate font is available.

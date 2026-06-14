@@ -22,7 +22,7 @@ The card shows your vehicles with TÜV/HU status, next inspection date, TÜV sti
 - Home Assistant
 - TÜV Reminder sensor entities
 - HACS or manual Lovelace resource setup
-- Optional: `EuroPlate.ttf` for graphical license plates
+- GL-Nummernschild font files for graphical license plates
 
 ## Installation
 
@@ -158,18 +158,13 @@ groups:
 
 ## Graphical license plates
 
-Graphical license plates currently require a user-provided `EuroPlate.ttf`.
+Graphical license plates use **GL-Nummernschild** when the font files are available to the card.
 
-Place the file here:
-
-```text
-/config/www/EuroPlate.ttf
-```
-
-Home Assistant serves it as:
+Expected file names:
 
 ```text
-/local/EuroPlate.ttf
+fonts/GL-Nummernschild-Mtl.ttf
+fonts/GL-Nummernschild-Eng.ttf
 ```
 
 Then enable graphical plates:
@@ -178,9 +173,9 @@ Then enable graphical plates:
 plate_style: plate
 ```
 
-If the font is missing, the visual editor hides the graphical license plate option and the card falls back to plain text plates.
+If the font files are missing or cannot be loaded, the visual editor hides the graphical license plate option and the card falls back to plain text plates.
 
-`EuroPlate.ttf` is not included. Users must provide their own file and are responsible for complying with that font's license.
+`EuroPlate.ttf` is still recognized as a legacy fallback at `/local/EuroPlate.ttf`, but GL-Nummernschild is preferred. There is intentionally no system-font fallback for graphical plates.
 
 ## Notes
 

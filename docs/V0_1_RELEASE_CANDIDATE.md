@@ -1,6 +1,6 @@
 # TÜV Card v0.1 / post-v0.1 development notes
 
-Current checked version: `b83`.
+Current checked version: `b84`.
 
 ## Release status
 
@@ -15,7 +15,7 @@ Current checked version: `b83`.
 - The modular source entry is `src/tuev-card-entry.js`.
 - HACS should load `/hacsfiles/tuev-card/tuev-card.js`.
 - Card type remains `custom:tuev-card`.
-- Graphical license plates are available only when `EuroPlate.ttf` is reachable.
+- Graphical license plates are available only when a supported GL-Nummernschild font or legacy a supported plate font is reachable.
 - There is no graphical system-font fallback for license plates.
 - Group title editing should keep focus while typing.
 - Display, color, and manual-sort confirmation floating panels are stable.
@@ -32,7 +32,7 @@ Current checked version: `b83`.
 ## Deferred ideas
 
 - Plate Renderer v2 based on FZV Anlage 4.
-- Replacing manual `EuroPlate.ttf` installation with bundled GL-Nummernschild fonts, after license/NOTICE review.
+- Replacing manual `supported plate font` installation with bundled GL-Nummernschild fonts, after license/NOTICE review.
 - Mittelschrift/Engschrift selection.
 - Seasonal, two-line, motorcycle, interchangeable, or other special plate types.
 - Compact mode refinements.

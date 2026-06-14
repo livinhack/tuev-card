@@ -1,4 +1,4 @@
-// TÜV Card bundled b83
+// TÜV Card bundled b85
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1925,10 +1925,95 @@ return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVe
 
 // ---- src/plate/font.js ----
 const __m_src_plate_font_js = (() => {
-const PLATE_FONT_URL = "/local/EuroPlate.ttf";
+const FONT_PROBE_BYTES = "bytes=0-15";
+
+const PLATE_FONT_CANDIDATES = [
+    {
+        key: "gl-mtl-hacs",
+        role: "mtl",
+        source: "gl",
+        family: "TuevPlateGLMtlHacs",
+        weight: 400,
+        format: "truetype",
+        url: "/hacsfiles/tuev-card/fonts/GL-Nummernschild-Mtl.ttf"
+    },
+    {
+        key: "gl-eng-hacs",
+        role: "eng",
+        source: "gl",
+        family: "TuevPlateGLEngHacs",
+        weight: 400,
+        format: "truetype",
+        url: "/hacsfiles/tuev-card/fonts/GL-Nummernschild-Eng.ttf"
+    },
+    {
+        key: "gl-mtl-local-community",
+        role: "mtl",
+        source: "gl",
+        family: "TuevPlateGLMtlLocalCommunity",
+        weight: 400,
+        format: "truetype",
+        url: "/local/community/tuev-card/fonts/GL-Nummernschild-Mtl.ttf"
+    },
+    {
+        key: "gl-eng-local-community",
+        role: "eng",
+        source: "gl",
+        family: "TuevPlateGLEngLocalCommunity",
+        weight: 400,
+        format: "truetype",
+        url: "/local/community/tuev-card/fonts/GL-Nummernschild-Eng.ttf"
+    },
+    {
+        key: "gl-mtl-local-package",
+        role: "mtl",
+        source: "gl",
+        family: "TuevPlateGLMtlLocalPackage",
+        weight: 400,
+        format: "truetype",
+        url: "/local/tuev-card/fonts/GL-Nummernschild-Mtl.ttf"
+    },
+    {
+        key: "gl-eng-local-package",
+        role: "eng",
+        source: "gl",
+        family: "TuevPlateGLEngLocalPackage",
+        weight: 400,
+        format: "truetype",
+        url: "/local/tuev-card/fonts/GL-Nummernschild-Eng.ttf"
+    },
+    {
+        key: "gl-mtl-local-root",
+        role: "mtl",
+        source: "gl",
+        family: "TuevPlateGLMtlLocalRoot",
+        weight: 400,
+        format: "truetype",
+        url: "/local/GL-Nummernschild-Mtl.ttf"
+    },
+    {
+        key: "gl-eng-local-root",
+        role: "eng",
+        source: "gl",
+        family: "TuevPlateGLEngLocalRoot",
+        weight: 400,
+        format: "truetype",
+        url: "/local/GL-Nummernschild-Eng.ttf"
+    },
+    {
+        key: "europlate-local-root",
+        role: "legacy",
+        source: "europlate",
+        family: "EuroPlate",
+        weight: 700,
+        format: "truetype",
+        url: "/local/EuroPlate.ttf"
+    }
+];
 
 let plateFontInjected = false;
 let plateFontLoadPromise = null;
+let availablePlateFonts = [];
 
 function hasValidFontSignature(buffer) {
     if (!buffer || buffer.byteLength < 4) {
@@ -1946,29 +2031,70 @@ function hasValidFontSignature(buffer) {
     );
 }
 
-async function checkPlateFontAvailable() {
-    const cacheBuster = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+function withCacheBuster(url) {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}v=${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
+async function checkCandidateAvailable(candidate) {
     try {
-        const response = await fetch(`${PLATE_FONT_URL}?v=${cacheBuster}`, {
+        const response = await fetch(withCacheBuster(candidate.url), {
             method: "GET",
             cache: "no-store",
             headers: {
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 Pragma: "no-cache",
-                Range: "bytes=0-15"
+                Range: FONT_PROBE_BYTES
             }
         });
 
         if (!response.ok) {
-            return false;
+            return null;
         }
 
         const buffer = await response.arrayBuffer();
-        return hasValidFontSignature(buffer);
+        return hasValidFontSignature(buffer) ? candidate : null;
     } catch (error) {
-        return false;
+        return null;
     }
+}
+
+async function checkPlateFontAvailable() {
+    injectPlateFont();
+
+    const results = await Promise.all(PLATE_FONT_CANDIDATES.map((candidate) => checkCandidateAvailable(candidate)));
+    availablePlateFonts = results.filter(Boolean);
+    plateFontLoadPromise = null;
+
+    return availablePlateFonts.length > 0;
+}
+
+function getPlateFontStatus() {
+    return {
+        available: availablePlateFonts.length > 0,
+        hasGlFont: availablePlateFonts.some((candidate) => candidate.source === "gl"),
+        hasMtlFont: availablePlateFonts.some((candidate) => candidate.role === "mtl"),
+        hasEngFont: availablePlateFonts.some((candidate) => candidate.role === "eng"),
+        hasLegacyEuroPlate: availablePlateFonts.some((candidate) => candidate.source === "europlate"),
+        fonts: [...availablePlateFonts]
+    };
+}
+
+function getPlateFontVariantForText(text) {
+    const cleanLength = String(text || "").replace(/\s/g, "").length;
+    const preferEng = cleanLength >= 8;
+    const findAvailable = (role) => availablePlateFonts.find((candidate) => candidate.role === role);
+    const findSource = (source) => availablePlateFonts.find((candidate) => candidate.source === source);
+
+    if (preferEng) {
+        return findAvailable("eng") || findAvailable("mtl") || findSource("europlate") || getDefaultPlateFontVariant();
+    }
+
+    return findAvailable("mtl") || findAvailable("eng") || findSource("europlate") || getDefaultPlateFontVariant();
+}
+
+function getDefaultPlateFontVariant() {
+    return PLATE_FONT_CANDIDATES[0];
 }
 
 function isPlateFontLoaded() {
@@ -1976,7 +2102,8 @@ function isPlateFontLoaded() {
         return false;
     }
 
-    return document.fonts.check("16px EuroPlate");
+    return availablePlateFonts.length > 0 &&
+        availablePlateFonts.every((candidate) => document.fonts.check(`${candidate.weight} 16px "${candidate.family}"`));
 }
 
 function ensurePlateFont(onReady) {
@@ -1991,7 +2118,13 @@ function ensurePlateFont(onReady) {
     }
 
     if (!plateFontLoadPromise) {
-        plateFontLoadPromise = document.fonts.load("16px EuroPlate");
+        const candidates = availablePlateFonts.length > 0
+            ? availablePlateFonts
+            : PLATE_FONT_CANDIDATES;
+
+        plateFontLoadPromise = Promise.allSettled(candidates.map((candidate) => (
+            document.fonts.load(`${candidate.weight} 16px "${candidate.family}"`)
+        )));
     }
 
     plateFontLoadPromise.then(() => {
@@ -2015,35 +2148,34 @@ function injectPlateFont() {
     plateFontInjected = true;
 
     const style = document.createElement("style");
-    style.textContent = `
+    style.textContent = PLATE_FONT_CANDIDATES.map((candidate) => `
         @font-face {
-            font-family: "EuroPlate";
-            src: url("${PLATE_FONT_URL}") format("truetype");
+            font-family: "${candidate.family}";
+            src: url("${candidate.url}") format("${candidate.format || 'truetype'}");
+            font-weight: ${candidate.weight};
+            font-style: normal;
             font-display: swap;
         }
-    `;
+    `).join("\n");
 
     document.head.appendChild(style);
 }
 
-return { checkPlateFontAvailable: checkPlateFontAvailable, isPlateFontLoaded: isPlateFontLoaded, ensurePlateFont: ensurePlateFont, injectPlateFont: injectPlateFont };
+return { checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: getPlateFontStatus, getPlateFontVariantForText: getPlateFontVariantForText, getDefaultPlateFontVariant: getDefaultPlateFontVariant, isPlateFontLoaded: isPlateFontLoaded, ensurePlateFont: ensurePlateFont, injectPlateFont: injectPlateFont };
 
 })();
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-const { checkPlateFontAvailable, ensurePlateFont, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
+const { checkPlateFontAvailable, ensurePlateFont, getPlateFontStatus, getPlateFontVariantForText, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
 
 
 
-const EUROPLATE_FONT_FAMILY = '"EuroPlate", "Arial Narrow", Arial, sans-serif';
-
-// Single base geometry for all graphical plates. The card calculates one
-// shared scale from the widest plate and the current tile width; every plate
-// is then rendered with this same scale. This keeps the visible height, font
-// size and vertical padding consistent while allowing shorter plates to remain
-// narrower.
-const PLATE_GEOMETRY = {
+// EuroPlate is kept as a legacy compatibility path, but the renderer now
+// prefers GL-Nummernschild Mittelschrift/Engschrift when those fonts are
+// available. There is intentionally no system-font fallback for graphical
+// plates: the editor only exposes the option after a valid plate font loaded.
+const EURO_PLATE_GEOMETRY = {
     height: 38,
     minWidth: 118,
     radius: 3,
@@ -2058,30 +2190,72 @@ const PLATE_GEOMETRY = {
     starRadius: 5.2,
     starDotRadius: 0.75,
     countryY: 0.72,
-    countryFontSize: 8.2
+    countryFontSize: 8.2,
+    fallbackWidthMode: "europlate"
 };
 
-// Editor-preview-only geometry. The dashboard renderer stays on
-// PLATE_GEOMETRY. This only gives the scaled HA editor preview a slightly
-// more centered visual balance without enabling any system-font fallback.
-const PREVIEW_PLATE_GEOMETRY = {
-    ...PLATE_GEOMETRY,
+const GL_MTL_PLATE_GEOMETRY = {
     height: 40,
-    fontSize: 30,
+    minWidth: 122,
+    radius: 3,
+    euWidth: 20,
+    euContentX: 10.5,
+    textGapLeft: 7,
+    fontSize: 31,
     textY: 0.535,
-    starY: 0.31,
-    countryY: 0.715
+    textScaleY: 1,
+    letterSpacing: 0.35,
+    starY: 0.30,
+    starRadius: 5.4,
+    starDotRadius: 0.78,
+    countryY: 0.72,
+    countryFontSize: 8.4,
+    fallbackWidthMode: "gl-mtl"
+};
+
+const GL_ENG_PLATE_GEOMETRY = {
+    ...GL_MTL_PLATE_GEOMETRY,
+    fontSize: 31.5,
+    letterSpacing: 0.25,
+    fallbackWidthMode: "gl-eng"
+};
+
+// Editor-preview-only adjustments. The dashboard renderer stays on the
+// real layout geometry. Preview tuning only compensates for HA's scaled
+// card preview and keeps the text visually centered there.
+const PREVIEW_TUNING = {
+    heightOffset: 1,
+    textYOffset: 0.01,
+    starYOffset: 0.005,
+    countryYOffset: -0.005
 };
 
 const CHAR_WIDTH = {
-    space: 0.29,
-    digit: 0.48,
-    wide: 0.61,
-    narrow: 0.36,
-    default: 0.51
+    europlate: {
+        space: 0.29,
+        digit: 0.48,
+        wide: 0.61,
+        narrow: 0.36,
+        default: 0.51
+    },
+    "gl-mtl": {
+        space: 0.30,
+        digit: 0.50,
+        wide: 0.66,
+        narrow: 0.34,
+        default: 0.53
+    },
+    "gl-eng": {
+        space: 0.26,
+        digit: 0.42,
+        wide: 0.52,
+        narrow: 0.28,
+        default: 0.44
+    }
 };
 
 let plateFontRequested = false;
+let measureCanvas = null;
 
 function normalizePlate(plate) {
     return String(plate || "")
@@ -2106,6 +2280,7 @@ function renderLicensePlate(plate, options = {}) {
     const {
         normalizedPlate,
         layout,
+        fontVariant,
         width,
         height,
         textPadLeft,
@@ -2136,7 +2311,7 @@ function renderLicensePlate(plate, options = {}) {
         ? ""
         : `translate(0 ${textY}) scale(1 ${textScaleY}) translate(0 ${-textY})`;
     const letterSpacing = `${layout.letterSpacing}px`;
-    const clipId = `plateClip-${hashString(`${normalizedPlate}-${Math.round(width * 10)}-${Math.round(height * 10)}`)}`;
+    const clipId = `plateClip-${hashString(`${normalizedPlate}-${fontVariant.key}-${Math.round(width * 10)}-${Math.round(height * 10)}`)}`;
 
     return renderPlateSvg({
         normalizedPlate,
@@ -2145,6 +2320,7 @@ function renderLicensePlate(plate, options = {}) {
         displayWidth,
         displayHeight,
         layout,
+        fontVariant,
         textX,
         textY,
         letterSpacing,
@@ -2164,12 +2340,13 @@ function getLicensePlateMetrics(plate, options = {}) {
         };
     }
 
-    const layout = options.preview === true ? PREVIEW_PLATE_GEOMETRY : PLATE_GEOMETRY;
+    const fontVariant = getPlateFontVariantForText(normalizedPlate);
+    const layout = getPlateGeometry(fontVariant, options.preview === true);
     const plainChars = normalizedPlate.replace(/\s/g, "");
     const charCount = plainChars.length;
-    const textPadLeft = getLeftPadding(charCount);
-    const textPadRight = getRightPadding(charCount);
-    const textWidth = estimatePlateTextWidth(normalizedPlate, layout.fontSize);
+    const textPadLeft = getLeftPadding(charCount, fontVariant);
+    const textPadRight = getRightPadding(charCount, fontVariant);
+    const textWidth = measurePlateTextWidth(normalizedPlate, layout, fontVariant);
 
     const contentWidth =
         layout.euWidth +
@@ -2187,6 +2364,7 @@ function getLicensePlateMetrics(plate, options = {}) {
         height: layout.height,
         normalizedPlate,
         layout,
+        fontVariant,
         charCount,
         textPadLeft,
         textPadRight,
@@ -2194,29 +2372,85 @@ function getLicensePlateMetrics(plate, options = {}) {
     };
 }
 
-function getLeftPadding(charCount) {
+function getPlateGeometry(fontVariant, preview) {
+    const base = fontVariant.source === "gl"
+        ? (fontVariant.role === "eng" ? GL_ENG_PLATE_GEOMETRY : GL_MTL_PLATE_GEOMETRY)
+        : EURO_PLATE_GEOMETRY;
+
+    if (!preview) {
+        return base;
+    }
+
+    return {
+        ...base,
+        height: base.height + PREVIEW_TUNING.heightOffset,
+        textY: base.textY + PREVIEW_TUNING.textYOffset,
+        starY: base.starY + PREVIEW_TUNING.starYOffset,
+        countryY: base.countryY + PREVIEW_TUNING.countryYOffset
+    };
+}
+
+function getLeftPadding(charCount, fontVariant) {
+    if (fontVariant.source === "gl") {
+        return charCount >= 8 ? 6 : charCount <= 4 ? 3 : charCount <= 6 ? 4 : 5;
+    }
+
     return charCount >= 8 ? 7 : charCount <= 4 ? 2 : charCount <= 6 ? 3 : 5;
 }
 
-function getRightPadding(charCount) {
+function getRightPadding(charCount, fontVariant) {
+    if (fontVariant.source === "gl") {
+        return charCount >= 8 ? 8 : charCount <= 4 ? 8 : charCount <= 6 ? 9 : 10;
+    }
+
     return charCount >= 8 ? 9 : charCount <= 4 ? 8 : charCount <= 6 ? 9 : 10;
 }
 
-function estimatePlateTextWidth(text, fontSize) {
+function measurePlateTextWidth(text, layout, fontVariant) {
+    const measured = measureTextWithCanvas(text, layout, fontVariant);
+
+    if (measured > 0) {
+        return measured + Math.max(0, text.length - 1) * layout.letterSpacing;
+    }
+
+    return estimatePlateTextWidth(text, layout.fontSize, layout.fallbackWidthMode, layout.letterSpacing);
+}
+
+function measureTextWithCanvas(text, layout, fontVariant) {
+    if (typeof document === "undefined" || typeof document.createElement !== "function") {
+        return 0;
+    }
+
+    if (!measureCanvas) {
+        measureCanvas = document.createElement("canvas");
+    }
+
+    const context = measureCanvas.getContext?.("2d");
+
+    if (!context || typeof context.measureText !== "function") {
+        return 0;
+    }
+
+    context.font = `${fontVariant.weight} ${layout.fontSize}px "${fontVariant.family}"`;
+
+    return context.measureText(text).width || 0;
+}
+
+function estimatePlateTextWidth(text, fontSize, widthMode, letterSpacing) {
+    const widths = CHAR_WIDTH[widthMode] || CHAR_WIDTH.europlate;
     let width = 0;
-    const letterSpacing = PLATE_GEOMETRY.letterSpacing || 0;
 
     for (const char of text) {
         if (char === " ") {
-            width += fontSize * CHAR_WIDTH.space;
+            width += fontSize * widths.space;
         } else if (char >= "0" && char <= "9") {
-            width += fontSize * CHAR_WIDTH.digit;
+            width += fontSize * widths.digit;
         } else if ("MW".includes(char)) {
-            width += fontSize * CHAR_WIDTH.wide;
+            width += fontSize * widths.wide;
         } else if ("IJ".includes(char)) {
-            width += fontSize * CHAR_WIDTH.narrow;
+            width += fontSize * widths.narrow;
         } else {
-            width += fontSize * CHAR_WIDTH.default;
+            width += fontSize * widths.default;
         }
     }
 
@@ -2230,6 +2464,7 @@ function renderPlateSvg({
     displayWidth,
     displayHeight,
     layout,
+    fontVariant,
     textX,
     textY,
     letterSpacing,
@@ -2265,9 +2500,9 @@ function renderPlateSvg({
 
                 <style>
                     .tuev-plate-text {
-                        font-family: ${EUROPLATE_FONT_FAMILY};
+                        font-family: "${fontVariant.family}";
                         font-size: ${layout.fontSize}px;
-                        font-weight: 700;
+                        font-weight: ${fontVariant.weight};
                         letter-spacing: ${letterSpacing};
                     }
                 </style>
@@ -2383,7 +2618,7 @@ function escapeHtml(value) {
         .replaceAll(">", "&gt;");
 }
 
-return { normalizePlate: normalizePlate, renderLicensePlate: renderLicensePlate, getLicensePlateMetrics: getLicensePlateMetrics, checkPlateFontAvailable: checkPlateFontAvailable, ensurePlateFont: ensurePlateFont, isPlateFontLoaded: isPlateFontLoaded };
+return { normalizePlate: normalizePlate, renderLicensePlate: renderLicensePlate, getLicensePlateMetrics: getLicensePlateMetrics, checkPlateFontAvailable: checkPlateFontAvailable, ensurePlateFont: ensurePlateFont, getPlateFontStatus: getPlateFontStatus, isPlateFontLoaded: isPlateFontLoaded };
 
 })();
 
@@ -5346,7 +5581,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b83
+// TÜV Card source entry b85
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

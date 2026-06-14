@@ -1,6 +1,6 @@
 # Responsive / Browser Test Checklist
 
-Current checked version: `b83`.
+Current checked version: `b84`.
 
 This checklist is for validating the TÜV Card across Home Assistant views, browsers, and the Android companion app. It is intentionally a manual smoke-test document; it does not change card behavior.
 
@@ -89,15 +89,15 @@ For each view and browser/app:
 
 ## License plate rendering
 
-Important decision: graphical plates are available only when `EuroPlate.ttf` is reachable. There is no graphical system-font fallback.
+Important decision: graphical plates are available only when a supported plate font is reachable. There is no graphical system-font fallback.
 
-Test with `EuroPlate.ttf` present:
+Test with `supported plate font` present:
 
 - `Kennzeichen grafisch darstellen` is available.
 - Graphical plates render in card/editor.
 - Example plates to check: `BIT GT 500`, `EU TE 333E`, `S AB 1234`, `DA CI 500`, `TR A 77`.
 
-Test with `EuroPlate.ttf` missing/unreachable:
+Test with `supported plate font` missing/unreachable:
 
 - Graphical plate option is not available.
 - Card does not fall back to graphical system-font plate rendering.

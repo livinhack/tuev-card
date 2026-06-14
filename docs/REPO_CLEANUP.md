@@ -1,6 +1,6 @@
 # TÜV Card repo cleanup notes
 
-Current checked version: `b83`.
+Current checked version: `b84`.
 
 This checkpoint is a repository/readiness cleanup. It does not intentionally change UI behavior, editor behavior, card rendering, EuroPlate handling, grouping, sorting, or HACS naming.
 
@@ -80,9 +80,9 @@ Developer/build/release details belong in `docs/`, not in the README.
 
 For the current checkpoint:
 
-- Graphical plate rendering remains available only when `EuroPlate.ttf` is reachable.
+- Graphical plate rendering remains available only when a supported GL-Nummernschild font or legacy a supported plate font is reachable.
 - There is no graphical system-font fallback.
-- GL-Nummernschild fonts are the recommended next evaluation before Integration Architecture V3, but are not included in b83.
+- GL-Nummernschild fonts are the recommended next evaluation before Integration Architecture V3, but are not included in b84.
 
 ## Deferred / later
 

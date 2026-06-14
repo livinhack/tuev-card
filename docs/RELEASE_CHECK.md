@@ -1,8 +1,8 @@
 # TÜV Card release check
 
-Current checked version: `b83`.
+Current checked version: `b84`.
 
-`b83` is a README/release-readiness cleanup. It keeps the confirmed b79-b82 runtime/editor behavior and does not intentionally change card behavior.
+`b84` adds GL-preferred license plate font detection and renderer-v2 groundwork after the confirmed b84 release-readiness checkpoint.
 
 See also:
 
@@ -15,11 +15,11 @@ docs/B83_README_RELEASE_CLEANUP_NEXT_STEP.md
 - b79 HU stamp overlay in 1-column layout: confirmed by user.
 - b81 modal sort-discard confirmation: confirmed by user.
 - b82 button state and `Alle hinzufügen`: confirmed by user.
-- b83 README is end-user oriented and uses the normal HACS resource path.
+- b84 README is end-user oriented and uses the normal HACS resource path; b84 adds GL-preferred plate font handling.
 
 The current EuroPlate rule remains unchanged:
 
-- Graphical plates are only available when `EuroPlate.ttf` is reachable.
+- Graphical plates are only available when a supported GL-Nummernschild font or legacy a supported plate font is reachable.
 - No graphical system-font fallback is used.
 
 ## HACS / root bundle
@@ -55,13 +55,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b83"
+"version": "0.1.1-b84"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b83
+b84
 ```
 
 For a future public semantic release, use `v0.1.x` or later tags instead of `bXX` tags.
@@ -89,8 +89,8 @@ node scripts/check-js.mjs
 - Switch manual group sorting to an automatic mode and confirm/cancel the discard dialog.
 - Sort ungrouped entities by name, plate, HU, and status.
 - Check grouped and ungrouped dashboard rendering.
-- Verify graphical license plates with reachable `EuroPlate.ttf`.
-- Verify plain text plates when `EuroPlate.ttf` is missing or unreachable.
+- Verify graphical license plates with reachable GL-Nummernschild files and with legacy `supported plate font`.
+- Verify plain text plates when no supported font is reachable.
 
 ## HU stamp confirmation smoke test
 

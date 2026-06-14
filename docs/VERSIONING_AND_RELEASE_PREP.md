@@ -1,19 +1,19 @@
 # TÜV Card versioning and release preparation
 
-Current checked version: `b83`.
+Current checked version: `b84`.
 
 The project currently uses internal `bXX` checkpoint labels for ZIP/test handoffs. A future public release should use semantic tags such as `v0.1.x` or later.
 
 ## Current development checkpoint
 
 ```json
-"version": "0.1.1-b83"
+"version": "0.1.1-b84"
 ```
 
 The generated root bundle should start with:
 
 ```text
-TÜV Card bundled b83
+TÜV Card bundled b84
 ```
 
 ## HACS file naming
@@ -76,11 +76,11 @@ dist/tuev-card.js
 Do not change the current EuroPlate rule until the bundled-font replacement is intentionally implemented:
 
 ```text
-Graphical license plates require reachable EuroPlate.ttf.
+Graphical license plates require reachable supported plate font.
 No graphical system-font fallback.
 ```
 
-## Deferred after b83
+## Deferred after b84
 
 - GL-Fontpaket/Lizenz prüfen.
 - Plate Renderer v2 planen und ggf. implementieren.
