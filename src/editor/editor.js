@@ -1,20 +1,20 @@
-import { localize } from "../translations/index.js?v=b81";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b81";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b81";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b81";
+import { localize } from "../translations/index.js?v=b82";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b82";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b82";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b82";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b81";
+} from "../plate/renderer.js?v=b82";
 import {
     getColumnLabel
-} from "./columns.js?v=b81";
+} from "./columns.js?v=b82";
 import {
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b81";
-import { renderEditorStyles } from "./styles.js?v=b81";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b81";
+} from "./render-parts.js?v=b82";
+import { renderEditorStyles } from "./styles.js?v=b82";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b82";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -75,8 +75,7 @@ export class TuevCardEditor extends HTMLElement {
 
         const clickedInsideSortConfirm = hasClass("tuev-editor-sort-confirm");
         const clickedInsideFloatingPanel = hasClass("tuev-editor-floating-panel");
-        const clickedFloatingTrigger = hasClass("tuev-editor-display-menu")
-            || hasClass("tuev-editor-display-toggle-wrap")
+        const clickedFloatingTrigger = hasClass("tuev-editor-display-toggle-wrap")
             || hasClass("tuev-editor-color-toggle-wrap")
             || hasAttribute("data-display-options-toggle")
             || hasAttribute("data-group-color-toggle");
@@ -296,7 +295,6 @@ export class TuevCardEditor extends HTMLElement {
 
                 ${renderGroupsSection({
                     groups: this._draftGroups,
-                    groupsLayout: this._config.groups_layout === "auto" ? "auto" : "stacked",
                     pickerOpenKey: this._pickerOpenKey,
                     unselectedEntities,
                     searchText: this._searchText,

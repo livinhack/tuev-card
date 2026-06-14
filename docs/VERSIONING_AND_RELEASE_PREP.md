@@ -1,22 +1,34 @@
 # TÜV Card versioning and release preparation
 
-Current checked version: `b81`.
+Current checked version: `b82`.
 
 The project has switched from internal `bXX` checkpoint labels to the first semantic test release `b64`.
 
-## Current release version
+## Current development checkpoint
 
 ```json
-"version": "0.1.1-b64"
+"version": "0.1.1-b82"
 ```
 
 The generated root bundle should start with:
 
 ```text
+TÜV Card bundled b82
+```
+
+## Earlier semantic test release note
+
+```json
+"version": "0.1.1-b64"
+```
+
+The earlier semantic-test bundle started with:
+
+```text
 TÜV Card bundled b64
 ```
 
-The GitHub Release tag should be:
+The earlier GitHub Release tag was:
 
 ```text
 b64
@@ -36,7 +48,7 @@ The HACS filename stays unchanged:
 The dashboard resource should use the root bundle:
 
 ```yaml
-url: /hacsfiles/tuev-card/tuev-card.js?v=b81
+url: /hacsfiles/tuev-card/tuev-card.js?v=b82
 type: module
 ```
 

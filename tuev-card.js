@@ -1,4 +1,4 @@
-// TÜV Card bundled b81
+// TÜV Card bundled b82
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2461,15 +2461,14 @@ return { getColumnSliderValue: getColumnSliderValue, getColumnsFromSliderValue: 
 
 // ---- src/editor/buttons.js ----
 const __m_src_editor_buttons_js = (() => {
-function renderButton({ id = null, disabled, text, active = true, extraAttributes = "" }) {
+function renderButton({ id = null, disabled, text, extraAttributes = "" }) {
     const enabled = !disabled;
-    const activeClass = active ? "" : " is-inactive";
     const idAttribute = id ? `id="${id}"` : "";
 
     return `
         <button
             ${idAttribute}
-            class="tuev-editor-pill-button${activeClass}"
+            class="tuev-editor-pill-button"
             type="button"
             ${extraAttributes}
             ${enabled ? "" : "disabled"}
@@ -2748,7 +2747,6 @@ function renderEntityPickerList({ unselectedEntities, localize, getEntityLabel }
 
 function renderGroupsSection({
     groups,
-    groupsLayout,
     pickerOpenKey,
     unselectedEntities,
     searchText,
@@ -2874,6 +2872,7 @@ function renderGroupEditor({
                             data-group-color-toggle="${group.id}"
                             title="${localize("editor.group_color")}"
                             aria-label="${localize("editor.group_color")}"
+                            aria-pressed="${isColorOpen ? "true" : "false"}"
                         ></button>
                     </span>
                     <span>${formatGroupEntityCount(entityCount, localize)}</span>
@@ -2903,7 +2902,6 @@ function renderGroupEditor({
                     group,
                     unselectedEntities,
                     searchText,
-                    pendingGroupSort,
                     localize,
                     getEntityLabel,
                     escapeHtml
@@ -3095,56 +3093,11 @@ function renderEditorStyles() {
                 transform: translateY(1px);
             }
 
-            .tuev-editor-pill-button:disabled,
-            .tuev-editor-pill-button.is-inactive {
+            .tuev-editor-pill-button:disabled {
                 cursor: default;
                 opacity: 0.55;
                 background: color-mix(in srgb, var(--disabled-color, #777) 18%, var(--secondary-background-color));
                 color: var(--secondary-text-color, var(--primary-text-color));
-            }
-
-            .tuev-editor-display-menu {
-                position: relative;
-                display: inline-flex;
-                align-items: center;
-                width: max-content;
-                margin: 0 0 -6px 0;
-            }
-
-            .tuev-editor-display-badge {
-                border: 1px solid var(--divider-color);
-                border-radius: 999px;
-                padding: 7px 13px;
-                background: var(--secondary-background-color);
-                color: var(--primary-text-color);
-                cursor: pointer;
-                font-weight: 800;
-                line-height: 1;
-            }
-
-            .tuev-editor-display-menu.is-open .tuev-editor-display-badge,
-            .tuev-editor-display-badge:hover,
-            .tuev-editor-display-badge:focus-visible {
-                border-color: var(--primary-color);
-                background: color-mix(in srgb, var(--primary-color) 20%, var(--secondary-background-color));
-                box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 18%, transparent) inset;
-            }
-
-            .tuev-editor-display-popover {
-                left: 0;
-                top: calc(100% + 10px);
-                width: max-content;
-                max-width: min(360px, calc(100vw - 48px));
-                box-sizing: border-box;
-                align-items: stretch;
-                flex-direction: column;
-                z-index: 20;
-                --tuev-group-accent: var(--primary-color);
-                display: none;
-            }
-
-            .tuev-editor-display-menu.is-open .tuev-editor-display-popover {
-                display: flex;
             }
 
             .tuev-editor-display-popover-title {
@@ -3219,32 +3172,6 @@ function renderEditorStyles() {
                 padding-top: 2px;
             }
 
-            .tuev-editor-groups-layout-toggle {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 6px 10px;
-                border-radius: 999px;
-                border: 1px solid var(--divider-color);
-                background: var(--secondary-background-color);
-                color: var(--secondary-text-color, var(--primary-text-color));
-                font-size: 12px;
-                font-weight: 700;
-                line-height: 1;
-                cursor: pointer;
-                white-space: nowrap;
-            }
-
-            .tuev-editor-groups-layout-toggle:hover,
-            .tuev-editor-groups-layout-toggle:focus-within {
-                border-color: var(--primary-color);
-                background: color-mix(in srgb, var(--primary-color) 14%, var(--secondary-background-color));
-            }
-
-            .tuev-editor-groups-layout-toggle input {
-                margin: 0;
-            }
-
             .tuev-editor-group-card {
                 position: relative;
                 border: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 42%, var(--divider-color));
@@ -3310,13 +3237,6 @@ function renderEditorStyles() {
                 backdrop-filter: blur(10px);
             }
 
-            .tuev-editor-display-popover {
-                display: none;
-            }
-
-            .tuev-editor-display-menu.is-open .tuev-editor-display-popover {
-                display: flex;
-            }
 
             .tuev-editor-color-popover {
                 left: 0;
@@ -3721,6 +3641,7 @@ function renderEditorStyles() {
                 transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease, opacity 120ms ease, transform 120ms ease;
             }
 
+            .tuev-editor-color-toggle[aria-pressed="true"],
             .tuev-editor-color-toggle:hover,
             .tuev-editor-color-toggle:focus-visible {
                 border-color: var(--primary-text-color);
@@ -4307,8 +4228,7 @@ class TuevCardEditor extends HTMLElement {
 
         const clickedInsideSortConfirm = hasClass("tuev-editor-sort-confirm");
         const clickedInsideFloatingPanel = hasClass("tuev-editor-floating-panel");
-        const clickedFloatingTrigger = hasClass("tuev-editor-display-menu")
-            || hasClass("tuev-editor-display-toggle-wrap")
+        const clickedFloatingTrigger = hasClass("tuev-editor-display-toggle-wrap")
             || hasClass("tuev-editor-color-toggle-wrap")
             || hasAttribute("data-display-options-toggle")
             || hasAttribute("data-group-color-toggle");
@@ -4528,7 +4448,6 @@ class TuevCardEditor extends HTMLElement {
 
                 ${renderGroupsSection({
                     groups: this._draftGroups,
-                    groupsLayout: this._config.groups_layout === "auto" ? "auto" : "stacked",
                     pickerOpenKey: this._pickerOpenKey,
                     unselectedEntities,
                     searchText: this._searchText,
@@ -5427,7 +5346,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b81
+// TÜV Card source entry b82
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

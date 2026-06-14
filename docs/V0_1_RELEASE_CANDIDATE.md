@@ -1,6 +1,6 @@
 # TÜV Card v0.1 / post-v0.1 development notes
 
-Current checked version: `b81`.
+Current checked version: `b82`.
 
 ## Release status
 
@@ -35,7 +35,6 @@ Current checked version: `b81`.
 - Replacing manual `EuroPlate.ttf` installation with bundled GL-Nummernschild fonts, after license/NOTICE review.
 - Mittelschrift/Engschrift selection.
 - Seasonal, two-line, motorcycle, interchangeable, or other special plate types.
-- Group-specific display overrides.
 - Compact mode refinements.
 - Optional side-by-side group layout for small groups only.
 - README screenshots and final image assets, late in the release process.

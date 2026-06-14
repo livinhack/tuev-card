@@ -1,21 +1,21 @@
 # Release check
 
-Current checkpoint: `b81`
+Current checkpoint: `b82`
 
-`b81` makes the manual-sort discard confirmation modal-like: outside clicks no longer close it. See `docs/B81_SORT_CONFIRM_MODAL.md`.
+`b82` is a cleanup/checkpoint pass after the b81 modal-sort confirmation fix. See `docs/B82_CLEANUP_BUTTON_STATE_AND_ADD_ALL_CHECK.md`.
 
 # TÜV Card release check
 
-Current checked version: `b81`.
+Current checked version: `b82`.
 
 ## Current release/checkpoint note
 
-`b81` keeps the b79 runtime result and the b80 normal floating-panel outside-click behavior. It additionally makes the manual-sort discard confirmation modal-like: outside clicks do not close it; only Cancel/Yes do.
+`b82` keeps the b79 runtime result, the b80/b81 floating-panel behavior, and adds a small editor cleanup. The `Alle hinzufügen` button is already implemented; the group color trigger now exposes an active/open state.
 
 See also:
 
 ```text
-docs/B73_DISPLAY_EYE_BADGE_EDITOR.md
+docs/B82_CLEANUP_BUTTON_STATE_AND_ADD_ALL_CHECK.md
 ```
 
 The current EuroPlate rule remains unchanged:
@@ -34,7 +34,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b81
+/hacsfiles/tuev-card/tuev-card.js?v=b82
 ```
 
 The dashboard card type remains:
@@ -56,13 +56,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b81"
+"version": "0.1.1-b82"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b81
+b82
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.

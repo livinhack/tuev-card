@@ -1,5 +1,5 @@
-import { getGroupAccentColor } from "../card/groups.js?v=b81";
-import { renderButton } from "./buttons.js?v=b81";
+import { getGroupAccentColor } from "../card/groups.js?v=b82";
+import { renderButton } from "./buttons.js?v=b82";
 export function renderEntitySection({
     selectedEntityIds,
     unselectedEntities,
@@ -261,7 +261,6 @@ function renderEntityPickerList({ unselectedEntities, localize, getEntityLabel }
 
 export function renderGroupsSection({
     groups,
-    groupsLayout,
     pickerOpenKey,
     unselectedEntities,
     searchText,
@@ -387,6 +386,7 @@ function renderGroupEditor({
                             data-group-color-toggle="${group.id}"
                             title="${localize("editor.group_color")}"
                             aria-label="${localize("editor.group_color")}"
+                            aria-pressed="${isColorOpen ? "true" : "false"}"
                         ></button>
                     </span>
                     <span>${formatGroupEntityCount(entityCount, localize)}</span>
@@ -416,7 +416,6 @@ function renderGroupEditor({
                     group,
                     unselectedEntities,
                     searchText,
-                    pendingGroupSort,
                     localize,
                     getEntityLabel,
                     escapeHtml
