@@ -1,8 +1,8 @@
-import { renderYearDigits as renderYearDigitPaths } from "./digits.js?v=b91";
-import { renderDividerLines, renderMarkerPaths, renderMonthDigits } from "./parts.js?v=b91";
-import { BADGE_CENTER, BADGE_PROFILE, tuevColorForYear } from "./profile.js?v=b91";
+import { renderYearDigits as renderYearDigitPaths } from "./digits.js?v=b92";
+import { renderDividerLines, renderMarkerPaths, renderMonthDigits } from "./parts.js?v=b92";
+import { BADGE_CENTER, BADGE_PROFILE, tuevColorForYear } from "./profile.js?v=b92";
 
-export { tuevColorForYear } from "./profile.js?v=b91";
+export { tuevColorForYear } from "./profile.js?v=b92";
 
 function getBadgeBlurStyle(blurred) {
     return blurred

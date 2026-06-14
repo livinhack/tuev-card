@@ -1,5 +1,5 @@
-import { en } from "./en.js?v=b91";
-import { de } from "./de.js?v=b91";
+import { en } from "./en.js?v=b92";
+import { de } from "./de.js?v=b92";
 
 export const TUEV_CARD_TRANSLATIONS = { en, de };
 

@@ -1,4 +1,4 @@
-// TÜV Card bundled b91
+// TÜV Card bundled b92
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2184,21 +2184,27 @@ const FZV_ONE_LINE = Object.freeze({
     maxWidth: 520,
     height: 110,
     widthBands: Object.freeze([340, 380, 420, 460, 480, 520]),
+    // The outside dimensions include the black rim. The rim is not additional
+    // layout space. The white face is modelled separately inside the rim band.
     borderBand: 4.5,
-    borderStroke: 3.2,
+    borderStroke: 4.5,
     cornerRadius: 7,
     euro: Object.freeze({
         width: 45,
-        starRingDiameter: 29,
-        countryFontSize: 18
+        height: 98,
+        starRingDiameter: 30,
+        countryFontSize: 20
     }),
     minimumSideGap: 8,
-    sealColumnWidth: 27,
-    sealGapLeft: 8,
-    sealGapRight: 9,
-    sealDiameter: 20.5,
-    huCenterRatio: 0.36,
-    authorityCenterRatio: 0.68
+    // In the one-line FZV pattern the plakette area between the district
+    // letters and the recognition number spans roughly 63.5–67.5 mm.
+    sealZoneWidth: 65.5,
+    huDiameter: 35,
+    authorityDiameter: 45,
+    // 13 + 75 + 13 = the 101 mm white usable area of the 110 mm plate.
+    textTopGap: 13,
+    fontHeight: 75,
+    recognitionGroupGap: 26
 });
 
 const FONT_PROFILES = Object.freeze({
@@ -2206,13 +2212,13 @@ const FONT_PROFILES = Object.freeze({
         role: "mtl",
         label: "Mittelschrift 75 mm",
         fontSize: 75,
-        charGap: 3.8,
-        yOffset: 1.8,
+        charGap: 8.5,
+        yOffset: 1.2,
         fallback: Object.freeze({
-            digit: 43,
-            wide: 55,
-            narrow: 25,
-            default: 47,
+            digit: 44.5,
+            wide: 47.5,
+            narrow: 20,
+            default: 47.5,
             space: 0
         })
     }),
@@ -2220,13 +2226,13 @@ const FONT_PROFILES = Object.freeze({
         role: "eng",
         label: "Engschrift 75 mm",
         fontSize: 75,
-        charGap: 3.1,
-        yOffset: 1.8,
+        charGap: 8.2,
+        yOffset: 1.2,
         fallback: Object.freeze({
-            digit: 36,
-            wide: 45,
-            narrow: 20,
-            default: 39,
+            digit: 39,
+            wide: 41,
+            narrow: 17,
+            default: 41,
             space: 0
         })
     })
@@ -2389,14 +2395,12 @@ function buildOneLineLayoutsForBands(parsed, fontVariant, options = {}) {
     const layout = FZV_ONE_LINE;
     const font = fontVariant.lawProfile || FONT_PROFILES.mtl;
     const prefixBoxes = measureTextBoxes(parsed.prefix, fontVariant, font);
-    const recognitionBoxes = measureTextBoxes(parsed.recognition, fontVariant, font);
+    const recognitionSegments = measureRecognitionSegments(parsed.recognition, fontVariant, font, layout);
     const prefixWidth = measureBoxesWidth(prefixBoxes, font);
-    const recognitionWidth = measureBoxesWidth(recognitionBoxes, font);
+    const recognitionWidth = measureTextSegmentsWidth(recognitionSegments);
     const hasSealColumn = Boolean(parsed.prefix && parsed.recognition);
-    const sealWidth = hasSealColumn ? layout.sealColumnWidth : 0;
-    const sealLeftGap = hasSealColumn ? layout.sealGapLeft : 0;
-    const sealRightGap = hasSealColumn ? layout.sealGapRight : 0;
-    const textAndSealWidth = prefixWidth + sealLeftGap + sealWidth + sealRightGap + recognitionWidth;
+    const sealZoneWidth = hasSealColumn ? layout.sealZoneWidth : 0;
+    const textAndSealWidth = prefixWidth + sealZoneWidth + recognitionWidth;
     const rawMinimumWidth = getOpenLeftBoundary(layout) + textAndSealWidth + layout.minimumSideGap * 2 + layout.borderBand;
     const preferredMinimumBand = parsed.clean.length >= 8 ? layout.maxWidth : layout.widthBands[0];
     const candidateBands = layout.widthBands.filter((band) => band >= preferredMinimumBand);
@@ -2407,13 +2411,11 @@ function buildOneLineLayoutsForBands(parsed, fontVariant, options = {}) {
         fontVariant,
         font,
         prefixBoxes,
-        recognitionBoxes,
+        recognitionSegments,
         prefixWidth,
         recognitionWidth,
         hasSealColumn,
-        sealWidth,
-        sealLeftGap,
-        sealRightGap,
+        sealZoneWidth,
         textAndSealWidth,
         rawMinimumWidth,
         width: band,
@@ -2426,13 +2428,11 @@ function buildOneLineLayoutForBand({
     fontVariant,
     font,
     prefixBoxes,
-    recognitionBoxes,
+    recognitionSegments,
     prefixWidth,
     recognitionWidth,
     hasSealColumn,
-    sealWidth,
-    sealLeftGap,
-    sealRightGap,
+    sealZoneWidth,
     textAndSealWidth,
     rawMinimumWidth,
     width,
@@ -2447,10 +2447,11 @@ function buildOneLineLayoutForBand({
     const overflow = sideGap < layout.minimumSideGap || width < rawMinimumWidth;
     const startX = openLeftBoundary + Math.max(layout.minimumSideGap, sideGap);
     const prefixX = startX;
-    const sealX = prefixX + prefixWidth + sealLeftGap + sealWidth / 2;
+    const sealStartX = prefixX + prefixWidth;
+    const sealX = sealStartX + sealZoneWidth / 2;
     const recognitionX = hasSealColumn
-        ? sealX + sealWidth / 2 + sealRightGap
-        : prefixX + prefixWidth + sealLeftGap;
+        ? sealStartX + sealZoneWidth
+        : prefixX + prefixWidth;
 
     return {
         width,
@@ -2466,7 +2467,7 @@ function buildOneLineLayoutForBand({
         fontVariant,
         font,
         prefixBoxes,
-        recognitionBoxes,
+        recognitionSegments,
         prefixWidth,
         recognitionWidth,
         textAndSealWidth,
@@ -2474,6 +2475,8 @@ function buildOneLineLayoutForBand({
         openRightBoundary,
         sideGap,
         prefixX,
+        sealStartX,
+        sealZoneWidth,
         sealX,
         recognitionX,
         hasSealColumn,
@@ -2510,6 +2513,35 @@ function measureBoxesWidth(boxes, font) {
     }
 
     return boxes.reduce((sum, box) => sum + box.width, 0) + Math.max(0, boxes.length - 1) * font.charGap;
+}
+
+function measureRecognitionSegments(text, fontVariant, font, layout = FZV_ONE_LINE) {
+    const value = String(text || "");
+    const match = value.match(/^([A-ZÄÖÜ]*)([0-9]*)([A-ZÄÖÜ]*)$/u);
+
+    if (!match) {
+        const boxes = measureTextBoxes(value, fontVariant, font);
+        return [{ boxes, width: measureBoxesWidth(boxes, font), gapBefore: 0 }];
+    }
+
+    const [, letters, digits, suffix] = match;
+    const segments = [];
+
+    for (const part of [letters, digits, suffix]) {
+        if (!part) continue;
+        const boxes = measureTextBoxes(part, fontVariant, font);
+        segments.push({
+            boxes,
+            width: measureBoxesWidth(boxes, font),
+            gapBefore: segments.length ? layout.recognitionGroupGap : 0
+        });
+    }
+
+    return segments.length ? segments : [{ boxes: [], width: 0, gapBefore: 0 }];
+}
+
+function measureTextSegmentsWidth(segments) {
+    return segments.reduce((sum, segment) => sum + (segment.gapBefore || 0) + (segment.width || 0), 0);
 }
 
 function measureCharacterWidth(char, fontVariant, font) {
@@ -2558,7 +2590,7 @@ function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
     const { width, height, layout, inner, fontVariant, font, parsed } = analysis;
     const clipId = `plateLawClip-${hashString(`${parsed.normalizedPlate}-${fontVariant.key}-${width}`)}`;
     const debug = options.debug === true || analysis.debug === true;
-    const textY = inner.centerY + font.yOffset;
+    const textY = inner.y + layout.textTopGap + layout.fontHeight / 2 + font.yOffset;
 
     return `
         <svg
@@ -2615,8 +2647,8 @@ function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
                     font,
                     className: `tuev-law-plate-text-${clipId}`
                 })}
-                ${renderCharacterRun({
-                    boxes: analysis.recognitionBoxes,
+                ${renderTextSegments({
+                    segments: analysis.recognitionSegments,
                     x: analysis.recognitionX,
                     y: textY,
                     font,
@@ -2660,18 +2692,35 @@ function renderCharacterRun({ boxes, x, y, font, className }) {
     }).join("");
 }
 
+function renderTextSegments({ segments, x, y, font, className }) {
+    let cursor = x;
+
+    return segments.map((segment) => {
+        cursor += segment.gapBefore || 0;
+        const rendered = renderCharacterRun({
+            boxes: segment.boxes || [],
+            x: cursor,
+            y,
+            font,
+            className
+        });
+        cursor += segment.width || 0;
+        return rendered;
+    }).join("");
+}
+
 function renderEuroField(layout, inner) {
     const euro = layout.euro;
     const x = inner.x;
-    const y = inner.y;
+    const y = (layout.height - euro.height) / 2;
     const centerX = x + euro.width / 2;
-    const starCenterY = y + inner.height * 0.29;
+    const starCenterY = y + euro.height * 0.30;
     const ringRadius = euro.starRingDiameter / 2 * 0.74;
-    const countryY = y + inner.height - 15;
+    const countryY = y + euro.height - 15;
 
     return `
         <g>
-            <rect x="${x}" y="${y}" width="${euro.width}" height="${inner.height}" fill="${EU_BLUE}"/>
+            <rect x="${x}" y="${y}" width="${euro.width}" height="${euro.height}" fill="${EU_BLUE}"/>
             ${Array.from({ length: 12 }, (_, index) => {
                 const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
                 const starX = centerX + Math.cos(angle) * ringRadius;
@@ -2694,15 +2743,18 @@ function renderEuroField(layout, inner) {
 
 function renderSealColumn(analysis, options) {
     const { layout, inner, sealX } = analysis;
-    const huY = inner.y + inner.height * layout.huCenterRatio;
-    const authorityY = inner.y + inner.height * layout.authorityCenterRatio;
+    // One-line pattern: smaller HU field above the larger authority seal. The
+    // diameters come from the Anlage-4 pattern dimensions: HU 35 mm, authority
+    // seal 45 mm. They are centred in the 101 mm white face with a small gap.
+    const huY = inner.y + 30.5;
+    const authorityY = inner.y + 74.5;
 
     return `
         <g>
             ${renderHuSeal({
                 x: sealX,
                 y: huY,
-                diameter: layout.sealDiameter,
+                diameter: layout.huDiameter,
                 year: Number(options.huYear || new Date().getFullYear()),
                 month: Number(options.huMonth || 1),
                 rotation: Number(options.huRotation || 0)
@@ -2710,7 +2762,7 @@ function renderSealColumn(analysis, options) {
             ${renderAuthoritySeal({
                 x: sealX,
                 y: authorityY,
-                diameter: layout.sealDiameter
+                diameter: layout.authorityDiameter
             })}
         </g>
     `;
@@ -5770,7 +5822,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b91
+// TÜV Card source entry b92
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
