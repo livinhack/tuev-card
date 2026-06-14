@@ -146,6 +146,14 @@ export function renderEditorStyles() {
                 gap: 12px;
             }
 
+
+            .tuev-editor-groups-bottom-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 12px;
+                padding-top: 2px;
+            }
+
             .tuev-editor-groups-layout-toggle {
                 display: inline-flex;
                 align-items: center;

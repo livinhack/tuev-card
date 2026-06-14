@@ -1,4 +1,4 @@
-import { GROUP_ACCENT_COLORS, getGroupAccentColor } from "../card/groups.js?v=b76";
+import { GROUP_ACCENT_COLORS, getGroupAccentColor } from "../card/groups.js?v=b77";
 
 function clampPanelPosition(anchor = {}, width = 360) {
     const margin = 8;
@@ -107,6 +107,7 @@ export function renderEditorFloatingPanels({
     showColumnSetting,
     columns,
     config,
+    groupsLayout,
     canRenderPlate,
     openGroupColorId,
     colorAnchor,
@@ -124,6 +125,7 @@ export function renderEditorFloatingPanels({
                 showColumnSetting,
                 columns,
                 config,
+                groupsLayout,
                 canRenderPlate,
                 localize
             }));
@@ -176,13 +178,13 @@ export function renderEditorFloatingPanels({
     `;
 }
 
-function renderDisplayOptionsPopover({ anchor, showColumnSetting, columns, config, canRenderPlate, localize }) {
+function renderDisplayOptionsPopover({ anchor, showColumnSetting, columns, config, groupsLayout, canRenderPlate, localize }) {
     const currentColumns = String(columns || "auto");
     const width = 360;
     const horizontalPosition = clampPanelPosition(anchor, width);
     const estimatedHeight = showColumnSetting
-        ? (canRenderPlate ? 186 : 154)
-        : (canRenderPlate ? 132 : 98);
+        ? (canRenderPlate ? 222 : 190)
+        : (canRenderPlate ? 168 : 134);
     const verticalPosition = resolveVerticalPanelPosition(anchor, estimatedHeight);
 
     return `
@@ -231,6 +233,15 @@ function renderDisplayOptionsPopover({ anchor, showColumnSetting, columns, confi
                         ${localize("editor.render_plate")}
                     </label>
                 ` : ""}
+
+                <label>
+                    <input
+                        id="groupsLayoutAuto"
+                        type="checkbox"
+                        ${groupsLayout === "auto" ? "checked" : ""}
+                    >
+                    ${localize("editor.groups_layout_auto")}
+                </label>
             </div>
         </div>
     `;

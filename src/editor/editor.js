@@ -1,20 +1,20 @@
-import { localize } from "../translations/index.js?v=b76";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b76";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b76";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b76";
+import { localize } from "../translations/index.js?v=b77";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b77";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b77";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b77";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b76";
+} from "../plate/renderer.js?v=b77";
 import {
     getColumnLabel
-} from "./columns.js?v=b76";
+} from "./columns.js?v=b77";
 import {
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b76";
-import { renderEditorStyles } from "./styles.js?v=b76";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b76";
+} from "./render-parts.js?v=b77";
+import { renderEditorStyles } from "./styles.js?v=b77";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b77";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -77,7 +77,7 @@ export class TuevCardEditor extends HTMLElement {
             || hasClass("tuev-editor-floating-layer")
             || hasClass("tuev-editor-floating-panel");
 
-        if (clickedInsideEditor && clickedInsideFloatingControl) {
+        if (clickedInsideEditor || clickedInsideFloatingControl) {
             return;
         }
 
@@ -270,6 +270,7 @@ export class TuevCardEditor extends HTMLElement {
 
                 ${renderGroupsSection({
                     groups: this._draftGroups,
+                    groupsLayout: this._config.groups_layout === "auto" ? "auto" : "stacked",
                     pickerOpenKey: this._pickerOpenKey,
                     unselectedEntities,
                     searchText: this._searchText,
@@ -289,6 +290,7 @@ export class TuevCardEditor extends HTMLElement {
                 showColumnSetting,
                 columns: this._config.columns,
                 config: this._config,
+                groupsLayout: this._config.groups_layout === "auto" ? "auto" : "stacked",
                 canRenderPlate,
                 openGroupColorId: this._openGroupColorId,
                 colorAnchor: this._colorPopoverAnchor,
@@ -361,13 +363,15 @@ export class TuevCardEditor extends HTMLElement {
             });
         });
 
-        this.querySelector("#addGroup")?.addEventListener("click", () => {
-            this._draftGroups = [
-                ...this._draftGroups,
-                createGroup(getNewGroupTitle((key) => this.localize(key)))
-            ];
-            this.applyDraftConfig();
-            this.render();
+        this.querySelectorAll("[data-add-group]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this._draftGroups = [
+                    ...this._draftGroups,
+                    createGroup(getNewGroupTitle((key) => this.localize(key)))
+                ];
+                this.applyDraftConfig();
+                this.render();
+            });
         });
 
         this.querySelector("#groupsLayoutAuto")?.addEventListener("change", (event) => {

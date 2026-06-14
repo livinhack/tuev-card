@@ -2451,13 +2451,14 @@ return { getColumnSliderValue: getColumnSliderValue, getColumnsFromSliderValue: 
 
 // ---- src/editor/buttons.js ----
 const __m_src_editor_buttons_js = (() => {
-function renderButton({ id, disabled, text, active = true, extraAttributes = "" }) {
+function renderButton({ id = null, disabled, text, active = true, extraAttributes = "" }) {
     const enabled = !disabled;
     const activeClass = active ? "" : " is-inactive";
+    const idAttribute = id ? `id="${id}"` : "";
 
     return `
         <button
-            id="${id}"
+            ${idAttribute}
             class="tuev-editor-pill-button${activeClass}"
             type="button"
             ${extraAttributes}
@@ -2761,16 +2762,8 @@ function renderGroupsSection({
                     ${localize("editor.groups")}
                 </label>
                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
-                    <label class="tuev-editor-groups-layout-toggle">
-                        <input
-                            id="groupsLayoutAuto"
-                            type="checkbox"
-                            ${groupsLayout === "auto" ? "checked" : ""}
-                        >
-                        ${localize("editor.groups_layout_auto")}
-                    </label>
                     ${renderButton({
-                        id: "addGroup",
+                        extraAttributes: 'data-add-group="top"',
                         disabled: false,
                         text: localize("editor.add_group")
                     })}
@@ -2801,6 +2794,16 @@ function renderGroupsSection({
                     escapeHtml
                 })).join("")}
             </div>
+
+            ${groups.length >= 3 ? `
+                <div class="tuev-editor-groups-bottom-actions">
+                    ${renderButton({
+                        extraAttributes: 'data-add-group="bottom"',
+                        disabled: false,
+                        text: localize("editor.add_group")
+                    })}
+                </div>
+            ` : ""}
         </div>
     `;
 }
@@ -3196,6 +3199,14 @@ function renderEditorStyles() {
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
+            }
+
+
+            .tuev-editor-groups-bottom-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 12px;
+                padding-top: 2px;
             }
 
             .tuev-editor-groups-layout-toggle {
@@ -3932,6 +3943,7 @@ function renderEditorFloatingPanels({
     showColumnSetting,
     columns,
     config,
+    groupsLayout,
     canRenderPlate,
     openGroupColorId,
     colorAnchor,
@@ -3949,6 +3961,7 @@ function renderEditorFloatingPanels({
                 showColumnSetting,
                 columns,
                 config,
+                groupsLayout,
                 canRenderPlate,
                 localize
             }));
@@ -4001,13 +4014,13 @@ function renderEditorFloatingPanels({
     `;
 }
 
-function renderDisplayOptionsPopover({ anchor, showColumnSetting, columns, config, canRenderPlate, localize }) {
+function renderDisplayOptionsPopover({ anchor, showColumnSetting, columns, config, groupsLayout, canRenderPlate, localize }) {
     const currentColumns = String(columns || "auto");
     const width = 360;
     const horizontalPosition = clampPanelPosition(anchor, width);
     const estimatedHeight = showColumnSetting
-        ? (canRenderPlate ? 186 : 154)
-        : (canRenderPlate ? 132 : 98);
+        ? (canRenderPlate ? 222 : 190)
+        : (canRenderPlate ? 168 : 134);
     const verticalPosition = resolveVerticalPanelPosition(anchor, estimatedHeight);
 
     return `
@@ -4056,6 +4069,15 @@ function renderDisplayOptionsPopover({ anchor, showColumnSetting, columns, confi
                         ${localize("editor.render_plate")}
                     </label>
                 ` : ""}
+
+                <label>
+                    <input
+                        id="groupsLayoutAuto"
+                        type="checkbox"
+                        ${groupsLayout === "auto" ? "checked" : ""}
+                    >
+                    ${localize("editor.groups_layout_auto")}
+                </label>
             </div>
         </div>
     `;
@@ -4277,7 +4299,7 @@ class TuevCardEditor extends HTMLElement {
             || hasClass("tuev-editor-floating-layer")
             || hasClass("tuev-editor-floating-panel");
 
-        if (clickedInsideEditor && clickedInsideFloatingControl) {
+        if (clickedInsideEditor || clickedInsideFloatingControl) {
             return;
         }
 
@@ -4470,6 +4492,7 @@ class TuevCardEditor extends HTMLElement {
 
                 ${renderGroupsSection({
                     groups: this._draftGroups,
+                    groupsLayout: this._config.groups_layout === "auto" ? "auto" : "stacked",
                     pickerOpenKey: this._pickerOpenKey,
                     unselectedEntities,
                     searchText: this._searchText,
@@ -4489,6 +4512,7 @@ class TuevCardEditor extends HTMLElement {
                 showColumnSetting,
                 columns: this._config.columns,
                 config: this._config,
+                groupsLayout: this._config.groups_layout === "auto" ? "auto" : "stacked",
                 canRenderPlate,
                 openGroupColorId: this._openGroupColorId,
                 colorAnchor: this._colorPopoverAnchor,
@@ -4561,13 +4585,15 @@ class TuevCardEditor extends HTMLElement {
             });
         });
 
-        this.querySelector("#addGroup")?.addEventListener("click", () => {
-            this._draftGroups = [
-                ...this._draftGroups,
-                createGroup(getNewGroupTitle((key) => this.localize(key)))
-            ];
-            this.applyDraftConfig();
-            this.render();
+        this.querySelectorAll("[data-add-group]").forEach((button) => {
+            button.addEventListener("click", () => {
+                this._draftGroups = [
+                    ...this._draftGroups,
+                    createGroup(getNewGroupTitle((key) => this.localize(key)))
+                ];
+                this.applyDraftConfig();
+                this.render();
+            });
         });
 
         this.querySelector("#groupsLayoutAuto")?.addEventListener("change", (event) => {
@@ -5365,7 +5391,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b76
+// TÜV Card source entry b77
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

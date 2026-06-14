@@ -1,10 +1,11 @@
-export function renderButton({ id, disabled, text, active = true, extraAttributes = "" }) {
+export function renderButton({ id = null, disabled, text, active = true, extraAttributes = "" }) {
     const enabled = !disabled;
     const activeClass = active ? "" : " is-inactive";
+    const idAttribute = id ? `id="${id}"` : "";
 
     return `
         <button
-            id="${id}"
+            ${idAttribute}
             class="tuev-editor-pill-button${activeClass}"
             type="button"
             ${extraAttributes}

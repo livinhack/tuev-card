@@ -1,5 +1,5 @@
-import { getGroupAccentColor } from "../card/groups.js?v=b76";
-import { renderButton } from "./buttons.js?v=b76";
+import { getGroupAccentColor } from "../card/groups.js?v=b77";
+import { renderButton } from "./buttons.js?v=b77";
 export function renderEntitySection({
     selectedEntityIds,
     unselectedEntities,
@@ -285,16 +285,8 @@ export function renderGroupsSection({
                     ${localize("editor.groups")}
                 </label>
                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
-                    <label class="tuev-editor-groups-layout-toggle">
-                        <input
-                            id="groupsLayoutAuto"
-                            type="checkbox"
-                            ${groupsLayout === "auto" ? "checked" : ""}
-                        >
-                        ${localize("editor.groups_layout_auto")}
-                    </label>
                     ${renderButton({
-                        id: "addGroup",
+                        extraAttributes: 'data-add-group="top"',
                         disabled: false,
                         text: localize("editor.add_group")
                     })}
@@ -325,6 +317,16 @@ export function renderGroupsSection({
                     escapeHtml
                 })).join("")}
             </div>
+
+            ${groups.length >= 3 ? `
+                <div class="tuev-editor-groups-bottom-actions">
+                    ${renderButton({
+                        extraAttributes: 'data-add-group="bottom"',
+                        disabled: false,
+                        text: localize("editor.add_group")
+                    })}
+                </div>
+            ` : ""}
         </div>
     `;
 }
