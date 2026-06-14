@@ -1,12 +1,12 @@
-// TÜV Card source entry b87
+// TÜV Card source entry b88
 
-import { localize } from "./translations/index.js?v=b87";
-import { normalizeCardConfig } from "./card/config.js?v=b87";
-import { findFirstTuevEntity } from "./card/entities.js?v=b87";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b87";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b87";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b87";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b87";
+import { localize } from "./translations/index.js?v=b88";
+import { normalizeCardConfig } from "./card/config.js?v=b88";
+import { findFirstTuevEntity } from "./card/entities.js?v=b88";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b88";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b88";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b88";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b88";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b87";
+} from "./card/render-parts.js?v=b88";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b87";
-import { TuevCardEditor } from "./editor/editor.js?v=b87";
+} from "./plate/renderer.js?v=b88";
+import { TuevCardEditor } from "./editor/editor.js?v=b88";
 
 window.customCards = window.customCards || [];
 
@@ -906,7 +906,9 @@ class TuevCard extends HTMLElement {
                 compact,
                 preview: previewPlateTuning,
                 maxWidth: plateLayout.maxWidth,
-                scale: plateLayout.scale
+                scale: plateLayout.scale,
+                huYear: year,
+                huRotation: rotation
             })
         });
 

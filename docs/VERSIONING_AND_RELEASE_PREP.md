@@ -1,6 +1,6 @@
 # Versioning and release prep
 
-Current checked version: `b87`.
+Current checked version: `b88`.
 
 ## Version files
 
@@ -18,7 +18,7 @@ HANDOVER.md
 The generated bundle should start with:
 
 ```text
-// TÜV Card bundled b87
+// TÜV Card bundled b88
 ```
 
 ## HACS metadata

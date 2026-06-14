@@ -1,6 +1,6 @@
 # Release check
 
-Current checked version: `b87`.
+Current checked version: `b88`.
 
 ## Package layout
 
@@ -22,9 +22,9 @@ npm run check
 
 Confirm:
 
-- `dist/tuev-card.js` starts with `// TÜV Card bundled b87`.
-- `src/tuev-card-entry.js` starts with `// TÜV Card source entry b87`.
-- Source imports use `?v=b87`.
+- `dist/tuev-card.js` starts with `// TÜV Card bundled b88`.
+- `src/tuev-card-entry.js` starts with `// TÜV Card source entry b88`.
+- Source imports use `?v=b88`.
 - Root `tuev-card.js` is not the active HACS bundle anymore.
 - `hacs.json` does not use `content_in_root: true`.
 - If local `.ttf` files exist in `fonts/`, they are copied to `dist/fonts/` by the build.

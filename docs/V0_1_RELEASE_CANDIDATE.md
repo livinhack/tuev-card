@@ -1,6 +1,6 @@
 # v0.1 release candidate notes
 
-Current checked version: `b87`.
+Current checked version: `b88`.
 
 ## Current release shape
 
