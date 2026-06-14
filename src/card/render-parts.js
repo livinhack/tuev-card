@@ -1,4 +1,4 @@
-import { renderBadge } from "../badge/renderer.js?v=b73";
+import { renderBadge } from "../badge/renderer.js?v=b74";
 
 export function renderMissingEntity(entityId, localize) {
     return `

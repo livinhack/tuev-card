@@ -1,4 +1,4 @@
-// TÜV Card bundled b73
+// TÜV Card bundled b74
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2876,76 +2876,6 @@ function renderGroupEditor({
     `;
 }
 
-function renderGroupDisplayOptions({ group, localize }) {
-    const display = group.display || null;
-    const enabled = Boolean(display);
-    const columns = String(display?.columns || "auto");
-    const showBadge = display?.show_badge !== false;
-    const showDetails = display?.show_details !== false;
-
-    return `
-        <div class="tuev-editor-group-display-options">
-            <label class="tuev-editor-group-display-toggle">
-                <input
-                    type="checkbox"
-                    data-group-display-enabled="${group.id}"
-                    ${enabled ? "checked" : ""}
-                >
-                ${localize("editor.group_display_custom")}
-            </label>
-
-            ${enabled ? `
-                <div class="tuev-editor-group-display-panel">
-                    <div class="tuev-editor-group-display-row">
-                        <span>${localize("editor.columns")}</span>
-                        <div class="tuev-editor-group-display-chips">
-                            ${renderGroupDisplayColumnChip(group.id, "1", columns, localize("editor.columns_1_short"), localize)}
-                            ${renderGroupDisplayColumnChip(group.id, "2", columns, localize("editor.columns_2_short"), localize)}
-                            ${renderGroupDisplayColumnChip(group.id, "3", columns, localize("editor.columns_3_short"), localize)}
-                            ${renderGroupDisplayColumnChip(group.id, "4", columns, localize("editor.columns_4_short"), localize)}
-                            ${renderGroupDisplayColumnChip(group.id, "auto", columns, localize("editor.columns_fill"), localize)}
-                        </div>
-                    </div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            data-group-display-show-badge="${group.id}"
-                            ${showBadge ? "checked" : ""}
-                        >
-                        ${localize("editor.show_badge")}
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            data-group-display-show-details="${group.id}"
-                            ${showDetails ? "checked" : ""}
-                        >
-                        ${localize("editor.show_details")}
-                    </label>
-                    <button
-                        class="tuev-editor-group-display-reset"
-                        type="button"
-                        data-group-display-reset="${group.id}"
-                    >${localize("editor.group_display_use_global")}</button>
-                </div>
-            ` : ""}
-        </div>
-    `;
-}
-
-function renderGroupDisplayColumnChip(groupId, value, columns, label, localize) {
-    return `
-        <button
-            class="tuev-editor-display-chip tuev-editor-group-display-chip"
-            type="button"
-            data-group-display-columns="${groupId}"
-            data-columns="${value}"
-            aria-pressed="${columns === value ? "true" : "false"}"
-            title="${localize("editor.columns")}: ${label}"
-        >${label}</button>
-    `;
-}
-
 function renderGroupSortControls({ group, pendingGroupSort, displayOptionsTarget, localize }) {
     const sort = group.sort || "manual";
     const direction = group.sort_direction || "asc";
@@ -5375,7 +5305,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b73
+// TÜV Card source entry b74
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

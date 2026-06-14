@@ -137,10 +137,12 @@ The visual editor supports:
 - column limit
 - sorting for ungrouped vehicles and groups
 - showing or hiding details
+- showing or hiding the TÜV sticker
 - graphical license plates when available
 - optional vehicle groups with freely named headings
 - group colors
 - manual group ordering
+- group-specific display overrides via the eye badge next to the sort controls
 
 The native Home Assistant editor preview may be narrower than the final dashboard card. Manual `4` and `auto` are therefore shown conservatively in the editor preview. The final dashboard uses the real available card width.
 
@@ -165,6 +167,18 @@ When a vehicle is due or expired, the card uses a stamp-style HU confirmation ov
 | `plate_style` | `text` | `text` or `plate` |
 
 Optional groups can be used to divide one card into sections such as `Private`, `Company`, `Cars`, `Motorcycles`, or `Trailers`. Each group can optionally define a `color`, `sort`, and `sort_direction`. Vehicles without a group remain in the ungrouped section.
+
+Groups can also define optional display overrides via `display`. In the visual editor, open these settings with the round eye badge in the group header. Values that are not set inherit the global card display. `plate_style` remains global for now.
+
+```yaml
+groups:
+  - id: daily
+    title: Daily cars
+    display:
+      columns: "2"
+      show_badge: false
+      show_details: true
+```
 
 `columns: auto` uses as many readable columns as fit. Manual values `1` to `4` act as maximums and may be reduced automatically if the available width is too small.
 
@@ -406,10 +420,12 @@ Der visuelle Editor unterstützt:
 - Spaltenbegrenzung
 - Sortierung für ungruppierte Fahrzeuge und Gruppen
 - Ein-/Ausblenden von Details
+- Ein-/Ausblenden der TÜV-Plakette
 - grafische Kennzeichen, wenn verfügbar
 - optionale Fahrzeuggruppen mit frei benennbaren Überschriften
 - Gruppenfarben
 - manuelle Gruppensortierung
+- gruppenspezifische Darstellungsoptionen über das Augen-Badge neben den Sortierbuttons
 
 Die native Home-Assistant-Editor-Vorschau kann schmaler sein als die endgültige Dashboard-Card. Manuell `4` und `auto` werden in der Editor-Vorschau deshalb konservativ dargestellt. Im Dashboard nutzt die Card die tatsächlich verfügbare Breite.
 
@@ -434,6 +450,18 @@ Wenn ein Fahrzeug fällig oder abgelaufen ist, nutzt die Card einen stempelartig
 | `plate_style` | `text` | `text` oder `plate` |
 
 Optionale Gruppen können verwendet werden, um eine Card in Bereiche wie `Privat`, `Firma`, `Autos`, `Motorräder` oder `Anhänger` zu unterteilen. Jede Gruppe kann optional `color`, `sort` und `sort_direction` definieren. Fahrzeuge ohne Gruppe bleiben im ungruppierten Bereich.
+
+Gruppen können außerdem optionale Darstellungs-Overrides über `display` definieren. Im visuellen Editor werden diese Einstellungen über das runde Augen-Badge im Gruppenkopf geöffnet. Nicht gesetzte Werte erben die globale Card-Darstellung. `plate_style` bleibt vorerst global.
+
+```yaml
+groups:
+  - id: daily
+    title: Alltagsautos
+    display:
+      columns: "2"
+      show_badge: false
+      show_details: true
+```
 
 `columns: auto` nutzt so viele lesbare Spalten, wie in die verfügbare Breite passen. Manuelle Werte von `1` bis `4` wirken als Maximum und können automatisch reduziert werden, wenn die verfügbare Breite zu klein ist.
 

@@ -1,10 +1,16 @@
+# Release check
+
+Current checkpoint: `b74`
+
+`b74` polishes the group display override editor path after the eye-badge integration. It keeps runtime behavior unchanged and removes stale inline group-display editor code. See `docs/B74_GROUP_DISPLAY_POLISH.md`.
+
 # TÜV Card release check
 
-Current checked version: `b73`.
+Current checked version: `b74`.
 
 ## Current release/checkpoint note
 
-`b73` integrates display settings into round eye badges next to the sort badges.
+`b74` integrates display settings into round eye badges next to the sort badges.
 
 - Ungrouped/global display is opened via an eye badge in the ungrouped header.
 - Group-specific display is opened via an eye badge in each group header.
@@ -33,7 +39,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b73
+/hacsfiles/tuev-card/tuev-card.js?v=b74
 ```
 
 The dashboard card type remains:
@@ -55,13 +61,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b73"
+"version": "0.1.1-b74"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b73
+b74
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
@@ -135,16 +141,16 @@ See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home A
 - `docs/B67_GROUP_DISPLAY_OVERRIDES_CONCEPT.md`
 
 
-## b73 note
+## b74 note
 
 See `docs/B70_BADGE_STAMP_FRAME_TEXT_TUNING.md` for the compact badge stamp text/frame tuning.
 
 
-## b73 note
+## b74 note
 
 Small visual tuning for compact badge stamp checkbox placement. See `docs/B71_BADGE_STAMP_CHECKBOX_OFFSET.md`.
 
-## b73 group display overrides
+## b74 group display overrides
 
 - Group-level `display` overrides are now active for runtime rendering and in the visual editor.
 - Supported first-scope overrides: `columns`, `show_badge`, `show_details`.

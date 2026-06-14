@@ -1,6 +1,6 @@
-# b70 group display overrides concept
+# b67 group display overrides concept
 
-`b70` is a concept/data-model checkpoint for a later group-specific display feature.
+`b67` is a concept/data-model checkpoint for a later group-specific display feature.
 It does not implement runtime behavior yet.
 
 ## Goal
