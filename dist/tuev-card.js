@@ -1,4 +1,4 @@
-// TÜV Card bundled b89
+// TÜV Card bundled b90
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2167,92 +2167,81 @@ return { checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: g
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-const { checkPlateFontAvailable, ensurePlateFont, getPlateFontStatus, getPlateFontVariantForText, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
+const { tuevColorForYear } = __m_src_badge_profile_js;
+const { checkPlateFontAvailable, ensurePlateFont, getDefaultPlateFontVariant, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
 
 
 
-// EuroPlate is kept as a legacy compatibility path, but the renderer now
-// prefers GL-Nummernschild Mittelschrift/Engschrift when those fonts are
-// available. There is intentionally no system-font fallback for graphical
-// plates: the editor only exposes the option after a valid plate font loaded.
-const EURO_PLATE_GEOMETRY = {
-    height: 38,
-    minWidth: 118,
-    radius: 3,
-    euWidth: 19,
-    euContentX: 10,
-    textGapLeft: 7,
-    fontSize: 30,
-    textY: 0.515,
-    textScaleY: 1.18,
-    letterSpacing: 1.1,
-    starY: 0.30,
-    starRadius: 5.2,
-    starDotRadius: 0.75,
-    countryY: 0.72,
-    countryFontSize: 8.2,
-    fallbackWidthMode: "europlate"
-};
+// Renderer v2 starts from the legal FZV Anlage 4 dimensions instead of the
+// old visual plate profile. Coordinates are millimetres. The card passes one
+// shared scale: the widest plate in a card determines the scale, every other
+// one-line plate keeps the same visible height because its physical height is
+// always 110 mm.
+const FZV_ONE_LINE = Object.freeze({
+    key: "oneLine",
+    label: "Einzeiliges Kennzeichen",
+    maxWidth: 520,
+    height: 110,
+    minWidthMtl: 340,
+    minWidthEng: 320,
+    borderWidth: 3,
+    cornerRadius: 7,
+    lightEdge: 2,
+    euro: Object.freeze({
+        x: 6,
+        y: 11,
+        width: 45,
+        height: 88,
+        starRingDiameter: 30,
+        countryFontSize: 20
+    }),
+    contentGapAfterEuro: 10,
+    rightPadding: 10,
+    textY: 61,
+    textHeight: 75,
+    sealColumnWidth: 34,
+    sealGapLeft: 10,
+    sealGapRight: 10,
+    sealDiameter: 24,
+    huY: 37,
+    authorityY: 73
+});
 
-const GL_MTL_PLATE_GEOMETRY = {
-    height: 40,
-    minWidth: 122,
-    radius: 3,
-    euWidth: 20,
-    euContentX: 10.5,
-    textGapLeft: 7,
-    fontSize: 31,
-    textY: 0.535,
-    textScaleY: 1,
-    letterSpacing: 0.35,
-    starY: 0.30,
-    starRadius: 5.4,
-    starDotRadius: 0.78,
-    countryY: 0.72,
-    countryFontSize: 8.4,
-    fallbackWidthMode: "gl-mtl"
-};
+const FONT_PROFILES = Object.freeze({
+    mtl: Object.freeze({
+        role: "mtl",
+        label: "Mittelschrift 75 mm",
+        fontSize: 75,
+        charGap: 4,
+        fallback: Object.freeze({
+            digit: 43.5,
+            wide: 55,
+            narrow: 25,
+            default: 47.5,
+            space: 0
+        })
+    }),
+    eng: Object.freeze({
+        role: "eng",
+        label: "Engschrift 75 mm",
+        fontSize: 75,
+        charGap: 3,
+        fallback: Object.freeze({
+            digit: 36.5,
+            wide: 45,
+            narrow: 20,
+            default: 39.5,
+            space: 0
+        })
+    })
+});
 
-const GL_ENG_PLATE_GEOMETRY = {
-    ...GL_MTL_PLATE_GEOMETRY,
-    fontSize: 31.5,
-    letterSpacing: 0.25,
-    fallbackWidthMode: "gl-eng"
-};
-
-// Editor-preview-only adjustments. The dashboard renderer stays on the
-// real layout geometry. Preview tuning only compensates for HA's scaled
-// card preview and keeps the text visually centered there.
-const PREVIEW_TUNING = {
-    heightOffset: 1,
-    textYOffset: 0.01,
-    starYOffset: 0.005,
-    countryYOffset: -0.005
-};
-
-const CHAR_WIDTH = {
-    europlate: {
-        space: 0.29,
-        digit: 0.48,
-        wide: 0.61,
-        narrow: 0.36,
-        default: 0.51
-    },
-    "gl-mtl": {
-        space: 0.30,
-        digit: 0.50,
-        wide: 0.66,
-        narrow: 0.34,
-        default: 0.53
-    },
-    "gl-eng": {
-        space: 0.26,
-        digit: 0.42,
-        wide: 0.52,
-        narrow: 0.28,
-        default: 0.44
-    }
-};
+const PLATE_FACE_COLOR = "#f8f8f2";
+const PLATE_EDGE_COLOR = "#101010";
+const EU_BLUE = "#003399";
+const EU_YELLOW = "#ffcc00";
+const AUTHORITY_SEAL_FILL = "#d8d8d2";
+const AUTHORITY_SEAL_STROKE = "#a7a7a2";
 
 let plateFontRequested = false;
 let measureCanvas = null;
@@ -2277,62 +2266,27 @@ function renderLicensePlate(plate, options = {}) {
         return "";
     }
 
-    const {
-        normalizedPlate,
-        layout,
-        fontVariant,
-        width,
-        height,
-        textPadLeft,
-        textPadRight
-    } = metrics;
-
     const requestedScale = Number(options.scale || 0);
     const maxWidth = Number(options.maxWidth || 0);
     const fallbackScale = Number.isFinite(maxWidth) && maxWidth > 0
-        ? maxWidth / width
+        ? maxWidth / metrics.width
         : 1;
-
-    // The card should pass one shared scale for all plates. If the renderer is
-    // called directly, it still protects a single plate with maxWidth.
     const scale = Number.isFinite(requestedScale) && requestedScale > 0
         ? Math.min(1, requestedScale)
         : Math.min(1, fallbackScale);
-    const displayWidth = Math.max(1, Math.round(width * scale));
-    const displayHeight = Math.max(1, Math.round(height * scale));
 
-    const textAreaStartX = layout.euWidth + layout.textGapLeft + textPadLeft;
-    const textAreaWidth = width - textAreaStartX - textPadRight;
-    const textX = textAreaStartX + textAreaWidth / 2;
-
-    const textY = height * layout.textY;
-    const textScaleY = layout.textScaleY || 1;
-    const textTransform = textScaleY === 1
-        ? ""
-        : `translate(0 ${textY}) scale(1 ${textScaleY}) translate(0 ${-textY})`;
-    const letterSpacing = `${layout.letterSpacing}px`;
-    const clipId = `plateClip-${hashString(`${normalizedPlate}-${fontVariant.key}-${Math.round(width * 10)}-${Math.round(height * 10)}`)}`;
-
-    return renderPlateSvg({
-        normalizedPlate,
-        width,
-        height,
-        displayWidth,
-        displayHeight,
-        layout,
-        fontVariant,
-        textX,
-        textY,
-        letterSpacing,
-        textTransform,
-        clipId
+    return renderLawPlateSvg({
+        analysis: metrics,
+        displayWidth: Math.max(1, Math.round(metrics.width * scale)),
+        displayHeight: Math.max(1, Math.round(metrics.height * scale)),
+        options
     });
 }
 
 function getLicensePlateMetrics(plate, options = {}) {
-    const normalizedPlate = normalizePlate(plate);
+    const parsed = parsePlate(plate);
 
-    if (!normalizedPlate) {
+    if (!parsed.normalizedPlate) {
         return {
             width: 0,
             height: 0,
@@ -2340,83 +2294,170 @@ function getLicensePlateMetrics(plate, options = {}) {
         };
     }
 
-    const fontVariant = getPlateFontVariantForText(normalizedPlate);
-    const layout = getPlateGeometry(fontVariant, options.preview === true);
-    const plainChars = normalizedPlate.replace(/\s/g, "");
-    const charCount = plainChars.length;
-    const textPadLeft = getLeftPadding(charCount, fontVariant);
-    const textPadRight = getRightPadding(charCount, fontVariant);
-    const textWidth = measurePlateTextWidth(normalizedPlate, layout, fontVariant);
+    const availableFonts = getLawFontVariants();
+    const alternatives = availableFonts.map((fontVariant) => buildOneLineLayout(parsed, fontVariant, options));
+    const fitting = alternatives.find((alternative) => alternative.width <= FZV_ONE_LINE.maxWidth && !alternative.overflow);
+    const chosen = fitting || alternatives[alternatives.length - 1] || buildOneLineLayout(parsed, getDefaultLawFontVariant(), options);
 
-    const contentWidth =
-        layout.euWidth +
-        layout.textGapLeft +
-        textPadLeft +
-        textWidth +
-        textPadRight;
+    return {
+        ...chosen,
+        normalizedPlate: parsed.normalizedPlate,
+        parsed,
+        alternatives
+    };
+}
 
-    // Do not cap the measured width. The widest real content width must be
-    // allowed to determine the shared card-wide scale.
-    const width = Math.max(layout.minWidth, contentWidth);
+function parsePlate(plate) {
+    const normalizedPlate = normalizePlate(plate);
+    const tokens = normalizedPlate.split(" ").filter(Boolean);
+    const first = tokens[0] || "";
+    const restTokens = tokens.slice(1);
+
+    let prefix = first;
+    let recognition = restTokens.join("");
+
+    if (!recognition && first) {
+        const match = first.match(/^([A-ZÄÖÜ]{1,3})([A-ZÄÖÜ0-9].*)$/u);
+        if (match) {
+            prefix = match[1];
+            recognition = match[2].replace(/\s/g, "");
+        }
+    }
+
+    if (!recognition && tokens.length === 1) {
+        recognition = first;
+        prefix = "";
+    }
+
+    return {
+        normalizedPlate,
+        prefix,
+        recognition,
+        clean: normalizedPlate.replace(/\s/g, ""),
+        tokenCount: tokens.length
+    };
+}
+
+function getLawFontVariants() {
+    const status = getPlateFontStatus();
+    const fonts = Array.isArray(status?.fonts) ? status.fonts : [];
+    const mtl = fonts.find((font) => font.source === "gl" && font.role === "mtl");
+    const eng = fonts.find((font) => font.source === "gl" && font.role === "eng");
+    const legacy = fonts.find((font) => font.source === "europlate");
+
+    const variants = [];
+
+    if (mtl) {
+        variants.push({ ...mtl, lawProfile: FONT_PROFILES.mtl });
+    }
+
+    if (eng) {
+        variants.push({ ...eng, lawProfile: FONT_PROFILES.eng });
+    }
+
+    if (!variants.length && legacy) {
+        variants.push({ ...legacy, lawProfile: FONT_PROFILES.mtl });
+    }
+
+    if (!variants.length) {
+        variants.push(getDefaultLawFontVariant());
+    }
+
+    return variants;
+}
+
+function getDefaultLawFontVariant() {
+    const fallback = getDefaultPlateFontVariant();
+    return {
+        ...fallback,
+        lawProfile: fallback.role === "eng" ? FONT_PROFILES.eng : FONT_PROFILES.mtl
+    };
+}
+
+function buildOneLineLayout(parsed, fontVariant, options = {}) {
+    const layout = FZV_ONE_LINE;
+    const font = fontVariant.lawProfile || FONT_PROFILES.mtl;
+    const prefixBoxes = measureTextBoxes(parsed.prefix, fontVariant, font);
+    const recognitionBoxes = measureTextBoxes(parsed.recognition, fontVariant, font);
+    const prefixWidth = measureBoxesWidth(prefixBoxes, font);
+    const recognitionWidth = measureBoxesWidth(recognitionBoxes, font);
+    const hasSealColumn = Boolean(parsed.prefix && parsed.recognition);
+    const sealWidth = hasSealColumn ? layout.sealColumnWidth : 0;
+    const sealLeftGap = hasSealColumn ? layout.sealGapLeft : 0;
+    const sealRightGap = hasSealColumn ? layout.sealGapRight : 0;
+    const textAndSealWidth = prefixWidth + sealLeftGap + sealWidth + sealRightGap + recognitionWidth;
+    const contentLeftBoundary = layout.euro.x + layout.euro.width + layout.contentGapAfterEuro;
+    const rawWidth = contentLeftBoundary + textAndSealWidth + layout.rightPadding;
+    const minWidth = font.role === "eng" ? layout.minWidthEng : layout.minWidthMtl;
+    const width = Math.min(layout.maxWidth, Math.max(minWidth, Math.ceil(rawWidth)));
+    const availableTextArea = width - contentLeftBoundary - layout.rightPadding;
+    const overflow = textAndSealWidth > availableTextArea;
+    const startX = contentLeftBoundary + Math.max(0, (availableTextArea - textAndSealWidth) / 2);
+    const prefixX = startX;
+    const sealX = prefixX + prefixWidth + sealLeftGap + sealWidth / 2;
+    const recognitionX = hasSealColumn
+        ? sealX + sealWidth / 2 + sealRightGap
+        : prefixX + prefixWidth + sealLeftGap;
 
     return {
         width,
         height: layout.height,
-        normalizedPlate,
+        rawWidth,
+        overflow,
         layout,
         fontVariant,
-        charCount,
-        textPadLeft,
-        textPadRight,
-        textWidth
+        font,
+        prefixBoxes,
+        recognitionBoxes,
+        prefixWidth,
+        recognitionWidth,
+        textAndSealWidth,
+        prefixX,
+        sealX,
+        recognitionX,
+        hasSealColumn,
+        debug: options.debug === true
     };
 }
 
-function getPlateGeometry(fontVariant, preview) {
-    const base = fontVariant.source === "gl"
-        ? (fontVariant.role === "eng" ? GL_ENG_PLATE_GEOMETRY : GL_MTL_PLATE_GEOMETRY)
-        : EURO_PLATE_GEOMETRY;
-
-    if (!preview) {
-        return base;
-    }
-
-    return {
-        ...base,
-        height: base.height + PREVIEW_TUNING.heightOffset,
-        textY: base.textY + PREVIEW_TUNING.textYOffset,
-        starY: base.starY + PREVIEW_TUNING.starYOffset,
-        countryY: base.countryY + PREVIEW_TUNING.countryYOffset
-    };
+function measureTextBoxes(text, fontVariant, font) {
+    return Array.from(String(text || "")).map((char) => ({
+        char,
+        width: measureCharacterWidth(char, fontVariant, font)
+    }));
 }
 
-function getLeftPadding(charCount, fontVariant) {
-    if (fontVariant.source === "gl") {
-        return charCount >= 8 ? 6 : charCount <= 4 ? 3 : charCount <= 6 ? 4 : 5;
+function measureBoxesWidth(boxes, font) {
+    if (!boxes.length) {
+        return 0;
     }
 
-    return charCount >= 8 ? 7 : charCount <= 4 ? 2 : charCount <= 6 ? 3 : 5;
+    return boxes.reduce((sum, box) => sum + box.width, 0) + Math.max(0, boxes.length - 1) * font.charGap;
 }
 
-function getRightPadding(charCount, fontVariant) {
-    if (fontVariant.source === "gl") {
-        return charCount >= 8 ? 8 : charCount <= 4 ? 8 : charCount <= 6 ? 9 : 10;
-    }
-
-    return charCount >= 8 ? 9 : charCount <= 4 ? 8 : charCount <= 6 ? 9 : 10;
-}
-
-function measurePlateTextWidth(text, layout, fontVariant) {
-    const measured = measureTextWithCanvas(text, layout, fontVariant);
+function measureCharacterWidth(char, fontVariant, font) {
+    const measured = measureCharacterWithCanvas(char, fontVariant, font);
 
     if (measured > 0) {
-        return measured + Math.max(0, text.length - 1) * layout.letterSpacing;
+        return measured;
     }
 
-    return estimatePlateTextWidth(text, layout.fontSize, layout.fallbackWidthMode, layout.letterSpacing);
+    if (/[0-9]/.test(char)) {
+        return font.fallback.digit;
+    }
+
+    if ("MWÄÖÜ".includes(char)) {
+        return font.fallback.wide;
+    }
+
+    if ("IJ1".includes(char)) {
+        return font.fallback.narrow;
+    }
+
+    return font.fallback.default;
 }
 
-function measureTextWithCanvas(text, layout, fontVariant) {
+function measureCharacterWithCanvas(char, fontVariant, font) {
     if (typeof document === "undefined" || typeof document.createElement !== "function") {
         return 0;
     }
@@ -2431,53 +2472,23 @@ function measureTextWithCanvas(text, layout, fontVariant) {
         return 0;
     }
 
-    context.font = `${fontVariant.weight} ${layout.fontSize}px "${fontVariant.family}"`;
+    context.font = `${fontVariant.weight || 400} ${font.fontSize}px "${fontVariant.family}"`;
 
-    return context.measureText(text).width || 0;
+    return context.measureText(char).width || 0;
 }
 
-function estimatePlateTextWidth(text, fontSize, widthMode, letterSpacing) {
-    const widths = CHAR_WIDTH[widthMode] || CHAR_WIDTH.europlate;
-    let width = 0;
+function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
+    const { width, height, layout, fontVariant, font, parsed } = analysis;
+    const clipId = `plateLawClip-${hashString(`${parsed.normalizedPlate}-${fontVariant.key}-${width}`)}`;
+    const debug = options.debug === true || analysis.debug === true;
 
-    for (const char of text) {
-        if (char === " ") {
-            width += fontSize * widths.space;
-        } else if (char >= "0" && char <= "9") {
-            width += fontSize * widths.digit;
-        } else if ("MW".includes(char)) {
-            width += fontSize * widths.wide;
-        } else if ("IJ".includes(char)) {
-            width += fontSize * widths.narrow;
-        } else {
-            width += fontSize * widths.default;
-        }
-    }
-
-    return width + Math.max(0, text.length - 1) * letterSpacing;
-}
-
-function renderPlateSvg({
-    normalizedPlate,
-    width,
-    height,
-    displayWidth,
-    displayHeight,
-    layout,
-    fontVariant,
-    textX,
-    textY,
-    letterSpacing,
-    textTransform,
-    clipId
-}) {
     return `
         <svg
             viewBox="0 0 ${width} ${height}"
             width="${displayWidth}"
             height="${displayHeight}"
             role="img"
-            aria-label="${escapeHtml(normalizedPlate)}"
+            aria-label="${escapeHtml(parsed.normalizedPlate)}"
             style="
                 display: block;
                 width: ${displayWidth}px;
@@ -2489,114 +2500,206 @@ function renderPlateSvg({
             <defs>
                 <clipPath id="${clipId}">
                     <rect
-                        x="1"
-                        y="1"
-                        width="${width - 2}"
-                        height="${height - 2}"
-                        rx="${layout.radius}"
-                        ry="${layout.radius}"
+                        x="${layout.borderWidth / 2}"
+                        y="${layout.borderWidth / 2}"
+                        width="${width - layout.borderWidth}"
+                        height="${height - layout.borderWidth}"
+                        rx="${layout.cornerRadius}"
+                        ry="${layout.cornerRadius}"
                     />
                 </clipPath>
-
                 <style>
-                    .tuev-plate-text {
+                    .tuev-law-plate-text-${clipId} {
                         font-family: "${fontVariant.family}";
-                        font-size: ${layout.fontSize}px;
-                        font-weight: ${fontVariant.weight};
-                        letter-spacing: ${letterSpacing};
+                        font-size: ${font.fontSize}px;
+                        font-weight: ${fontVariant.weight || 400};
+                        dominant-baseline: central;
+                        text-anchor: middle;
                     }
                 </style>
             </defs>
 
             <g clip-path="url(#${clipId})">
-                <rect
-                    x="1"
-                    y="1"
-                    width="${width - 2}"
-                    height="${height - 2}"
-                    fill="#f7f7f2"
-                />
-
-                <rect
-                    x="1"
-                    y="1"
-                    width="${layout.euWidth}"
-                    height="${height - 2}"
-                    fill="#003399"
-                />
-
-                <rect
-                    x="${layout.euWidth}"
-                    y="1"
-                    width="1"
-                    height="${height - 2}"
-                    fill="#111"
-                    opacity="0.10"
-                />
-
-                ${renderEuStars(
-                    layout.euContentX,
-                    height * layout.starY,
-                    layout.starRadius,
-                    layout.starDotRadius
-                )}
-
-                <text
-                    x="${layout.euContentX}"
-                    y="${height * layout.countryY}"
-                    text-anchor="middle"
-                    dominant-baseline="middle"
-                    font-family="Arial, sans-serif"
-                    font-size="${layout.countryFontSize}"
-                    font-weight="700"
-                    fill="#fff"
-                >
-                    D
-                </text>
-
-                <text
-                    class="tuev-plate-text"
-                    x="${textX}"
-                    y="${textY}"
-                    text-anchor="middle"
-                    dominant-baseline="middle"
-                    transform="${textTransform}"
-                    fill="#111"
-                >
-                    ${escapeHtml(normalizedPlate)}
-                </text>
+                <rect x="0" y="0" width="${width}" height="${height}" fill="${PLATE_FACE_COLOR}"/>
+                ${renderEuroField(layout)}
+                ${analysis.hasSealColumn ? renderSealColumn(analysis, options) : ""}
+                ${renderCharacterRun({
+                    boxes: analysis.prefixBoxes,
+                    x: analysis.prefixX,
+                    y: layout.textY,
+                    font,
+                    className: `tuev-law-plate-text-${clipId}`
+                })}
+                ${renderCharacterRun({
+                    boxes: analysis.recognitionBoxes,
+                    x: analysis.recognitionX,
+                    y: layout.textY,
+                    font,
+                    className: `tuev-law-plate-text-${clipId}`
+                })}
+                ${debug ? renderDebugLayer(analysis) : ""}
             </g>
 
             <rect
-                x="1"
-                y="1"
-                width="${width - 2}"
-                height="${height - 2}"
-                rx="${layout.radius}"
-                ry="${layout.radius}"
+                x="${layout.borderWidth / 2}"
+                y="${layout.borderWidth / 2}"
+                width="${width - layout.borderWidth}"
+                height="${height - layout.borderWidth}"
+                rx="${layout.cornerRadius}"
+                ry="${layout.cornerRadius}"
                 fill="none"
-                stroke="#111"
-                stroke-width="2"
+                stroke="${PLATE_EDGE_COLOR}"
+                stroke-width="${layout.borderWidth}"
             />
         </svg>
     `;
 }
 
-function renderEuStars(cx, cy, radius, starRadius) {
-    return Array.from({ length: 12 }, (_, index) => {
-        const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
-        const x = cx + Math.cos(angle) * radius;
-        const y = cy + Math.sin(angle) * radius;
+function renderCharacterRun({ boxes, x, y, font, className }) {
+    let cursor = x;
+
+    return boxes.map((box) => {
+        const center = cursor + box.width / 2;
+        cursor += box.width + font.charGap;
 
         return `
-            <circle
-                cx="${x.toFixed(2)}"
-                cy="${y.toFixed(2)}"
-                r="${starRadius}"
-                fill="#ffcc00"
-            />
+            <text
+                class="${className}"
+                x="${center.toFixed(2)}"
+                y="${y}"
+                textLength="${box.width.toFixed(2)}"
+                lengthAdjust="spacingAndGlyphs"
+                fill="${PLATE_EDGE_COLOR}"
+            >${escapeHtml(box.char)}</text>
         `;
     }).join("");
+}
+
+function renderEuroField(layout) {
+    const euro = layout.euro;
+    const x = euro.x;
+    const y = euro.y;
+    const centerX = x + euro.width / 2;
+    const starCenterY = y + 26;
+    const ringRadius = euro.starRingDiameter / 2 * 0.74;
+    const countryY = y + euro.height - 16;
+
+    return `
+        <g>
+            <rect x="${x}" y="${y}" width="${euro.width}" height="${euro.height}" fill="${EU_BLUE}"/>
+            ${Array.from({ length: 12 }, (_, index) => {
+                const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
+                const starX = centerX + Math.cos(angle) * ringRadius;
+                const starY = starCenterY + Math.sin(angle) * ringRadius;
+                return renderStar(starX, starY, 2.0);
+            }).join("")}
+            <text
+                x="${centerX}"
+                y="${countryY}"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                font-family="Arial, sans-serif"
+                font-size="${euro.countryFontSize}"
+                font-weight="700"
+                fill="#fff"
+            >D</text>
+        </g>
+    `;
+}
+
+function renderSealColumn(analysis, options) {
+    const { layout, sealX } = analysis;
+
+    return `
+        <g>
+            ${renderHuSeal({
+                x: sealX,
+                y: layout.huY,
+                diameter: layout.sealDiameter,
+                year: Number(options.huYear || new Date().getFullYear()),
+                month: Number(options.huMonth || 1),
+                rotation: Number(options.huRotation || 0)
+            })}
+            ${renderAuthoritySeal({
+                x: sealX,
+                y: layout.authorityY,
+                diameter: layout.sealDiameter
+            })}
+        </g>
+    `;
+}
+
+function renderAuthoritySeal({ x, y, diameter }) {
+    const r = diameter / 2;
+
+    return `
+        <g opacity="0.96">
+            <circle cx="${x.toFixed(2)}" cy="${y}" r="${r}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="1.1"/>
+            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.66).toFixed(2)}" fill="none" stroke="#f5f5ef" stroke-width="0.9" opacity="0.85"/>
+            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.22).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
+        </g>
+    `;
+}
+
+function renderHuSeal({ x, y, diameter, year, month, rotation }) {
+    const r = diameter / 2;
+    const color = tuevColorForYear(year);
+    const shortYear = String(year || "").slice(-2) || "--";
+    const markerRotation = Number.isFinite(rotation) ? rotation : ((month % 12) * 30);
+
+    return `
+        <g transform="rotate(${markerRotation} ${x.toFixed(2)} ${y})">
+            <circle cx="${x.toFixed(2)}" cy="${y}" r="${r}" fill="${color}" stroke="${PLATE_EDGE_COLOR}" stroke-width="1.1"/>
+            ${Array.from({ length: 12 }, (_, index) => {
+                const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
+                const x1 = x + Math.cos(angle) * r * 0.62;
+                const y1 = y + Math.sin(angle) * r * 0.62;
+                const x2 = x + Math.cos(angle) * r * 0.86;
+                const y2 = y + Math.sin(angle) * r * 0.86;
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${PLATE_EDGE_COLOR}" stroke-width="0.7"/>`;
+            }).join("")}
+            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.31).toFixed(2)}" fill="${PLATE_EDGE_COLOR}"/>
+            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.23).toFixed(2)}" fill="${color}"/>
+            <text
+                x="${x.toFixed(2)}"
+                y="${y}"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                font-family="Arial, sans-serif"
+                font-size="${(r * 0.52).toFixed(2)}"
+                font-weight="700"
+                fill="${PLATE_EDGE_COLOR}"
+                transform="rotate(${-markerRotation} ${x.toFixed(2)} ${y})"
+            >${escapeHtml(shortYear)}</text>
+        </g>
+    `;
+}
+
+function renderStar(cx, cy, r) {
+    const points = [];
+
+    for (let index = 0; index < 10; index += 1) {
+        const radius = index % 2 === 0 ? r : r * 0.42;
+        const angle = -Math.PI / 2 + index * Math.PI / 5;
+        points.push(`${(cx + Math.cos(angle) * radius).toFixed(2)},${(cy + Math.sin(angle) * radius).toFixed(2)}`);
+    }
+
+    return `<polygon points="${points.join(" ")}" fill="${EU_YELLOW}"/>`;
+}
+
+function renderDebugLayer(analysis) {
+    const { layout, width, height } = analysis;
+    const contentLeftBoundary = layout.euro.x + layout.euro.width + layout.contentGapAfterEuro;
+    const rightBoundary = width - layout.rightPadding;
+
+    return `
+        <g opacity="0.72">
+            <rect x="0" y="0" width="${width}" height="${height}" fill="none" stroke="#00aaff" stroke-width="0.6" stroke-dasharray="4 4"/>
+            <line x1="${contentLeftBoundary}" y1="8" x2="${contentLeftBoundary}" y2="${height - 8}" stroke="#44cc44" stroke-width="0.6" stroke-dasharray="3 3"/>
+            <line x1="${rightBoundary}" y1="8" x2="${rightBoundary}" y2="${height - 8}" stroke="#44cc44" stroke-width="0.6" stroke-dasharray="3 3"/>
+            <text x="8" y="${height - 7}" font-family="monospace" font-size="7" fill="#0055aa">${escapeHtml(`${analysis.font.label}, ${Math.round(width)}×${height} mm`)}</text>
+        </g>
+    `;
 }
 
 function hashString(value) {
@@ -5581,7 +5684,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b89
+// TÜV Card source entry b90
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -6477,6 +6580,7 @@ class TuevCard extends HTMLElement {
                 maxWidth: plateLayout.maxWidth,
                 scale: plateLayout.scale,
                 huYear: year,
+                huMonth: month,
                 huRotation: rotation
             })
         });

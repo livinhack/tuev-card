@@ -1,12 +1,12 @@
-// TÜV Card source entry b89
+// TÜV Card source entry b90
 
-import { localize } from "./translations/index.js?v=b89";
-import { normalizeCardConfig } from "./card/config.js?v=b89";
-import { findFirstTuevEntity } from "./card/entities.js?v=b89";
-import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b89";
-import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b89";
-import { getSharedPlateLayout } from "./card/plate-layout.js?v=b89";
-import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b89";
+import { localize } from "./translations/index.js?v=b90";
+import { normalizeCardConfig } from "./card/config.js?v=b90";
+import { findFirstTuevEntity } from "./card/entities.js?v=b90";
+import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b90";
+import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b90";
+import { getSharedPlateLayout } from "./card/plate-layout.js?v=b90";
+import { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } from "./card/ui-state.js?v=b90";
 import {
     renderBadgeArea,
     renderCompactConfirmPanel,
@@ -15,15 +15,15 @@ import {
     renderMissingEntity,
     renderVehicleDetails,
     renderVehicleHeader
-} from "./card/render-parts.js?v=b89";
+} from "./card/render-parts.js?v=b90";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b89";
-import { TuevCardEditor } from "./editor/editor.js?v=b89";
+} from "./plate/renderer.js?v=b90";
+import { TuevCardEditor } from "./editor/editor.js?v=b90";
 
 window.customCards = window.customCards || [];
 
@@ -908,6 +908,7 @@ class TuevCard extends HTMLElement {
                 maxWidth: plateLayout.maxWidth,
                 scale: plateLayout.scale,
                 huYear: year,
+                huMonth: month,
                 huRotation: rotation
             })
         });
