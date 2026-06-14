@@ -5,7 +5,7 @@ import {
     getPlateFontVariantForText,
     injectPlateFont,
     isPlateFontLoaded
-} from "./font.js?v=b85";
+} from "./font.js?v=b86";
 
 export {
     checkPlateFontAvailable,

@@ -1,12 +1,12 @@
 # Plate fonts
 
-The card can use GL-Nummernschild for graphical license plates.
+This folder is the package location for GL-Nummernschild font files used by graphical license plates.
 
-Expected file names when the fonts are present in this folder:
+Release repository file names:
 
 ```text
 GL-Nummernschild-Mtl.ttf
 GL-Nummernschild-Eng.ttf
 ```
 
-This generated development ZIP contains the license/readme notes only, not the font binary files.
+The generated ChatGPT ZIP may omit binary font files. For a local GitHub/HACS package, keep the `.ttf` files in this folder next to the license/readme notes.

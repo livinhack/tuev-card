@@ -1,12 +1,12 @@
-# TÜV Reminder Card - Übergabeprotokoll b85
+# TÜV Reminder Card - Übergabeprotokoll b86
 
 ## Stand
 
 - Projekt: Home Assistant Lovelace Card `tuev-card` für die Integration `tuev_reminder` / „TÜV Reminder“.
-- Aktueller Fokus: Card, Kennzeichen-Font und Kennzeichenrenderer.
-- Neuer Stand: `0.1.1-b85`.
-- Neuer ZIP-Name: `tuev-card-full-b85-gl-font-license-path-prep.zip`.
-- Ausgangspunkt: `tuev-card-full-b84-gl-font-renderer-v2.zip`.
+- Aktueller Fokus: Card, GL-Nummernschild-Font und Kennzeichenrenderer.
+- Neuer Stand: `0.1.1-b86`.
+- Neuer ZIP-Name: `tuev-card-full-b86-hacs-bundled-font-readme-cleanup.zip`.
+- Ausgangspunkt: `tuev-card-full-b85-gl-font-license-path-prep.zip`.
 
 ## Feste Projektregeln
 
@@ -19,95 +19,94 @@
 - Systemschrift-Fallback für grafische Kennzeichen bleibt ausgeschlossen.
 - Grafische Kennzeichen nur anbieten, wenn ein gültiger Kennzeichen-Font verfügbar ist.
 
-## Direkt vor b85 bestätigte Punkte
+## Direkt vor b86 bestätigte Punkte
 
 - b79 Overlay final geprüft: bestanden.
 - Editor-Gruppenfunktionen: bestanden.
 - Floating Panels: bestanden.
 - b81 Sortier-Bestätigungsdialog modal: bestanden.
 - b82 Button-Zustände und „Alle hinzufügen“: bestanden.
-- b83 README/Release-Cleanup: durchgeführt.
-- b84 GL-Font-/Renderer-v2-Grundlage: vorhanden.
-- Nutzer hat GL-Nummernschild-FontSpace-ZIP hochgeladen und nach Lizenzprüfung „ok, los“ gesagt.
+- b83 README auf Endnutzer-Level: erledigt.
+- b84/b85 GL-Font-/Renderer-Grundlage: vorhanden.
+- Nutzer hat gemeldet: Der Renderer ist nach GL-Fonttest sichtbar aus der Bahn, das Laden hat also wahrscheinlich funktioniert.
+- Nutzer legt die GL-Fonts jetzt selbst in den lokalen GitHub-Ordner auf dem PC.
+- Wunsch: Wenn Fonts im Paket enthalten sind, soll im Endnutzer-README kein eigener Font-Erklärblock stehen.
 
-## Wichtig zu b85
+## Wichtig zu b86
 
-Dieses generierte Entwicklungs-ZIP enthält keine Font-Binärdateien (`.ttf`, `.otf`, `.woff`, ...). Es enthält die Lizenz-/Readme-Notizen und die vorbereiteten Runtime-Pfade.
-
-Erwartete Font-Dateinamen für eine Paket-/Release-Variante mit GL-Fonts:
+Das generierte ChatGPT-ZIP enthält weiterhin keine Font-Binärdateien (`.ttf`, `.otf`, `.woff`, ...). Für den echten GitHub-/HACS-Stand sollen die Fontdateien lokal im Repo liegen:
 
 ```text
 fonts/GL-Nummernschild-Mtl.ttf
 fonts/GL-Nummernschild-Eng.ttf
 ```
 
-## Was b85 ändert
+HACS installiert Dashboard-Repositories nach `www/community/<repo-name>/`; damit werden die Fonts über folgende Laufzeitpfade erreichbar:
 
-### 1. Font-Pfade bereinigt
+```text
+/hacsfiles/tuev-card/fonts/GL-Nummernschild-Mtl.ttf
+/hacsfiles/tuev-card/fonts/GL-Nummernschild-Eng.ttf
+```
 
-`src/plate/font.js` prüft jetzt die regulären GL-Dateinamen zuerst:
+`src/plate/font.js` prüft diese HACS-Pfade bereits zuerst.
 
-- `/hacsfiles/tuev-card/fonts/GL-Nummernschild-Mtl.ttf`
-- `/hacsfiles/tuev-card/fonts/GL-Nummernschild-Eng.ttf`
-- `/local/community/tuev-card/fonts/GL-Nummernschild-Mtl.ttf`
-- `/local/community/tuev-card/fonts/GL-Nummernschild-Eng.ttf`
-- `/local/tuev-card/fonts/GL-Nummernschild-Mtl.ttf`
-- `/local/tuev-card/fonts/GL-Nummernschild-Eng.ttf`
-- `/local/GL-Nummernschild-Mtl.ttf`
-- `/local/GL-Nummernschild-Eng.ttf`
-- `/local/EuroPlate.ttf` als Legacy-Fallback
+## Was b86 ändert
 
-Die b84-Kandidaten für optionale Bold-Dateien wurden entfernt, weil das bereitgestellte FontSpace-Paket reguläre `Mtl`-/`Eng`-Dateien enthält.
+### 1. README auf Paket-/HACS-Zustand vereinfacht
 
-### 2. Lizenz-/Readme-Notizen aufgenommen
+`README.md` wurde weiter auf Endnutzer-Level gehalten:
 
-Neue/aktualisierte Dateien:
+- GL-Fontdateien nicht mehr als manuelle Voraussetzung gelistet.
+- Der separate Abschnitt „Graphical license plates“ mit Dateinamen/Installationshinweisen wurde entfernt.
+- Grafische Kennzeichen bleiben als normales Feature erwähnt.
+- HACS-Pfad bleibt ohne Cachebuster:
 
-- `fonts/README.md`
-- `fonts/LICENSE.GL-Nummernschild.txt`
-- `fonts/GL-Nummernschild-Mtl-readme.txt`
-- `fonts/GL-Nummernschild-Eng-readme.txt`
-- `NOTICE.md`
+```yaml
+url: /hacsfiles/tuev-card/tuev-card.js
+type: module
+```
 
-Die hochgeladenen Readmes nennen Gutenberg Labo als Copyright-/Fontquelle und enthalten die Erlaubnis zur Nutzung, Kopie und Weitergabe mit oder ohne Änderung, kommerziell und nicht-kommerziell, ohne Gewährleistung.
+### 2. Font-/Lizenznotizen angepasst
 
-### 3. README angepasst
+- `NOTICE.md` beschreibt nun, dass Fontdateien, wenn sie im `fonts/`-Ordner liegen, über HACS zusammen mit der Card installiert und unter `/hacsfiles/tuev-card/fonts/...` bereitgestellt werden.
+- `fonts/README.md` beschreibt den Repository-/Paketort der Fonts.
+- `fonts/LICENSE.GL-Nummernschild.txt` nennt die Release-Dateinamen, ohne die Fonts als grundsätzlich extern darzustellen.
 
-`README.md` beschreibt grafische Kennzeichen jetzt auf GL-Nummernschild-Basis. EuroPlate wird nur noch als Legacy-Fallback erwähnt.
+### 3. Versionierung synchronisiert
 
-### 4. Versionierung synchronisiert
-
-- `package.json`: `0.1.1-b85`
-- `package-lock.json`: `0.1.1-b85`
-- `src/**/*.js`: Import-Querymarker `?v=b85`
-- `src/tuev-card-entry.js`: `// TÜV Card source entry b85`
-- `tuev-card.js`: nach Build `// TÜV Card bundled b85`
+- `package.json`: `0.1.1-b86`
+- `package-lock.json`: `0.1.1-b86`
+- `src/**/*.js`: Import-Querymarker `?v=b86`
+- `src/tuev-card-entry.js`: `// TÜV Card source entry b86`
+- `tuev-card.js`: nach Build `// TÜV Card bundled b86`
 
 ## Betroffene Hauptdateien
 
-- `src/plate/font.js`
 - `README.md`
 - `NOTICE.md`
-- `fonts/*`
-- `docs/B85_GL_FONT_LICENSE_PATH_PREP.md`
+- `fonts/README.md`
+- `fonts/LICENSE.GL-Nummernschild.txt`
+- `docs/B86_HACS_BUNDLED_FONT_README_CLEANUP.md`
 - `HANDOVER.md`
 - `package.json`
 - `package-lock.json`
+- `src/**/*.js` nur wegen Versions-Querymarkern
 - `tuev-card.js`
 
 ## Nicht geändert
 
 - TÜV-Plakettenrenderer.
-- Kennzeichen-Geometrie aus b84.
+- Kennzeichen-Geometrie/Rendererwerte aus b84/b85.
+- Font-Erkennung außer Versionsmarker/Bundle.
 - Card-/Editor-Gruppenlogik.
 - Floating Panels.
 - Sortier-Bestätigungsdialog.
 - „Alle hinzufügen“-Workflow.
-- Keine Systemschrift als Fallback.
+- Kein Systemschrift-Fallback.
 
 ## Build-/Check-Status
 
-Ausführen für b85:
+Ausführen für b86:
 
 ```text
 npm run check
@@ -118,52 +117,46 @@ Erwartet:
 
 - JavaScript-Syntaxcheck erfolgreich.
 - Bundle erfolgreich erzeugt.
-- Bundle-Header: `// TÜV Card bundled b85`.
-- Keine aktiven `?v=b84`-Imports mehr in `src/`.
-- Keine `.ttf`/`.otf`-Dateien im generierten ZIP.
+- Bundle-Header: `// TÜV Card bundled b86`.
+- Keine aktiven `?v=b85`-Imports mehr in `src/`.
 
-## Testanweisung für b85
+## Testanweisung für b86
 
-1. ZIP installieren/kopieren.
-2. Ohne Fontdateien testen:
-   - grafische Kennzeichenoption soll verborgen bleiben.
-   - Textkennzeichen sollen funktionieren.
-3. Zum GL-Test kompatible Fontdateien an einen unterstützten Pfad legen, bevorzugt:
+1. In deinem lokalen GitHub-/HACS-Ordner die Fontdateien ablegen:
 
 ```text
-/config/www/community/tuev-card/fonts/GL-Nummernschild-Mtl.ttf
-/config/www/community/tuev-card/fonts/GL-Nummernschild-Eng.ttf
+fonts/GL-Nummernschild-Mtl.ttf
+fonts/GL-Nummernschild-Eng.ttf
 ```
 
-4. Home Assistant Dashboard neu laden.
-5. Grafische Kennzeichen aktivieren.
-6. Kurze und lange Kennzeichen vergleichen.
-7. Firefox, Chrome und Android-App gegenprüfen.
+2. b86-Dateien übernehmen, ohne die lokalen `.ttf`-Dateien zu löschen.
+3. Über HACS oder lokale Kopie installieren.
+4. Dashboard neu laden.
+5. Prüfen, ob grafische Kennzeichen ohne manuelle `/local/...`-Fontinstallation verfügbar bleiben.
+6. Danach Screenshots/Referenzwerte für b87 Renderer-Feintuning bereitstellen.
 
-## Aktuelle Todo-Liste nach b85
+## Aktuelle Todo-Liste nach b86
 
 ### Nächster sinnvoller Schritt
 
-1. GL-Fontladung in Home Assistant prüfen.
-2. Screenshots mit kurzer/mittlerer/langer Platte sammeln.
-3. b86 Renderer-Feintuning anhand echter Screenshots:
+1. b87 GL-Kennzeichenrenderer feintunen:
    - Mtl/Eng Umschaltgrenze prüfen.
-   - Breite/Höhe/Abstände prüfen.
+   - Plate-Höhe/Breite prüfen.
+   - EU-Balken, Textabstand, Schriftgröße und Baseline prüfen.
    - Firefox/Chrome/Android vergleichen.
-   - Preview ggf. separat und vorsichtig behandeln.
+   - gespeicherte Referenzseite/Werte einbeziehen.
 
 ### Danach
 
-4. Card Richtung stabiler Release-Kandidat prüfen.
-5. Integration Architektur V3 angehen.
+2. Card Richtung stabiler Release-Kandidat prüfen.
+3. Integration Architektur V3 angehen.
 
 ### Später / bewusst verschoben
 
-- Kennzeichenrenderer v2 weiter ausbauen.
 - Sonderkennzeichen: Saisonkennzeichen, Wechselkennzeichen, grüne Kennzeichen, zweizeilige Kennzeichen.
 - Option TÜV-Plakette ausblenden / Compact-Card.
 - Browser-/App-Rendering grundsätzlich robuster prüfen.
 
 ## Fortsetzungstext bei Chatlimit
 
-Bitte mit `tuev-card-full-b85-gl-font-license-path-prep.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. Stand: b79 Overlay bestanden, Editor-Gruppenfunktionen bestanden, Floating Panels bestanden, b81 Sortier-Bestätigungsdialog modal bestanden, b82 Button-Zustände und „Alle hinzufügen“ bestanden, b83 README auf Endnutzer-Level, b84 GL-Renderer-v2-Grundlage, b85 GL-Lizenz-/Readme-Notizen und bereinigte Fontpfade. Dieses generierte ZIP enthält keine Font-Binärdateien; für GL-Tests müssen `GL-Nummernschild-Mtl.ttf` und `GL-Nummernschild-Eng.ttf` an einen unterstützten Pfad gelegt werden. Systemschrift-Fallback bleibt ausgeschlossen. Nächster Schritt: GL-Fontladung testen und dann b86 Renderer-Feintuning anhand Screenshots.
+Bitte mit `tuev-card-full-b86-hacs-bundled-font-readme-cleanup.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. Stand: b79 Overlay bestanden, Editor-Gruppenfunktionen bestanden, Floating Panels bestanden, b81 Sortier-Bestätigungsdialog modal bestanden, b82 Button-Zustände und „Alle hinzufügen“ bestanden, b83 README auf Endnutzer-Level, b84/b85 GL-Font-/Renderer-Grundlage, b86 README bereinigt und HACS-Font-Bundling-Pfad dokumentiert. Das generierte ChatGPT-ZIP enthält keine Font-Binärdateien; im echten GitHub-/HACS-Repo sollen `fonts/GL-Nummernschild-Mtl.ttf` und `fonts/GL-Nummernschild-Eng.ttf` lokal mitgeführt werden. Nächster Schritt: b87 GL-Kennzeichenrenderer anhand Screenshot/Referenzwerten feintunen. TÜV-Plakettenrenderer nicht ändern. Systemschrift-Fallback bleibt ausgeschlossen.

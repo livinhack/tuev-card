@@ -9,7 +9,7 @@ The card shows your vehicles with TÜV/HU status, next inspection date, TÜV sti
 - Shows one or multiple TÜV Reminder vehicles
 - TÜV/HU sticker with month/year display
 - Due and expired vehicles can be confirmed directly from the card
-- Optional graphical license plates when the required font is available
+- Optional graphical German-style license plates
 - Visual editor with localized UI
 - Columns: automatic, 1, 2, 3, or 4
 - Sorting by name, plate, due date, or status
@@ -22,7 +22,6 @@ The card shows your vehicles with TÜV/HU status, next inspection date, TÜV sti
 - Home Assistant
 - TÜV Reminder sensor entities
 - HACS or manual Lovelace resource setup
-- GL-Nummernschild font files for graphical license plates
 
 ## Installation
 
@@ -113,7 +112,7 @@ The visual editor supports:
 - sorting for ungrouped vehicles and groups
 - showing or hiding details
 - showing or hiding the TÜV sticker
-- graphical license plates when available
+- graphical license plates
 - optional vehicle groups with freely named headings
 - group colors
 - manual group ordering
@@ -155,27 +154,6 @@ groups:
 ```
 
 `columns: auto` uses as many readable columns as fit. Manual values `1` to `4` act as maximums and may be reduced automatically if the available width is too small.
-
-## Graphical license plates
-
-Graphical license plates use **GL-Nummernschild** when the font files are available to the card.
-
-Expected file names:
-
-```text
-fonts/GL-Nummernschild-Mtl.ttf
-fonts/GL-Nummernschild-Eng.ttf
-```
-
-Then enable graphical plates:
-
-```yaml
-plate_style: plate
-```
-
-If the font files are missing or cannot be loaded, the visual editor hides the graphical license plate option and the card falls back to plain text plates.
-
-`EuroPlate.ttf` is still recognized as a legacy fallback at `/local/EuroPlate.ttf`, but GL-Nummernschild is preferred. There is intentionally no system-font fallback for graphical plates.
 
 ## Notes
 

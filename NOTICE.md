@@ -51,7 +51,7 @@ The surrounding software code remains licensed separately under AGPL-3.0-or-late
 
 The card can render graphical German-style license plates with GL-Nummernschild by Gutenberg Labo.
 
-Expected runtime font file names:
+Bundled/expected runtime font file names:
 
 ```text
 fonts/GL-Nummernschild-Mtl.ttf
@@ -68,7 +68,7 @@ fonts/GL-Nummernschild-Eng-readme.txt
 
 The upstream readmes state that unlimited permission is granted to use, copy, and distribute the fonts, with or without modification, commercially and noncommercially, and that the fonts are provided "AS IS" without warranty.
 
-This generated development ZIP contains the license/readme notes only, not the font binary files.
+When the font binary files are present in `fonts/`, HACS installs them together with the card and Home Assistant serves them via `/hacsfiles/tuev-card/fonts/...`.
 
 ## EuroPlate.ttf legacy fallback
 
