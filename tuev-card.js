@@ -1,4 +1,4 @@
-// TÜV Card bundled b79
+// TÜV Card bundled b80
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -4297,22 +4297,42 @@ class TuevCardEditor extends HTMLElement {
     }
 
     handleDocumentClick(event) {
-        const path = typeof event.composedPath === "function" ? event.composedPath() : [];
-        const target = event.target;
-
-        const hasClass = (className) => path.some((item) => item?.classList?.contains?.(className));
-        const clickedInsideEditor = path.includes(this) || (target instanceof Node && this.contains(target));
-
-        const clickedInsideFloatingControl = hasClass("tuev-editor-display-menu")
-            || hasClass("tuev-editor-display-toggle-wrap")
-            || hasClass("tuev-editor-color-toggle-wrap")
-            || hasClass("tuev-editor-floating-layer")
-            || hasClass("tuev-editor-floating-panel");
-
-        if (clickedInsideEditor || clickedInsideFloatingControl) {
+        if (!this.hasOpenFloatingPanel()) {
             return;
         }
 
+        const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+        const hasClass = (className) => path.some((item) => item?.classList?.contains?.(className));
+        const hasAttribute = (attributeName) => path.some((item) => item?.hasAttribute?.(attributeName));
+
+        const clickedInsideFloatingPanel = hasClass("tuev-editor-floating-panel");
+        const clickedFloatingTrigger = hasClass("tuev-editor-display-menu")
+            || hasClass("tuev-editor-display-toggle-wrap")
+            || hasClass("tuev-editor-color-toggle-wrap")
+            || hasAttribute("data-display-options-toggle")
+            || hasAttribute("data-group-color-toggle");
+        const clickedGroupSortTrigger = hasAttribute("data-group-sort");
+
+        if (clickedInsideFloatingPanel || clickedFloatingTrigger) {
+            return;
+        }
+
+        window.setTimeout(() => {
+            if (clickedGroupSortTrigger && this._pendingGroupSort) {
+                return;
+            }
+
+            this.closeFloatingPanels();
+        }, 0);
+    }
+
+    hasOpenFloatingPanel() {
+        return this._displayOptionsOpen === true
+            || Boolean(this._openGroupColorId)
+            || Boolean(this._pendingGroupSort);
+    }
+
+    closeFloatingPanels() {
         let shouldRender = false;
 
         if (this._displayOptionsOpen) {
@@ -4334,7 +4354,7 @@ class TuevCardEditor extends HTMLElement {
             shouldRender = true;
         }
 
-        if (shouldRender) {
+        if (shouldRender && this.isConnected) {
             this.render();
         }
     }
@@ -5401,7 +5421,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b79
+// TÜV Card source entry b80
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

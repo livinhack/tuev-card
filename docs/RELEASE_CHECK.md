@@ -1,21 +1,16 @@
 # Release check
 
-Current checkpoint: `b79`
+Current checkpoint: `b80`
 
-`b75` polishes the group display override editor path after the eye-badge integration. It keeps runtime behavior unchanged and removes stale inline group-display editor code. See `docs/B74_GROUP_DISPLAY_POLISH.md`.
+`b80` stabilizes floating-panel outside-click handling after the b79 single-column HU stamp fix. See `docs/B80_FLOATING_PANEL_OUTSIDE_CLICK_CLEANUP.md`.
 
 # TÜV Card release check
 
-Current checked version: `b79`.
+Current checked version: `b80`.
 
 ## Current release/checkpoint note
 
-`b75` integrates display settings into round eye badges next to the sort badges.
-
-- Ungrouped/global display is opened via an eye badge in the ungrouped header.
-- Group-specific display is opened via an eye badge in each group header.
-- The two-line group header layout is preserved.
-- The runtime behavior from b72 remains unchanged.
+`b80` keeps the b79 runtime result and only changes editor floating-panel close behavior. Display settings remain opened via eye badges; the two-line group header layout remains preserved.
 
 See also:
 
@@ -39,7 +34,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b79
+/hacsfiles/tuev-card/tuev-card.js?v=b80
 ```
 
 The dashboard card type remains:
@@ -61,13 +56,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b79"
+"version": "0.1.1-b80"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b76
+b80
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
@@ -163,3 +158,12 @@ Small visual tuning for compact badge stamp checkbox placement. See `docs/B71_BA
 - Groups with more than 2 vehicles stay stacked.
 - Ungrouped vehicles stay separate.
 - Single-column cards should not overflow because of an oversized badge.
+
+## b80 floating panel smoke check
+
+- Open global and group display panels.
+- Click inside a panel: it should stay open.
+- Click outside the panel, including elsewhere inside the editor: it should close.
+- Open the group color picker and verify outside-click closing.
+- Switch manual group sorting to an automatic mode; the discard confirmation should not close immediately after the sort click.
+- Verify `Zur Gruppe hinzufügen` still reacts on the first click.

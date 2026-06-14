@@ -1,206 +1,190 @@
-# TÜV Reminder Card - Übergabeprotokoll b79
+# TÜV Reminder Card - Übergabeprotokoll b80
 
-## Projektkontext
+## Zweck dieses Dokuments
 
-- Projekt: Home Assistant Custom Card / Integration „TÜV Reminder“.
-- Aktueller Schwerpunkt: `tuev-card`, besonders Gruppen-/Editor-Darstellung und kleine UI-Feinschliffe.
+Dieses Übergabeprotokoll ist ab b77/b78 Bestandteil jedes neuen ZIPs. Es soll bei erneutem Chatlimit den direkten Wiedereinstieg ermöglichen, ohne alte Nachrichten rekonstruieren zu müssen.
+
+## Aktueller Stand
+
+- Projekt: Home Assistant Lovelace Card `tuev-card` für die Integration „TÜV Reminder“
+- Fokus aktuell: Card-/Editor-Darstellung, Gruppen, Floating Panels
+- Vorheriger Arbeitsstand: `tuev-card-full-b79-single-column-stamp-rethink-version-sync.zip`
+- Erkannte Ausgangsversion: `0.1.1-b79`
+- Neuer Stand: `0.1.1-b80`
+- Neuer ZIP-Name: `tuev-card-full-b80-floating-panel-outside-click-cleanup.zip`
+
+## Grundregeln / Projektentscheidungen
+
 - Code, Dateinamen und Funktionen grundsätzlich Englisch halten.
 - Deutsche UI-Texte nur über Übersetzungen/Lokalisierung lösen.
 - ZIP-Versionierung fortlaufend weiterzählen.
 - Bei jedem neuen Arbeitsstand einen neuen ZIP mit nächster Versionsnummer erzeugen.
-- Ab b77/b78 enthält jedes neue ZIP ein vollständiges Übergabeprotokoll.
+- Keine alten stabilen Renderer-Entscheidungen unnötig anfassen.
+- TÜV-Plakettenrenderer nicht ohne konkreten Grund ändern.
+- Kennzeichenrenderer nicht nebenbei refactoren.
+- Grafische Kennzeichen nur anbieten, wenn die benötigte Schrift erreichbar ist.
+- Systemschrift-Fallback für grafische Kennzeichen bleibt ausgeschlossen.
+- Änderungen an alten Plaketten-/Ziffern-Experimenten nach „Zentrierung sieht gut aus“ nicht übernehmen, bis neue SVG-Daten vorliegen.
+- Ab diesem Arbeitsstand bleibt das vollständige `HANDOVER.md` Pflichtbestandteil jedes ZIPs.
 
-## Version / Stand
+## Wichtige stabile Grundlagen
 
-- Vorheriger Arbeitsstand: `tuev-card-full-b78-single-column-stamp-scale.zip`
-- Tatsächlich erkannte Version im Input: `0.1.1-b78`
-- Neuer Stand: `0.1.1-b79`
-- Neuer ZIP-Name: `tuev-card-full-b79-single-column-stamp-rethink-version-sync.zip`
+- Frühere stabile Basis: `tuev-card-full-a91-cleanup.zip`
+- b-Versionen setzen darauf auf.
+- b75 war der Übergabepunkt für Gruppen nebeneinander / Editor-Darstellung.
+- b79 wurde vom Nutzer visuell bestätigt:
+  - 1-Spalten-HU-Stempel/Overlay: bestanden.
+  - Editor-Gruppenfunktionen: bestanden.
 
-## Stabile Grundlagen, die nicht unnötig geändert werden sollen
+## Nutzerfeedback direkt vor b80
 
-- Frühere stabile Basis: `tuev-card-full-a91-cleanup.zip`.
-- Danach b-Versionen; aktueller Arbeitszweig ist b-Serie.
-- Kennzeichenrenderer ist grundsätzlich stabil.
-- Grafische Kennzeichen sind nur verfügbar, wenn die benötigte Schrift vorhanden ist.
-- Kein Systemschrift-Fallback für grafische Kennzeichen.
-- TÜV-Plakettenrenderer nicht unnötig ändern.
-- Alte Plaketten-/Ziffern-Experimente nach „Zentrierung sieht gut aus“ bleiben verworfen, bis neue SVG-Daten vorliegen.
-- Gruppenabhängige Färbung der Buttons/Badges ist gut und soll nicht grundsätzlich umgedacht werden.
+Der Nutzer meldete:
 
-## Ausgangslage b78
+- `1. b79 Overlay final prüfen = Bestanden`
+- `2. Editor-Gruppenfunktionen prüfen = Bestanden`
+- `3. Floating Panels = Klick außen schließt nicht Konsistent. An manchen stellen geht es, an anderen passiert nichts beim außerhalb klicken.`
+- Zum früheren Todo „Automatisches Hinzufügen neuer Fahrzeuge“: Das wurde bereits diskutiert. Ergebnis: Ein Button „Alle hinzufügen“ ist sinnvoller, weil ein dynamisches, nicht in die Config schreibendes System zu umständlicher Konfiguration führte.
 
-b78 sollte den roten/grünen TÜV-Dialog in der 1-Spalten-Darstellung vergrößern.
+## Was b80 ändert
 
-Der Nutzer meldete danach:
+### 1. Floating-Panel-Außenklick konsistenter gemacht
 
-- Keine sichtbare Änderung.
-- In 1 Spalte ist der Dialog weiter zu klein im Verhältnis zum verfügbaren Platz.
-- 2-, 3- und 4-Spalten wirken inzwischen gut.
-- Nebenbemerkung: Versionsnummern innerhalb der Dateien müssen mitgehen; in `tuev-card.js` stand noch `b75`.
+Datei: `src/editor/editor.js`
 
-## Ursache der fehlenden b78-Wirkung
+Vor b80 wurde jeder Klick innerhalb des Editor-Elements geschützt. Dadurch blieb ein geöffnetes Floating Panel offen, wenn der Nutzer zwar außerhalb des Panels, aber noch innerhalb des Editors klickte.
 
-b78 hat die größere Stempelvariante an `compact === false` gekoppelt.
+b80 trennt jetzt genauer:
 
-In der echten gezeigten 1-Spalten-Situation mit mehreren Fahrzeugen ist `compact` aber weiterhin `true`, weil `compact` bisher aus `sectionIsMulti` abgeleitet wird. Es bedeutet also eher „mehrere Fahrzeuge im Abschnitt“ und nicht „aktuell mehrere Spalten“.
+- Klick innerhalb eines echten Floating Panels: offen lassen.
+- Klick auf echte Panel-Trigger: offen lassen bzw. Trigger-Aktion ausführen lassen.
+- Klick außerhalb des Panels, auch innerhalb des Editors: Panel schließen.
 
-Deshalb blieb der betroffene 1-Spalten-Fall im alten kompakten Stempelmodus.
+### 2. Klick wird nicht mehr vorzeitig „verbraucht“
 
-Zusätzlich war in `scripts/build-bundle.mjs` noch `const version = "b75"` hart kodiert. Dadurch wurde der Header von `tuev-card.js` trotz neuer Paketversion weiterhin als b75 gebaut.
+Der globale Click-Handler läuft weiterhin im Capture-Pfad, schließt aber nicht mehr sofort. Stattdessen wird das Schließen per `setTimeout(..., 0)` verzögert.
 
-## Was b79 ändert
+Ziel:
 
-### 1. TÜV-Dialog in echter 1-Spalten-Darstellung neu gedacht
+- Der ursprünglich geklickte Editor-Button kann zuerst seinen eigenen Handler ausführen.
+- Danach werden eventuell offene Floating Panels geschlossen.
+- Damit soll der frühere Effekt vermieden werden, dass ein Button wie „Zur Gruppe hinzufügen“ erst beim zweiten Versuch reagiert.
 
-Datei: `src/card/render-parts.js`
+### 3. Sortier-Bestätigungsdialog bleibt geschützt
 
-`renderCompactConfirmPanel()` erhält zusätzlich:
+Beim Wechsel von manueller Gruppensortierung zu einer automatischen Sortierung kann der Dialog „Manuelle Sortierung verwerfen?“ erscheinen.
 
-- `badgeSize`
-- `layoutColumns`
+b80 verhindert, dass dieser Dialog durch denselben Sortierklick sofort wieder geschlossen wird.
 
-Neue Logik:
+### 4. Versionierung synchronisiert
 
-- `badgeSingleColumn = withBadge && layoutColumns <= 1`
+- `package.json`: `0.1.1-b80`
+- `package-lock.json`: `0.1.1-b80`
+- `src/**/*.js`: Import-Cachebuster `?v=b80`
+- `src/tuev-card-entry.js`: `// TÜV Card source entry b80`
+- `tuev-card.js`: nach Build erwarteter Header `// TÜV Card bundled b80`
 
-Damit richtet sich die Overlay-Größe nach der tatsächlichen Layout-Spaltenzahl, nicht mehr nach `compact`.
+## Betroffene Hauptdateien in b80
 
-Für `badgeSingleColumn` werden diese Werte proportional zur Plakettengröße skaliert:
-
-- rote Warnstempel-Schrift
-- grüner Aktionsstempel-Schrift
-- Mindestbreiten
-- Padding
-- Abstand zwischen rotem und grünem Stempel
-- X-Versatz des grünen Stempels
-- Checkbox-/Hakenfeldgröße
-- maximale Overlaybreite
-
-Die Skalierung ist begrenzt, damit sie in 1 Spalte sichtbar größer wird, aber nicht unkontrolliert wächst.
-
-### 2. Echte Layoutdaten an den Overlay-Renderer übergeben
-
-Datei: `src/tuev-card-entry.js`
-
-Beim Aufruf von `renderCompactConfirmPanel()` werden jetzt übergeben:
-
-- `badgeSize`
-- `layoutColumns: layout.effectiveColumns`
-
-Damit kann der Renderer unterscheiden:
-
-- 1 Spalte mit mehreren Fahrzeugen: großer Stempel
-- 2/3/4 Spalten: bestehender kompakter Stempel
-
-### 3. Bundle-Version automatisch synchronisiert
-
-Datei: `scripts/build-bundle.mjs`
-
-Vorher:
-
-```js
-const version = "b75";
-```
-
-Jetzt:
-
-- `package.json` wird gelesen.
-- Aus `0.1.1-b79` wird automatisch `b79` extrahiert.
-- Der Bundle-Header wird daraus erzeugt.
-
-Ergebnis nach Build:
-
-```js
-// TÜV Card bundled b79
-```
-
-### 4. Source-Version / Cachebuster aktualisiert
-
-- `src/tuev-card-entry.js` beginnt jetzt mit `// TÜV Card source entry b79`.
-- Alle `src/**/*.js` Import-Cachebuster stehen auf `?v=b79`.
-- `package.json` und `package-lock.json` stehen auf `0.1.1-b79`.
-
-## Betroffene Dateien in b79
-
+- `src/editor/editor.js`
+  - `handleDocumentClick()` neu gedacht.
+  - `hasOpenFloatingPanel()` ergänzt.
+  - `closeFloatingPanels()` ergänzt.
 - `package.json`
-  - Version auf `0.1.1-b79`.
 - `package-lock.json`
-  - Version auf `0.1.1-b79`.
-- `scripts/build-bundle.mjs`
-  - Bundle-Version wird aus `package.json` abgeleitet.
-- `src/card/render-parts.js`
-  - echte 1-Spalten-Erkennung und skalierte Stempelwerte.
 - `src/tuev-card-entry.js`
-  - Übergabe von `badgeSize` und `layout.effectiveColumns` an den Stempelrenderer.
-  - Source-Kommentar auf b79.
-- `src/**/*.js`
-  - Import-Cachebuster auf `?v=b79`.
 - `tuev-card.js`
-  - Bundle neu gebaut; Header b79.
-- `docs/B79_SINGLE_COLUMN_STAMP_AND_VERSION_SYNC.md`
-  - technische b79-Dokumentation.
+- `docs/B80_FLOATING_PANEL_OUTSIDE_CLICK_CLEANUP.md`
 - `HANDOVER.md`
-  - dieses vollständige Übergabeprotokoll.
-- aktuelle Check-/Release-Dokumente
-  - Current-Version-/Cachebuster-Hinweise auf b79 aktualisiert, soweit sie den aktuellen Stand beschreiben.
+- Current-Checklist-Dokumente mit aktivem Cachebuster/Checkpoint.
 
-## Bewusst nicht geändert
+## Bewusst nicht verändert
 
-- Kein Refactor des TÜV-Plakettenrenderers.
-- Keine inhaltliche Änderung an `src/badge/*` außer Import-Cachebuster.
-- Keine Änderung am Kennzeichenrenderer oder an der EuroPlate-/Font-Logik außer Import-Cachebuster.
-- Kein Systemschrift-Fallback eingeführt.
-- Keine Änderung an Editor-Floating-Panels.
-- Keine Änderung an Gruppen-nebeneinander-Logik.
-- 2-/3-/4-Spalten-Stempelwerte sollten durch die neue Bedingung unverändert bleiben.
+- Badge-/Plakettenrenderer.
+- HU-Stempelgröße aus b79.
+- Kennzeichenrenderer.
+- EuroPlate-/TTF-/Font-Logik.
+- Systemschrift-Fallback bleibt ausgeschlossen.
+- Gruppen-nebeneinander-Laufzeitlogik wurde nicht weiter umgebaut.
+- Keine Renderer-v2-/GL-Fontpaket-Arbeit.
 
-## Tests ausgeführt
+## Relevante Dateien / Struktur
 
-```bash
-node --check src/card/render-parts.js
-node --check src/tuev-card-entry.js
-node --check scripts/build-bundle.mjs
-npm run check
-npm run build
+```text
+package.json
+package-lock.json
+tuev-card.js
+src/tuev-card-entry.js
+src/card/
+src/editor/editor.js
+src/editor/floating-panels.js
+src/editor/render-parts.js
+src/editor/styles.js
+src/translations/de.js
+src/translations/en.js
+docs/B80_FLOATING_PANEL_OUTSIDE_CLICK_CLEANUP.md
+HANDOVER.md
 ```
 
-Ergebnis:
+## Testanweisung für b80
 
-- Alle 27 JavaScript-Dateien geprüft.
-- Build erfolgreich.
-- `tuev-card.js` beginnt mit `// TÜV Card bundled b79`.
-- Im Bundle ist `// TÜV Card source entry b79` enthalten.
+In Home Assistant die Ressource mit Cachebuster laden:
 
-## Manuelle Testpunkte für den Nutzer
+```yaml
+url: /hacsfiles/tuev-card/tuev-card.js?v=b80
+```
 
-1. 1-Spalten-Ansicht mit mehreren Fahrzeugen und sichtbarer Plakette testen.
-   - Erwartung: Der rote/grüne TÜV-Dialog ist jetzt deutlich größer als in b78.
-2. 2-Spalten-Darstellung testen.
-   - Erwartung: Stempel bleibt ungefähr wie vorher und läuft nicht über.
-3. 3- und 4-Spalten-Darstellung testen.
-   - Erwartung: keine übergroßen Stempel, kein Layoutbruch.
-4. Cache prüfen.
-   - Empfohlene Ressourcen-URL: `/hacsfiles/tuev-card/tuev-card.js?v=b79`
-   - Zusätzlich Browser-/HA-Cache leeren, falls weiter alte Darstellung sichtbar ist.
-5. Geladenes Bundle prüfen.
-   - `tuev-card.js` sollte im Header `b79` zeigen, nicht mehr `b75`.
+Dann testen:
 
-## Offene / spätere Punkte
+1. Globales Darstellungs-/Auge-Panel öffnen.
+2. Klick im Panel: Panel bleibt offen.
+3. Klick außerhalb des Panels, aber innerhalb des Editors: Panel schließt.
+4. Klick außerhalb des Editors: Panel schließt.
+5. Gruppenspezifisches Darstellungs-/Auge-Panel öffnen und dieselben Außenklicks testen.
+6. Gruppen-Farbpanel öffnen:
+   - Klick auf Farbe funktioniert.
+   - Klick außerhalb schließt.
+7. Sortierung von manuell auf automatisch ändern:
+   - Bestätigungsdialog bleibt nach dem Sortierklick sichtbar.
+   - Bestätigen/Abbrechen schließt ihn.
+8. „Zur Gruppe hinzufügen“ testen:
+   - Soll beim ersten Klick reagieren.
+9. Bereits bestandene b79-Punkte nur kurz gegenprüfen:
+   - 1-Spalten-HU-Stempel weiterhin passend.
+   - Editor-Gruppenfunktionen weiterhin stabil.
 
-- Falls b79 noch zu klein oder zu groß wirkt, nur die `badgeSingleColumn`-Werte in `src/card/render-parts.js` feinjustieren.
-- Nicht wieder an `compact` koppeln; der Fehler in b78 kam genau daher.
-- Danach zum Gruppen-/Editor-Thema zurückkehren:
-  - `Kleine Gruppen nebeneinander` mehrfach ein-/ausschalten.
-  - `Zur Gruppe hinzufügen` beim ersten Klick prüfen.
-  - Zusätzlicher `Gruppe hinzufügen`-Button unten ab 3 Gruppen prüfen.
-  - Gruppen nebeneinander nur für kleine Gruppen ruhig/kontrolliert halten.
-- Kennzeichen-Rendering zwischen Firefox, Chrome und Android-App später umfassender prüfen.
-- Preview-Darstellung später eventuell an aktuelles Kennzeichenrendering angleichen.
-- Keine größeren Renderer-Refactors als Nebenänderung einschleusen.
+## Aktuelle Todo-Liste nach b80
 
-## Fortsetzung nach Chatlimit
+### Direkt nach b80 prüfen
 
-In einem neuen Chat diesen Stand hochladen und sagen:
+1. Floating Panels: Außenklick konsistent?
+2. „Zur Gruppe hinzufügen“ weiterhin erster Klick?
+3. Sortier-Bestätigungsdialog nicht sofort geschlossen?
 
-„Bitte mit `tuev-card-full-b79-single-column-stamp-rethink-version-sync.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. Fokus: Testauswertung der 1-Spalten-Stempelgröße; danach zurück zu Gruppen-/Editor-Darstellung.“
+### Nächster sinnvoller Schritt bei bestandenem b80-Test
+
+4. Editor-Button-Zustände vereinheitlichen:
+   - Auge/Darstellung
+   - Sortierung
+   - Gruppen-Freigabe
+   - manuelle Sortierung
+   - aktive/inaktive/hover/focus-Zustände
+   - gruppenabhängige Färbung beibehalten
+
+### Danach / später
+
+5. Gruppen-nebeneinander-Logik final polieren, falls in echten Beispielen noch Unruhe sichtbar wird.
+6. „Alle hinzufügen“-Button ggf. weiter verbessern; kein dynamisches Auto-Hinzufügen ohne Config-Schreibweise einführen.
+7. Preview-Darstellung später an aktuelles Kennzeichenrendering angleichen.
+8. Renderer-Stabilität Firefox/Chrome/Android grundsätzlich prüfen.
+9. Kennzeichenrenderer v2 mit GL-Fontpaket evaluieren.
+10. Sonderkennzeichen prüfen.
+11. Option TÜV-Plakette ausblenden / Compact-Card prüfen.
+12. Architektur V3 der Integration später angehen.
+
+## Nächster Einstieg im neuen Chat
+
+Falls wieder ein Chatlimit erreicht wird, mit diesem Text starten:
+
+```text
+Bitte mit `tuev-card-full-b80-floating-panel-outside-click-cleanup.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. b79 Overlay und Editor-Gruppenfunktionen waren bestanden. b80 fokussiert Floating-Panel-Außenklicks. Wichtig: Auto-Hinzufügen wurde zugunsten des Buttons „Alle hinzufügen“ verworfen. Renderer/Fontlogik nicht unnötig anfassen.
+```
