@@ -80,7 +80,8 @@ export function calculateLayoutInfo({ cardWidth, isMulti, requestedColumns }) {
 
 export function calculateAutomaticBadgeSize({ isMulti, effectiveColumns, tileWidth }) {
     if (!isMulti) {
-        return 250;
+        const dynamicSize = Math.floor((Number(tileWidth) || 250) - 18);
+        return clamp(dynamicSize, 170, 250);
     }
 
     const safety = effectiveColumns <= 2 ? 18 : 14;

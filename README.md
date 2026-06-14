@@ -563,3 +563,29 @@ LICENSES/
 ```
 
 `EuroPlate.ttf` ist nicht enthalten. Nutzer müssen eine eigene Datei bereitstellen und sind selbst für die Einhaltung der jeweiligen Schriftlizenz verantwortlich.
+
+### Group layout mode / Gruppenlayout
+
+English: Groups are stacked by default. For compact dashboards, small groups can optionally be shown side by side:
+
+```yaml
+groups_layout: auto
+```
+
+Only named groups with at most two vehicles are eligible. Larger groups and ungrouped vehicles remain stacked. The default is:
+
+```yaml
+groups_layout: stacked
+```
+
+Deutsch: Gruppen werden standardmäßig untereinander angezeigt. Für kompakte Dashboards können kleine Gruppen optional nebeneinander dargestellt werden:
+
+```yaml
+groups_layout: auto
+```
+
+Nur benannte Gruppen mit maximal zwei Fahrzeugen kommen dafür in Frage. Größere Gruppen und ungruppierte Fahrzeuge bleiben untereinander. Standard ist:
+
+```yaml
+groups_layout: stacked
+```

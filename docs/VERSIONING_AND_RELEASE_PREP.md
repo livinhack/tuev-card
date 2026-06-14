@@ -1,6 +1,6 @@
 # TÜV Card versioning and release preparation
 
-Current checked version: `b74`.
+Current checked version: `b75`.
 
 The project has switched from internal `bXX` checkpoint labels to the first semantic test release `b64`.
 
@@ -36,7 +36,7 @@ The HACS filename stays unchanged:
 The dashboard resource should use the root bundle:
 
 ```yaml
-url: /hacsfiles/tuev-card/tuev-card.js?v=b74
+url: /hacsfiles/tuev-card/tuev-card.js?v=b75
 type: module
 ```
 

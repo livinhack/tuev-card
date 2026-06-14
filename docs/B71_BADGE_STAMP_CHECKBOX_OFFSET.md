@@ -1,4 +1,4 @@
-# b74 - Badge stamp checkbox offset
+# b75 - Badge stamp checkbox offset
 
 This is a very small visual tuning release based on b70.
 

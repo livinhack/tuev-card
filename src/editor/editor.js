@@ -1,20 +1,20 @@
-import { localize } from "../translations/index.js?v=b74";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b74";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b74";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b74";
+import { localize } from "../translations/index.js?v=b75";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b75";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b75";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b75";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b74";
+} from "../plate/renderer.js?v=b75";
 import {
     getColumnLabel
-} from "./columns.js?v=b74";
+} from "./columns.js?v=b75";
 import {
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b74";
-import { renderEditorStyles } from "./styles.js?v=b74";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b74";
+} from "./render-parts.js?v=b75";
+import { renderEditorStyles } from "./styles.js?v=b75";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b75";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -367,6 +367,15 @@ export class TuevCardEditor extends HTMLElement {
                 createGroup(getNewGroupTitle((key) => this.localize(key)))
             ];
             this.applyDraftConfig();
+            this.render();
+        });
+
+        this.querySelector("#groupsLayoutAuto")?.addEventListener("change", (event) => {
+            this._config = {
+                ...this._config,
+                groups_layout: event.target.checked ? "auto" : "stacked"
+            };
+            this.fireConfigChanged();
             this.render();
         });
 
@@ -1059,6 +1068,7 @@ export class TuevCardEditor extends HTMLElement {
             columns,
             sort: this._config.sort || "name",
             sort_direction: this._config.sort_direction === "desc" ? "desc" : "asc",
+            groups_layout: this._config.groups_layout === "auto" ? "auto" : "stacked",
             plate_style: renderPlate ? "plate" : "text",
             show_badge: showBadge,
             show_details: showDetails

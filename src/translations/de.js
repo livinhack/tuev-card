@@ -51,6 +51,7 @@ export const de = {
         "editor.columns_3_short": "3",
         "editor.columns_4_short": "4",
         "editor.groups": "Gruppen",
+        "editor.groups_layout_auto": "Kleine Gruppen nebeneinander",
         "editor.groups_hint": "Gruppen sind optional. Fahrzeuge ohne Gruppe bleiben im normalen Bereich.",
         "editor.add_group": "Gruppe hinzufügen",
         "editor.group_color": "Gruppenfarbe",

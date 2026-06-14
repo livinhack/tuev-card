@@ -146,6 +146,32 @@ export function renderEditorStyles() {
                 gap: 12px;
             }
 
+            .tuev-editor-groups-layout-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 10px;
+                border-radius: 999px;
+                border: 1px solid var(--divider-color);
+                background: var(--secondary-background-color);
+                color: var(--secondary-text-color, var(--primary-text-color));
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+
+            .tuev-editor-groups-layout-toggle:hover,
+            .tuev-editor-groups-layout-toggle:focus-within {
+                border-color: var(--primary-color);
+                background: color-mix(in srgb, var(--primary-color) 14%, var(--secondary-background-color));
+            }
+
+            .tuev-editor-groups-layout-toggle input {
+                margin: 0;
+            }
+
             .tuev-editor-group-card {
                 position: relative;
                 border: 1px solid color-mix(in srgb, var(--tuev-group-accent, var(--primary-color)) 42%, var(--divider-color));

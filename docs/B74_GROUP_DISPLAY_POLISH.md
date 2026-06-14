@@ -1,4 +1,4 @@
-# b74 – Group display overrides polish
+# b75 – Group display overrides polish
 
 This version polishes the group-specific display override work from b72/b73.
 

@@ -1,4 +1,4 @@
-// TÜV Card bundled b74
+// TÜV Card bundled b75
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -56,6 +56,7 @@ const en = {
         "editor.columns_3_short": "3",
         "editor.columns_4_short": "4",
         "editor.groups": "Groups",
+        "editor.groups_layout_auto": "Small groups side by side",
         "editor.groups_hint": "Groups are optional. Vehicles without a group remain in the normal section.",
         "editor.add_group": "Add group",
         "editor.group_color": "Group color",
@@ -145,6 +146,7 @@ const de = {
         "editor.columns_3_short": "3",
         "editor.columns_4_short": "4",
         "editor.groups": "Gruppen",
+        "editor.groups_layout_auto": "Kleine Gruppen nebeneinander",
         "editor.groups_hint": "Gruppen sind optional. Fahrzeuge ohne Gruppe bleiben im normalen Bereich.",
         "editor.add_group": "Gruppe hinzufügen",
         "editor.group_color": "Gruppenfarbe",
@@ -582,6 +584,7 @@ const ALLOWED_SORTS = ["name", "plate", "due_date", "status"];
 const ALLOWED_COLUMNS = ["auto", "1", "2", "3", "4"];
 const ALLOWED_PLATE_STYLES = ["text", "plate"];
 const ALLOWED_SORT_DIRECTIONS = ["asc", "desc"];
+const ALLOWED_GROUPS_LAYOUTS = ["stacked", "auto"];
 
 const DEFAULT_CARD_CONFIG = {
     columns: "auto",
@@ -589,7 +592,8 @@ const DEFAULT_CARD_CONFIG = {
     show_details: true,
     show_badge: true,
     plate_style: "text",
-    sort_direction: "asc"
+    sort_direction: "asc",
+    groups_layout: "stacked"
 };
 
 function normalizeCardConfig(config = {}, options = {}) {
@@ -621,12 +625,17 @@ function normalizeCardConfig(config = {}, options = {}) {
         ? config.sort_direction
         : DEFAULT_CARD_CONFIG.sort_direction;
 
+    const groupsLayout = ALLOWED_GROUPS_LAYOUTS.includes(config.groups_layout)
+        ? config.groups_layout
+        : DEFAULT_CARD_CONFIG.groups_layout;
+
     const normalizedConfig = {
         ...DEFAULT_CARD_CONFIG,
         ...config,
         columns,
         sort,
         sort_direction: sortDirection,
+        groups_layout: groupsLayout,
         plate_style: plateStyle
     };
 
@@ -651,7 +660,7 @@ function removeLegacyCardConfigOptions(config) {
     return config;
 }
 
-return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED_PLATE_STYLES: ALLOWED_PLATE_STYLES, ALLOWED_SORT_DIRECTIONS: ALLOWED_SORT_DIRECTIONS, DEFAULT_CARD_CONFIG: DEFAULT_CARD_CONFIG, normalizeCardConfig: normalizeCardConfig, removeLegacyCardConfigOptions: removeLegacyCardConfigOptions };
+return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED_PLATE_STYLES: ALLOWED_PLATE_STYLES, ALLOWED_SORT_DIRECTIONS: ALLOWED_SORT_DIRECTIONS, ALLOWED_GROUPS_LAYOUTS: ALLOWED_GROUPS_LAYOUTS, DEFAULT_CARD_CONFIG: DEFAULT_CARD_CONFIG, normalizeCardConfig: normalizeCardConfig, removeLegacyCardConfigOptions: removeLegacyCardConfigOptions };
 
 })();
 
@@ -739,7 +748,8 @@ function calculateLayoutInfo({ cardWidth, isMulti, requestedColumns }) {
 
 function calculateAutomaticBadgeSize({ isMulti, effectiveColumns, tileWidth }) {
     if (!isMulti) {
-        return 250;
+        const dynamicSize = Math.floor((Number(tileWidth) || 250) - 18);
+        return clamp(dynamicSize, 170, 250);
     }
 
     const safety = effectiveColumns <= 2 ? 18 : 14;
@@ -2724,6 +2734,7 @@ function renderEntityPickerList({ unselectedEntities, localize, getEntityLabel }
 
 function renderGroupsSection({
     groups,
+    groupsLayout,
     pickerOpenKey,
     unselectedEntities,
     searchText,
@@ -2746,11 +2757,21 @@ function renderGroupsSection({
                 <label style="font-weight: 600;">
                     ${localize("editor.groups")}
                 </label>
-                ${renderButton({
-                    id: "addGroup",
-                    disabled: false,
-                    text: localize("editor.add_group")
-                })}
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                    <label class="tuev-editor-groups-layout-toggle">
+                        <input
+                            id="groupsLayoutAuto"
+                            type="checkbox"
+                            ${groupsLayout === "auto" ? "checked" : ""}
+                        >
+                        ${localize("editor.groups_layout_auto")}
+                    </label>
+                    ${renderButton({
+                        id: "addGroup",
+                        disabled: false,
+                        text: localize("editor.add_group")
+                    })}
+                </div>
             </div>
 
             <div style="
@@ -3172,6 +3193,32 @@ function renderEditorStyles() {
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
+            }
+
+            .tuev-editor-groups-layout-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 10px;
+                border-radius: 999px;
+                border: 1px solid var(--divider-color);
+                background: var(--secondary-background-color);
+                color: var(--secondary-text-color, var(--primary-text-color));
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+
+            .tuev-editor-groups-layout-toggle:hover,
+            .tuev-editor-groups-layout-toggle:focus-within {
+                border-color: var(--primary-color);
+                background: color-mix(in srgb, var(--primary-color) 14%, var(--secondary-background-color));
+            }
+
+            .tuev-editor-groups-layout-toggle input {
+                margin: 0;
             }
 
             .tuev-editor-group-card {
@@ -4520,6 +4567,15 @@ class TuevCardEditor extends HTMLElement {
             this.render();
         });
 
+        this.querySelector("#groupsLayoutAuto")?.addEventListener("change", (event) => {
+            this._config = {
+                ...this._config,
+                groups_layout: event.target.checked ? "auto" : "stacked"
+            };
+            this.fireConfigChanged();
+            this.render();
+        });
+
         this.querySelectorAll("[data-group-title]").forEach((input) => {
             const updateDraftTitle = () => {
                 const groupId = input.getAttribute("data-group-title");
@@ -5209,6 +5265,7 @@ class TuevCardEditor extends HTMLElement {
             columns,
             sort: this._config.sort || "name",
             sort_direction: this._config.sort_direction === "desc" ? "desc" : "asc",
+            groups_layout: this._config.groups_layout === "auto" ? "auto" : "stacked",
             plate_style: renderPlate ? "plate" : "text",
             show_badge: showBadge,
             show_details: showDetails
@@ -5305,7 +5362,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b74
+// TÜV Card source entry b75
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -5869,7 +5926,51 @@ class TuevCard extends HTMLElement {
     }
 
     renderSections(hass, sections, layoutContext) {
-        const renderSection = (section) => {
+        const contentWidth = Math.max(0, layoutContext.layoutWidth - 32);
+        const groupRowGap = 18;
+        const minInlineGroupWidth = 280;
+        const groupsLayout = this.config?.groups_layout === "auto" ? "auto" : "stacked";
+
+        const getInlineGroupColumnCount = (groupCount) => {
+            if (groupsLayout !== "auto" || groupCount < 2 || !contentWidth) {
+                return 1;
+            }
+
+            return Math.max(
+                1,
+                Math.min(
+                    groupCount,
+                    Math.floor((contentWidth + groupRowGap) / (minInlineGroupWidth + groupRowGap))
+                )
+            );
+        };
+
+        const getInlineGroupCardWidth = (columnCount) => {
+            if (columnCount <= 1) {
+                return layoutContext.layoutWidth;
+            }
+
+            const slotWidth = Math.max(
+                minInlineGroupWidth,
+                (contentWidth - groupRowGap * (columnCount - 1)) / columnCount
+            );
+
+            // calculateLayoutInfo receives the card width and subtracts the
+            // card padding internally. For an inline group slot we therefore
+            // add the same padding back so the resulting tile width matches the
+            // actual slot width instead of shrinking twice.
+            return slotWidth + 32;
+        };
+
+        const canInlineGroupSection = (section) => (
+            groupsLayout === "auto" &&
+            section.grouped === true &&
+            Boolean(section.title) &&
+            section.entityIds.length > 0 &&
+            section.entityIds.length <= 2
+        );
+
+        const renderSection = (section, options = {}) => {
             const entityIds = section.entityIds.filter((entityId) => hass.states[entityId]);
 
             if (entityIds.length === 0) {
@@ -5880,7 +5981,7 @@ class TuevCard extends HTMLElement {
             const sectionDisplay = this.getSectionDisplayConfig(section);
             const sectionColumns = sectionDisplay.columns || layoutContext.requestedColumns || this.config.columns;
             const layout = calculateLayoutInfo({
-                cardWidth: layoutContext.layoutWidth,
+                cardWidth: options.cardWidth || layoutContext.layoutWidth,
                 isMulti: sectionIsMulti,
                 requestedColumns: sectionColumns
             });
@@ -6001,6 +6102,54 @@ class TuevCard extends HTMLElement {
             `;
         };
 
+        const renderInlineGroupRun = (run) => {
+            const columnCount = getInlineGroupColumnCount(run.length);
+
+            if (columnCount <= 1) {
+                return run.map((section) => renderSection(section)).join("");
+            }
+
+            const sectionCardWidth = getInlineGroupCardWidth(columnCount);
+            const rows = [];
+
+            for (let index = 0; index < run.length; index += columnCount) {
+                rows.push(run.slice(index, index + columnCount));
+            }
+
+            return rows.map((row) => `
+                <div style="
+                    display: grid;
+                    grid-template-columns: repeat(${row.length}, minmax(0, 1fr));
+                    gap: 22px ${groupRowGap}px;
+                    align-items: start;
+                    min-width: 0;
+                ">
+                    ${row.map((section) => renderSection(section, { cardWidth: sectionCardWidth })).join("")}
+                </div>
+            `).join("");
+        };
+
+        const renderedSections = [];
+        let inlineRun = [];
+
+        sections.forEach((section) => {
+            if (canInlineGroupSection(section)) {
+                inlineRun.push(section);
+                return;
+            }
+
+            if (inlineRun.length > 0) {
+                renderedSections.push(renderInlineGroupRun(inlineRun));
+                inlineRun = [];
+            }
+
+            renderedSections.push(renderSection(section));
+        });
+
+        if (inlineRun.length > 0) {
+            renderedSections.push(renderInlineGroupRun(inlineRun));
+        }
+
         const hasHeadings = sections.some((section) => section.title);
 
         return `
@@ -6010,7 +6159,7 @@ class TuevCard extends HTMLElement {
                 flex-direction: column;
                 gap: ${hasHeadings ? 22 : 0}px;
             ">
-                ${sections.map(renderSection).join("")}
+                ${renderedSections.join("")}
             </div>
         `;
     }

@@ -1,9 +1,10 @@
-import { normalizeGroups } from "./groups.js?v=b74";
+import { normalizeGroups } from "./groups.js?v=b75";
 
 export const ALLOWED_SORTS = ["name", "plate", "due_date", "status"];
 export const ALLOWED_COLUMNS = ["auto", "1", "2", "3", "4"];
 export const ALLOWED_PLATE_STYLES = ["text", "plate"];
 export const ALLOWED_SORT_DIRECTIONS = ["asc", "desc"];
+export const ALLOWED_GROUPS_LAYOUTS = ["stacked", "auto"];
 
 export const DEFAULT_CARD_CONFIG = {
     columns: "auto",
@@ -11,7 +12,8 @@ export const DEFAULT_CARD_CONFIG = {
     show_details: true,
     show_badge: true,
     plate_style: "text",
-    sort_direction: "asc"
+    sort_direction: "asc",
+    groups_layout: "stacked"
 };
 
 export function normalizeCardConfig(config = {}, options = {}) {
@@ -43,12 +45,17 @@ export function normalizeCardConfig(config = {}, options = {}) {
         ? config.sort_direction
         : DEFAULT_CARD_CONFIG.sort_direction;
 
+    const groupsLayout = ALLOWED_GROUPS_LAYOUTS.includes(config.groups_layout)
+        ? config.groups_layout
+        : DEFAULT_CARD_CONFIG.groups_layout;
+
     const normalizedConfig = {
         ...DEFAULT_CARD_CONFIG,
         ...config,
         columns,
         sort,
         sort_direction: sortDirection,
+        groups_layout: groupsLayout,
         plate_style: plateStyle
     };
 
