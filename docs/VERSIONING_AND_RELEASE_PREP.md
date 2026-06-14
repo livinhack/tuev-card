@@ -1,37 +1,19 @@
 # TÜV Card versioning and release preparation
 
-Current checked version: `b82`.
+Current checked version: `b83`.
 
-The project has switched from internal `bXX` checkpoint labels to the first semantic test release `b64`.
+The project currently uses internal `bXX` checkpoint labels for ZIP/test handoffs. A future public release should use semantic tags such as `v0.1.x` or later.
 
 ## Current development checkpoint
 
 ```json
-"version": "0.1.1-b82"
+"version": "0.1.1-b83"
 ```
 
 The generated root bundle should start with:
 
 ```text
-TÜV Card bundled b82
-```
-
-## Earlier semantic test release note
-
-```json
-"version": "0.1.1-b64"
-```
-
-The earlier semantic-test bundle started with:
-
-```text
-TÜV Card bundled b64
-```
-
-The earlier GitHub Release tag was:
-
-```text
-b64
+TÜV Card bundled b83
 ```
 
 ## HACS file naming
@@ -48,15 +30,15 @@ The HACS filename stays unchanged:
 The dashboard resource should use the root bundle:
 
 ```yaml
-url: /hacsfiles/tuev-card/tuev-card.js?v=b82
+url: /hacsfiles/tuev-card/tuev-card.js
 type: module
 ```
 
-## Release flow
+## Internal checkpoint flow
 
-1. Start from the confirmed release-candidate checkpoint.
-2. Change the package version to `0.1.1-b64`.
-3. Adjust the bundle release label to `b64`.
+1. Start from the latest confirmed ZIP checkpoint.
+2. Increment the `bXX` version.
+3. Update `package.json`, `package-lock.json`, source import query markers, and source/bundle headers.
 4. Run:
 
 ```bash
@@ -64,11 +46,19 @@ npm run build
 npm run check
 ```
 
-5. Commit and push with GitHub Desktop.
-6. Create a GitHub Release with tag `b64`.
-7. Let HACS discover the update, or use **Informationen aktualisieren** for a manual test.
+5. Create a new ZIP with the matching version number.
+6. Update `HANDOVER.md` fully.
 
-## What should not change for b64
+## Later public release flow
+
+1. Start from a confirmed release-candidate checkpoint.
+2. Change the package version to the chosen semantic version.
+3. Run build/check.
+4. Commit and push with GitHub Desktop.
+5. Create a GitHub Release with the semantic tag.
+6. Let HACS discover the update, or use **Informationen aktualisieren** for immediate testing.
+
+## What should not change accidentally
 
 Do not rename the card type:
 
@@ -83,21 +73,18 @@ tuev-card-test.js
 dist/tuev-card.js
 ```
 
-Do not change the current EuroPlate rule for the first release:
+Do not change the current EuroPlate rule until the bundled-font replacement is intentionally implemented:
 
 ```text
 Graphical license plates require reachable EuroPlate.ttf.
 No graphical system-font fallback.
 ```
 
-## Deferred after b64
+## Deferred after b83
 
-The following items are intentionally not part of the first release versioning switch:
-
-- Plate Renderer v2 based on FZV Anlage 4.
-- Bundled GL-Nummernschild fonts.
+- GL-Fontpaket/Lizenz prüfen.
+- Plate Renderer v2 planen und ggf. implementieren.
 - Mittelschrift / Engschrift selection.
+- Integration Architecture V3.
 - Compact mode / hide TÜV badge.
-- Group-specific display overrides.
-- Optional side-by-side layout for small groups.
 - README screenshots.

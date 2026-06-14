@@ -1,22 +1,21 @@
-# Release check
-
-Current checkpoint: `b82`
-
-`b82` is a cleanup/checkpoint pass after the b81 modal-sort confirmation fix. See `docs/B82_CLEANUP_BUTTON_STATE_AND_ADD_ALL_CHECK.md`.
-
 # TÜV Card release check
 
-Current checked version: `b82`.
+Current checked version: `b83`.
 
-## Current release/checkpoint note
-
-`b82` keeps the b79 runtime result, the b80/b81 floating-panel behavior, and adds a small editor cleanup. The `Alle hinzufügen` button is already implemented; the group color trigger now exposes an active/open state.
+`b83` is a README/release-readiness cleanup. It keeps the confirmed b79-b82 runtime/editor behavior and does not intentionally change card behavior.
 
 See also:
 
 ```text
-docs/B82_CLEANUP_BUTTON_STATE_AND_ADD_ALL_CHECK.md
+docs/B83_README_RELEASE_CLEANUP_NEXT_STEP.md
 ```
+
+## Current stable notes
+
+- b79 HU stamp overlay in 1-column layout: confirmed by user.
+- b81 modal sort-discard confirmation: confirmed by user.
+- b82 button state and `Alle hinzufügen`: confirmed by user.
+- b83 README is end-user oriented and uses the normal HACS resource path.
 
 The current EuroPlate rule remains unchanged:
 
@@ -34,7 +33,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b82
+/hacsfiles/tuev-card/tuev-card.js
 ```
 
 The dashboard card type remains:
@@ -56,16 +55,16 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b82"
+"version": "0.1.1-b83"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b82
+b83
 ```
 
-For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
+For a future public semantic release, use `v0.1.x` or later tags instead of `bXX` tags.
 
 ## Build/check commands
 
@@ -116,63 +115,3 @@ For due and expired vehicles:
 ## Responsive / browser test
 
 See `docs/RESPONSIVE_BROWSER_TEST.md` for the dedicated cross-browser and Home Assistant view checklist.
-
-## Related checkpoint docs
-
-- `docs/B50_HANDOFF_CHECKPOINT.md`
-- `docs/B53_RESTORE_B50_CONFIRM_OVERLAY.md`
-- `docs/B54_HU_STAMP_CONFIRM_OVERLAY.md`
-- `docs/B55_STAMP_READABILITY_TUNING.md`
-- `docs/B56_STAMP_BACKGROUND_TUNING.md`
-- `docs/B57_STAMP_CONFIRM_ANIMATION.md`
-- `docs/B59_CLEANUP_AND_STAMP_CLICK_FIX.md`
-- `docs/B60_STAMP_ANIMATION_SEQUENCE.md`
-- `docs/B61_STAMP_ANIMATION_NO_SUCCESS_FLASH.md`
-- `docs/B62_STAMP_ANIMATION_REBUILD.md`
-- `docs/B63_STAMP_FLASH_FIX.md`
-- `docs/B64_STAMP_WITH_BADGE_TRIAL.md`
-- `docs/B65_STAMP_CONFIRM_FINAL_CLEANUP.md`
-- `docs/B66_STAMP_CONFIRM_DOCS.md`
-- `docs/B67_GROUP_DISPLAY_OVERRIDES_CONCEPT.md`
-
-
-## b75 note
-
-See `docs/B70_BADGE_STAMP_FRAME_TEXT_TUNING.md` for the compact badge stamp text/frame tuning.
-
-
-## b75 note
-
-Small visual tuning for compact badge stamp checkbox placement. See `docs/B71_BADGE_STAMP_CHECKBOX_OFFSET.md`.
-
-## b75 group display overrides
-
-- Group-level `display` overrides are now active for runtime rendering and in the visual editor.
-- Supported first-scope overrides: `columns`, `show_badge`, `show_details`.
-- `plate_style` remains global for now because graphical plates depend on EuroPlate availability.
-
-## b75 group layout smoke check
-
-- `groups_layout: stacked` keeps all groups below each other.
-- `groups_layout: auto` places only small groups next to each other when every involved group has at most 2 vehicles.
-- Groups with more than 2 vehicles stay stacked.
-- Ungrouped vehicles stay separate.
-- Single-column cards should not overflow because of an oversized badge.
-
-## b80 floating panel smoke check
-
-- Open global and group display panels.
-- Click inside a panel: it should stay open.
-- Click outside the panel, including elsewhere inside the editor: it should close.
-- Open the group color picker and verify outside-click closing.
-- Switch manual group sorting to an automatic mode; the discard confirmation should not close on outside click.
-- Verify `Zur Gruppe hinzufügen` still reacts on the first click.
-
-## b81 sort confirmation smoke check
-
-- Switch a group from manual sorting to automatic sorting.
-- Confirm the discard confirmation appears.
-- Click outside the dialog, inside the editor: it should stay open and no control behind it should react.
-- Click outside the editor/card: it should stay open.
-- Click `Abbrechen`: it should close without changing to automatic sort.
-- Reopen it and click `Ja`: it should close and apply the selected automatic sort.

@@ -1,8 +1,8 @@
 # TÜV Card repo cleanup notes
 
-Current checked version: `b82`.
+Current checked version: `b83`.
 
-This checkpoint is a repository cleanup before the first semantic `b64` release. It does not intentionally change UI behavior, editor behavior, card rendering, EuroPlate handling, grouping, sorting, or HACS naming.
+This checkpoint is a repository/readiness cleanup. It does not intentionally change UI behavior, editor behavior, card rendering, EuroPlate handling, grouping, sorting, or HACS naming.
 
 ## Verified release layout
 
@@ -30,7 +30,7 @@ The HACS metadata points to the root bundle:
 Expected Home Assistant resource path:
 
 ```yaml
-url: /hacsfiles/tuev-card/tuev-card.js?v=b82
+url: /hacsfiles/tuev-card/tuev-card.js
 type: module
 ```
 
@@ -54,7 +54,7 @@ npm run build
 npm run check
 ```
 
-`npm run check` now uses a small Node script so it works consistently on Windows and Linux instead of relying on Unix shell tools.
+`npm run check` uses a small Node script so it works consistently on Windows and Linux instead of relying on Unix shell tools.
 
 The Windows helper:
 
@@ -62,23 +62,32 @@ The Windows helper:
 build-tuev-card.bat
 ```
 
-now runs both build and syntax check before reporting success.
+runs both build and syntax check before reporting success.
+
+## README scope
+
+`README.md` should stay end-user oriented:
+
+- install through HACS or manual resource
+- add the card
+- use the visual editor
+- show simple YAML examples
+- explain current graphical license plate requirement
+
+Developer/build/release details belong in `docs/`, not in the README.
 
 ## License and font notes
 
-For the current `v0.1` candidate path:
+For the current checkpoint:
 
 - Graphical plate rendering remains available only when `EuroPlate.ttf` is reachable.
 - There is no graphical system-font fallback.
-- GL-Nummernschild fonts are noted for a later Plate Renderer v2, not included in this cleanup.
+- GL-Nummernschild fonts are the recommended next evaluation before Integration Architecture V3, but are not included in b83.
 
-## Deferred after v0.1
-
-Keep larger changes after the first stable test release:
+## Deferred / later
 
 - Plate Renderer v2 based on FZV Anlage 4.
-- Bundled GL-Nummernschild Mittel-/Engschrift fonts, after final license documentation.
+- Bundled GL-Nummernschild Mittel-/Engschrift fonts, after license documentation.
+- Integration Architecture V3.
 - Compact mode / hiding the TÜV badge.
-- Optional group-specific display overrides.
-- Optional side-by-side group layout for small groups.
 - Screenshot refresh shortly before broader public promotion.
