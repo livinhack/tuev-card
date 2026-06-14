@@ -1,16 +1,16 @@
 # Release check
 
-Current checkpoint: `b80`
+Current checkpoint: `b81`
 
-`b80` stabilizes floating-panel outside-click handling after the b79 single-column HU stamp fix. See `docs/B80_FLOATING_PANEL_OUTSIDE_CLICK_CLEANUP.md`.
+`b81` makes the manual-sort discard confirmation modal-like: outside clicks no longer close it. See `docs/B81_SORT_CONFIRM_MODAL.md`.
 
 # TÜV Card release check
 
-Current checked version: `b80`.
+Current checked version: `b81`.
 
 ## Current release/checkpoint note
 
-`b80` keeps the b79 runtime result and only changes editor floating-panel close behavior. Display settings remain opened via eye badges; the two-line group header layout remains preserved.
+`b81` keeps the b79 runtime result and the b80 normal floating-panel outside-click behavior. It additionally makes the manual-sort discard confirmation modal-like: outside clicks do not close it; only Cancel/Yes do.
 
 See also:
 
@@ -34,7 +34,7 @@ tuev-card.js
 HACS should load:
 
 ```text
-/hacsfiles/tuev-card/tuev-card.js?v=b80
+/hacsfiles/tuev-card/tuev-card.js?v=b81
 ```
 
 The dashboard card type remains:
@@ -56,13 +56,13 @@ dist/tuev-card.js
 The package version for this checkpoint is:
 
 ```json
-"version": "0.1.1-b80"
+"version": "0.1.1-b81"
 ```
 
 The internal GitHub Release tag can be:
 
 ```text
-b80
+b81
 ```
 
 For a future public semantic release, use `v0.1.x` tags instead of `bXX` tags.
@@ -165,5 +165,14 @@ Small visual tuning for compact badge stamp checkbox placement. See `docs/B71_BA
 - Click inside a panel: it should stay open.
 - Click outside the panel, including elsewhere inside the editor: it should close.
 - Open the group color picker and verify outside-click closing.
-- Switch manual group sorting to an automatic mode; the discard confirmation should not close immediately after the sort click.
+- Switch manual group sorting to an automatic mode; the discard confirmation should not close on outside click.
 - Verify `Zur Gruppe hinzufügen` still reacts on the first click.
+
+## b81 sort confirmation smoke check
+
+- Switch a group from manual sorting to automatic sorting.
+- Confirm the discard confirmation appears.
+- Click outside the dialog, inside the editor: it should stay open and no control behind it should react.
+- Click outside the editor/card: it should stay open.
+- Click `Abbrechen`: it should close without changing to automatic sort.
+- Reopen it and click `Ja`: it should close and apply the selected automatic sort.

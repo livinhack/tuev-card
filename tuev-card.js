@@ -1,4 +1,4 @@
-// TÜV Card bundled b80
+// TÜV Card bundled b81
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -4305,23 +4305,29 @@ class TuevCardEditor extends HTMLElement {
         const hasClass = (className) => path.some((item) => item?.classList?.contains?.(className));
         const hasAttribute = (attributeName) => path.some((item) => item?.hasAttribute?.(attributeName));
 
+        const clickedInsideSortConfirm = hasClass("tuev-editor-sort-confirm");
         const clickedInsideFloatingPanel = hasClass("tuev-editor-floating-panel");
         const clickedFloatingTrigger = hasClass("tuev-editor-display-menu")
             || hasClass("tuev-editor-display-toggle-wrap")
             || hasClass("tuev-editor-color-toggle-wrap")
             || hasAttribute("data-display-options-toggle")
             || hasAttribute("data-group-color-toggle");
-        const clickedGroupSortTrigger = hasAttribute("data-group-sort");
+
+        if (this._pendingGroupSort) {
+            if (clickedInsideSortConfirm) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
 
         if (clickedInsideFloatingPanel || clickedFloatingTrigger) {
             return;
         }
 
         window.setTimeout(() => {
-            if (clickedGroupSortTrigger && this._pendingGroupSort) {
-                return;
-            }
-
             this.closeFloatingPanels();
         }, 0);
     }
@@ -5421,7 +5427,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b80
+// TÜV Card source entry b81
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

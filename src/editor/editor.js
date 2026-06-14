@@ -1,20 +1,20 @@
-import { localize } from "../translations/index.js?v=b80";
-import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b80";
-import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b80";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b80";
+import { localize } from "../translations/index.js?v=b81";
+import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b81";
+import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b81";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b81";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b80";
+} from "../plate/renderer.js?v=b81";
 import {
     getColumnLabel
-} from "./columns.js?v=b80";
+} from "./columns.js?v=b81";
 import {
     renderEntitySection,
     renderGroupsSection
-} from "./render-parts.js?v=b80";
-import { renderEditorStyles } from "./styles.js?v=b80";
-import { renderEditorFloatingPanels } from "./floating-panels.js?v=b80";
+} from "./render-parts.js?v=b81";
+import { renderEditorStyles } from "./styles.js?v=b81";
+import { renderEditorFloatingPanels } from "./floating-panels.js?v=b81";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -73,23 +73,29 @@ export class TuevCardEditor extends HTMLElement {
         const hasClass = (className) => path.some((item) => item?.classList?.contains?.(className));
         const hasAttribute = (attributeName) => path.some((item) => item?.hasAttribute?.(attributeName));
 
+        const clickedInsideSortConfirm = hasClass("tuev-editor-sort-confirm");
         const clickedInsideFloatingPanel = hasClass("tuev-editor-floating-panel");
         const clickedFloatingTrigger = hasClass("tuev-editor-display-menu")
             || hasClass("tuev-editor-display-toggle-wrap")
             || hasClass("tuev-editor-color-toggle-wrap")
             || hasAttribute("data-display-options-toggle")
             || hasAttribute("data-group-color-toggle");
-        const clickedGroupSortTrigger = hasAttribute("data-group-sort");
+
+        if (this._pendingGroupSort) {
+            if (clickedInsideSortConfirm) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
 
         if (clickedInsideFloatingPanel || clickedFloatingTrigger) {
             return;
         }
 
         window.setTimeout(() => {
-            if (clickedGroupSortTrigger && this._pendingGroupSort) {
-                return;
-            }
-
             this.closeFloatingPanels();
         }, 0);
     }
