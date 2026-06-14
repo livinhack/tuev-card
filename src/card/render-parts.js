@@ -1,4 +1,4 @@
-import { renderBadge } from "../badge/renderer.js?v=b77";
+import { renderBadge } from "../badge/renderer.js?v=b78";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -209,8 +209,9 @@ export function renderCompactConfirmPanel({
 
     const confirming = ui.confirming;
     const badgeCompactText = withBadge && compact;
-    const warningFontSize = badgeCompactText ? "8.2px" : (compact ? "10px" : "11px");
-    const actionFontSize = badgeCompactText ? "7.0px" : (compact ? "9px" : "10px");
+    const badgeSpaciousText = withBadge && !compact;
+    const warningFontSize = badgeCompactText ? "8.2px" : (badgeSpaciousText ? "12.6px" : (compact ? "10px" : "11px"));
+    const actionFontSize = badgeCompactText ? "7.0px" : (badgeSpaciousText ? "10.8px" : (compact ? "9px" : "10px"));
     const frozenExpired = typeof ui.confirmStampExpired === "boolean" ? ui.confirmStampExpired : expired;
     const stampColor = frozenExpired
         ? "var(--error-color, #db5337)"
@@ -273,7 +274,7 @@ export function renderCompactConfirmPanel({
             transform: translate(-50%, -50%) rotate(-18deg);
             z-index: 6;
             width: max-content;
-            max-width: min(98%, ${compact ? (withBadge ? "168px" : "154px") : "178px"});
+            max-width: min(98%, ${compact ? (withBadge ? "168px" : "154px") : (badgeSpaciousText ? "218px" : "178px")});
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -285,9 +286,9 @@ export function renderCompactConfirmPanel({
             <div style="
                 position: relative;
                 box-sizing: border-box;
-                min-width: ${badgeCompactText ? "74px" : (compact ? "62px" : "72px")};
+                min-width: ${badgeCompactText ? "74px" : (badgeSpaciousText ? "104px" : (compact ? "62px" : "72px"))};
                 max-width: 100%;
-                padding: ${badgeCompactText ? "4px 10px 5px" : (compact ? "4px 8px 5px" : "5px 10px 6px")};
+                padding: ${badgeCompactText ? "4px 10px 5px" : (badgeSpaciousText ? "6px 13px 7px" : (compact ? "4px 8px 5px" : "5px 10px 6px"))};
                 border: 2px solid color-mix(in srgb, ${stampColor} 88%, transparent);
                 outline: 1px dashed color-mix(in srgb, ${stampColor} 64%, transparent);
                 outline-offset: -4px;
@@ -301,8 +302,8 @@ export function renderCompactConfirmPanel({
                 font-family: 'Arial Narrow', 'DIN Condensed', 'Bahnschrift SemiCondensed', sans-serif;
                 font-size: ${warningFontSize};
                 font-weight: 900;
-                line-height: ${badgeCompactText ? "0.90" : "0.92"};
-                letter-spacing: ${badgeCompactText ? "0.12px" : "0.28px"};
+                line-height: ${badgeCompactText ? "0.90" : (badgeSpaciousText ? "0.94" : "0.92")};
+                letter-spacing: ${badgeCompactText ? "0.12px" : (badgeSpaciousText ? "0.34px" : "0.28px")};
                 text-transform: uppercase;
                 text-align: center;
                 text-shadow: 0 1px 1px rgba(0, 0, 0, 0.78), 0 0 5px rgba(0, 0, 0, 0.35);
@@ -325,15 +326,15 @@ export function renderCompactConfirmPanel({
                 ${confirming ? "disabled" : ""}
                 style="
                     position: relative;
-                    transform: translateX(${compact ? "9px" : "13px"}) rotate(14deg);
+                    transform: translateX(${compact ? "9px" : (badgeSpaciousText ? "17px" : "13px")}) rotate(14deg);
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: ${badgeCompactText ? "5px" : (compact ? "5px" : "6px")};
+                    gap: ${badgeCompactText ? "5px" : (badgeSpaciousText ? "7px" : (compact ? "5px" : "6px"))};
                     max-width: 100%;
-                    min-width: ${badgeCompactText ? "82px" : "0"};
+                    min-width: ${badgeCompactText ? "82px" : (badgeSpaciousText ? "118px" : "0")};
                     box-sizing: border-box;
-                    padding: ${badgeCompactText ? "4px 8px" : (compact ? "4px 6px" : "5px 8px")};
+                    padding: ${badgeCompactText ? "4px 8px" : (badgeSpaciousText ? "6px 10px" : (compact ? "4px 6px" : "5px 8px"))};
                     border-radius: 4px;
                     border: 2px solid color-mix(in srgb, ${actionColor} 88%, transparent);
                     outline: 1px dashed color-mix(in srgb, ${actionColor} 62%, transparent);
@@ -347,8 +348,8 @@ export function renderCompactConfirmPanel({
                     font-family: 'Arial Narrow', 'DIN Condensed', 'Bahnschrift SemiCondensed', sans-serif;
                     font-size: ${actionFontSize};
                     font-weight: 900;
-                    line-height: ${badgeCompactText ? "0.86" : "0.94"};
-                    letter-spacing: ${badgeCompactText ? "0.08px" : "0.18px"};
+                    line-height: ${badgeCompactText ? "0.86" : (badgeSpaciousText ? "0.96" : "0.94")};
+                    letter-spacing: ${badgeCompactText ? "0.08px" : (badgeSpaciousText ? "0.22px" : "0.18px")};
                     text-transform: uppercase;
                     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75), 0 0 5px rgba(0, 0, 0, 0.35);
                     cursor: ${confirming ? "default" : "pointer"};
@@ -369,8 +370,8 @@ export function renderCompactConfirmPanel({
                 ">${actionLines}</span>
                 <span style="
                     flex: 0 0 auto;
-                    width: ${compact ? "17px" : "19px"};
-                    height: ${compact ? "17px" : "19px"};
+                    width: ${compact ? "17px" : (badgeSpaciousText ? "21px" : "19px")};
+                    height: ${compact ? "17px" : (badgeSpaciousText ? "21px" : "19px")};
                     border-radius: 2px;
                     border: 1.7px solid currentColor;
                     display: inline-flex;
@@ -381,7 +382,7 @@ export function renderCompactConfirmPanel({
                     overflow: visible;
                     transform: translateX(${badgeCompactText ? "3.5px" : "0"});
                 ">
-                    <svg viewBox="0 0 18 18" width="${compact ? "17" : "19"}" height="${compact ? "17" : "19"}" aria-hidden="true" style="display: block; overflow: visible;">
+                    <svg viewBox="0 0 18 18" width="${compact ? "17" : (badgeSpaciousText ? "21" : "19")}" height="${compact ? "17" : (badgeSpaciousText ? "21" : "19")}" aria-hidden="true" style="display: block; overflow: visible;">
                         <path
                             pathLength="1"
                             d="M3.1 9.5 L7.0 13.0 L15.2 4.3"

@@ -1,20 +1,20 @@
-# TÜV Reminder Card - Übergabeprotokoll b77
+# TÜV Reminder Card - Übergabeprotokoll b78
 
 ## Projektkontext
 
 - Projekt: Home Assistant Custom Card / Integration „TÜV Reminder“
-- Aktueller Schwerpunkt: `tuev-card`, insbesondere Gruppen- und Editor-Darstellung
+- Aktueller Schwerpunkt: `tuev-card`, insbesondere Gruppen-/Editor-Darstellung und kleine UI-Feinschliffe.
 - Code, Dateinamen und Funktionen bleiben grundsätzlich Englisch.
 - Deutsche UI-Texte werden über Übersetzungen/Lokalisierung gelöst.
 - ZIP-Versionierung wird fortlaufend weitergezählt.
-- Ab diesem Stand soll jedes neue ZIP ein vollständiges Übergabeprotokoll enthalten.
+- Ab b77/b78 soll jedes neue ZIP ein vollständiges Übergabeprotokoll enthalten.
 
 ## Version / Stand
 
-- Vorheriger Arbeitsstand: `tuev-card-full-b76-groups-side-by-side-gap-scale.zip`
-- Tatsächlich erkannte Version im Input: `0.1.1-b76`
-- Neuer Stand: `0.1.1-b77`
-- Neuer ZIP-Name: `tuev-card-full-b77-editor-group-layout-handover.zip`
+- Vorheriger Arbeitsstand: `tuev-card-full-b77-editor-group-layout-handover.zip`
+- Tatsächlich erkannte Version im Input: `0.1.1-b77`
+- Neuer Stand: `0.1.1-b78`
+- Neuer ZIP-Name: `tuev-card-full-b78-single-column-stamp-scale.zip`
 
 ## Stabile Grundlagen, die nicht unnötig geändert werden sollen
 
@@ -27,132 +27,100 @@
 - Alte Plaketten-/Ziffern-Experimente nach „Zentrierung sieht gut aus“ bleiben verworfen, bis neue SVG-Daten vorliegen.
 - Gruppenabhängige Färbung der Buttons/Badges ist gut und soll nicht grundsätzlich umgedacht werden.
 
-## Was b77 ändert
+## Ausgangslage b77
 
-### 1. Fehler beim Schalter „Kleine Gruppen nebeneinander“
+b77 enthielt insbesondere:
 
-Problem aus b76:
+- Reparatur des Schalters `Kleine Gruppen nebeneinander`.
+- Verschiebung dieser Option in den globalen Darstellungsdialog.
+- Stabilisierung des Klickverhaltens, damit `Zur Gruppe hinzufügen` nicht durch Floating-Panel-Schließen verschluckt wird.
+- Zusätzlicher `Gruppe hinzufügen`-Button unten ab 3 Gruppen.
+- Erstes vollständiges `HANDOVER.md` im ZIP.
 
-- Der Menüpunkt reagierte nur einmalig.
-- Die Checkbox änderte sich nicht zuverlässig.
-- Die Option wirkte danach nicht mehr abschaltbar.
+## Anlass für b78
 
-Ursache:
+Der Nutzer meldete anhand eines Screenshots:
 
-- `groupsLayout` wurde beim Rendern von `renderGroupsSection()` nicht mitgegeben.
-- Dadurch wurde der UI-Zustand nicht sauber an den aktuellen Config-Wert gekoppelt.
+- Das rote/grüne TÜV-abgelaufen-/HU-bestanden-Stempeloverlay ist in der 1-Spalten-Darstellung zu klein im Verhältnis zum verfügbaren Platz.
+- Die 2-, 3- und 4-Spalten-Darstellung wirken inzwischen gut und sollen möglichst nicht verändert werden.
 
-Änderung:
+## Was b78 ändert
 
-- `src/editor/editor.js` übergibt `groupsLayout` nun explizit.
-- Der Schalter wurde in den globalen Darstellungsdialog verschoben.
+### Single-column stamp overlay scale
 
-### 2. Einordnung der Option in den Darstellungsdialog
-
-Bewertung:
-
-- `Kleine Gruppen nebeneinander` ist eine globale Darstellungsoption der Card.
-- Als einzelner Punkt in der Gruppen-Kopfzeile wirkt sie zu prominent und etwas losgelöst.
-- Im globalen Darstellungsdialog passt sie besser zu Spalten, Badge, Details und Kennzeichenanzeige.
-
-Umsetzung:
-
-- Einzelner Schalter neben `Gruppe hinzufügen` entfernt.
-- Checkbox in `src/editor/floating-panels.js` in den globalen Darstellungsdialog aufgenommen.
-
-### 3. `Zur Gruppe hinzufügen` reagiert manchmal erst beim zweiten Klick
-
-Wahrscheinliche Ursache:
-
-- Der globale Document-Click-Handler lief in der Capture-Phase.
-- Bei Klicks innerhalb des Editors konnte er zuerst ein offenes Floating Panel schließen und neu rendern.
-- Dadurch war das ursprünglich geklickte Element weg, bevor dessen eigener Click-Handler sauber greifen konnte.
+Datei: `src/card/render-parts.js`
 
 Änderung:
 
-- Klicks innerhalb des Editors lösen im globalen Document-Click-Handler kein automatisches Schließen mehr aus.
-- Klicks außerhalb schließen Floating Panels weiterhin.
-- Spezifische Button-Handler schließen Panels weiterhin gezielt, wenn das sinnvoll ist.
+- `renderCompactConfirmPanel()` unterscheidet jetzt zusätzlich den Fall:
+  - `badgeCompactText`: Badge sichtbar + kompakte/multicolumn Darstellung.
+  - `badgeSpaciousText`: Badge sichtbar + nicht kompakte 1-Spalten-Darstellung.
+- Nur für `badgeSpaciousText` wurden folgende Werte vergrößert:
+  - Schriftgröße des roten Warnstempels.
+  - Schriftgröße des grünen Aktionsstempels.
+  - Mindestbreiten.
+  - Padding.
+  - Abstand zwischen rotem und grünem Stempel.
+  - Maximalbreite des Overlay-Containers.
+  - Checkbox/Icon-Größe im grünen Stempel.
+  - leichte X-Verschiebung des grünen Stempels passend zur größeren Darstellung.
 
-### 4. Zusätzlicher `Gruppe hinzufügen`-Button unten
+Ziel:
 
-Änderung:
+- In 1 Spalte nutzt der Dialog mehr der verfügbaren Plakettenfläche.
+- 2/3/4-Spalten bleiben durch die bestehende kompakte Logik praktisch unverändert.
 
-- Ab 3 Gruppen wird zusätzlich unter der letzten Gruppe ein `Gruppe hinzufügen`-Button angezeigt.
-- Der obere und untere Button verwenden denselben `data-add-group` Handler.
-
-### 5. Vorbereitung Übergabeprotokoll
-
-Änderung:
-
-- Neues Root-Dokument `HANDOVER.md` hinzugefügt.
-- Neues Versionsdokument `docs/B77_EDITOR_GROUP_LAYOUT_AND_HANDOVER.md` hinzugefügt.
-
-## Betroffene Dateien in b77
+## Betroffene Dateien in b78
 
 - `package.json`
-  - Version auf `0.1.1-b77`
+  - Version auf `0.1.1-b78`
 - `package-lock.json`
-  - Version auf `0.1.1-b77`
-- `src/editor/buttons.js`
-  - `id` optional gemacht, damit mehrere Add-Group-Buttons ohne doppelte ID möglich sind.
-- `src/editor/editor.js`
-  - `groupsLayout` an Gruppen-Renderer und Floating-Panels übergeben.
-  - Add-Group-Handler auf `[data-add-group]` umgestellt.
-  - Document-Click-Handler so geändert, dass Klicks im Editor nicht mehr versehentlich erste Klicks verbrauchen.
-- `src/editor/floating-panels.js`
-  - `Kleine Gruppen nebeneinander` in globalen Darstellungsdialog verschoben.
-  - Doppelte `estimatedHeight` Deklaration entfernt.
-- `src/editor/render-parts.js`
-  - Einzelnen Gruppenlayout-Schalter aus Header entfernt.
-  - Zusätzlichen unteren Add-Group-Button ab 3 Gruppen ergänzt.
-- `src/editor/styles.js`
-  - Styling für unteren Gruppen-Aktionsbereich ergänzt.
+  - Version auf `0.1.1-b78`
+- `src/card/render-parts.js`
+  - neue `badgeSpaciousText`-Größenlogik für den Stempeloverlay.
 - `src/**/*.js`
-  - Import-Cachebuster von `?v=b76` auf `?v=b77` aktualisiert.
+  - Import-Cachebuster auf `?v=b78` aktualisiert.
 - `tuev-card.js`
   - Bundle neu gebaut.
-- `docs/B77_EDITOR_GROUP_LAYOUT_AND_HANDOVER.md`
+- `docs/B78_SINGLE_COLUMN_STAMP_SCALE.md`
   - Versionsdokumentation.
 - `HANDOVER.md`
-  - Vollständiges Übergabeprotokoll.
+  - vollständiges Übergabeprotokoll aktualisiert.
+
+## Bewusst nicht geändert
+
+- `src/badge/*`: keine Änderung am TÜV-Plakettenrenderer.
+- `src/plate/*`: keine Änderung am Kennzeichenrenderer oder an der Font-/EuroPlate-Logik.
+- Gruppenlayout-Logik aus b75-b77 nicht umgebaut.
+- Editor-Floating-Panels nicht erneut angefasst.
 
 ## Tests ausgeführt
 
 ```bash
+node --check src/card/render-parts.js
 npm run check
 npm run build
-node --check src/editor/floating-panels.js
-node --check src/editor/editor.js
-node --check src/editor/render-parts.js
-node --check src/editor/buttons.js
 ```
 
 Alle genannten Prüfungen liefen erfolgreich.
 
 ## Was als Nächstes manuell getestet werden soll
 
-1. Editor öffnen.
-2. Globales Auge/Darstellungsmenü öffnen.
-3. Checkbox `Kleine Gruppen nebeneinander` mehrfach ein- und ausschalten.
-4. Prüfen, ob der YAML-/Config-Wert korrekt wechselt:
-   - aktiv: `groups_layout: auto`
-   - inaktiv: `groups_layout: stacked`
-5. Mit geöffnetem Darstellungsdialog auf `Zur Gruppe hinzufügen` klicken.
-   - Erwartung: erster Klick soll direkt reagieren.
-6. Gruppenliste mit mindestens 3 Gruppen prüfen.
-   - Erwartung: zusätzlicher `Gruppe hinzufügen`-Button unter der letzten Gruppe sichtbar.
-7. Außerhalb des Editors klicken.
-   - Erwartung: Floating Panels schließen.
-8. Innerhalb eines Floating Panels klicken.
-   - Erwartung: Panel bleibt offen, außer die Aktion selbst schließt es bewusst.
-9. Laufzeitdarstellung prüfen:
-   - 2 Gruppen mit je maximal 2 Fahrzeugen: dürfen nebeneinander, wenn Platz vorhanden.
-   - 1 Gruppe mit 6 Fahrzeugen + 1 kleine Gruppe: soll nicht wild nebeneinander/masonryartig wirken.
-   - schmale/mobile Ansicht: Gruppen sollen ruhig untereinander fallen.
+1. Eine 1-Spalten-Card mit sichtbarer TÜV-Plakette und `expired`/`due` Zustand öffnen.
+   - Erwartung: roter und grüner Stempel sind spürbar größer und füllen den verfügbaren Bereich harmonischer aus.
+2. Zwei-Spalten-Darstellung prüfen.
+   - Erwartung: Stempel wirkt weiterhin wie in b77 und läuft nicht über.
+3. Drei- und Vier-Spalten-Darstellung prüfen.
+   - Erwartung: keine Verschlechterung, keine übergroßen Stempel.
+4. Klick auf `HU bestanden?` in 1 Spalte prüfen.
+   - Erwartung: Button bleibt bedienbar und die bestehende Aktualisierungsanimation bleibt erhalten.
+5. Kurz prüfen, ob die b77-Editor-Fixes weiterhin funktionieren:
+   - `Kleine Gruppen nebeneinander` mehrfach ein-/ausschalten.
+   - `Zur Gruppe hinzufügen` sollte beim ersten Klick reagieren.
 
 ## Offene / spätere Punkte
 
+- Falls die 1-Spalten-Stempel jetzt zu groß oder noch zu klein wirken, nur die `badgeSpaciousText`-Werte in `src/card/render-parts.js` feinjustieren.
 - Kennzeichen-Rendering zwischen Firefox, Chrome und Android-App später umfassender prüfen.
 - Preview-Darstellung später eventuell an aktuelles Kennzeichenrendering angleichen.
 - Keine größeren Renderer-Refactors als Nebenänderung einschleusen.

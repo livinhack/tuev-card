@@ -4,7 +4,7 @@
 
 - Input ZIP: `tuev-card-full-b76-groups-side-by-side-gap-scale.zip`
 - Ermittelter Stand: `0.1.1-b76`
-- Neuer Stand: `0.1.1-b77`
+- Neuer Stand: `0.1.1-b78`
 - Fokus: Editor-Bedienung rund um Gruppen und Gruppenlayout.
 - Renderer-/Kennzeichen-/Plakettenlogik wurde nicht absichtlich verändert.
 
