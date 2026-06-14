@@ -17,24 +17,27 @@ export function getPlateMaxWidth(tileWidth) {
 }
 
 export function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics) {
-    const widestPlateWidth = entityIds.reduce((widestWidth, entityId) => {
+    const widestScaleBasisWidth = entityIds.reduce((widestWidth, entityId) => {
         const plate = hass.states[entityId]?.attributes?.plate || "";
         const metrics = getLicensePlateMetrics(plate);
+        const scaleBasisWidth = metrics.scaleBasisWidth || metrics.width || 0;
 
-        return Math.max(widestWidth, metrics.width || 0);
+        return Math.max(widestWidth, scaleBasisWidth);
     }, 0);
 
-    if (!widestPlateWidth || !maxWidth) {
+    if (!widestScaleBasisWidth || !maxWidth) {
         return 1;
     }
 
-    const rawScale = Math.min(1, maxWidth / widestPlateWidth);
+    const rawScale = Math.min(1, maxWidth / widestScaleBasisWidth);
     const baseHeight = getLicensePlateMetrics(entityIds
         .map((entityId) => hass.states[entityId]?.attributes?.plate || "")
         .find(Boolean) || "0").height || 38;
 
-    // Snap the shared visible plate height to even pixels. That avoids
-    // uneven 1px differences above/below the text in tight tile layouts.
+    // Snap the shared visible plate height to even pixels. The law-based
+    // renderer uses a 520 mm standard-width reference for scaling, so very
+    // short physical plates keep their shorter width without inflating the
+    // shared visible height in wide single-column cards.
     const snappedHeight = Math.max(18, Math.floor((baseHeight * rawScale) / 2) * 2);
 
     return Math.min(1, snappedHeight / baseHeight);

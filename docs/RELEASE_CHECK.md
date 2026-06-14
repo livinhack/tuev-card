@@ -1,6 +1,6 @@
 # Release check
 
-Current checked version: `b88`.
+Current checked version: `b91`.
 
 ## Package layout
 
@@ -22,9 +22,9 @@ npm run check
 
 Confirm:
 
-- `dist/tuev-card.js` starts with `// TÜV Card bundled b90`.
-- `src/tuev-card-entry.js` starts with `// TÜV Card source entry b88`.
-- Source imports use `?v=b90`.
+- `dist/tuev-card.js` starts with `// TÜV Card bundled b91`.
+- `src/tuev-card-entry.js` starts with `// TÜV Card source entry b91`.
+- Source imports use `?v=b91`.
 - Root `tuev-card.js` is not the active HACS bundle anymore.
 - `hacs.json` does not use `content_in_root: true`.
 - If local `.ttf` files exist in `fonts/`, they are copied to `dist/fonts/` by the build.
@@ -42,3 +42,5 @@ Confirm:
 - b81 sort-confirm dialog closes only via **Cancel/Abbrechen** or **Yes/Ja**.
 - b82 button active/open states still consistent.
 - Group side-by-side auto layout still behaves calmly.
+- b91 one-line license plates use black border inside the 110 mm outside height.
+- b91 short plates keep a shorter width without ballooning the common display height.

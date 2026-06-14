@@ -1,103 +1,111 @@
-# TÜV Reminder Card - Übergabeprotokoll b90
+# TÜV Reminder Card - Übergabeprotokoll b91
 
-## Aktueller Stand
+## Kurzstand
 
-- Projekt: Home Assistant Dashboard Card `tuev-card` für TÜV Reminder.
-- Aktueller Arbeitsstand: `0.1.1-b90`.
-- ZIP-Name: `tuev-card-full-b90-law-based-plate-renderer-rebuild.zip`.
-- Schwerpunkt b90: Kennzeichenrenderer in der Card von Grund auf neu aufbauen, basierend auf FZV-Anlage-4-Maßmodell plus unseren Skalierungs- und Siegelregeln.
+- Projekt: Home Assistant Lovelace Card `tuev-card` für die Integration `tuev_reminder`.
+- Neuer Stand: `0.1.1-b91`.
+- Neuer ZIP-Name: `tuev-card-full-b91-law-plate-inner-border-width-bands.zip`.
+- Ausgangspunkt: `tuev-card-full-b90-law-based-plate-renderer-rebuild.zip`.
+- Fokus b91: Kennzeichenrenderer auf ein korrekt getrenntes Außen-/Innenmaßmodell umstellen und kurze Kennzeichen über praxisnahe Breitenstufen beruhigen.
 
-## Direkt vor b90 bestätigte Punkte
+## Direkt vor b91 bestätigte Punkte
 
-- b79 Overlay final geprüft: bestanden.
-- b82 Editor-Gruppenfunktionen, Buttonzustände und „Alle hinzufügen“: bestanden.
-- b81/b82 Floating Panels und Sortier-Bestätigungsdialog: bestanden.
-- b87 HACS-Auslieferung über `dist/` funktioniert: bestätigt.
-- b88 Renderer war optisch nicht brauchbar.
-- b89 hatte die Card deshalb wieder auf den alten kompakten Renderer zurückgesetzt und ein separates Renderer-Lab angelegt.
-- Nutzer meldete danach: In der Card ist alles wie vor der Änderung; der Kennzeichenrenderer soll komplett neu auf Basis der FZV-Anlage 4 und unserer Skalierungs-/Siegelregeln aufgebaut werden.
+- b79 Overlay in Einzelspalte: bestanden.
+- b82 Editor-Gruppenfunktionen: bestanden.
+- b81 Floating Panels / Sortier-Bestätigungsdialog: bestanden.
+- b82 Button-Aktivzustände und „Alle hinzufügen“: bestanden.
+- b83 README auf Endnutzer-Level: erledigt.
+- b87 HACS-Auslieferung über `dist/`: bestätigt, Fonts kommen nach Update über HACS im Card-Ordner an.
+- b90 Card-Kennzeichenrenderer: deutlich besser als b88, aber Kennzeichenhöhe/Skalierung und physische Innenfläche waren noch nicht sauber genug.
 
-## Wichtige Grundentscheidungen
+## Wichtige Entscheidungen b91
 
-- Code/Dateien/Funktionen bleiben grundsätzlich Englisch.
-- Deutsche UI-Texte laufen nur über Übersetzung/Lokalisierung.
-- Kein Systemschrift-Fallback für grafische Kennzeichen.
-- GL-Nummernschild ist der bevorzugte Font.
-- Fonts sollen bei echter HACS-Nutzung über `dist/fonts/` mit ausgeliefert werden.
-- Chat-ZIPs enthalten weiterhin keine Font-Binärdateien.
-- Große TÜV-Plakette und alter Plakettenrenderer werden nicht nebenbei verändert.
-- Echte Behörden-/Landessiegelgrafiken, Wappen, Druckstücknummern oder amtliche Sicherheitsmerkmale werden nicht nachgebildet.
-- Behördensiegelstelle: generischer grau/silberner Platzhalter.
-- HU-Stelle: kleine generische TÜV-Reminder-Plakette/Farbfläche, bevorzugt mit Jahr/Monat.
+### Außenmaß inklusive Rand
 
-## Was b90 geändert hat
+Das einzeilige Kennzeichenmodell verwendet jetzt:
+
+```text
+Außenmaß:  Höhe 110 mm
+Randband:  4,5 mm oben/unten/links/rechts innerhalb des Außenmaßes
+Innenfläche: ca. 101 mm hoch
+```
+
+Damit wird die 110-mm-Höhe nicht mehr als komplett nutzbare weiße Fläche behandelt. Eurofeld, Text, HU-Plakette und neutraler Behördensiegelplatz liegen innerhalb der Innenfläche.
+
+### Kurze Kennzeichen nicht frei schrumpfen lassen
+
+Für normale einzeilige Pkw-Kennzeichen ist weiterhin kein gesetzliches Mindestmaß als harte Behauptung im Code hinterlegt. Für die Renderer-Praxis verwendet b91 aber abgestufte Breiten:
+
+```text
+340 / 380 / 420 / 460 / 480 / 520 mm
+```
+
+Der Renderer berechnet den benötigten Platz und wählt die kleinste passende Stufe. Sehr kurze Kennzeichen wie `K S 70`, `TR M 6` oder `5` landen dadurch nicht mehr bei einer winzigen freien Breite.
+
+### Skalierungsbasis bleibt 520 mm
+
+Auch wenn ein reales kurzes Kennzeichen z. B. nur 340 mm breit gerendert wird, verwendet die Card für die gemeinsame Anzeigehöhe weiterhin ein virtuelles 520-mm-Referenzschild als Skalierungsbasis. Dadurch werden kurze Kennzeichen nicht vertikal aufgeblasen, nur weil sie physisch schmaler sind. Ihre sichtbare Breite bleibt trotzdem kürzer.
+
+## Was b91 geändert hat
 
 ### `src/plate/renderer.js`
 
-Der Renderer wurde neu geschrieben. Alte visuelle Profilwerte wie `EURO_PLATE_GEOMETRY`, `GL_MTL_PLATE_GEOMETRY`, Preview-Tuning und alte Character-Width-Tabellen wurden entfernt.
+- Renderer neu auf Außen-/Innenmaßmodell korrigiert.
+- `FZV_ONE_LINE` enthält jetzt:
+  - `maxWidth: 520`
+  - `height: 110`
+  - `widthBands: [340, 380, 420, 460, 480, 520]`
+  - `borderBand: 4.5`
+  - abgeleitete Innenfläche ca. 101 mm.
+- Eurofeld füllt jetzt die Innenfläche statt eine separate alte 88-mm-Höhe zu verwenden.
+- Text läuft zentral auf der Innenfläche.
+- Plaketten-/Siegelspalte wird innerhalb der Innenfläche gesetzt.
+- HU-Plakette bleibt klein/generisch und verwendet Jahresfarbe/Rotation.
+- Behördensiegel bleibt generisch grau/silbern ohne amtliche Grafik.
+- Breitenwahl:
+  - Mittelschrift zuerst.
+  - kleinste passende Breitenstufe.
+  - Engschrift erst danach als Ausweichpfad, wenn Mittelschrift nicht passt.
+- `scaleBasisWidth: 520` für Card-Skalierung ergänzt.
 
-Neue Basis:
+### `src/card/plate-layout.js`
 
-- Koordinaten in Millimetern.
-- Einzeiliges Standardkennzeichen als FZV-Anlage-4-Modell:
-  - maximale Breite 520 mm
-  - Höhe 110 mm
-  - Randbreite 3 mm
-  - Eurofeld als physischer Bereich
-  - Mittelschrift 75 mm
-  - Engschrift 75 mm nur, wenn Mittelschrift nicht passt
-- Parser trennt Kennzeichen in:
-  - Ortskennung / Prefix
-  - Erkennungsnummer / Recognition
-- Wenn Prefix und Recognition vorhanden sind, wird dazwischen eine Siegelspalte gerendert.
-- Inhalt wird zwischen Eurofeld und rechter Kante zentriert.
-- Behördensiegel ist neutral grau/silbern.
-- HU-Siegel nutzt `tuevColorForYear(year)` und Month/Rotation aus dem Fahrzeug.
-- Textbreiten werden im Browser per Canvas mit GL-Font gemessen; falls das nicht verfügbar ist, greift eine deterministische Ersatzmessung.
-- Renderer gibt SVG mit physischem `viewBox` aus und skaliert nur über den von der Card gelieferten gemeinsamen Scale.
+- Gemeinsame Skalierung nutzt jetzt `metrics.scaleBasisWidth || metrics.width`.
+- Dadurch bleibt die sichtbare Kennzeichenhöhe auch in Karten mit ausschließlich kurzen Kennzeichen ruhig.
+- Kurze Kennzeichen behalten ihre kürzere sichtbare Breite.
 
-### `src/tuev-card-entry.js`
+### Versionierung
 
-- Source-Kommentar auf b90 aktualisiert.
-- Import-Queries auf `?v=b90` aktualisiert.
-- `huMonth` wird jetzt zusätzlich an `renderLicensePlate()` übergeben.
+- `package.json`: `0.1.1-b91`
+- `package-lock.json`: `0.1.1-b91`
+- `src/**/*.js`: Import-Querymarker `?v=b91`
+- `src/tuev-card-entry.js`: `// TÜV Card source entry b91`
+- `dist/tuev-card.js`: `// TÜV Card bundled b91`
 
-### Versionierung/Build
+### Neue Doku
 
-- `package.json`: `0.1.1-b90`
-- `package-lock.json`: `0.1.1-b90`
-- `src/**/*.js`: `?v=b90`
-- `dist/tuev-card.js`: `// TÜV Card bundled b90`
+- `docs/B91_LAW_PLATE_INNER_BORDER_WIDTH_BANDS.md`
 
 ## Nicht geändert
 
-- Card-Gruppenlayout.
-- Editorlogik.
-- Floating Panels.
-- Sortier-Bestätigungsdialog.
-- großer TÜV-Plakettenrenderer.
-- HACS `dist/`-Struktur.
-- Fontloader-Pfade.
-- README-Endnutzerstil.
-- `tools/plate-renderer-lab/` bleibt als separates Experiment/Lab erhalten.
+- Keine Editor-/Floating-Panel-Funktionsänderung.
+- Keine Gruppenlayout-Änderung.
+- Keine große TÜV-Plakettenrenderer-Änderung.
+- Keine alten Plaketten-/Ziffern-Experimente übernommen.
+- Keine Systemschrift als grafischer Kennzeichenfallback.
+- Keine echten amtlichen Behörden-/Landessiegelgrafiken.
+- Keine Integration neuer Sonderkennzeichenarten in die Card-Config.
 
-## Font-/HACS-Regel
+## Font-/HACS-Regel ab b91
 
-Lokaler Repo-Ordner soll die Fontdateien enthalten:
+Im echten lokalen GitHub-Repository sollen die Fontdateien erhalten bleiben:
 
 ```text
 fonts/GL-Nummernschild-Mtl.ttf
 fonts/GL-Nummernschild-Eng.ttf
 ```
 
-Beim Build werden sie nach `dist/fonts/` kopiert:
-
-```text
-dist/fonts/GL-Nummernschild-Mtl.ttf
-dist/fonts/GL-Nummernschild-Eng.ttf
-```
-
-HACS liefert die Card aus `dist/` aus. Erwarteter Pfad in Home Assistant:
+Beim Build werden sie nach `dist/fonts/` gespiegelt. HACS installiert die Inhalte aus `dist/`, sodass Home Assistant danach diese Pfade hat:
 
 ```text
 /config/www/community/tuev-card/tuev-card.js
@@ -105,76 +113,80 @@ HACS liefert die Card aus `dist/` aus. Erwarteter Pfad in Home Assistant:
 /config/www/community/tuev-card/fonts/GL-Nummernschild-Eng.ttf
 ```
 
-Erwartete URL:
+Lovelace-Resource bleibt:
 
-```text
-/hacsfiles/tuev-card/tuev-card.js
-/hacsfiles/tuev-card/fonts/GL-Nummernschild-Mtl.ttf
-/hacsfiles/tuev-card/fonts/GL-Nummernschild-Eng.ttf
+```yaml
+url: /hacsfiles/tuev-card/tuev-card.js
+type: module
 ```
 
-## Testanweisung für b90
+## Build- und Prüfanweisungen
 
-1. b90 in lokalen GitHub-Ordner übernehmen.
-2. Lokale `.ttf`-Dateien in `fonts/` behalten.
-3. `npm run build` ausführen.
-4. Prüfen, ob `dist/fonts/` die Fontdateien enthält.
-5. Commit + Push.
-6. In HACS neu herunterladen/Redownload.
-7. Dashboard prüfen.
+Im lokalen GitHub-Repository:
 
-Konkrete Kennzeichen zum Testen:
+```bash
+npm run build
+npm run check
+```
+
+Danach commit/push und in HACS Redownload/Update.
+
+## Testanweisung für b91
+
+1. b91 in den lokalen GitHub-Ordner übernehmen, ohne lokale `.ttf`-Dateien aus `fonts/` zu löschen.
+2. `npm run build` und `npm run check` ausführen.
+3. Prüfen, ob `dist/fonts/` die beiden Fontdateien enthält.
+4. Commit + Push.
+5. HACS Redownload/Update.
+6. Dashboard hart neu laden.
+7. Screenshots mit diesen Kennzeichen prüfen:
 
 ```text
 WIL CL 212
 BKS R 95
 WIL LM 216
-WIL LC 122
 TR A 77
 S AB 1234
 DA CI 500
 WIL DE 13H
-BN FR 248
-K S 70
 HH EV 204E
-MY KA 84
-B EQ 203E
+K S 70
 TR M 6
-BIT GT 500
-WI MX 55
+5
 ```
 
-Besonders prüfen:
+## Erwartete b91-Wirkung
 
-- vier Spalten: gleiche Kennzeichenhöhe innerhalb der Card
-- zwei Spalten: keine abgeschnittenen Kennzeichen
-- eine Spalte: Kennzeichen darf groß werden, soll aber nicht absurd wirken
-- Siegelspalte zwischen Ortskennung und Erkennungsnummer
-- HU-Farbpunkt/Kleinstplakette sichtbar, aber nicht amtlich wirkend
-- Engschrift nur bei sehr langen Kennzeichen
+- Schwarzer Rand gehört sichtbar zum Außenmaß.
+- Weiße Innenfläche wirkt flacher/korrekter als in b90.
+- Kurze Kennzeichen werden physisch kurz, aber nicht mehr vertikal aufgeblasen.
+- Lange Kennzeichen können weiterhin die Card-Spaltenbreite bestimmen.
+- Alle einzeiligen Kennzeichen derselben Card haben eine ruhige gemeinsame Anzeigehöhe.
 
-## Wahrscheinlich nächster Schritt
+## Aktuelle Todo-Liste nach b91
 
-b91 wird sehr wahrscheinlich visuelles Feintuning des neuen Maß-Renderers:
+### Direkt als nächstes
 
-- Text-Y/Baseline
-- Eurofeldposition
-- Siegelspaltenbreite
-- HU-/Behördensiegelgröße
-- Mindestbreiten für kurze Kennzeichen
-- ggf. optisches Verhältnis in 1-Spalten-Darstellung
+1. b91 visuell in Home Assistant prüfen.
+2. Falls nötig b92-Feintuning:
+   - Text-Baseline
+   - Eurofeldbreite/-Position
+   - Breitenstufen bei 420/460/480
+   - Siegelspalte und Siegelgröße
+   - Mini-HU-Plakette ggf. durch einfache farbige Fläche ersetzen.
+3. Wenn einzeilig stabil ist, Renderer-Lab und Card-Kern wieder angleichen.
 
-## Weiterhin offene spätere Themen
+### Danach
 
-- Renderer-Lab und Card-Renderer zusammenführen oder klarer trennen.
-- Zweizeilige Kennzeichen in die Card übernehmen.
-- Saisonkennzeichen.
-- Wechselkennzeichen.
-- grüne Kennzeichen.
-- optionale Ausblendung der großen TÜV-Plakette / Compact-Mode.
-- Renderer-Stabilität Firefox/Chrome/Android grundsätzlich prüfen.
-- Integration Architektur V3.
+4. Zweizeilige/Kraftrad/verkleinerte Kennzeichen als eigene Rendererprofile vorbereiten.
+5. Saison/Kurzzeit/Ausfuhr/Wechsel später auf dem Maßmodell ergänzen.
+6. Firefox / Chrome / Android-App prüfen.
+7. Release Candidate vorbereiten, falls Card stabil genug.
+8. Danach Integrationsarchitektur V3.
 
-## Fortsetzungshinweis für neuen Chat
+### Später
 
-Bitte mit `tuev-card-full-b90-law-based-plate-renderer-rebuild.zip` fortsetzen. Zuerst `HANDOVER.md` lesen. Stand: b79 Overlay bestanden, b82 Editor-/Gruppen-/Buttonzustände bestanden, b87 HACS `dist/` bestätigt, b88 Renderer verworfen, b89 Lab/Restore, b90 neuer Card-Kennzeichenrenderer nach FZV-Anlage-4-Maßmodell. Nächster sinnvoller Schritt: b90 anhand Screenshots testen und b91 als visuelles Feintuning des neuen Maß-Renderers bauen. Große TÜV-Plakette nicht unnötig ändern. Systemschrift-Fallback bleibt ausgeschlossen. Echte amtliche Siegelgrafiken bleiben out of scope.
+- Preview-Darstellung an aktuelles Kennzeichenrendering angleichen.
+- Kompaktmodus / TÜV-Plakette optional ausblenden.
+- Sonderkennzeichen sauber modellieren.
+- Zentrale Integrationsarchitektur V3.

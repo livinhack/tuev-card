@@ -1,4 +1,4 @@
-import { tuevColorForYear } from "../badge/profile.js?v=b90";
+import { tuevColorForYear } from "../badge/profile.js?v=b91";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
@@ -6,7 +6,7 @@ import {
     getPlateFontStatus,
     injectPlateFont,
     isPlateFontLoaded
-} from "./font.js?v=b90";
+} from "./font.js?v=b91";
 
 export {
     checkPlateFontAvailable,
@@ -15,39 +15,30 @@ export {
     isPlateFontLoaded
 };
 
-// Renderer v2 starts from the legal FZV Anlage 4 dimensions instead of the
-// old visual plate profile. Coordinates are millimetres. The card passes one
-// shared scale: the widest plate in a card determines the scale, every other
-// one-line plate keeps the same visible height because its physical height is
-// always 110 mm.
+// Law-based one-line plate renderer.
+// All coordinates are millimetres. The 110 mm height is the complete outside
+// dimension including the black border. The usable white area is modelled as
+// 101 mm high (110 mm minus a 4.5 mm inner border band on each side).
 const FZV_ONE_LINE = Object.freeze({
     key: "oneLine",
-    label: "Einzeiliges Kennzeichen",
     maxWidth: 520,
     height: 110,
-    minWidthMtl: 340,
-    minWidthEng: 320,
-    borderWidth: 3,
+    widthBands: Object.freeze([340, 380, 420, 460, 480, 520]),
+    borderBand: 4.5,
+    borderStroke: 3.2,
     cornerRadius: 7,
-    lightEdge: 2,
     euro: Object.freeze({
-        x: 6,
-        y: 11,
         width: 45,
-        height: 88,
-        starRingDiameter: 30,
-        countryFontSize: 20
+        starRingDiameter: 29,
+        countryFontSize: 18
     }),
-    contentGapAfterEuro: 10,
-    rightPadding: 10,
-    textY: 61,
-    textHeight: 75,
-    sealColumnWidth: 34,
-    sealGapLeft: 10,
-    sealGapRight: 10,
-    sealDiameter: 24,
-    huY: 37,
-    authorityY: 73
+    minimumSideGap: 8,
+    sealColumnWidth: 27,
+    sealGapLeft: 8,
+    sealGapRight: 9,
+    sealDiameter: 20.5,
+    huCenterRatio: 0.36,
+    authorityCenterRatio: 0.68
 });
 
 const FONT_PROFILES = Object.freeze({
@@ -55,12 +46,13 @@ const FONT_PROFILES = Object.freeze({
         role: "mtl",
         label: "Mittelschrift 75 mm",
         fontSize: 75,
-        charGap: 4,
+        charGap: 3.8,
+        yOffset: 1.8,
         fallback: Object.freeze({
-            digit: 43.5,
+            digit: 43,
             wide: 55,
             narrow: 25,
-            default: 47.5,
+            default: 47,
             space: 0
         })
     }),
@@ -68,23 +60,25 @@ const FONT_PROFILES = Object.freeze({
         role: "eng",
         label: "Engschrift 75 mm",
         fontSize: 75,
-        charGap: 3,
+        charGap: 3.1,
+        yOffset: 1.8,
         fallback: Object.freeze({
-            digit: 36.5,
+            digit: 36,
             wide: 45,
             narrow: 20,
-            default: 39.5,
+            default: 39,
             space: 0
         })
     })
 });
 
-const PLATE_FACE_COLOR = "#f8f8f2";
-const PLATE_EDGE_COLOR = "#101010";
+const PLATE_FACE_COLOR = "#f7f7f1";
+const PLATE_EDGE_COLOR = "#0d0d0d";
 const EU_BLUE = "#003399";
 const EU_YELLOW = "#ffcc00";
 const AUTHORITY_SEAL_FILL = "#d8d8d2";
 const AUTHORITY_SEAL_STROKE = "#a7a7a2";
+const AUTHORITY_SEAL_HIGHLIGHT = "#f4f4ed";
 
 let plateFontRequested = false;
 let measureCanvas = null;
@@ -111,8 +105,9 @@ export function renderLicensePlate(plate, options = {}) {
 
     const requestedScale = Number(options.scale || 0);
     const maxWidth = Number(options.maxWidth || 0);
+    const scaleBasisWidth = metrics.scaleBasisWidth || metrics.width || FZV_ONE_LINE.maxWidth;
     const fallbackScale = Number.isFinite(maxWidth) && maxWidth > 0
-        ? maxWidth / metrics.width
+        ? maxWidth / scaleBasisWidth
         : 1;
     const scale = Number.isFinite(requestedScale) && requestedScale > 0
         ? Math.min(1, requestedScale)
@@ -133,14 +128,28 @@ export function getLicensePlateMetrics(plate, options = {}) {
         return {
             width: 0,
             height: 0,
+            scaleBasisWidth: FZV_ONE_LINE.maxWidth,
             normalizedPlate: ""
         };
     }
 
     const availableFonts = getLawFontVariants();
-    const alternatives = availableFonts.map((fontVariant) => buildOneLineLayout(parsed, fontVariant, options));
-    const fitting = alternatives.find((alternative) => alternative.width <= FZV_ONE_LINE.maxWidth && !alternative.overflow);
-    const chosen = fitting || alternatives[alternatives.length - 1] || buildOneLineLayout(parsed, getDefaultLawFontVariant(), options);
+    const alternatives = [];
+
+    for (const fontVariant of availableFonts.filter((font) => font.lawProfile?.role !== "eng")) {
+        alternatives.push(...buildOneLineLayoutsForBands(parsed, fontVariant, options));
+    }
+
+    for (const fontVariant of availableFonts.filter((font) => font.lawProfile?.role === "eng")) {
+        alternatives.push(...buildOneLineLayoutsForBands(parsed, fontVariant, options));
+    }
+
+    if (!alternatives.length) {
+        alternatives.push(...buildOneLineLayoutsForBands(parsed, getDefaultLawFontVariant(), options));
+    }
+
+    const fitting = alternatives.find((alternative) => !alternative.overflow);
+    const chosen = fitting || alternatives[alternatives.length - 1];
 
     return {
         ...chosen,
@@ -187,7 +196,6 @@ function getLawFontVariants() {
     const mtl = fonts.find((font) => font.source === "gl" && font.role === "mtl");
     const eng = fonts.find((font) => font.source === "gl" && font.role === "eng");
     const legacy = fonts.find((font) => font.source === "europlate");
-
     const variants = [];
 
     if (mtl) {
@@ -217,7 +225,7 @@ function getDefaultLawFontVariant() {
     };
 }
 
-function buildOneLineLayout(parsed, fontVariant, options = {}) {
+function buildOneLineLayoutsForBands(parsed, fontVariant, options = {}) {
     const layout = FZV_ONE_LINE;
     const font = fontVariant.lawProfile || FONT_PROFILES.mtl;
     const prefixBoxes = measureTextBoxes(parsed.prefix, fontVariant, font);
@@ -229,13 +237,55 @@ function buildOneLineLayout(parsed, fontVariant, options = {}) {
     const sealLeftGap = hasSealColumn ? layout.sealGapLeft : 0;
     const sealRightGap = hasSealColumn ? layout.sealGapRight : 0;
     const textAndSealWidth = prefixWidth + sealLeftGap + sealWidth + sealRightGap + recognitionWidth;
-    const contentLeftBoundary = layout.euro.x + layout.euro.width + layout.contentGapAfterEuro;
-    const rawWidth = contentLeftBoundary + textAndSealWidth + layout.rightPadding;
-    const minWidth = font.role === "eng" ? layout.minWidthEng : layout.minWidthMtl;
-    const width = Math.min(layout.maxWidth, Math.max(minWidth, Math.ceil(rawWidth)));
-    const availableTextArea = width - contentLeftBoundary - layout.rightPadding;
-    const overflow = textAndSealWidth > availableTextArea;
-    const startX = contentLeftBoundary + Math.max(0, (availableTextArea - textAndSealWidth) / 2);
+    const rawMinimumWidth = getOpenLeftBoundary(layout) + textAndSealWidth + layout.minimumSideGap * 2 + layout.borderBand;
+    const preferredMinimumBand = parsed.clean.length >= 8 ? layout.maxWidth : layout.widthBands[0];
+    const candidateBands = layout.widthBands.filter((band) => band >= preferredMinimumBand);
+    const bands = candidateBands.length ? candidateBands : [layout.maxWidth];
+
+    return bands.map((band) => buildOneLineLayoutForBand({
+        parsed,
+        fontVariant,
+        font,
+        prefixBoxes,
+        recognitionBoxes,
+        prefixWidth,
+        recognitionWidth,
+        hasSealColumn,
+        sealWidth,
+        sealLeftGap,
+        sealRightGap,
+        textAndSealWidth,
+        rawMinimumWidth,
+        width: band,
+        options
+    }));
+}
+
+function buildOneLineLayoutForBand({
+    parsed,
+    fontVariant,
+    font,
+    prefixBoxes,
+    recognitionBoxes,
+    prefixWidth,
+    recognitionWidth,
+    hasSealColumn,
+    sealWidth,
+    sealLeftGap,
+    sealRightGap,
+    textAndSealWidth,
+    rawMinimumWidth,
+    width,
+    options
+}) {
+    const layout = FZV_ONE_LINE;
+    const inner = getInnerRect(width, layout);
+    const openLeftBoundary = getOpenLeftBoundary(layout);
+    const openRightBoundary = width - layout.borderBand;
+    const availableTextArea = openRightBoundary - openLeftBoundary;
+    const sideGap = (availableTextArea - textAndSealWidth) / 2;
+    const overflow = sideGap < layout.minimumSideGap || width < rawMinimumWidth;
+    const startX = openLeftBoundary + Math.max(layout.minimumSideGap, sideGap);
     const prefixX = startX;
     const sealX = prefixX + prefixWidth + sealLeftGap + sealWidth / 2;
     const recognitionX = hasSealColumn
@@ -245,9 +295,14 @@ function buildOneLineLayout(parsed, fontVariant, options = {}) {
     return {
         width,
         height: layout.height,
-        rawWidth,
+        // A full-width standard plate remains the display reference. This keeps
+        // very short plates from being enlarged vertically just because they are
+        // physically narrow, while still preserving their shorter rendered width.
+        scaleBasisWidth: layout.maxWidth,
+        rawMinimumWidth,
         overflow,
         layout,
+        inner,
         fontVariant,
         font,
         prefixBoxes,
@@ -255,12 +310,31 @@ function buildOneLineLayout(parsed, fontVariant, options = {}) {
         prefixWidth,
         recognitionWidth,
         textAndSealWidth,
+        openLeftBoundary,
+        openRightBoundary,
+        sideGap,
         prefixX,
         sealX,
         recognitionX,
         hasSealColumn,
-        debug: options.debug === true
+        debug: options.debug === true,
+        parsed
     };
+}
+
+function getInnerRect(width, layout = FZV_ONE_LINE) {
+    const band = layout.borderBand;
+    return {
+        x: band,
+        y: band,
+        width: width - band * 2,
+        height: layout.height - band * 2,
+        centerY: layout.height / 2
+    };
+}
+
+function getOpenLeftBoundary(layout = FZV_ONE_LINE) {
+    return layout.borderBand + layout.euro.width;
 }
 
 function measureTextBoxes(text, fontVariant, font) {
@@ -321,9 +395,10 @@ function measureCharacterWithCanvas(char, fontVariant, font) {
 }
 
 function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
-    const { width, height, layout, fontVariant, font, parsed } = analysis;
+    const { width, height, layout, inner, fontVariant, font, parsed } = analysis;
     const clipId = `plateLawClip-${hashString(`${parsed.normalizedPlate}-${fontVariant.key}-${width}`)}`;
     const debug = options.debug === true || analysis.debug === true;
+    const textY = inner.centerY + font.yOffset;
 
     return `
         <svg
@@ -343,10 +418,10 @@ function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
             <defs>
                 <clipPath id="${clipId}">
                     <rect
-                        x="${layout.borderWidth / 2}"
-                        y="${layout.borderWidth / 2}"
-                        width="${width - layout.borderWidth}"
-                        height="${height - layout.borderWidth}"
+                        x="0"
+                        y="0"
+                        width="${width}"
+                        height="${height}"
                         rx="${layout.cornerRadius}"
                         ry="${layout.cornerRadius}"
                     />
@@ -363,20 +438,27 @@ function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
             </defs>
 
             <g clip-path="url(#${clipId})">
-                <rect x="0" y="0" width="${width}" height="${height}" fill="${PLATE_FACE_COLOR}"/>
-                ${renderEuroField(layout)}
+                <rect x="0" y="0" width="${width}" height="${height}" fill="${PLATE_EDGE_COLOR}"/>
+                <rect
+                    x="${inner.x}"
+                    y="${inner.y}"
+                    width="${inner.width}"
+                    height="${inner.height}"
+                    fill="${PLATE_FACE_COLOR}"
+                />
+                ${renderEuroField(layout, inner)}
                 ${analysis.hasSealColumn ? renderSealColumn(analysis, options) : ""}
                 ${renderCharacterRun({
                     boxes: analysis.prefixBoxes,
                     x: analysis.prefixX,
-                    y: layout.textY,
+                    y: textY,
                     font,
                     className: `tuev-law-plate-text-${clipId}`
                 })}
                 ${renderCharacterRun({
                     boxes: analysis.recognitionBoxes,
                     x: analysis.recognitionX,
-                    y: layout.textY,
+                    y: textY,
                     font,
                     className: `tuev-law-plate-text-${clipId}`
                 })}
@@ -384,15 +466,15 @@ function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
             </g>
 
             <rect
-                x="${layout.borderWidth / 2}"
-                y="${layout.borderWidth / 2}"
-                width="${width - layout.borderWidth}"
-                height="${height - layout.borderWidth}"
+                x="${layout.borderStroke / 2}"
+                y="${layout.borderStroke / 2}"
+                width="${width - layout.borderStroke}"
+                height="${height - layout.borderStroke}"
                 rx="${layout.cornerRadius}"
                 ry="${layout.cornerRadius}"
                 fill="none"
                 stroke="${PLATE_EDGE_COLOR}"
-                stroke-width="${layout.borderWidth}"
+                stroke-width="${layout.borderStroke}"
             />
         </svg>
     `;
@@ -409,7 +491,7 @@ function renderCharacterRun({ boxes, x, y, font, className }) {
             <text
                 class="${className}"
                 x="${center.toFixed(2)}"
-                y="${y}"
+                y="${y.toFixed(2)}"
                 textLength="${box.width.toFixed(2)}"
                 lengthAdjust="spacingAndGlyphs"
                 fill="${PLATE_EDGE_COLOR}"
@@ -418,23 +500,23 @@ function renderCharacterRun({ boxes, x, y, font, className }) {
     }).join("");
 }
 
-function renderEuroField(layout) {
+function renderEuroField(layout, inner) {
     const euro = layout.euro;
-    const x = euro.x;
-    const y = euro.y;
+    const x = inner.x;
+    const y = inner.y;
     const centerX = x + euro.width / 2;
-    const starCenterY = y + 26;
+    const starCenterY = y + inner.height * 0.29;
     const ringRadius = euro.starRingDiameter / 2 * 0.74;
-    const countryY = y + euro.height - 16;
+    const countryY = y + inner.height - 15;
 
     return `
         <g>
-            <rect x="${x}" y="${y}" width="${euro.width}" height="${euro.height}" fill="${EU_BLUE}"/>
+            <rect x="${x}" y="${y}" width="${euro.width}" height="${inner.height}" fill="${EU_BLUE}"/>
             ${Array.from({ length: 12 }, (_, index) => {
                 const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
                 const starX = centerX + Math.cos(angle) * ringRadius;
                 const starY = starCenterY + Math.sin(angle) * ringRadius;
-                return renderStar(starX, starY, 2.0);
+                return renderStar(starX, starY, 1.9);
             }).join("")}
             <text
                 x="${centerX}"
@@ -451,13 +533,15 @@ function renderEuroField(layout) {
 }
 
 function renderSealColumn(analysis, options) {
-    const { layout, sealX } = analysis;
+    const { layout, inner, sealX } = analysis;
+    const huY = inner.y + inner.height * layout.huCenterRatio;
+    const authorityY = inner.y + inner.height * layout.authorityCenterRatio;
 
     return `
         <g>
             ${renderHuSeal({
                 x: sealX,
-                y: layout.huY,
+                y: huY,
                 diameter: layout.sealDiameter,
                 year: Number(options.huYear || new Date().getFullYear()),
                 month: Number(options.huMonth || 1),
@@ -465,7 +549,7 @@ function renderSealColumn(analysis, options) {
             })}
             ${renderAuthoritySeal({
                 x: sealX,
-                y: layout.authorityY,
+                y: authorityY,
                 diameter: layout.sealDiameter
             })}
         </g>
@@ -477,9 +561,9 @@ function renderAuthoritySeal({ x, y, diameter }) {
 
     return `
         <g opacity="0.96">
-            <circle cx="${x.toFixed(2)}" cy="${y}" r="${r}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="1.1"/>
-            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.66).toFixed(2)}" fill="none" stroke="#f5f5ef" stroke-width="0.9" opacity="0.85"/>
-            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.22).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="1"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.66).toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="0.8" opacity="0.85"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.22).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
         </g>
     `;
 }
@@ -491,28 +575,28 @@ function renderHuSeal({ x, y, diameter, year, month, rotation }) {
     const markerRotation = Number.isFinite(rotation) ? rotation : ((month % 12) * 30);
 
     return `
-        <g transform="rotate(${markerRotation} ${x.toFixed(2)} ${y})">
-            <circle cx="${x.toFixed(2)}" cy="${y}" r="${r}" fill="${color}" stroke="${PLATE_EDGE_COLOR}" stroke-width="1.1"/>
+        <g transform="rotate(${markerRotation} ${x.toFixed(2)} ${y.toFixed(2)})">
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${color}" stroke="${PLATE_EDGE_COLOR}" stroke-width="0.95"/>
             ${Array.from({ length: 12 }, (_, index) => {
                 const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
                 const x1 = x + Math.cos(angle) * r * 0.62;
                 const y1 = y + Math.sin(angle) * r * 0.62;
                 const x2 = x + Math.cos(angle) * r * 0.86;
                 const y2 = y + Math.sin(angle) * r * 0.86;
-                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${PLATE_EDGE_COLOR}" stroke-width="0.7"/>`;
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${PLATE_EDGE_COLOR}" stroke-width="0.55"/>`;
             }).join("")}
-            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.31).toFixed(2)}" fill="${PLATE_EDGE_COLOR}"/>
-            <circle cx="${x.toFixed(2)}" cy="${y}" r="${(r * 0.23).toFixed(2)}" fill="${color}"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.31).toFixed(2)}" fill="${PLATE_EDGE_COLOR}"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.23).toFixed(2)}" fill="${color}"/>
             <text
                 x="${x.toFixed(2)}"
-                y="${y}"
+                y="${y.toFixed(2)}"
                 text-anchor="middle"
                 dominant-baseline="middle"
                 font-family="Arial, sans-serif"
-                font-size="${(r * 0.52).toFixed(2)}"
+                font-size="${(r * 0.48).toFixed(2)}"
                 font-weight="700"
                 fill="${PLATE_EDGE_COLOR}"
-                transform="rotate(${-markerRotation} ${x.toFixed(2)} ${y})"
+                transform="rotate(${-markerRotation} ${x.toFixed(2)} ${y.toFixed(2)})"
             >${escapeHtml(shortYear)}</text>
         </g>
     `;
@@ -531,16 +615,15 @@ function renderStar(cx, cy, r) {
 }
 
 function renderDebugLayer(analysis) {
-    const { layout, width, height } = analysis;
-    const contentLeftBoundary = layout.euro.x + layout.euro.width + layout.contentGapAfterEuro;
-    const rightBoundary = width - layout.rightPadding;
+    const { layout, inner, width, height } = analysis;
 
     return `
         <g opacity="0.72">
             <rect x="0" y="0" width="${width}" height="${height}" fill="none" stroke="#00aaff" stroke-width="0.6" stroke-dasharray="4 4"/>
-            <line x1="${contentLeftBoundary}" y1="8" x2="${contentLeftBoundary}" y2="${height - 8}" stroke="#44cc44" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <line x1="${rightBoundary}" y1="8" x2="${rightBoundary}" y2="${height - 8}" stroke="#44cc44" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <text x="8" y="${height - 7}" font-family="monospace" font-size="7" fill="#0055aa">${escapeHtml(`${analysis.font.label}, ${Math.round(width)}×${height} mm`)}</text>
+            <rect x="${inner.x}" y="${inner.y}" width="${inner.width}" height="${inner.height}" fill="none" stroke="#44cc44" stroke-width="0.6" stroke-dasharray="3 3"/>
+            <line x1="${analysis.openLeftBoundary}" y1="${inner.y}" x2="${analysis.openLeftBoundary}" y2="${inner.y + inner.height}" stroke="#aa44ff" stroke-width="0.6" stroke-dasharray="3 3"/>
+            <line x1="${analysis.openRightBoundary}" y1="${inner.y}" x2="${analysis.openRightBoundary}" y2="${inner.y + inner.height}" stroke="#aa44ff" stroke-width="0.6" stroke-dasharray="3 3"/>
+            <text x="8" y="${height - 7}" font-family="monospace" font-size="7" fill="#0055aa">${escapeHtml(`${analysis.font.label}, ${Math.round(width)}×${height} mm, white ${Math.round(inner.height)} mm`)}</text>
         </g>
     `;
 }
