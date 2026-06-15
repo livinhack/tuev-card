@@ -1,4 +1,5 @@
-import { ONE_LINE_RULES_MM, buildPlateModelMm, renderPlateSvgMm } from "./mm-model.js";
+import { ONE_LINE_RULES_MM, buildPlateModelMm, getCharacterBand, renderPlateSvgMm } from "./mm-model.js";
+import { resolveFontFitMm } from "./font-calibration.js";
 import { MONITOR_PROFILES, correctionFromMeasured100Mm, getCalibrationState, resolveViewerSize } from "./viewer-calibration.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -25,15 +26,44 @@ const controls = {
   plateInput: $("#plateInput"),
   widthMode: $("#widthMode"),
   fontMode: $("#fontMode"),
+  autoFitFont: $("#autoFitFont"),
+  targetGlyphHeight: $("#targetGlyphHeight"),
+  fontSize: $("#fontSize"),
+  baselineY: $("#baselineY"),
   showDimensions: $("#showDimensions")
 };
 
-function render() {
+let renderTicket = 0;
+
+async function render() {
+  const ticket = ++renderTicket;
   const calibration = getCalibration();
+  const fontMode = controls.fontMode.value;
+  const rules = ONE_LINE_RULES_MM;
+  const baseFont = rules.cells[fontMode] || rules.cells.middle;
+  const charBand = getCharacterBand(rules);
+  const fontFit = await resolveFontFitMm({
+    enabled: controls.autoFitFont.checked,
+    fontFamily: baseFont.fontFamily,
+    fallbackFontSize: numberValue(controls.fontSize, baseFont.fontSize),
+    fallbackBaselineY: numberValue(controls.baselineY, baseFont.baselineY),
+    bandY: charBand.y,
+    bandHeight: charBand.height,
+    targetVisibleHeight: numberValue(controls.targetGlyphHeight, charBand.height)
+  });
+
+  if (ticket !== renderTicket) return;
+
+  controls.fontSize.value = formatPlain(fontFit.fontSize, 2);
+  controls.baselineY.value = formatPlain(fontFit.baselineY, 2);
+
   const result = renderPlateSvgMm(controls.plateInput.value, {
     stage: controls.stage.value,
     widthMode: controls.widthMode.value,
-    fontMode: controls.fontMode.value,
+    fontMode,
+    fontSize: fontFit.fontSize,
+    baselineY: fontFit.baselineY,
+    fontFit,
     showDimensions: controls.showDimensions.checked
   });
   const { model, canvas } = result;
@@ -55,7 +85,8 @@ function render() {
   $("#calibrationReadout").innerHTML = renderCalibrationReadout(calibration, viewer);
   $("#sizePill").textContent = `${model.metrics.width} × ${model.metrics.height} mm`;
   renderMetrics(model.metrics, calibration, viewer, canvas);
-  renderNotes(model, viewer);
+  renderFontFit(fontFit);
+  renderNotes(model, viewer, fontFit);
 }
 
 function getCalibration() {
@@ -89,6 +120,19 @@ function renderMetrics(metrics, calibration, viewer, canvas) {
     ["Außenmaß Kennzeichen", `${metrics.width} × ${metrics.height} mm`],
     ["SVG-Canvas", `${format(canvas.width, 1)} × ${format(canvas.height, 1)} mm`],
     ["Rohbreite Inhalt", `${format(metrics.rawContentWidth, 1)} mm`],
+    ["DXF-Referenz", metrics.dxfReference],
+    ["Außen-/Innenhöhe", `${format(metrics.height, 1)} mm außen · ${format(metrics.innerHeight, 1)} mm innen`],
+    ["Rand/Ecken", `${format(metrics.innerInset, 1)} mm Rand · außen R${format(metrics.outerCornerRadius, 2)} · innen R${format(metrics.innerCornerRadius, 2)}`],
+    ["Eurofeld", `x ${format(metrics.euroX, 1)} · ${format(metrics.euroWidth, 1)} × ${format(metrics.euroHeight, 1)} mm`],
+    ["Zeichenband", `y ${format(metrics.characterBandY, 1)} mm · Höhe ${format(metrics.characterBandHeight, 1)} mm`],
+    ["Zellbreiten", `Buchstaben ${format(metrics.cellLetterWidth, 1)} mm · Ziffern ${format(metrics.cellDigitWidth, 1)} mm · Zeichenabstand ${format(metrics.cellGap, 1)} mm · Gruppengap ${format(metrics.groupGap, 1)} mm`],
+    ["Font-Kalibrierprofil", `${metrics.fontLabel} · Font-Kalibriergröße ${format(metrics.characterFontSize, 2)} · Baseline y ${format(metrics.characterBaselineY, 2)} mm`],
+    ["Glyphen-Fit", metrics.fontFitMode === "auto" ? `Auto · sichtbar ${format(metrics.fontFitVisibleHeight, 2)} mm · oben ${format(metrics.fontFitTopY, 2)} / unten ${format(metrics.fontFitBottomY, 2)} mm` : metrics.fontFitMode || "manuell"],
+    ["Siegelspalte", `${format(metrics.sealColumnWidth, 1)} mm, äußerer Referenzraum ${format(metrics.sealColumnMaxWidth, 1)} mm`],
+    ["HU-Plakette", `${format(metrics.huDiameter, 1)} mm · Mitte y ${format(metrics.huCenterY, 1)} mm`],
+    ["Behördensiegel", `${format(metrics.authorityDiameter, 1)} mm · Mitte y ${format(metrics.authorityCenterY, 1)} mm`],
+    ["Abstand HU/Behörde", `${format(metrics.sealVisibleCircleGap, 1)} mm zwischen sichtbaren Kreisen`],
+    ["Siegel-Anschluss", metrics.sealAdjacentGapPolicy || "nicht gesetzt"],
     ["Freiraum links nach Eurofeld", `${format(metrics.remainingLeft, 1)} mm`],
     ["Freiraum rechts", `${format(metrics.remainingRight, 1)} mm`],
     ["Monitor", `${format(calibration.devicePxPerMm, 4)} Geräte-px/mm`],
@@ -98,7 +142,27 @@ function renderMetrics(metrics, calibration, viewer, canvas) {
   $("#metrics").innerHTML = rows.map(([key, value]) => `<tr><th>${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`).join("");
 }
 
-function renderNotes(model, viewer) {
+function renderFontFit(fontFit) {
+  const target = $("#fontFitReadout");
+  if (!target) return;
+
+  const measured = fontFit.measured;
+  const rows = [
+    ["Modus", fontFit.mode],
+    ["Font-Kalibriergröße", `${format(fontFit.fontSize, 2)}`],
+    ["Baseline", `${format(fontFit.baselineY, 2)} mm`],
+    ["Probe", fontFit.sample || "—"]
+  ];
+
+  if (measured) {
+    rows.push(["gemessene Probe bei 100 mm", `y ${format(measured.y, 2)} · Höhe ${format(measured.height, 2)} mm`]);
+    rows.push(["sichtbarer Zielbereich", `${format(measured.topY, 2)} bis ${format(measured.bottomY, 2)} mm`]);
+  }
+
+  target.innerHTML = rows.map(([key, value]) => `<div><strong>${escapeHtml(key)}:</strong> ${escapeHtml(value)}</div>`).join("");
+}
+
+function renderNotes(model, viewer, fontFit) {
   const notes = [];
   if (model.metrics.width === ONE_LINE_RULES_MM.maxWidth) {
     notes.push("Maximalbreite 520 mm erreicht.");
@@ -110,7 +174,12 @@ function renderNotes(model, viewer) {
   if (viewer.modeLabel !== "1:1 physisch") {
     notes.push("Aktueller Viewer-Modus ist nicht 1:1; zum Messen auf dem Monitor bitte 1:1 physisch wählen.");
   }
-  notes.push("Morgen zuerst nur Schritt 1 prüfen: Außenmaß, schwarzer Rand, Eurofeld und 100-mm-Kalibrierlinie.");
+  notes.push("b102: Die Siegelspalte steht direkt zwischen den angrenzenden Zeichenzellen; es gibt keine zusätzlichen Gap-Elemente vor/nach der Siegelzone.");
+  notes.push("b102: Das Länderkennzeichen D verwendet DIN1451Alt/din1451alt.ttf, wenn die Fontdatei lokal im Lab- oder Repo-Fonts-Ordner liegt.");
+  notes.push("b102: GL-Mittelschrift ist als manueller Kalibrierstand 125 / 92,5 mm festgehalten; die automatische Messung bleibt zuschaltbar.");
+  if (controls.stage?.value === "horizontal") notes.push("Horizontalprüfung aktiv: Zellgrenzen, Zellmitten, Zellbreiten und Gap-Breiten werden sichtbar gemacht, ohne das Modell zu verändern.");
+  notes.push("Die automatische Kalibrierung erzeugt nur mm-basierte Modellparameter Font-Kalibriergröße und Baseline; das komplette SVG wird weiterhin erst danach skaliert.");
+  if (fontFit?.mode === "fallback") notes.push("Fontmessung war nicht verfügbar; Fallbackwerte aktiv.");
   $("#notes").innerHTML = notes.map((note) => `<div>${escapeHtml(note)}</div>`).join("");
 }
 
@@ -157,6 +226,10 @@ function numberValue(input, fallback) {
 
 function format(value, decimals = 2) {
   return Number(value || 0).toLocaleString("de-DE", { maximumFractionDigits: decimals });
+}
+
+function formatPlain(value, decimals = 2) {
+  return Number(value || 0).toFixed(decimals).replace(/\.?0+$/, "");
 }
 
 function escapeHtml(value) {

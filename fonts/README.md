@@ -1,12 +1,14 @@
-# Plate fonts
+# Fonts
 
-This folder is the source package location for GL-Nummernschild font files used by graphical license plates.
+This folder contains license/readme notes for bundled or locally supplied fonts.
 
-Release repository file names:
+For local/HACS repository builds, the GL-Nummernschild font files can be placed here before running `npm run build`:
 
-```text
-GL-Nummernschild-Mtl.ttf
-GL-Nummernschild-Eng.ttf
-```
+- `GL-Nummernschild-Mtl.ttf`
+- `GL-Nummernschild-Eng.ttf`
 
-The generated ChatGPT ZIP may omit binary font files. For a local GitHub/HACS package, keep the `.ttf` files in this folder next to the license/readme notes. `npm run build` mirrors this folder to `dist/fonts/`, which is the HACS-delivered folder.
+For the standalone physical plate lab, the country mark `D` can additionally use:
+
+- `din1451alt.ttf`
+
+The ChatGPT-generated ZIP files do not include font binary files.

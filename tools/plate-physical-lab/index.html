@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kennzeichen Physical Lab b96</title>
+  <title>Kennzeichen Physical Lab b102</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="hero">
     <div>
       <p class="eyebrow">TÜV Card · Renderer-Neustart</p>
-      <h1>Kennzeichen Physical Lab b96</h1>
-      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige. Home Assistant ist hier bewusst nicht beteiligt.</p>
+      <h1>Kennzeichen Physical Lab b102</h1>
+      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b102 hält das manuelle GL-Mittelschrift-Kalibrierprofil 125 / 92,5 mm fest, benennt die technische Font-Kalibriergröße klarer und ergänzt einen eigenen Schritt zur horizontalen Zeichen-/Zellprüfung. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige. Home Assistant ist hier bewusst nicht beteiligt.</p>
     </div>
-    <div class="version">b96</div>
+    <div class="version">b102</div>
   </header>
 
   <main>
@@ -63,10 +63,12 @@
         Schritt/Layer
         <select id="stage">
           <option value="body">1 · Schildkörper, Außenmaß, Rand, Eurofeld</option>
-          <option value="grid">2 · Raster, Zeichen- und Siegelzellen</option>
-          <option value="seals">3 · HU- und Behördensiegelplätze</option>
-          <option value="text">4 · Zeichen in festen Zellen</option>
-          <option value="complete" selected>5 · Komplettbild</option>
+          <option value="dxf">2 · DXF-Referenzlinien für Körper/Euro/Siegel</option>
+          <option value="grid">3 · Raster, Zeichen- und Siegelzellen</option>
+          <option value="seals">4 · HU- und Behördensiegelplätze</option>
+          <option value="text">5 · Zeichen in festen Zellen</option>
+          <option value="horizontal">6 · Horizontale Zeichen-/Zellprüfung</option>
+          <option value="complete" selected>7 · Komplettbild</option>
         </select>
       </label>
 
@@ -99,6 +101,25 @@
         </label>
       </div>
       <label class="checkbox">
+        <input id="autoFitFont" type="checkbox" />
+        Schrift automatisch ins 75-mm-Zeichenband einpassen
+      </label>
+      <div class="grid three">
+        <label>
+          Ziel-Glyphenhöhe in mm
+          <input id="targetGlyphHeight" type="number" min="60" max="75" step="0.25" value="75" />
+        </label>
+        <label>
+          Font-Kalibriergröße (SVG)
+          <input id="fontSize" type="number" min="60" max="160" step="0.25" value="125" />
+        </label>
+        <label>
+          Baseline Y in mm
+          <input id="baselineY" type="number" min="60" max="105" step="0.25" value="92.5" />
+        </label>
+      </div>
+      <div class="font-fit-readout" id="fontFitReadout"></div>
+      <label class="checkbox">
         <input id="showDimensions" type="checkbox" checked />
         Maßlinien anzeigen
       </label>
@@ -121,13 +142,19 @@
     <section class="panel metrics-panel">
       <h2>Messwerte</h2>
       <table><tbody id="metrics"></tbody></table>
-      <h2>Feste b96-Regeln</h2>
+      <h2>Feste b102-Regeln</h2>
       <ul>
         <li>Alle Modell-Koordinaten sind Millimeter.</li>
         <li>Das Außenmaß enthält den schwarzen Rand.</li>
         <li>Nach dem physischen Aufbau wird nur das komplette SVG in der Anzeige-Schicht skaliert.</li>
         <li>Keine nachträgliche Einzel-Skalierung von Zeichen, Eurofeld oder Siegeln.</li>
+        <li>Schildkörper, Eurofeld und Siegelpositionen sind aus den gelieferten DXF-Skizzen übernommen.</li>
+        <li>Siegel werden getrennt berechnet: HU-Kreis 35 mm, Behördensiegel 45 mm, Spalte 63,5 mm bzw. äußerer Referenzraum 67,5 mm.</li>
+        <li>GL-Mittelschrift ist aktuell als manuelles Kalibrierprofil festgehalten: Ziel 75 mm, Font-Kalibriergröße 125, Baseline 92,5 mm.</li>
+        <li>Automatische Messung bleibt zuschaltbar, ist aber nicht mehr der Standard für die weitere manuelle Maßarbeit.</li>
+        <li>Der neue Schritt „Horizontale Zeichen-/Zellprüfung“ zeigt Zellgrenzen, Zellmitten, Zellbreiten und Gap-Breiten ohne Änderung der physikalischen Geometrie.</li>
         <li>Amtliche Siegelgrafiken werden nicht nachgebildet; nur neutrale Platzhalter.</li>
+        <li>Das Länderkennzeichen D nutzt im Lab <code>din1451alt.ttf</code>, falls die Datei lokal in <code>tools/plate-physical-lab/fonts/</code> oder <code>fonts/</code> liegt.</li>
         <li>Pixel, DPR, Browser-Zoom und Monitorprofil kommen nicht in das Modell, sondern nur in <code>viewer-calibration.js</code>.</li>
       </ul>
     </section>

@@ -1,22 +1,73 @@
-// Kennzeichen Physical Lab b96
+// Kennzeichen Physical Lab b102
 // CAD-like model layer: every coordinate, size and distance in this file is millimetres.
 // No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
+// b102 keeps the supplied DXF sketches, separate seal geometry and no extra seal gaps; GL-Mittelschrift uses the current manual 125 / 92.5 mm calibration profile, and a horizontal cell-check layer is available.
 
 export const WIDTH_BANDS = Object.freeze({
   middle: [340, 380, 420, 460, 480, 520],
   narrow: [320, 340, 380, 420, 460, 480, 520]
 });
 
+export const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
+  middleManualB102: {
+    label: "GL-Mittelschrift · manuell kalibriert b102",
+    targetGlyphHeight: 75,
+    fontSize: 125,
+    baselineY: 92.5,
+    note: "Aktueller manueller Kalibrierstand für die GL-Mittelschrift im 75-mm-Zeichenband."
+  },
+  narrowPending: {
+    label: "GL-Engschrift · noch separat zu kalibrieren",
+    targetGlyphHeight: 75,
+    fontSize: 125,
+    baselineY: 92.5,
+    note: "Vorläufiger Startwert; Engschrift wird später separat geprüft."
+  }
+});
+
+export const DXF_REFERENCE_MM = Object.freeze({
+  source: "Euro-Einzeilig.dxf / Skizze2.dxf",
+  coordinateMode: "normalised top-left plate coordinates",
+  body: {
+    outerHeight: 110,
+    innerInset: 4.5,
+    innerHeight: 101,
+    outerCornerRadius: 9.25,
+    innerCornerRadius: 4.75
+  },
+  euro: {
+    x: 4.5,
+    y: 4.5,
+    width: 45,
+    height: 101,
+    starsCenterX: 27,
+    starsCenterY: 36.5,
+    starsRadius: 15,
+    countryCenterX: 27,
+    countryBaselineY: 89.5
+  },
+  seals: {
+    columnInnerWidth: 63.5,
+    columnOuterWidth: 67.5,
+    huDiameter: 35,
+    huCenterY: 29.5,
+    authorityDiameter: 45,
+    authorityCenterY: 75.5,
+    visibleCircleGap: 6
+  }
+});
+
 export const ONE_LINE_RULES_MM = Object.freeze({
   name: "Einzeiliges Standardkennzeichen",
-  outerHeight: 110,
+  reference: DXF_REFERENCE_MM.source,
+  outerHeight: DXF_REFERENCE_MM.body.outerHeight,
   maxWidth: 520,
-  blackStroke: 3,
-  cornerRadius: 7,
+  innerInset: DXF_REFERENCE_MM.body.innerInset,
+  innerHeight: DXF_REFERENCE_MM.body.innerHeight,
+  outerCornerRadius: DXF_REFERENCE_MM.body.outerCornerRadius,
+  innerCornerRadius: DXF_REFERENCE_MM.body.innerCornerRadius,
   euro: {
-    width: 45,
-    y: 4.5,
-    height: 98,
+    ...DXF_REFERENCE_MM.euro,
     country: "D"
   },
   content: {
@@ -25,15 +76,39 @@ export const ONE_LINE_RULES_MM = Object.freeze({
     bottomClearance: 13,
     sideClearance: 8,
     groupGap: 24,
-    sealColumnWidth: 63.5,
-    sealDiameter: 35,
-    authorityDiameter: 35,
-    huCenterY: 37,
-    authorityCenterY: 73
+    seal: {
+      columnWidth: DXF_REFERENCE_MM.seals.columnInnerWidth,
+      columnMaxWidth: DXF_REFERENCE_MM.seals.columnOuterWidth,
+      huDiameter: DXF_REFERENCE_MM.seals.huDiameter,
+      huCenterY: DXF_REFERENCE_MM.seals.huCenterY,
+      authorityDiameter: DXF_REFERENCE_MM.seals.authorityDiameter,
+      authorityCenterY: DXF_REFERENCE_MM.seals.authorityCenterY,
+      visibleCircleGap: DXF_REFERENCE_MM.seals.visibleCircleGap
+    }
   },
   cells: {
-    middle: { label: "Mittelschrift", fontFamily: "GL-Nummernschild-Mtl", letterWidth: 47.5, digitWidth: 44.5, gap: 8, fontSize: 75 },
-    narrow: { label: "Engschrift", fontFamily: "GL-Nummernschild-Eng", letterWidth: 40.5, digitWidth: 38.5, gap: 8, fontSize: 75 }
+    middle: {
+      label: "Mittelschrift",
+      fontFamily: "GL-Nummernschild-Mtl",
+      letterWidth: 47.5,
+      digitWidth: 44.5,
+      gap: 8,
+      characterHeight: 75,
+      // Font output calibration is still in mm. It is not viewer scaling.
+      // SVG font-size does not equal visible cap height, therefore this can be tuned separately.
+      fontSize: FONT_CALIBRATION_PROFILES_MM.middleManualB102.fontSize,
+      baselineY: FONT_CALIBRATION_PROFILES_MM.middleManualB102.baselineY
+    },
+    narrow: {
+      label: "Engschrift",
+      fontFamily: "GL-Nummernschild-Eng",
+      letterWidth: 40.5,
+      digitWidth: 38.5,
+      gap: 8,
+      characterHeight: 75,
+      fontSize: FONT_CALIBRATION_PROFILES_MM.narrowPending.fontSize,
+      baselineY: FONT_CALIBRATION_PROFILES_MM.narrowPending.baselineY
+    }
   },
   dimensions: {
     enabledMarginRight: 40,
@@ -70,7 +145,13 @@ export function parsePlate(input) {
 export function buildPlateModelMm(input, options = {}) {
   const fontMode = options.fontMode === "narrow" ? "narrow" : "middle";
   const rules = ONE_LINE_RULES_MM;
-  const font = rules.cells[fontMode];
+  const baseFont = rules.cells[fontMode];
+  const font = {
+    ...baseFont,
+    fontSize: positiveNumber(options.fontSize, baseFont.fontSize),
+    baselineY: positiveNumber(options.baselineY, baseFont.baselineY),
+    fit: options.fontFit || null
+  };
   const parsed = parsePlate(input);
   const districtCells = makeCells(parsed.district, font, "district");
   const recognitionGroups = splitRecognition(parsed.recognition);
@@ -82,12 +163,12 @@ export function buildPlateModelMm(input, options = {}) {
   const content = buildContentSequence({ districtCells, recognitionCells, rules, font });
   const rawContentWidth = content.reduce((sum, item) => sum + item.width, 0);
   const width = resolveWidthMm({ rawContentWidth, fontMode, requestedWidth: options.widthMode, rules });
-  const zoneStart = rules.euro.width;
-  const zoneWidth = width - rules.euro.width;
-  const centeredStart = zoneStart + (zoneWidth - rawContentWidth) / 2;
-  const xStart = Math.max(zoneStart + rules.content.sideClearance, centeredStart);
+  const contentLimits = getContentLimits(rules, width);
+  const centeredStart = contentLimits.left + (contentLimits.width - rawContentWidth) / 2;
+  const xStart = Math.max(contentLimits.left + rules.content.sideClearance, centeredStart);
   const positioned = positionContent(content, xStart);
   const rightEdge = xStart + rawContentWidth;
+  const sealGeometry = getSealGeometryForContent(rules, positioned);
   const metrics = {
     input,
     normalized: parsed.normalized,
@@ -95,11 +176,40 @@ export function buildPlateModelMm(input, options = {}) {
     recognition: parsed.recognition,
     fontMode,
     fontLabel: font.label,
+    cellLetterWidth: font.letterWidth,
+    cellDigitWidth: font.digitWidth,
+    cellGap: font.gap,
+    groupGap: rules.content.groupGap,
     width,
     height: rules.outerHeight,
     rawContentWidth,
-    remainingLeft: xStart - rules.euro.width,
-    remainingRight: width - rightEdge,
+    dxfReference: rules.reference,
+    outerCornerRadius: rules.outerCornerRadius,
+    innerCornerRadius: rules.innerCornerRadius,
+    innerInset: rules.innerInset,
+    innerHeight: rules.innerHeight,
+    euroX: rules.euro.x,
+    euroWidth: rules.euro.width,
+    euroHeight: rules.euro.height,
+    characterBandY: getCharacterBand(rules).y,
+    characterBandHeight: getCharacterBand(rules).height,
+    characterFontSize: font.fontSize,
+    characterBaselineY: font.baselineY,
+    fontFitMode: options.fontFit?.mode || "manual",
+    fontFitVisibleHeight: options.fontFit?.measured?.visibleHeight ?? null,
+    fontFitTopY: options.fontFit?.measured?.topY ?? null,
+    fontFitBottomY: options.fontFit?.measured?.bottomY ?? null,
+    sealColumnWidth: rules.content.seal.columnWidth,
+    sealColumnMaxWidth: rules.content.seal.columnMaxWidth,
+    huDiameter: rules.content.seal.huDiameter,
+    huCenterY: rules.content.seal.huCenterY,
+    authorityDiameter: rules.content.seal.authorityDiameter,
+    authorityCenterY: rules.content.seal.authorityCenterY,
+    sealVisibleCircleGap: rules.content.seal.visibleCircleGap,
+    sealAdjacentGapPolicy: "none - 63.5 mm seal column includes its adjacent spacing",
+    sealCenterX: sealGeometry?.cx ?? null,
+    remainingLeft: xStart - contentLimits.left,
+    remainingRight: contentLimits.right - rightEdge,
     modelUnit: "mm",
     modelNote: "Pure mm model. The viewer may scale the complete SVG, but the model never sees pixels."
   };
@@ -116,14 +226,20 @@ export function renderPlateSvgMm(input, options = {}) {
 
   layers.push(renderBody(model));
 
-  if (["grid", "seals", "text", "complete"].includes(stage)) {
+  if (["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderDxfReferenceGuides(model));
+  }
+  if (["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderGrid(model));
   }
-  if (["seals", "text", "complete"].includes(stage)) {
+  if (["seals", "text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderSeals(model));
   }
-  if (["text", "complete"].includes(stage)) {
+  if (["text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderText(model));
+  }
+  if (stage === "horizontal") {
+    layers.push(renderHorizontalDiagnostics(model));
   }
   if (showDimensions) {
     layers.push(renderDimensions(model));
@@ -179,13 +295,12 @@ function splitRecognition(value) {
 function buildContentSequence({ districtCells, recognitionCells, rules, font }) {
   const sequence = [];
   appendCells(sequence, districtCells, font.gap);
-  if (districtCells.length) {
-    sequence.push({ type: "char-gap", key: "district-seal-gap", width: font.gap });
-  }
-  sequence.push({ type: "seals", key: "seal-zone", width: rules.content.sealColumnWidth });
-  if (recognitionCells.length) {
-    sequence.push({ type: "group-gap", key: "seal-recognition-gap", width: rules.content.groupGap });
-  }
+
+  // Anlage-4/DXF interpretation for the seal area:
+  // The 63.5 mm seal column is the complete measured area between adjacent character cells.
+  // Do not add separate left/right gap items around it, otherwise the seals appear too isolated.
+  sequence.push({ type: "seals", key: "seal-zone", width: rules.content.seal.columnWidth });
+
   recognitionCells.forEach((group, groupIndex) => {
     if (groupIndex > 0) {
       sequence.push({ type: "group-gap", key: `recognition-group-gap-${groupIndex}`, width: rules.content.groupGap });
@@ -213,61 +328,184 @@ function positionContent(sequence, startX) {
 
 function resolveWidthMm({ rawContentWidth, fontMode, requestedWidth, rules }) {
   if (requestedWidth && requestedWidth !== "auto") return Number(requestedWidth);
-  const needed = rules.euro.width + rawContentWidth + rules.content.sideClearance * 2;
+  const geometry = getFixedHorizontalGeometry(rules);
+  const needed = geometry.contentLeft + rawContentWidth + rules.content.sideClearance + rules.innerInset;
   return WIDTH_BANDS[fontMode].find((width) => width >= needed) || rules.maxWidth;
+}
+
+function getFixedHorizontalGeometry(rules) {
+  const contentLeft = rules.euro.x + rules.euro.width;
+  return {
+    innerLeft: rules.innerInset,
+    innerRightInset: rules.innerInset,
+    contentLeft,
+    euroRight: contentLeft
+  };
+}
+
+function getContentLimits(rules, width) {
+  const geometry = getFixedHorizontalGeometry(rules);
+  const left = geometry.contentLeft;
+  const right = width - geometry.innerRightInset;
+  return { left, right, width: right - left };
+}
+
+export function getCharacterBand(rules) {
+  return {
+    y: rules.innerInset + rules.content.topClearance,
+    height: rules.content.characterHeight
+  };
+}
+
+function getSealGeometryForContent(rules, content) {
+  const seal = content.find((item) => item.type === "seals");
+  return seal ? getSealGeometry(rules, seal) : null;
+}
+
+function getSealGeometry(rules, sealItem) {
+  const charBand = getCharacterBand(rules);
+  const sealRules = rules.content.seal;
+  const innerWidth = sealRules.columnWidth;
+  const outerWidth = sealRules.columnMaxWidth;
+  const outerX = sealItem.x - (outerWidth - innerWidth) / 2;
+  const cx = sealItem.x + innerWidth / 2;
+  const huRadius = sealRules.huDiameter / 2;
+  const authorityRadius = sealRules.authorityDiameter / 2;
+  return {
+    cx,
+    innerColumnLeft: sealItem.x,
+    innerColumnRight: sealItem.x + innerWidth,
+    innerColumnWidth: innerWidth,
+    outerColumnLeft: outerX,
+    outerColumnRight: outerX + outerWidth,
+    outerColumnWidth: outerWidth,
+    hu: {
+      cy: sealRules.huCenterY,
+      diameter: sealRules.huDiameter,
+      radius: huRadius
+    },
+    authority: {
+      cy: sealRules.authorityCenterY,
+      diameter: sealRules.authorityDiameter,
+      radius: authorityRadius
+    },
+    visibleCircleGap: sealRules.visibleCircleGap,
+    charBand
+  };
 }
 
 function renderBody({ rules, metrics }) {
   const w = metrics.width;
   const h = rules.outerHeight;
+  const inset = rules.innerInset;
   const euro = rules.euro;
   return `
 <g class="layer layer-body" filter="url(#plateShadow)">
-  <rect x="0" y="0" width="${w}" height="${h}" rx="${rules.cornerRadius}" fill="#f4f3ee" stroke="#111" stroke-width="${rules.blackStroke}"/>
-  <rect x="${rules.blackStroke / 2}" y="${euro.y}" width="${euro.width - rules.blackStroke / 2}" height="${euro.height}" fill="#0046ad"/>
-  ${renderEuStars(23, 29, 10)}
-  <text x="22.5" y="91" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#fff">D</text>
+  <rect x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="#111"/>
+  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>
+  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="#0046ad"/>
+  ${renderEuStars(euro.starsCenterX, euro.starsCenterY, euro.starsRadius)}
+  <text x="${euro.countryCenterX}" y="${euro.countryBaselineY}" text-anchor="middle" font-family="DIN1451Alt, AlteDIN1451Mittelschrift, Arial, sans-serif" font-size="30" font-weight="500" fill="#fff">${escapeText(euro.country)}</text>
+</g>`.trim();
+}
+
+function renderDxfReferenceGuides({ rules, metrics }) {
+  const w = metrics.width;
+  const inset = rules.innerInset;
+  const euro = rules.euro;
+  const charBand = getCharacterBand(rules);
+  return `
+<g class="layer layer-dxf-guides" fill="none" stroke-linecap="square">
+  <rect x="0" y="0" width="${w}" height="${rules.outerHeight}" rx="${rules.outerCornerRadius}" stroke="rgba(255,255,255,.28)" stroke-width="0.45"/>
+  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" stroke="rgba(255,255,255,.42)" stroke-width="0.45"/>
+  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" stroke="rgba(70,170,255,.8)" stroke-width="0.55"/>
+  <line x1="0" y1="${charBand.y}" x2="${w}" y2="${charBand.y}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
+  <line x1="0" y1="${charBand.y + charBand.height}" x2="${w}" y2="${charBand.y + charBand.height}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
 </g>`.trim();
 }
 
 function renderGrid({ content, rules, metrics }) {
-  const charTop = (rules.outerHeight - rules.content.characterHeight) / 2;
-  const seal = content.find((item) => item.type === "seals");
+  const charBand = getCharacterBand(rules);
   const parts = content.map((item) => {
     if (item.type === "char") {
-      return `<rect x="${item.x}" y="${charTop}" width="${item.width}" height="${rules.content.characterHeight}" fill="rgba(30,165,255,.08)" stroke="rgba(30,165,255,.55)" stroke-width="0.6"/>`;
+      return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(30,165,255,.08)" stroke="rgba(30,165,255,.55)" stroke-width="0.6"/>`;
     }
     if (item.type === "seals") {
-      return `<rect x="${item.x}" y="${charTop}" width="${item.width}" height="${rules.content.characterHeight}" fill="rgba(255,211,107,.08)" stroke="rgba(255,211,107,.7)" stroke-width="0.8"/>`;
+      const sealGeometry = getSealGeometry(rules, item);
+      return `
+        <rect x="${sealGeometry.outerColumnLeft}" y="${charBand.y}" width="${sealGeometry.outerColumnWidth}" height="${charBand.height}" fill="rgba(255,211,107,.05)" stroke="rgba(255,211,107,.5)" stroke-width="0.6" stroke-dasharray="2 1.5"/>
+        <rect x="${sealGeometry.innerColumnLeft}" y="${charBand.y}" width="${sealGeometry.innerColumnWidth}" height="${charBand.height}" fill="rgba(255,211,107,.09)" stroke="rgba(255,211,107,.75)" stroke-width="0.8"/>
+        <line x1="${sealGeometry.cx}" y1="${charBand.y - 8}" x2="${sealGeometry.cx}" y2="${charBand.y + charBand.height + 8}" stroke="rgba(255,211,107,.45)" stroke-width="0.5"/>
+        <circle cx="${sealGeometry.cx}" cy="${sealGeometry.hu.cy}" r="${sealGeometry.hu.radius}" fill="none" stroke="rgba(255,211,107,.8)" stroke-width="0.65" stroke-dasharray="2 1.5"/>
+        <circle cx="${sealGeometry.cx}" cy="${sealGeometry.authority.cy}" r="${sealGeometry.authority.radius}" fill="none" stroke="rgba(255,211,107,.8)" stroke-width="0.65" stroke-dasharray="2 1.5"/>`;
     }
-    return `<rect x="${item.x}" y="${charTop}" width="${item.width}" height="${rules.content.characterHeight}" fill="rgba(255,99,99,.07)" stroke="rgba(255,99,99,.4)" stroke-width="0.4"/>`;
+    return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,99,99,.07)" stroke="rgba(255,99,99,.4)" stroke-width="0.4"/>`;
   });
   const centerLine = `<line x1="0" y1="${rules.outerHeight / 2}" x2="${metrics.width}" y2="${rules.outerHeight / 2}" stroke="rgba(255,255,255,.35)" stroke-width="0.5" stroke-dasharray="4 3"/>`;
-  return `<g class="layer layer-grid">${centerLine}${parts.join("")}${seal ? `<line x1="${seal.x + seal.width / 2}" y1="0" x2="${seal.x + seal.width / 2}" y2="${rules.outerHeight}" stroke="rgba(255,211,107,.45)" stroke-width="0.5"/>` : ""}</g>`;
+  return `<g class="layer layer-grid">${centerLine}${parts.join("")}</g>`;
 }
 
 function renderSeals({ content, rules }) {
   const seal = content.find((item) => item.type === "seals");
   if (!seal) return "";
-  const cx = seal.x + seal.width / 2;
-  const topCy = rules.content.huCenterY;
-  const bottomCy = rules.content.authorityCenterY;
-  const r = rules.content.sealDiameter / 2;
+  const geometry = getSealGeometry(rules, seal);
   return `
 <g class="layer layer-seals">
-  <circle cx="${cx}" cy="${topCy}" r="${r}" fill="#1ea5ff" stroke="#111" stroke-width="1.3"/>
-  <circle cx="${cx}" cy="${topCy}" r="${r * 0.68}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.8" stroke-dasharray="1.4 1.8"/>
-  <text x="${cx}" y="${topCy + 3.3}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#111">HU</text>
-  <circle cx="${cx}" cy="${bottomCy}" r="${r}" fill="#d7d7d2" stroke="#999" stroke-width="1"/>
-  <circle cx="${cx}" cy="${bottomCy}" r="${r * 0.55}" fill="none" stroke="rgba(120,120,115,.65)" stroke-width="1"/>
+  <g class="seal-slot seal-slot-hu">
+    <circle cx="${geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius}" fill="#1ea5ff" stroke="#111" stroke-width="1.25"/>
+    <circle cx="${geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius * 0.68}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.8" stroke-dasharray="1.4 1.8"/>
+    <text x="${geometry.cx}" y="${geometry.hu.cy + 3.3}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#111">HU</text>
+  </g>
+  <g class="seal-slot seal-slot-authority">
+    <circle cx="${geometry.cx}" cy="${geometry.authority.cy}" r="${geometry.authority.radius}" fill="#d7d7d2" stroke="#999" stroke-width="1"/>
+    <circle cx="${geometry.cx}" cy="${geometry.authority.cy}" r="${geometry.authority.radius * 0.55}" fill="none" stroke="rgba(120,120,115,.65)" stroke-width="1"/>
+  </g>
 </g>`.trim();
 }
 
-function renderText({ content, font, rules }) {
-  const y = rules.outerHeight / 2 + 8;
+function renderText({ content, font }) {
+  const glyphGuide = font.fit?.measured ? `
+    <rect x="0" y="${font.fit.measured.topY}" width="100%" height="${font.fit.measured.visibleHeight}" fill="rgba(92, 214, 255, .035)" stroke="rgba(92, 214, 255, .35)" stroke-width="0.35" stroke-dasharray="2 1.5"/>` : "";
   const chars = content.filter((item) => item.type === "char").map((cell) => `
-    <text x="${cell.x + cell.width / 2}" y="${y}" text-anchor="middle" font-family="${font.fontFamily}, Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
-  return `<g class="layer layer-text">${chars}</g>`;
+    <text x="${cell.x + cell.width / 2}" y="${font.baselineY}" text-anchor="middle" font-family="${font.fontFamily}, Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
+  return `<g class="layer layer-text">${glyphGuide}${chars}</g>`;
+}
+
+
+function renderHorizontalDiagnostics({ content, rules }) {
+  const charBand = getCharacterBand(rules);
+  const yTop = Math.max(0, charBand.y - 6);
+  const yBottom = Math.min(rules.outerHeight, charBand.y + charBand.height + 6);
+  const labelY = Math.max(6, charBand.y - 2.5);
+  const parts = [];
+
+  for (const item of content) {
+    const x1 = item.x;
+    const x2 = item.x + item.width;
+    const cx = x1 + item.width / 2;
+
+    if (item.type === "char") {
+      parts.push(`<line x1="${x1}" y1="${yTop}" x2="${x1}" y2="${yBottom}" stroke="rgba(30,165,255,.9)" stroke-width="0.45"/>`);
+      parts.push(`<line x1="${x2}" y1="${yTop}" x2="${x2}" y2="${yBottom}" stroke="rgba(30,165,255,.9)" stroke-width="0.45"/>`);
+      parts.push(`<line x1="${cx}" y1="${yTop - 2}" x2="${cx}" y2="${yBottom + 2}" stroke="rgba(255,255,255,.7)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
+      parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.3" fill="#1ea5ff">${escapeText(item.char)} · ${formatMm(item.width)}</text>`);
+      continue;
+    }
+
+    if (item.type === "seals") {
+      const geometry = getSealGeometry(rules, item);
+      parts.push(`<line x1="${geometry.innerColumnLeft}" y1="${yTop}" x2="${geometry.innerColumnLeft}" y2="${yBottom}" stroke="rgba(255,211,107,.95)" stroke-width="0.55"/>`);
+      parts.push(`<line x1="${geometry.innerColumnRight}" y1="${yTop}" x2="${geometry.innerColumnRight}" y2="${yBottom}" stroke="rgba(255,211,107,.95)" stroke-width="0.55"/>`);
+      parts.push(`<line x1="${geometry.cx}" y1="${yTop - 3}" x2="${geometry.cx}" y2="${yBottom + 3}" stroke="rgba(255,211,107,.8)" stroke-width="0.4" stroke-dasharray="1.5 1"/>`);
+      parts.push(`<text x="${geometry.cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.3" fill="#ffd36b">Siegel · ${formatMm(geometry.innerColumnWidth)}</text>`);
+      continue;
+    }
+
+    parts.push(`<rect x="${x1}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,99,99,.03)" stroke="rgba(255,99,99,.55)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
+    parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.6" fill="#ff7777">${formatMm(item.width)}</text>`);
+  }
+
+  return `<g class="layer layer-horizontal-diagnostics">${parts.join("")}</g>`;
 }
 
 function renderDimensions({ metrics, rules }) {
@@ -293,13 +531,22 @@ function renderEuStars(cx, cy, r) {
     const angle = -Math.PI / 2 + (Math.PI * 2 * i) / 12;
     const x = cx + Math.cos(angle) * r;
     const y = cy + Math.sin(angle) * r;
-    stars.push(`<text x="${x.toFixed(2)}" y="${(y + 1.6).toFixed(2)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.2" fill="#ffd200">●</text>`);
+    stars.push(`<text x="${x.toFixed(2)}" y="${(y + 1.6).toFixed(2)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#ffd200">●</text>`);
   }
   return `<g class="eu-stars">${stars.join("")}</g>`;
 }
 
+function formatMm(value) {
+  return `${Number(value).toLocaleString("de-DE", { maximumFractionDigits: 1 })} mm`;
+}
+
 function isDigit(char) {
   return /\d/.test(char);
+}
+
+function positiveNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
 function escapeText(value) {

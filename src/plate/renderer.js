@@ -1,4 +1,4 @@
-import { tuevColorForYear } from "../badge/profile.js?v=b96";
+import { tuevColorForYear } from "../badge/profile.js?v=b102";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
@@ -6,7 +6,7 @@ import {
     getPlateFontStatus,
     injectPlateFont,
     isPlateFontLoaded
-} from "./font.js?v=b96";
+} from "./font.js?v=b102";
 
 export {
     checkPlateFontAvailable,

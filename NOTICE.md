@@ -79,3 +79,5 @@ When the font binary files are present in `fonts/`, the build mirrors them to `d
 ```
 
 GL-Nummernschild is preferred when available. The card falls back to plain text license plates when no valid plate font is available.
+
+Physical Lab note (b101): The standalone lab can use a locally supplied `din1451alt.ttf` for the Euro-field country mark `D`. The font binary is not included in ChatGPT-generated ZIP files.

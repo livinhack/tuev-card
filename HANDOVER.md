@@ -1,139 +1,77 @@
-# TÜV Reminder Card - Übergabeprotokoll b96
+# TÜV Card / TÜV Reminder – Handover b102
 
-## Stand
+## Current package
 
-- Version: `0.1.1-b96`
-- ZIP: `tuev-card-full-b96-cad-mm-physical-lab.zip`
-- Standalone Lab-ZIP: `plate-physical-lab-b96-cad-mm-vscode-liveserver.zip`
-- Ausgangspunkt: `b95`
-- Fokus: Physical Lab konsequent CAD-artig aufbauen: interne Rendererlogik in Millimetern, Pixel/DPR/Monitorprofil nur als äußere Anzeige-/Kalibrierungsschicht.
+- Version: `0.1.1-b102`
+- Main ZIP: `tuev-card-full-b102-font-calibration-profile-horizontal-check.zip`
+- Standalone Lab ZIP: `plate-physical-lab-b102-font-calibration-profile-horizontal-check-vscode-liveserver.zip`
+- Main focus: standalone physical plate renderer lab, not Home Assistant card integration.
 
-## Nutzerentscheidung / Vorgabe
+## Stable project context
 
-- Die bisherigen Card-Renderer-Versuche b90-b94 sollen nicht weiter direkt in Home Assistant feingetunt werden.
-- Der Kennzeichenrenderer wird ab jetzt außerhalb von Home Assistant neu aufgebaut.
-- Pro Schritt entsteht ein separater physischer Lab-Stand.
-- Erst wenn Teilrenderer stimmen, werden sie zusammengeführt und später in die Card integriert.
-- CAD-Regel ab b96:
+- Home Assistant card/editor/group work through b83 was stable.
+- HACS/dist structure from b87 works: HACS serves `dist/tuev-card.js` and copied assets from `dist/fonts/`.
+- GL font support exists, but generated ChatGPT ZIPs intentionally do not include font binaries. Local repo should keep fonts in `fonts/`.
+- Card renderer experiments b90-b94 were not considered good enough. The plate renderer is being rebuilt outside HA in a physical lab first.
+- Physical lab is CAD-like: all geometry is in millimetres; pixels/DPR/monitor calibration are only viewer concerns.
 
-```text
-physisches mm-Modell -> fertiges SVG -> äußere Anzeige-Skalierung
-```
+## b102 changes
 
-- Der Renderer selbst darf nicht früh in Pixel umrechnen.
-- Pixel, DPR, Browser-Zoom und Monitorprofil sind nur für die Anzeige zuständig.
-- Einzelne Elemente wie Text, Eurofeld, Siegel oder Abstände werden nicht separat nachskaliert.
+- Keeps DIN1451Alt support from b101 for the Euro-field `D`.
+- Freezes the current manual GL-Mittelschrift calibration profile:
+  - target glyph height: 75 mm
+  - Font-Kalibriergröße: 125
+  - Baseline Y: 92.5 mm
+- Renames UI wording from `Font-Ausgabegröße` to `Font-Kalibriergröße (SVG)`.
+- Leaves automatic font measuring available, but it is not the default for current manual measurement work.
+- Adds a new lab stage: `6 · Horizontale Zeichen-/Zellprüfung`.
+- The horizontal stage shows cell borders, cell centers, cell widths, gap widths and the seal column without altering geometry.
 
-## Monitorbasis für 1:1-Arbeit
+## Important physical rules currently used
 
-Nutzer-Monitor: Acer VG272U V.
+- Outer one-line plate height: 110 mm.
+- Inner white height: 101 mm.
+- Inner inset / black border: 4.5 mm.
+- Outer corner radius: 9.25 mm.
+- Inner corner radius: 4.75 mm.
+- Euro field: x 4.5, y 4.5, 45 × 101 mm.
+- Character band: 75 mm high.
+- Letter cell: 47.5 mm.
+- Digit cell: 44.5 mm.
+- Character gap: 8 mm.
+- Group gap: 24 mm.
+- Seal column: 63.5 mm inner / 67.5 mm reference.
+- HU seal: 35 mm diameter, y 29.5.
+- Authority placeholder: 45 mm diameter, y 75.5.
+- No extra gap before or after the seal column.
 
-Startwerte im Lab:
+## Files changed
 
-```text
-Geräte-px/mm: 4,2918
-Pixel Pitch: ca. 0,233 mm
-PPI: ca. 109
-```
-
-Die Anzeige-Schicht rechnet:
-
-```text
-CSS-px/mm 1:1 = Geräte-px/mm / window.devicePixelRatio × Korrekturfaktor
-```
-
-Damit soll die 100-mm-Kontrolllinie bei Anzeige-Modus `1:1 physisch`, Browser-Zoom 100% und korrektem Korrekturfaktor physisch 100 mm messen.
-
-## Geänderte Dateien
-
-- `tools/plate-physical-lab/mm-model.js`
-  - neu.
-  - reine physische Renderer-/SVG-Logik in Millimetern.
-  - enthält keine Monitor-, Pixel-, DPR- oder Browser-Zoom-Logik.
-  - SVG-ViewBox ist ein mm-Koordinatensystem.
-- `tools/plate-physical-lab/viewer-calibration.js`
-  - neu.
-  - enthält Acer-Monitorprofil, DPR-/CSS-px/mm-Rechnung und Anzeige-Modi.
-  - Anzeige-Modi:
-    - `1:1 physisch`
-    - `Fit to screen`
-    - `2× Debug`
-    - `3× Debug`
-- `tools/plate-physical-lab/app.js`
-  - überarbeitet.
-  - verbindet mm-Modell und Anzeige-Schicht.
-  - skaliert nur das komplette SVG.
 - `tools/plate-physical-lab/index.html`
-  - auf b96 aktualisiert.
-  - Anzeige-Modus statt Lab-Skalierung.
-  - CAD-Regeln im UI ergänzt.
+- `tools/plate-physical-lab/app.js`
+- `tools/plate-physical-lab/mm-model.js`
+- `tools/plate-physical-lab/font-calibration.js`
+- `tools/plate-physical-lab/viewer-calibration.js`
 - `tools/plate-physical-lab/README.md`
-  - b96-Anleitung für direkten morgigen Einstieg.
-- `docs/B96_CAD_MM_PHYSICAL_LAB.md`
-  - neue Dokumentation.
-- `package.json`, `package-lock.json`, `src/**/*.js`
-  - Version/Import-Cachebuster auf b96.
-- `dist/tuev-card.js`
-  - neu gebaut, Bundle-Header `// TÜV Card bundled b96`.
+- `docs/B102_FONT_CALIBRATION_PROFILE_AND_HORIZONTAL_CHECK.md`
+- `docs/RELEASE_CHECK.md`
+- `package.json`
+- `package-lock.json`
+- `src/**/*.js` import cache-busters to b102
+- `dist/tuev-card.js` rebuilt
 
-## Entfernt / ersetzt
+## Test next
 
-- `tools/plate-physical-lab/physical-renderer.js` wurde durch `mm-model.js` und `viewer-calibration.js` ersetzt.
-- Dadurch ist die Trennung zwischen physischem Modell und Anzeige deutlich klarer.
+1. Open `tools/plate-physical-lab/index.html` with VS Code Live Server.
+2. Put local fonts in either `tools/plate-physical-lab/fonts/` or root `fonts/`:
+   - `GL-Nummernschild-Mtl.ttf`
+   - `GL-Nummernschild-Eng.ttf`
+   - optional `din1451alt.ttf` for the Euro-field `D`
+3. Use manual font settings: `125` and `92.5`.
+4. Choose `6 · Horizontale Zeichen-/Zellprüfung`.
+5. Compare: `HH HU 199`, `BKS R 95`, `DA CI 500`, `K S 70`, `TR M 6`.
+6. Check whether letters are visually centered in their fixed cells before changing any further geometry.
 
-## Nicht geändert
+## Next likely step
 
-- Card-Renderer wurde inhaltlich nicht weiter verbessert.
-- Großer TÜV-Plakettenrenderer unverändert.
-- Gruppen-/Editorlogik unverändert.
-- Floating Panels unverändert.
-- HACS/dist-Struktur unverändert.
-- Font-Binärdateien sind weiterhin nicht im Chat-ZIP enthalten.
-
-## Font-Hinweis
-
-Für das neue Lab optional lokal ablegen:
-
-```text
-tools/plate-physical-lab/fonts/GL-Nummernschild-Mtl.ttf
-tools/plate-physical-lab/fonts/GL-Nummernschild-Eng.ttf
-```
-
-Alternativ nutzt das Lab die Fonts aus dem Projektordner:
-
-```text
-fonts/GL-Nummernschild-Mtl.ttf
-fonts/GL-Nummernschild-Eng.ttf
-```
-
-## Build/Check
-
-Auszuführen/ausgeführt:
-
-```bash
-npm run check
-npm run build
-```
-
-## Nächster Einstieg morgen
-
-Direkt öffnen:
-
-```text
-tools/plate-physical-lab/index.html
-```
-
-Dann mit VS Code Live Server starten.
-
-Startreihenfolge:
-
-1. Browser-Zoom auf 100% stellen.
-2. Anzeige-Modus `1:1 physisch` lassen.
-3. Mit Lineal prüfen, ob die 100-mm-Kontrolllinie wirklich 100 mm misst.
-4. Falls nicht: gemessenen Wert eintragen und Korrekturfaktor übernehmen.
-5. Nur Schritt `1 · Schildkörper, Außenmaß, Rand, Eurofeld` prüfen.
-6. Erst wenn Außenmaß/Rand/Eurofeld stimmen, zu Raster/Siegel/Text weitergehen.
-
-## Offene Entscheidung
-
-Die Card bleibt vorerst ungeeignet als Messumgebung. Erst wenn das Physical Lab in echten mm-Schritten stimmt, wird entschieden, wie der Renderer wieder in die Card integriert wird und ob der Card-Renderer auf einen früheren stabileren Stand zurückgeht.
+If the horizontal cells are correct but individual glyphs look optically off-center, add per-character optical offset tables in millimetres inside the physical model. Do not use CSS/px transforms and do not scale individual elements.
