@@ -1,96 +1,139 @@
-# TÜV Reminder Card - Übergabeprotokoll b94
+# TÜV Reminder Card - Übergabeprotokoll b96
 
 ## Stand
 
-- Version: `0.1.1-b94`
-- ZIP: `tuev-card-full-b94-physical-plate-rules-width-bands.zip`
-- Ausgangspunkt: `b93`
-- Fokus: Kennzeichenrenderer weiter von optischem Raten lösen und die Regel festziehen, dass vor der Skalierung ein physisches Kennzeichenmodell in Millimetern entsteht.
+- Version: `0.1.1-b96`
+- ZIP: `tuev-card-full-b96-cad-mm-physical-lab.zip`
+- Standalone Lab-ZIP: `plate-physical-lab-b96-cad-mm-vscode-liveserver.zip`
+- Ausgangspunkt: `b95`
+- Fokus: Physical Lab konsequent CAD-artig aufbauen: interne Rendererlogik in Millimetern, Pixel/DPR/Monitorprofil nur als äußere Anzeige-/Kalibrierungsschicht.
 
 ## Nutzerentscheidung / Vorgabe
 
-- Feste Regeln für den physikgleichen Renderer vor Skalierung.
-- Skalierung darf danach nur auf das Gesamtbild/SVG wirken, nicht auf einzelne Elemente.
-- Recherche und Ergänzung der Breitenstufen von Mindest- bis Maximalbreite.
-- Offizielle Mindestbreite für einzeilige Pkw-Kennzeichen nicht als Gesetzeswert behaupten; praktische Breitenstufen dürfen als Renderer-/Herstellerlogik genutzt werden.
+- Die bisherigen Card-Renderer-Versuche b90-b94 sollen nicht weiter direkt in Home Assistant feingetunt werden.
+- Der Kennzeichenrenderer wird ab jetzt außerhalb von Home Assistant neu aufgebaut.
+- Pro Schritt entsteht ein separater physischer Lab-Stand.
+- Erst wenn Teilrenderer stimmen, werden sie zusammengeführt und später in die Card integriert.
+- CAD-Regel ab b96:
 
-## Quellen- und Datenstand
+```text
+physisches mm-Modell -> fertiges SVG -> äußere Anzeige-Skalierung
+```
 
-- Offizielle FZV/BMV-Angaben: einzeilig max. 520 × 110 mm, zweizeilig max. 340 × 200 mm, Kraftrad 180–220 × 200 mm, verkleinert zweizeilig max. 255 × 130 mm.
-- Nutzerdatei `kennzeichenmasse_liste.xlsx` ausgewertet: enthält konsolidierte Werte wie Rand 4,5 mm, Eurofeld 45 mm, Zeichenabstand 8–10 mm, Siegelbereich 63,5–67,5 mm, HU/Plakette 35 mm, Mittelschrift-/Engschrift-Zellbreiten.
-- Praktische Breitenstufen aus Hersteller-/Händlerquellen ergänzt.
+- Der Renderer selbst darf nicht früh in Pixel umrechnen.
+- Pixel, DPR, Browser-Zoom und Monitorprofil sind nur für die Anzeige zuständig.
+- Einzelne Elemente wie Text, Eurofeld, Siegel oder Abstände werden nicht separat nachskaliert.
+
+## Monitorbasis für 1:1-Arbeit
+
+Nutzer-Monitor: Acer VG272U V.
+
+Startwerte im Lab:
+
+```text
+Geräte-px/mm: 4,2918
+Pixel Pitch: ca. 0,233 mm
+PPI: ca. 109
+```
+
+Die Anzeige-Schicht rechnet:
+
+```text
+CSS-px/mm 1:1 = Geräte-px/mm / window.devicePixelRatio × Korrekturfaktor
+```
+
+Damit soll die 100-mm-Kontrolllinie bei Anzeige-Modus `1:1 physisch`, Browser-Zoom 100% und korrektem Korrekturfaktor physisch 100 mm messen.
 
 ## Geänderte Dateien
 
-- `src/plate/renderer.js`
-  - Breitenstufen getrennt nach Mittelschrift und Engschrift ergänzt.
-  - Siegelmodell korrigiert: sichtbare neutrale Behördensiegelfläche 35 mm, reservierter Außenprägungsbereich 45 mm.
-  - Zwei 35-mm-Siegelpositionen im 75-mm-Zeichenband mit festem 5-mm-Zwischenraum.
-  - Kommentare im Code präzisieren: feste mm-Geometrie vor Skalierung; kein Per-Element-Scaling.
-- `docs/B94_PHYSICAL_PLATE_RULES_AND_WIDTH_BANDS.md`
-  - neue Detaildoku zu festen Regeln und Breitenbändern.
-- `docs/RELEASE_CHECK.md`
-  - b94-Prüfnotizen ergänzt.
+- `tools/plate-physical-lab/mm-model.js`
+  - neu.
+  - reine physische Renderer-/SVG-Logik in Millimetern.
+  - enthält keine Monitor-, Pixel-, DPR- oder Browser-Zoom-Logik.
+  - SVG-ViewBox ist ein mm-Koordinatensystem.
+- `tools/plate-physical-lab/viewer-calibration.js`
+  - neu.
+  - enthält Acer-Monitorprofil, DPR-/CSS-px/mm-Rechnung und Anzeige-Modi.
+  - Anzeige-Modi:
+    - `1:1 physisch`
+    - `Fit to screen`
+    - `2× Debug`
+    - `3× Debug`
+- `tools/plate-physical-lab/app.js`
+  - überarbeitet.
+  - verbindet mm-Modell und Anzeige-Schicht.
+  - skaliert nur das komplette SVG.
+- `tools/plate-physical-lab/index.html`
+  - auf b96 aktualisiert.
+  - Anzeige-Modus statt Lab-Skalierung.
+  - CAD-Regeln im UI ergänzt.
+- `tools/plate-physical-lab/README.md`
+  - b96-Anleitung für direkten morgigen Einstieg.
+- `docs/B96_CAD_MM_PHYSICAL_LAB.md`
+  - neue Dokumentation.
 - `package.json`, `package-lock.json`, `src/**/*.js`
-  - Version/Import-Cachebuster auf b94.
+  - Version/Import-Cachebuster auf b96.
 - `dist/tuev-card.js`
-  - neu gebaut.
+  - neu gebaut, Bundle-Header `// TÜV Card bundled b96`.
 
-## Aktive Breitenbänder im Renderer
+## Entfernt / ersetzt
 
-Mittelschrift:
-
-```text
-340 / 380 / 420 / 460 / 480 / 520 mm
-```
-
-Engschrift:
-
-```text
-320 / 340 / 380 / 420 / 480 / 520 mm
-```
-
-Engschrift wird weiterhin erst nach Mittelschrift versucht. Die 320-mm-Stufe wird dadurch nicht genutzt, nur weil ein kurzes Kennzeichen damit optisch noch kürzer wäre.
+- `tools/plate-physical-lab/physical-renderer.js` wurde durch `mm-model.js` und `viewer-calibration.js` ersetzt.
+- Dadurch ist die Trennung zwischen physischem Modell und Anzeige deutlich klarer.
 
 ## Nicht geändert
 
-- Großer TÜV-Plakettenrenderer.
-- Gruppen-/Editorlogik.
-- Floating Panels.
-- HACS/dist-Struktur.
-- Font-Binärdateien im Chat-ZIP: weiterhin nicht enthalten.
+- Card-Renderer wurde inhaltlich nicht weiter verbessert.
+- Großer TÜV-Plakettenrenderer unverändert.
+- Gruppen-/Editorlogik unverändert.
+- Floating Panels unverändert.
+- HACS/dist-Struktur unverändert.
+- Font-Binärdateien sind weiterhin nicht im Chat-ZIP enthalten.
+
+## Font-Hinweis
+
+Für das neue Lab optional lokal ablegen:
+
+```text
+tools/plate-physical-lab/fonts/GL-Nummernschild-Mtl.ttf
+tools/plate-physical-lab/fonts/GL-Nummernschild-Eng.ttf
+```
+
+Alternativ nutzt das Lab die Fonts aus dem Projektordner:
+
+```text
+fonts/GL-Nummernschild-Mtl.ttf
+fonts/GL-Nummernschild-Eng.ttf
+```
 
 ## Build/Check
 
-Ausgeführt:
+Auszuführen/ausgeführt:
 
 ```bash
 npm run check
 npm run build
 ```
 
-## Nächster Test
+## Nächster Einstieg morgen
 
-Bitte b94 übernehmen, lokale Fontdateien in `fonts/` behalten, `npm run build`, commit/push, HACS Redownload.
-
-Testkennzeichen:
+Direkt öffnen:
 
 ```text
-K S 70
-TR M 6
-DA CI 500
-WIL CL 212
-HH EV 204E
-BIT GT500
-5
+tools/plate-physical-lab/index.html
 ```
 
-Wichtigste Prüfung:
+Dann mit VS Code Live Server starten.
 
-1. Wirken die Breitenstufen natürlicher?
-2. Sind HU-/Behördensiegelgröße und vertikale Position plausibler?
-3. Bleibt das Kennzeichen als Ganzes skaliert, ohne dass Einzelteile unterschiedlich wirken?
+Startreihenfolge:
 
-## Nächster Einstieg
+1. Browser-Zoom auf 100% stellen.
+2. Anzeige-Modus `1:1 physisch` lassen.
+3. Mit Lineal prüfen, ob die 100-mm-Kontrolllinie wirklich 100 mm misst.
+4. Falls nicht: gemessenen Wert eintragen und Korrekturfaktor übernehmen.
+5. Nur Schritt `1 · Schildkörper, Außenmaß, Rand, Eurofeld` prüfen.
+6. Erst wenn Außenmaß/Rand/Eurofeld stimmen, zu Raster/Siegel/Text weitergehen.
 
-Falls b94 grundsätzlich besser ist: b95 nur noch Feintuning an festen Werten, z. B. 24 vs. 30 mm Gruppentrennung, 58/63,5/67,5 mm Siegelzone, 8/10 mm Zeichenabstand. Keine Rückkehr zu Canvas-/Glyphbreitenmessung.
+## Offene Entscheidung
+
+Die Card bleibt vorerst ungeeignet als Messumgebung. Erst wenn das Physical Lab in echten mm-Schritten stimmt, wird entschieden, wie der Renderer wieder in die Card integriert wird und ob der Card-Renderer auf einen früheren stabileren Stand zurückgeht.

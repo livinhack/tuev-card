@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kennzeichen Physical Lab b96</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">TÜV Card · Renderer-Neustart</p>
+      <h1>Kennzeichen Physical Lab b96</h1>
+      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige. Home Assistant ist hier bewusst nicht beteiligt.</p>
+    </div>
+    <div class="version">b96</div>
+  </header>
+
+  <main>
+    <section class="panel controls">
+      <h2>1:1-Kalibrierung</h2>
+      <div class="grid two">
+        <label>
+          Monitor-Profil
+          <select id="monitorProfile">
+            <option value="acer-vg272u-v" selected>Acer VG272U V · 4,2918 px/mm</option>
+            <option value="custom">Manuell</option>
+          </select>
+        </label>
+        <label>
+          Geräte-px/mm
+          <input id="devicePxPerMm" type="number" min="1" max="20" step="0.0001" value="4.2918" />
+        </label>
+      </div>
+      <div class="grid three">
+        <label>
+          Anzeige-Modus
+          <select id="displayMode">
+            <option value="physical" selected>1:1 physisch</option>
+            <option value="fit">Fit to screen</option>
+            <option value="debug-2">2× Debug</option>
+            <option value="debug-3">3× Debug</option>
+          </select>
+        </label>
+        <label>
+          Korrekturfaktor
+          <input id="calibrationFactor" type="number" min="0.5" max="1.5" step="0.001" value="1" />
+        </label>
+        <label>
+          Gemessene 100-mm-Linie
+          <input id="measured100" type="number" min="50" max="150" step="0.1" placeholder="optional" />
+        </label>
+      </div>
+      <div class="readout" id="calibrationReadout"></div>
+      <div class="calibration-card">
+        <div class="ruler-line" id="ruler100"><span>100 mm Kontrolllinie</span></div>
+        <div class="ruler-hint">Bei 1:1 und 100% Browser-Zoom mit Lineal prüfen. Falls abweichend: gemessene Länge eintragen und „Faktor übernehmen“ klicken.</div>
+        <button type="button" id="applyMeasured">Faktor übernehmen</button>
+      </div>
+
+      <h2>Renderer-Schritt</h2>
+      <label>
+        Schritt/Layer
+        <select id="stage">
+          <option value="body">1 · Schildkörper, Außenmaß, Rand, Eurofeld</option>
+          <option value="grid">2 · Raster, Zeichen- und Siegelzellen</option>
+          <option value="seals">3 · HU- und Behördensiegelplätze</option>
+          <option value="text">4 · Zeichen in festen Zellen</option>
+          <option value="complete" selected>5 · Komplettbild</option>
+        </select>
+      </label>
+
+      <h2>Kennzeichen</h2>
+      <label>
+        Eingabe
+        <input id="plateInput" value="HH HU 199" autocomplete="off" />
+      </label>
+      <div class="examples" id="examples"></div>
+      <div class="grid two">
+        <label>
+          Breite
+          <select id="widthMode">
+            <option value="auto" selected>Auto: nächste Stufe</option>
+            <option value="320">320 mm</option>
+            <option value="340">340 mm</option>
+            <option value="380">380 mm</option>
+            <option value="420">420 mm</option>
+            <option value="460">460 mm</option>
+            <option value="480">480 mm</option>
+            <option value="520">520 mm</option>
+          </select>
+        </label>
+        <label>
+          Schrift
+          <select id="fontMode">
+            <option value="middle" selected>Mittelschrift</option>
+            <option value="narrow">Engschrift</option>
+          </select>
+        </label>
+      </div>
+      <label class="checkbox">
+        <input id="showDimensions" type="checkbox" checked />
+        Maßlinien anzeigen
+      </label>
+    </section>
+
+    <section class="panel preview-panel">
+      <div class="preview-header">
+        <div>
+          <h2>Physisches Ergebnis</h2>
+          <p>Das SVG-Modell bleibt in Millimetern. Nur das fertige Gesamt-SVG wird außen für 1:1, Fit oder Debug skaliert.</p>
+        </div>
+        <div class="pill" id="sizePill"></div>
+      </div>
+      <div class="preview-scroll" id="previewScroll">
+        <div id="output" class="output"></div>
+      </div>
+      <div class="notes" id="notes"></div>
+    </section>
+
+    <section class="panel metrics-panel">
+      <h2>Messwerte</h2>
+      <table><tbody id="metrics"></tbody></table>
+      <h2>Feste b96-Regeln</h2>
+      <ul>
+        <li>Alle Modell-Koordinaten sind Millimeter.</li>
+        <li>Das Außenmaß enthält den schwarzen Rand.</li>
+        <li>Nach dem physischen Aufbau wird nur das komplette SVG in der Anzeige-Schicht skaliert.</li>
+        <li>Keine nachträgliche Einzel-Skalierung von Zeichen, Eurofeld oder Siegeln.</li>
+        <li>Amtliche Siegelgrafiken werden nicht nachgebildet; nur neutrale Platzhalter.</li>
+        <li>Pixel, DPR, Browser-Zoom und Monitorprofil kommen nicht in das Modell, sondern nur in <code>viewer-calibration.js</code>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
