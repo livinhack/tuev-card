@@ -1,5 +1,8 @@
 const FONT_PROBE_BYTES = "bytes=0-15";
 
+export const CANONICAL_GL_MIDDLE_FONT_FAMILY = "GL-Nummernschild-Mtl";
+export const CANONICAL_GL_NARROW_FONT_FAMILY = "GL-Nummernschild-Eng";
+
 const PLATE_FONT_CANDIDATES = [
     {
         key: "gl-mtl-hacs",
@@ -107,6 +110,20 @@ function hasValidFontSignature(buffer) {
 function withCacheBuster(url) {
     const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}v=${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function canonicalFamilyForRole(role) {
+    if (role === "eng") return CANONICAL_GL_NARROW_FONT_FAMILY;
+    if (role === "mtl") return CANONICAL_GL_MIDDLE_FONT_FAMILY;
+    return null;
+}
+
+function canonicalFontFaceSrc(role) {
+    const urls = PLATE_FONT_CANDIDATES
+        .filter((candidate) => candidate.source === "gl" && candidate.role === role)
+        .map((candidate) => `url("${candidate.url}") format("${candidate.format || 'truetype'}")`);
+
+    return urls.join(",\n                ");
 }
 
 async function checkCandidateAvailable(candidate) {
@@ -220,8 +237,28 @@ export function injectPlateFont() {
 
     plateFontInjected = true;
 
-    const style = document.createElement("style");
-    style.textContent = PLATE_FONT_CANDIDATES.map((candidate) => `
+    const canonicalMiddleSrc = canonicalFontFaceSrc("mtl");
+    const canonicalNarrowSrc = canonicalFontFaceSrc("eng");
+    const canonicalFaces = [
+        canonicalMiddleSrc ? `
+        @font-face {
+            font-family: "${CANONICAL_GL_MIDDLE_FONT_FAMILY}";
+            src: ${canonicalMiddleSrc};
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }` : "",
+        canonicalNarrowSrc ? `
+        @font-face {
+            font-family: "${CANONICAL_GL_NARROW_FONT_FAMILY}";
+            src: ${canonicalNarrowSrc};
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }` : ""
+    ].filter(Boolean).join("\n");
+
+    const candidateFaces = PLATE_FONT_CANDIDATES.map((candidate) => `
         @font-face {
             font-family: "${candidate.family}";
             src: url("${candidate.url}") format("${candidate.format || 'truetype'}");
@@ -230,6 +267,9 @@ export function injectPlateFont() {
             font-display: swap;
         }
     `).join("\n");
+
+    const style = document.createElement("style");
+    style.textContent = `${canonicalFaces}\n${candidateFaces}`;
 
     document.head.appendChild(style);
 }

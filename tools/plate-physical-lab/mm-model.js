@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b114 / shared plate physical mm model
+// Kennzeichen Physical Lab b115 / shared plate physical mm model
 // CAD-like model layer: every coordinate, size and distance in this file is millimetres.
 // No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
 // Shared CAD-like one-line plate model used by the Physical Lab and the production Card renderer. Final H/E suffix plates may shrink the one-line seal column to 58.0 mm; normal plates keep 63.5-67.5 mm.
@@ -22,7 +22,7 @@ export const SPACING_RULES_MM = Object.freeze({
 
 export const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
   middleManualB108: {
-    label: "GL middle script · manually calibrated b114",
+    label: "GL middle script · manually calibrated b115",
     targetGlyphHeight: 75,
     fontSize: 125,
     baselineY: 92.5,

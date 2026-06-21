@@ -1,119 +1,109 @@
-# TÜV Reminder Card – Handover b114
+# TÜV Reminder Card – Handover b115
 
-Version: `0.1.1-b114`
+## Current version
+
+- ZIP/version: `b115`
+- Package version: `0.1.1-b115`
+- Previous baseline: `b114` (`tuev-card-full-b114-physical-lab-renderer-card.zip`)
+
+## Project rules to keep
+
+- Code, file names and function names stay English.
+- German UI text must go through translations/localisation.
+- ZIP versions must continue incrementally.
+- Every new working ZIP must include an updated `HANDOVER.md`.
+- Do not include font binary files in Chat ZIPs.
+- Local GL font files live separately in the user repo/Home Assistant setup.
 
 ## Current focus
 
-The license-plate renderer was rebuilt outside Home Assistant in the Physical Lab and is now used as the productive Card renderer.
+The license plate renderer is now based on the Physical Lab millimetre model and must match the Lab visually in Home Assistant.
 
-The current architecture is:
+The renderer architecture remains:
 
-1. Build the complete physical plate model in millimetres.
+1. Build a complete physical model in millimetres.
 2. Render one complete SVG from that model.
-3. Let the Card scale only the complete SVG to the available UI size.
-4. Do not individually scale characters, seals, the Euro field or other elements after solving the physical model.
+3. Scale only the full SVG for the Card display.
+4. Do not post-scale individual characters, seals, the euro field or other elements.
 
-## Important project rules
+## What changed in b115
 
-- Code, file names and functions should stay English.
-- German Home Assistant UI text should go through translations/localization.
-- ZIP versions must continue monotonically.
-- Every new work ZIP must include an updated `HANDOVER.md`.
-- No font binary files should be included in the Chat ZIP.
-- Local fonts live separately in the repo/Home Assistant project.
+b114 correctly moved the Card to the Lab mm model, but Home Assistant could still render a visually different plate. The issue was the production font selection:
 
-## Change b114
+- The Lab uses the canonical GL font-family names `GL-Nummernschild-Mtl` and `GL-Nummernschild-Eng`.
+- The Card selected a transient candidate family from the async font availability check, for example HACS/local-specific names.
+- If the availability list was not ready yet, or if the default candidate path was not the actually installed path, the SVG could fall back to a browser font.
+- That made the glyph shapes/widths no longer match the calibrated mm cells from the Lab.
 
-b114 replaces the old Card-side plate renderer with the current Physical Lab renderer logic.
+b115 fixes this by injecting canonical `@font-face` aliases for:
 
-### New production path
+- `GL-Nummernschild-Mtl`
+- `GL-Nummernschild-Eng`
 
-- `src/plate/mm-model.js`
-  - shared CAD-like mm model based on the Physical Lab logic
-  - internal dimensions are millimetres only
-  - includes the b112 H/E suffix seal-column exception
-  - includes b110/b111 balanced spacing behaviour and solved variable gaps
+Each canonical alias contains the known GL candidate URLs for the corresponding role. The per-candidate names are still injected for compatibility and availability checks, but the production SVG now always renders text with the canonical Lab names.
+
+## Main files changed
+
+- `src/plate/font.js`
+  - Added canonical GL font-family constants.
+  - Added canonical `@font-face` aliases for middle and narrow GL fonts.
+  - Kept candidate-specific `@font-face` entries for compatibility.
+
 - `src/plate/renderer.js`
-  - now calls `buildPlateModelMm()`
-  - outputs a complete physical SVG
-  - applies only whole-SVG display scaling via SVG `width` / `height` and `viewBox`
-  - keeps the Card’s shared-height behaviour because all plates share the same physical height of 110 mm and the Card applies one shared scale
+  - Production SVG now selects the canonical GL family by resolved font mode.
+  - Middle mode uses `GL-Nummernschild-Mtl`.
+  - Narrow mode uses `GL-Nummernschild-Eng`.
 
-### Physical rules now active in the Card
+- `dist/tuev-card.js`
+  - Rebuilt from source.
 
-- One-line outer height: `110 mm`
-- Inner white height: `101 mm`
-- Border band: `4.5 mm`
-- Euro field and seal positions are based on the Lab/DXF model
-- HU and authority seal positions are solved separately
-- Normal seal column: `63.5–67.5 mm`
-- Final H/E suffix seal column: `58.0–67.5 mm`
-- HU circle: `35 mm`
-- Authority seal circle: `45 mm`
-- Equal outside margins, minimum `8 mm` when the layout fits
-- Variable character gaps and group gaps are distributed by the layout solver
-- `Auto balanced` / `widthMode: balanced` is now the production default
-- Middle script remains the default
-- Narrow script is used only if middle script cannot satisfy the allowed layout
-- Shared GL middle/narrow `I` width remains `35.5 mm`
+- `docs/B115_CARD_CANONICAL_FONT_SYNC.md`
+  - Documents the b115 fix.
 
-## Validation results
+## Physical Lab state
 
-Checked with `fontMode: auto`, `widthMode: balanced`, `specialIWidth: 35.5`:
+- Lab path: `tools/plate-physical-lab/`
+- Entry point: `tools/plate-physical-lab/index.html`
+- Lab remains on the b114/b115 mm model basis.
+- b111 dimension lines remain in the Lab.
+- b112 H/E seal-column rule remains active:
+  - normal one-line plates: seal column `63.5–67.5 mm`
+  - final H/E after digit: seal column `58.0–67.5 mm`
 
-| Plate | Font | Width | Seal column | Outside margins | Result |
-| --- | --- | ---: | ---: | ---: | --- |
-| `BIT GT500` | narrow | 520 mm | 64.7 mm | 8.0 / 8.0 mm | fits |
-| `K S 70` | middle | 380 mm | 67.5 mm | 17.3 / 17.3 mm | fits |
-| `TR M 6` | middle | 380 mm | 67.5 mm | 15.8 / 15.8 mm | fits |
-| `HH EV 204E` | narrow | 520 mm | 58.6 mm | 8.0 / 8.0 mm | fits with H/E rule |
-| `DA CI 500` | middle | 520 mm | 67.5 mm | 8.5 / 8.5 mm | fits |
+## Renderer rules currently active
 
-## Checks performed
+- One-line outer height: `110 mm`, including black border.
+- Inner white area height: `101 mm`.
+- Border/inset: `4.5 mm`.
+- Euro field, plate body and seal positions are based on the DXF references.
+- HU and authority seal are computed separately.
+- Visible HU circle: `35 mm`.
+- Visible authority seal circle: `45 mm`.
+- Left/right outside margins must stay equal and at least `8 mm` when the layout fits.
+- Variable spacing is distributed by the layout solver.
+- Middle script is preferred.
+- Narrow script is only selected if middle script does not fit within the current Anlage-4-style solver constraints.
+- Shared GL `I` width: `35.5 mm` for middle and narrow script. This is a calibrated GL value, not an individually official measure.
+
+## Validation done
 
 - `npm run check` passed.
 - `npm run build` passed.
-- The generated bundle is `dist/tuev-card.js`.
-- No `.ttf`, `.otf`, `.woff` or `.woff2` files are included in the generated Chat ZIPs.
+- No `.ttf`, `.otf`, `.woff` or `.woff2` files are included in the generated ZIPs.
 
-## Files changed in b114
+## Suggested next test in Home Assistant
 
-- `src/plate/mm-model.js`
-  - new shared production mm model
-- `src/plate/renderer.js`
-  - old Card plate renderer replaced by production Physical Lab renderer path
-- `tools/plate-physical-lab/mm-model.js`
-  - synchronized with the shared mm model implementation
-- `tools/plate-physical-lab/index.html`
-  - version text updated to b114
-- `tools/plate-physical-lab/app.js`
-  - version notes updated to b114
-- `tools/plate-physical-lab/README.md`
-  - version heading updated to b114
-- `src/tuev-card-entry.js`
-  - source comment updated to b114
-- `docs/B114_CARD_PHYSICAL_LAB_RENDERER.md`
-  - new implementation note
-- `package.json` / `package-lock.json`
-  - version updated to `0.1.1-b114`
-- `dist/tuev-card.js`
-  - rebuilt from source
+After installing b115, test at least:
 
-## Not changed
+- `DA CI 500`
+- `HH HU 199`
+- `HH EV 204E`
+- `BIT GT500`
+- `K S 70`
+- `TR M 6`
 
-- The Card/editor grouping features were not intentionally changed.
-- The HU badge renderer outside the plate SVG was not intentionally changed.
-- The Physical Lab remains available as a separate test environment.
-- Font binaries are not included in the Chat ZIP.
+Expected: Home Assistant should now use the same canonical GL font identities as the Physical Lab. If the Card still differs from the Lab, the next thing to inspect is not the mm solver but the browser-loaded font URL/path in Home Assistant.
 
-## Next suggested checks
+## Next likely work item
 
-1. Install b114 in Home Assistant and check graphical plates in the Card.
-2. Compare the Card output against the Physical Lab for:
-   - `BIT GT500`
-   - `K S 70`
-   - `TR M 6`
-   - `HH EV 204E`
-   - `DA CI 500`
-3. Check single-column and multi-column Card scaling.
-4. If the Card output visually matches the Lab, the next step is cleanup/polish rather than more geometry rewrites.
+If b115 visually matches the Lab, continue with final Card integration polish: shared scaling across vehicle tiles and responsive/browser checks. If the Card still does not match, add a small optional debug output showing the active SVG data attributes and resolved font mode/family directly in the Card for diagnosis.

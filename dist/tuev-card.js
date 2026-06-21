@@ -1,4 +1,4 @@
-// TÜV Card bundled b114
+// TÜV Card bundled b115
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1928,7 +1928,7 @@ return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVe
 
 // ---- src/plate/mm-model.js ----
 const __m_src_plate_mm_model_js = (() => {
-// Plate physical mm model b114
+// Plate physical mm model b115
 // CAD-like model layer: every coordinate, size and distance in this file is millimetres.
 // No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
 // Shared CAD-like one-line plate model used by the Physical Lab and the production Card renderer. Final H/E suffix plates may shrink the one-line seal column to 58.0 mm; normal plates keep 63.5-67.5 mm.
@@ -1952,7 +1952,7 @@ const SPACING_RULES_MM = Object.freeze({
 
 const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
   middleManualB108: {
-    label: "GL middle script · manually calibrated b114",
+    label: "GL middle script · manually calibrated b115",
     targetGlyphHeight: 75,
     fontSize: 125,
     baselineY: 92.5,
@@ -2926,6 +2926,9 @@ return { WIDTH_BANDS: WIDTH_BANDS, SPACING_RULES_MM: SPACING_RULES_MM, FONT_CALI
 const __m_src_plate_font_js = (() => {
 const FONT_PROBE_BYTES = "bytes=0-15";
 
+const CANONICAL_GL_MIDDLE_FONT_FAMILY = "GL-Nummernschild-Mtl";
+const CANONICAL_GL_NARROW_FONT_FAMILY = "GL-Nummernschild-Eng";
+
 const PLATE_FONT_CANDIDATES = [
     {
         key: "gl-mtl-hacs",
@@ -3033,6 +3036,20 @@ function hasValidFontSignature(buffer) {
 function withCacheBuster(url) {
     const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}v=${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function canonicalFamilyForRole(role) {
+    if (role === "eng") return CANONICAL_GL_NARROW_FONT_FAMILY;
+    if (role === "mtl") return CANONICAL_GL_MIDDLE_FONT_FAMILY;
+    return null;
+}
+
+function canonicalFontFaceSrc(role) {
+    const urls = PLATE_FONT_CANDIDATES
+        .filter((candidate) => candidate.source === "gl" && candidate.role === role)
+        .map((candidate) => `url("${candidate.url}") format("${candidate.format || 'truetype'}")`);
+
+    return urls.join(",\n                ");
 }
 
 async function checkCandidateAvailable(candidate) {
@@ -3146,8 +3163,28 @@ function injectPlateFont() {
 
     plateFontInjected = true;
 
-    const style = document.createElement("style");
-    style.textContent = PLATE_FONT_CANDIDATES.map((candidate) => `
+    const canonicalMiddleSrc = canonicalFontFaceSrc("mtl");
+    const canonicalNarrowSrc = canonicalFontFaceSrc("eng");
+    const canonicalFaces = [
+        canonicalMiddleSrc ? `
+        @font-face {
+            font-family: "${CANONICAL_GL_MIDDLE_FONT_FAMILY}";
+            src: ${canonicalMiddleSrc};
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }` : "",
+        canonicalNarrowSrc ? `
+        @font-face {
+            font-family: "${CANONICAL_GL_NARROW_FONT_FAMILY}";
+            src: ${canonicalNarrowSrc};
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }` : ""
+    ].filter(Boolean).join("\n");
+
+    const candidateFaces = PLATE_FONT_CANDIDATES.map((candidate) => `
         @font-face {
             font-family: "${candidate.family}";
             src: url("${candidate.url}") format("${candidate.format || 'truetype'}");
@@ -3157,10 +3194,13 @@ function injectPlateFont() {
         }
     `).join("\n");
 
+    const style = document.createElement("style");
+    style.textContent = `${canonicalFaces}\n${candidateFaces}`;
+
     document.head.appendChild(style);
 }
 
-return { checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: getPlateFontStatus, getPlateFontVariantForText: getPlateFontVariantForText, getDefaultPlateFontVariant: getDefaultPlateFontVariant, isPlateFontLoaded: isPlateFontLoaded, ensurePlateFont: ensurePlateFont, injectPlateFont: injectPlateFont };
+return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANONICAL_GL_NARROW_FONT_FAMILY: CANONICAL_GL_NARROW_FONT_FAMILY, checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: getPlateFontStatus, getPlateFontVariantForText: getPlateFontVariantForText, getDefaultPlateFontVariant: getDefaultPlateFontVariant, isPlateFontLoaded: isPlateFontLoaded, ensurePlateFont: ensurePlateFont, injectPlateFont: injectPlateFont };
 
 })();
 
@@ -3168,7 +3208,7 @@ return { checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: g
 const __m_src_plate_renderer_js = (() => {
 const { tuevColorForYear } = __m_src_badge_profile_js;
 const { buildPlateModelMm, getCanvasMm, getCharacterBand, ONE_LINE_RULES_MM } = __m_src_plate_mm_model_js;
-const { checkPlateFontAvailable, ensurePlateFont, getDefaultPlateFontVariant, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
+const { CANONICAL_GL_MIDDLE_FONT_FAMILY, CANONICAL_GL_NARROW_FONT_FAMILY, checkPlateFontAvailable, ensurePlateFont, getDefaultPlateFontVariant, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
 
 
 
@@ -3259,6 +3299,12 @@ function getLicensePlateMetrics(plate, options = {}) {
     };
 }
 
+function getCanonicalFontFamilyForMode(fontMode) {
+    return fontMode === "narrow"
+        ? CANONICAL_GL_NARROW_FONT_FAMILY
+        : CANONICAL_GL_MIDDLE_FONT_FAMILY;
+}
+
 function getFontVariantForMode(fontMode) {
     const status = getPlateFontStatus();
     const fonts = Array.isArray(status?.fonts) ? status.fonts : [];
@@ -3274,8 +3320,8 @@ function renderPhysicalPlateSvg({ analysis, displayWidth, displayHeight, options
     const { model, fontVariant } = analysis;
     const { rules, metrics } = model;
     const clipId = `tuev-physical-plate-${hashString(metrics.normalized)}-${Math.round(metrics.width)}`;
-    const fontFamily = fontVariant?.family || model.font.fontFamily;
-    const fontWeight = fontVariant?.weight || 400;
+    const fontFamily = getCanonicalFontFamilyForMode(metrics.fontMode);
+    const fontWeight = 400;
 
     return `
         <svg
@@ -6484,7 +6530,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b114
+// TÜV Card source entry b115
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

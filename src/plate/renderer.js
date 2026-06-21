@@ -1,18 +1,20 @@
-import { tuevColorForYear } from "../badge/profile.js?v=b114";
+import { tuevColorForYear } from "../badge/profile.js?v=b115";
 import {
     buildPlateModelMm,
     getCanvasMm,
     getCharacterBand,
     ONE_LINE_RULES_MM
-} from "./mm-model.js?v=b114";
+} from "./mm-model.js?v=b115";
 import {
+    CANONICAL_GL_MIDDLE_FONT_FAMILY,
+    CANONICAL_GL_NARROW_FONT_FAMILY,
     checkPlateFontAvailable,
     ensurePlateFont,
     getDefaultPlateFontVariant,
     getPlateFontStatus,
     injectPlateFont,
     isPlateFontLoaded
-} from "./font.js?v=b114";
+} from "./font.js?v=b115";
 
 export {
     checkPlateFontAvailable,
@@ -108,6 +110,12 @@ export function getLicensePlateMetrics(plate, options = {}) {
     };
 }
 
+function getCanonicalFontFamilyForMode(fontMode) {
+    return fontMode === "narrow"
+        ? CANONICAL_GL_NARROW_FONT_FAMILY
+        : CANONICAL_GL_MIDDLE_FONT_FAMILY;
+}
+
 function getFontVariantForMode(fontMode) {
     const status = getPlateFontStatus();
     const fonts = Array.isArray(status?.fonts) ? status.fonts : [];
@@ -123,8 +131,8 @@ function renderPhysicalPlateSvg({ analysis, displayWidth, displayHeight, options
     const { model, fontVariant } = analysis;
     const { rules, metrics } = model;
     const clipId = `tuev-physical-plate-${hashString(metrics.normalized)}-${Math.round(metrics.width)}`;
-    const fontFamily = fontVariant?.family || model.font.fontFamily;
-    const fontWeight = fontVariant?.weight || 400;
+    const fontFamily = getCanonicalFontFamilyForMode(metrics.fontMode);
+    const fontWeight = 400;
 
     return `
         <svg
