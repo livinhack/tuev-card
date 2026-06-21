@@ -1,4 +1,4 @@
-# Kennzeichen Physical Lab b102
+# Kennzeichen Physical Lab b114
 
 Eigenständiges Renderer-Lab für VS Code Live Server. Dieses Lab bleibt bewusst von Home Assistant getrennt und ist der neue Ausgangspunkt für den Kennzeichenrenderer.
 
@@ -17,7 +17,7 @@ mm-Modell → fertiges SVG mit mm-viewBox → äußere Anzeige-Skalierung
 - Einzelne Elemente werden niemals nachträglich separat im Viewer skaliert.
 - Pixel, DPR, Browser-Zoom und Monitorprofil dürfen nicht in die physische Rendererlogik wandern.
 
-## b98-b100 DXF-Referenz
+## DXF-Referenz
 
 Der Stand übernimmt Körper-/Euro-/Siegel-Geometrie aus den gelieferten DXF-Skizzen:
 
@@ -35,61 +35,30 @@ Der Stand übernimmt Körper-/Euro-/Siegel-Geometrie aus den gelieferten DXF-Ski
 
 Die DXF-Dateien liegen im Projekt/Lab unter `tools/plate-physical-lab/reference/` und dienen nur als Referenzmaterial. Die Runtime selbst liest die DXF-Dateien nicht ein.
 
-## b99-b102 Schrift-Fit
+## Schrift-Fit und Kalibrierprofil
 
-Die Zeichenzellen bleiben physisch 75 mm hoch. b99-b102 kann die GL-Schrift im Browser per SVG `getBBox()` und berechnet daraus:
-
-- `font-size` in mm
-- `baselineY` in mm
-
-Ziel ist, dass die sichtbare Glyphenhöhe in das 75-mm-Zeichenband passt. Diese automatische Kalibrierung ist Teil des mm-Modells; sie ist keine Pixel-Skalierung und kein nachträgliches Verziehen einzelner Elemente.
-
-## Start
-
-1. In VS Code öffnen:
-   `tools/plate-physical-lab/index.html`
-2. Mit Live Server starten.
-3. Fonts optional hier ablegen:
-   - `tools/plate-physical-lab/fonts/GL-Nummernschild-Mtl.ttf`
-   - `tools/plate-physical-lab/fonts/GL-Nummernschild-Eng.ttf`
-
-Alternativ werden die Fonts aus dem Projektordner `fonts/` gesucht.
-
-## Acer VG272U V Kalibrierung
-
-Vorbelegt:
-
-- Geräte-px/mm: `4.2918`
-- Pixel Pitch: ca. `0.233 mm`
-- PPI: ca. `109`
-
-Die Anzeige-Schicht berechnet daraus:
+Die Zeichenzellen bleiben physisch 75 mm hoch. Das Lab kann die GL-Schrift im Browser per SVG `getBBox()` messen und daraus mm-basierte Werte für `font-size` und `baselineY` berechnen. Für die aktuelle Maßarbeit ist aber das manuelle Profil festgehalten:
 
 ```text
-CSS-px/mm 1:1 = Geräte-px/mm / window.devicePixelRatio × Korrekturfaktor
+GL-Mittelschrift · manuell kalibriert
+Ziel-Glyphenhöhe: 75 mm
+Font-Kalibriergröße: 125
+Baseline Y: 92,5 mm
 ```
 
-Bei Anzeige-Modus `1:1 physisch` und Browser-Zoom 100% sollte die 100-mm-Linie mit einem Lineal 100 mm messen. Falls nicht, gemessene Länge eintragen und den Faktor übernehmen.
+Die automatische Kalibrierung bleibt zuschaltbar, ist aber nicht mehr der Standard für die manuelle Maßarbeit.
 
-## Anzeige-Modi
+## Gemeinsame I-Sonderbreite
 
-- `1:1 physisch`: für Messung am Monitor.
-- `Fit to screen`: zum Überblick, nicht zum Messen.
-- `2× Debug` / `3× Debug`: zum Prüfen kleiner Details, nicht zum Messen.
+`I` wird im Lab nicht mehr automatisch als volle Buchstabenzelle behandelt. Die gelieferten GL-Mittel-/Engschrift-Fonts verwenden beim `I` dieselbe Glyphenform bzw. dieselbe gemessene Advance-/BBox-Charakteristik. Deshalb nutzt das Lab eine gemeinsame echte physische Zellbreite für beide Schriftmodi:
 
-## Testreihenfolge
+```text
+I-Sonderbreite: 35,5 mm
+```
 
-1. Browser-Zoom auf 100% stellen.
-2. Anzeige-Modus `1:1 physisch` wählen.
-3. Mit Lineal prüfen, ob die 100-mm-Kontrolllinie wirklich 100 mm misst.
-4. Falls nicht: gemessenen Wert eintragen und Korrekturfaktor übernehmen.
-5. Schritt `1 · Schildkörper, Außenmaß, Rand, Eurofeld` prüfen.
-6. Schritt `2 · DXF-Referenzlinien für Körper/Euro/Siegel` prüfen.
-7. Schritt `4 · HU- und Behördensiegelplätze` prüfen.
-8. Schritt `5 · Zeichen in festen Zellen` mit automatischem Schrift-Fit prüfen.
-9. Erst danach Komplettbild betrachten.
+Status: **kalibrierter GL-Mittel-/Engschrift-Modellwert**. Das ist bewusst **keine Behauptung eines amtlich einzeln belegten I-Maßes**. Die übrigen Zeichen bleiben weiterhin je nach Mittel-/Engschrift unterschiedlich breit.
 
-## b101/b102 Länderkennzeichen D
+## Länderkennzeichen D
 
 Das Länderkennzeichen `D` kann mit der lokalen Schriftdatei `din1451alt.ttf` gerendert werden. Die Fontdatei wird aus einem dieser Pfade geladen:
 
@@ -101,8 +70,48 @@ fonts/din1451alt.ttf
 Die Fontdatei ist nicht im Chat-ZIP enthalten.
 
 
-## b102 Kalibrierprofil und Horizontalprüfung
+## Rechtsnahe Auto-Schriftwahl
 
-- GL-Mittelschrift ist zunächst manuell auf `Font-Kalibriergröße 125` und `Baseline 92,5 mm` festgehalten.
-- Die automatische Fontmessung bleibt zuschaltbar, ist aber nicht mehr der Standard für die Maßarbeit.
-- Der neue Schritt `6 · Horizontale Zeichen-/Zellprüfung` zeigt Zellgrenzen, Zellmitten, Zeichenbreiten, Gap-Breiten und die Siegelspalte, ohne die physische Geometrie zu verändern.
+Die Schriftwahl kann auf `Auto` stehen. Dann gilt im Lab:
+
+```text
+Mittelschrift bleibt Standard.
+Engschrift wird nur verwendet, wenn Mittelschrift in die relevante Höchstlänge beziehungsweise gewählte Breitenbegrenzung nicht passt.
+```
+
+Bei Breite `Auto` ist die relevante Grenze das einzeilige Größtmaß `520 mm`. Bei fest gewählter Breite simuliert das Lab eine begrenzte Anbringungsstelle. Die Automatik mischt Mittel- und Engschrift nicht innerhalb eines Kennzeichens; sie schaltet das Lab-Kennzeichen komplett auf Engschrift um, wenn der Mittel-Schrift-Aufbau nicht passt.
+
+## Start
+
+1. In VS Code öffnen:
+   `tools/plate-physical-lab/index.html`
+2. Mit Live Server starten.
+3. Fonts optional hier ablegen:
+   - `tools/plate-physical-lab/fonts/GL-Nummernschild-Mtl.ttf`
+   - `tools/plate-physical-lab/fonts/GL-Nummernschild-Eng.ttf`
+   - `tools/plate-physical-lab/fonts/din1451alt.ttf`
+
+Alternativ werden die Fonts aus dem Projektordner `fonts/` gesucht.
+
+## Testreihenfolge
+
+1. Browser-Zoom auf 100% stellen.
+2. Anzeige-Modus `1:1 physisch` wählen.
+3. 100-mm-Kontrolllinie mit Lineal prüfen.
+4. Schritt `6 · Horizontale Zeichen-/Zellprüfung` für die Zeichen-/Zellbreiten verwenden.
+5. Testkennzeichen: `DA CI 500`, `WIL CL 212`, `BIT GT500`, `BKS R 95`, `K S 70`.
+
+
+## b112 Layout solver + Maßlinien
+
+The lab now solves horizontal spacing as a physical millimetre model before rendering:
+
+- outside margins left/right are equal and at least 8 mm when the layout fits;
+- character gaps are variable from 8 to 10 mm, preferred 9 mm;
+- group gaps are variable from 20 to 30 mm, preferred 24 mm;
+- the seal column is variable from 63.5 to 67.5 mm, preferred 63.5 mm;
+- `Auto kompakt` chooses the smallest width band that satisfies minimum spacings without exact boundary squeezing;
+- `Auto ausgewogen` chooses the smallest width band that satisfies preferred spacings, otherwise falls back to compact;
+- if the chosen width has extra room, variable spacings grow from preferred toward max before remaining space becomes equal outside margins.
+
+Pixel/DPR calibration remains viewer-only. The solver never uses pixels.

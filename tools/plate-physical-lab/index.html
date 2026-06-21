@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kennzeichen Physical Lab b102</title>
+  <title>Kennzeichen Physical Lab b114</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="hero">
     <div>
       <p class="eyebrow">TÜV Card · Renderer-Neustart</p>
-      <h1>Kennzeichen Physical Lab b102</h1>
-      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b102 hält das manuelle GL-Mittelschrift-Kalibrierprofil 125 / 92,5 mm fest, benennt die technische Font-Kalibriergröße klarer und ergänzt einen eigenen Schritt zur horizontalen Zeichen-/Zellprüfung. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige. Home Assistant ist hier bewusst nicht beteiligt.</p>
+      <h1>Kennzeichen Physical Lab b114</h1>
+      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b114 nutzt weiterhin die b111-Maßlinien und die b112-Anlage-4-Ausnahme für finale H/E-Suffix-Kennzeichen: Die Siegelspalte darf dann von 58,0 bis 67,5 mm gelöst werden; normale Kennzeichen bleiben bei 63,5 bis 67,5 mm. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige. Das gleiche mm-Modell ist ab b114 auch die produktive Card-Renderer-Basis; Pixel/DPR bleiben weiterhin nur Anzeige-/Card-Skalierung.</p>
     </div>
-    <div class="version">b102</div>
+    <div class="version">b114</div>
   </header>
 
   <main>
@@ -82,7 +82,8 @@
         <label>
           Breite
           <select id="widthMode">
-            <option value="auto" selected>Auto: nächste Stufe</option>
+            <option value="auto">Auto kompakt: Mindestmaße ohne Grenzquetschung</option>
+            <option value="balanced" selected>Auto ausgewogen: bevorzugte Abstände</option>
             <option value="320">320 mm</option>
             <option value="340">340 mm</option>
             <option value="380">380 mm</option>
@@ -95,8 +96,9 @@
         <label>
           Schrift
           <select id="fontMode">
-            <option value="middle" selected>Mittelschrift</option>
-            <option value="narrow">Engschrift</option>
+            <option value="auto" selected>Auto: Mittelschrift, Engschrift nur wenn nötig</option>
+            <option value="middle">Mittelschrift manuell</option>
+            <option value="narrow">Engschrift manuell</option>
           </select>
         </label>
       </div>
@@ -117,6 +119,15 @@
           Baseline Y in mm
           <input id="baselineY" type="number" min="60" max="105" step="0.25" value="92.5" />
         </label>
+      </div>
+      <div class="grid two">
+        <label>
+          I-Sonderbreite in mm
+          <input id="specialIWidth" type="number" min="8" max="47.5" step="0.1" value="35.5" />
+        </label>
+        <div class="hint-box">
+          Gemeinsamer kalibrierter GL-Wert für Mittel- und Engschrift. Nicht als amtlich einzeln belegtes I-Maß dokumentieren. Standardbuchstaben bleiben 47,5 mm in Mittelschrift und 40,5 mm in Engschrift.
+        </div>
       </div>
       <div class="font-fit-readout" id="fontFitReadout"></div>
       <label class="checkbox">
@@ -142,7 +153,7 @@
     <section class="panel metrics-panel">
       <h2>Messwerte</h2>
       <table><tbody id="metrics"></tbody></table>
-      <h2>Feste b102-Regeln</h2>
+      <h2>Feste b114-Regeln</h2>
       <ul>
         <li>Alle Modell-Koordinaten sind Millimeter.</li>
         <li>Das Außenmaß enthält den schwarzen Rand.</li>
@@ -152,7 +163,14 @@
         <li>Siegel werden getrennt berechnet: HU-Kreis 35 mm, Behördensiegel 45 mm, Spalte 63,5 mm bzw. äußerer Referenzraum 67,5 mm.</li>
         <li>GL-Mittelschrift ist aktuell als manuelles Kalibrierprofil festgehalten: Ziel 75 mm, Font-Kalibriergröße 125, Baseline 92,5 mm.</li>
         <li>Automatische Messung bleibt zuschaltbar, ist aber nicht mehr der Standard für die weitere manuelle Maßarbeit.</li>
-        <li>Der neue Schritt „Horizontale Zeichen-/Zellprüfung“ zeigt Zellgrenzen, Zellmitten, Zellbreiten und Gap-Breiten ohne Änderung der physikalischen Geometrie.</li>
+        <li>Der Schritt „Horizontale Zeichen-/Zellprüfung“ zeigt Zellgrenzen, Zellmitten, Zellbreiten und Gap-Breiten ohne Änderung der physikalischen Geometrie.</li>
+        <li>I wird als Sonderfall mit gemeinsamer physischer Zellbreite behandelt: 35,5 mm. Status: kalibrierter GL-Mittel-/Engschrift-Wert, nicht amtlich einzeln belegt. Die übrigen Buchstaben bleiben je nach Mittel-/Engschrift unterschiedlich breit.</li>
+        <li>Schriftwahl Auto: Mittelschrift ist Standard. Engschrift wird nur gewählt, wenn Mittelschrift mit dem Layout-Solver nicht passt.</li>
+        <li>Breite „Auto kompakt“ nimmt die kleinste Stufe, in der Mindestabstände und gleiche Außenränder ohne exakte Grenzquetschung passen.</li>
+        <li>Breite „Auto ausgewogen“ nimmt die kleinste Stufe, in der bevorzugte variable Abstände und gleiche Außenränder passen; wenn keine Stufe das schafft, wird die kompakte Lösung als Fallback verwendet.</li>
+        <li>Wenn in der gewählten Breite zusätzlicher Platz vorhanden ist, werden Zeichenabstand, Gruppengap und Siegelspalte zuerst bis zu ihren Maximalwerten erweitert; erst danach wächst der gleichmäßige Außenrand.</li>
+        <li>b111/b112/b114 zeigen die gelösten Abstände zusätzlich als Maßlinien direkt am Kennzeichen: Außenränder, Zeichenabstände, Gruppengaps und Siegelspalte.</li>
+        <li>Variable Bereiche: Außenrand mindestens 8 mm, Zeichenabstand 8–10 mm, Gruppengap 20–30 mm, normale Siegelspalte 63,5–67,5 mm. Bei finalem Oldtimer-/Elektro-Suffix H/E nach einer Ziffer schaltet die Siegelspalte auf 58,0–67,5 mm um; 63,5 mm bleibt der bevorzugte DXF-Wert.</li>
         <li>Amtliche Siegelgrafiken werden nicht nachgebildet; nur neutrale Platzhalter.</li>
         <li>Das Länderkennzeichen D nutzt im Lab <code>din1451alt.ttf</code>, falls die Datei lokal in <code>tools/plate-physical-lab/fonts/</code> oder <code>fonts/</code> liegt.</li>
         <li>Pixel, DPR, Browser-Zoom und Monitorprofil kommen nicht in das Modell, sondern nur in <code>viewer-calibration.js</code>.</li>

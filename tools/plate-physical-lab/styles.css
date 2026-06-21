@@ -156,3 +156,15 @@ ul { color: var(--muted); }
   color: var(--muted);
   font-size: 12px;
 }
+
+.hint-box {
+  align-self: end;
+  margin: 0 0 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 211, 107, .25);
+  border-radius: 8px;
+  background: rgba(255, 211, 107, .06);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}

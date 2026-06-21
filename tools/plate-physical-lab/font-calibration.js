@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b102
+// Kennzeichen Physical Lab b114
 // Browser-side font measurement for mm-based model parameters.
 // This file measures rendered font glyphs and returns mm values (font-size/baseline)
 // for the model. It does not scale the SVG viewer and it does not apply per-element

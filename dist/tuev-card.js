@@ -1,4 +1,4 @@
-// TÜV Card bundled b102
+// TÜV Card bundled b114
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1926,6 +1926,1002 @@ return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVe
 
 })();
 
+// ---- src/plate/mm-model.js ----
+const __m_src_plate_mm_model_js = (() => {
+// Plate physical mm model b114
+// CAD-like model layer: every coordinate, size and distance in this file is millimetres.
+// No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
+// Shared CAD-like one-line plate model used by the Physical Lab and the production Card renderer. Final H/E suffix plates may shrink the one-line seal column to 58.0 mm; normal plates keep 63.5-67.5 mm.
+
+const WIDTH_BANDS = Object.freeze({
+  middle: [340, 380, 420, 460, 480, 520],
+  narrow: [320, 340, 380, 420, 460, 480, 520]
+});
+
+const SPACING_RULES_MM = Object.freeze({
+  outsideMargin: { min: 8 },
+  charGap: { min: 8, preferred: 9, max: 10 },
+  groupGap: { min: 20, preferred: 24, max: 30 },
+  sealColumn: { min: 63.5, preferred: 63.5, max: 67.5 },
+  sealColumnHistoricalOrElectric: { min: 58, preferred: 63.5, max: 67.5 },
+  autoWidth: {
+    compact: "smallest width that satisfies all minimum spacings and equal outside margins",
+    balanced: "smallest width that satisfies preferred spacings and equal outside margins"
+  }
+});
+
+const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
+  middleManualB108: {
+    label: "GL middle script · manually calibrated b114",
+    targetGlyphHeight: 75,
+    fontSize: 125,
+    baselineY: 92.5,
+    note: "Current manual calibration for GL middle script in the 75 mm character band; free width is distributed into variable gaps up to their maximum values before equal outside margins remain."
+  },
+  narrowPending: {
+    label: "GL narrow script · pending separate calibration",
+    targetGlyphHeight: 75,
+    fontSize: 125,
+    baselineY: 92.5,
+    note: "Temporary start value; narrow script will be checked separately."
+  }
+});
+
+const DXF_REFERENCE_MM = Object.freeze({
+  source: "Euro-Einzeilig.dxf / Skizze2.dxf",
+  coordinateMode: "normalised top-left plate coordinates",
+  body: {
+    outerHeight: 110,
+    innerInset: 4.5,
+    innerHeight: 101,
+    outerCornerRadius: 9.25,
+    innerCornerRadius: 4.75
+  },
+  euro: {
+    x: 4.5,
+    y: 4.5,
+    width: 45,
+    height: 101,
+    starsCenterX: 27,
+    starsCenterY: 36.5,
+    starsRadius: 15,
+    countryCenterX: 27,
+    countryBaselineY: 89.5
+  },
+  seals: {
+    columnInnerWidth: 63.5,
+    columnOuterWidth: 67.5,
+    huDiameter: 35,
+    huCenterY: 29.5,
+    authorityDiameter: 45,
+    authorityCenterY: 75.5,
+    visibleCircleGap: 6
+  }
+});
+
+const ONE_LINE_RULES_MM = Object.freeze({
+  name: "One-line standard plate",
+  reference: DXF_REFERENCE_MM.source,
+  outerHeight: DXF_REFERENCE_MM.body.outerHeight,
+  maxWidth: 520,
+  innerInset: DXF_REFERENCE_MM.body.innerInset,
+  innerHeight: DXF_REFERENCE_MM.body.innerHeight,
+  outerCornerRadius: DXF_REFERENCE_MM.body.outerCornerRadius,
+  innerCornerRadius: DXF_REFERENCE_MM.body.innerCornerRadius,
+  euro: {
+    ...DXF_REFERENCE_MM.euro,
+    country: "D"
+  },
+  content: {
+    topClearance: 13,
+    characterHeight: 75,
+    bottomClearance: 13,
+    sideClearance: SPACING_RULES_MM.outsideMargin.min,
+    charGap: SPACING_RULES_MM.charGap,
+    groupGap: SPACING_RULES_MM.groupGap,
+    seal: {
+      columnMinWidth: SPACING_RULES_MM.sealColumn.min,
+      columnWidth: DXF_REFERENCE_MM.seals.columnInnerWidth,
+      columnMaxWidth: DXF_REFERENCE_MM.seals.columnOuterWidth,
+      huDiameter: DXF_REFERENCE_MM.seals.huDiameter,
+      huCenterY: DXF_REFERENCE_MM.seals.huCenterY,
+      authorityDiameter: DXF_REFERENCE_MM.seals.authorityDiameter,
+      authorityCenterY: DXF_REFERENCE_MM.seals.authorityCenterY,
+      visibleCircleGap: DXF_REFERENCE_MM.seals.visibleCircleGap
+    }
+  },
+  cells: {
+    middle: {
+      label: "Middle script",
+      fontFamily: "GL-Nummernschild-Mtl",
+      letterWidth: 47.5,
+      digitWidth: 44.5,
+      gap: SPACING_RULES_MM.charGap.preferred,
+      characterHeight: 75,
+      // Font output calibration is still in mm. It is not viewer scaling.
+      // SVG font-size does not equal visible cap height, therefore this can be tuned separately.
+      fontSize: FONT_CALIBRATION_PROFILES_MM.middleManualB108.fontSize,
+      baselineY: FONT_CALIBRATION_PROFILES_MM.middleManualB108.baselineY,
+      specialWidths: {
+        I: 35.5
+      }
+    },
+    narrow: {
+      label: "Narrow script",
+      fontFamily: "GL-Nummernschild-Eng",
+      letterWidth: 40.5,
+      digitWidth: 38.5,
+      gap: SPACING_RULES_MM.charGap.preferred,
+      characterHeight: 75,
+      fontSize: FONT_CALIBRATION_PROFILES_MM.narrowPending.fontSize,
+      baselineY: FONT_CALIBRATION_PROFILES_MM.narrowPending.baselineY,
+      specialWidths: {
+        I: 35.5
+      }
+    }
+  },
+  dimensions: {
+    enabledMarginRight: 40,
+    enabledMarginBottom: 32,
+    baselineOffset: 18
+  }
+});
+
+function parsePlate(input) {
+  const normalized = String(input || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9ÄÖÜ\s-]/g, " ")
+    .replace(/[\s-]+/g, " ")
+    .trim();
+  const parts = normalized ? normalized.split(" ") : [];
+
+  if (parts.length >= 2) {
+    return {
+      normalized,
+      district: parts[0],
+      recognition: parts.slice(1).join(""),
+      parts
+    };
+  }
+
+  return {
+    normalized,
+    district: "",
+    recognition: parts[0] || "",
+    parts
+  };
+}
+
+function resolvePlateFontMode(input, options = {}) {
+  const rules = ONE_LINE_RULES_MM;
+  const requestedFontMode = options.fontMode === "auto" ? "auto" : options.fontMode === "narrow" ? "narrow" : "middle";
+  const specialIWidth = positiveNumber(options.specialIWidth, rules.cells.middle.specialWidths?.I || rules.cells.middle.letterWidth);
+  const middleFont = withSpecialIWidth(rules.cells.middle, specialIWidth);
+  const narrowFont = withSpecialIWidth(rules.cells.narrow, specialIWidth);
+  const middleLayout = findPlateLayoutForFont(input, rules, middleFont, "middle", options.widthMode);
+  const narrowLayout = findPlateLayoutForFont(input, rules, narrowFont, "narrow", options.widthMode);
+  const widthCapMm = resolveWidthCapMm(options.widthMode, rules.maxWidth);
+
+  if (requestedFontMode !== "auto") {
+    const chosenLayout = requestedFontMode === "narrow" ? narrowLayout : middleLayout;
+    return {
+      requestedFontMode,
+      fontMode: requestedFontMode,
+      reason: requestedFontMode === "narrow" ? "Narrow script manuell gewählt." : "Middle script manuell gewählt.",
+      policy: "manual",
+      widthCapMm,
+      middleRawContentWidth: middleLayout.preferredContentWidth,
+      narrowRawContentWidth: narrowLayout.preferredContentWidth,
+      middleNeededWidth: middleLayout.preferredNeededWidth,
+      narrowNeededWidth: narrowLayout.preferredNeededWidth,
+      middleFitsWidthCap: middleLayout.fits,
+      narrowFitsWidthCap: narrowLayout.fits,
+      middleLayout,
+      narrowLayout,
+      chosenLayout
+    };
+  }
+
+  if (middleLayout.fits) {
+    return {
+      requestedFontMode,
+      fontMode: "middle",
+      reason: "Auto: Middle script passt mit den zulässigen Abständen und gleichen Außenrändern; Narrow script wird nicht verwendet.",
+      policy: "middle-first; narrow only if middle cannot satisfy the layout solver",
+      widthCapMm,
+      middleRawContentWidth: middleLayout.preferredContentWidth,
+      narrowRawContentWidth: narrowLayout.preferredContentWidth,
+      middleNeededWidth: middleLayout.preferredNeededWidth,
+      narrowNeededWidth: narrowLayout.preferredNeededWidth,
+      middleFitsWidthCap: true,
+      narrowFitsWidthCap: narrowLayout.fits,
+      middleLayout,
+      narrowLayout,
+      chosenLayout: middleLayout
+    };
+  }
+
+  return {
+    requestedFontMode,
+    fontMode: "narrow",
+    reason: narrowLayout.fits
+      ? "Auto: Middle script passt nicht mit den zulässigen Abständen; Narrow script wird als Ausweichschrift gewählt."
+      : "Auto: Middle script passt nicht mit den zulässigen Abständen; Narrow script wird gewählt, passt aber ebenfalls nicht vollständig in die aktuelle Breitenbegrenzung.",
+    policy: "middle-first; narrow only if middle cannot satisfy the layout solver",
+    widthCapMm,
+    middleRawContentWidth: middleLayout.preferredContentWidth,
+    narrowRawContentWidth: narrowLayout.preferredContentWidth,
+    middleNeededWidth: middleLayout.preferredNeededWidth,
+    narrowNeededWidth: narrowLayout.preferredNeededWidth,
+    middleFitsWidthCap: false,
+    narrowFitsWidthCap: narrowLayout.fits,
+    middleLayout,
+    narrowLayout,
+    chosenLayout: narrowLayout
+  };
+}
+
+function buildPlateModelMm(input, options = {}) {
+  const rules = ONE_LINE_RULES_MM;
+  const fontResolution = resolvePlateFontMode(input, {
+    fontMode: options.fontMode,
+    widthMode: options.widthMode,
+    specialIWidth: options.specialIWidth
+  });
+  const fontMode = fontResolution.fontMode;
+  const baseFont = rules.cells[fontMode];
+  const specialIWidth = positiveNumber(options.specialIWidth, baseFont.specialWidths?.I || baseFont.letterWidth);
+  const font = {
+    ...baseFont,
+    specialWidths: {
+      ...(baseFont.specialWidths || {}),
+      I: specialIWidth
+    },
+    fontSize: positiveNumber(options.fontSize, baseFont.fontSize),
+    baselineY: positiveNumber(options.baselineY, baseFont.baselineY),
+    fit: options.fontFit || null
+  };
+  const parsed = parsePlate(input);
+  const layout = findPlateLayoutForFont(input, rules, font, fontMode, options.widthMode);
+  const positioned = layout.positionedContent;
+  const width = layout.width;
+  const rawContentWidth = layout.contentWidth;
+  const sealGeometry = getSealGeometryForContent(rules, positioned);
+  const metrics = {
+    input,
+    normalized: parsed.normalized,
+    district: parsed.district,
+    recognition: parsed.recognition,
+    requestedFontMode: fontResolution.requestedFontMode,
+    fontMode,
+    fontLabel: font.label,
+    autoFontModeReason: fontResolution.reason,
+    autoFontModePolicy: fontResolution.policy,
+    autoWidthCapMm: fontResolution.widthCapMm,
+    middleNeededWidth: fontResolution.middleNeededWidth,
+    narrowNeededWidth: fontResolution.narrowNeededWidth,
+    middleFitsWidthCap: fontResolution.middleFitsWidthCap,
+    narrowFitsWidthCap: fontResolution.narrowFitsWidthCap,
+    cellLetterWidth: font.letterWidth,
+    cellDigitWidth: font.digitWidth,
+    specialIWidth: font.specialWidths?.I ?? null,
+    specialIWidthPolicy: "gemeinsame GL-I-Breite für Mittel- und Narrow script; kalibriert, nicht amtlich einzeln belegt",
+    cellGap: layout.actualCharGap,
+    cellGapRange: `${SPACING_RULES_MM.charGap.min}-${SPACING_RULES_MM.charGap.max}`,
+    groupGap: layout.actualGroupGap,
+    groupGapRange: `${SPACING_RULES_MM.groupGap.min}-${SPACING_RULES_MM.groupGap.max}`,
+    layoutMode: layout.modeLabel,
+    layoutPolicy: layout.policy,
+    widthSelectionReason: layout.reason,
+    minContentWidth: layout.minContentWidth,
+    preferredContentWidth: layout.preferredContentWidth,
+    maxContentWidth: layout.maxContentWidth,
+    minNeededWidth: layout.minNeededWidth,
+    preferredNeededWidth: layout.preferredNeededWidth,
+    maxNeededWidth: layout.maxNeededWidth,
+    preferredFits: layout.preferredFits,
+    maxFits: layout.maxFits,
+    outsideMarginMin: SPACING_RULES_MM.outsideMargin.min,
+    width,
+    height: rules.outerHeight,
+    rawContentWidth,
+    dxfReference: rules.reference,
+    outerCornerRadius: rules.outerCornerRadius,
+    innerCornerRadius: rules.innerCornerRadius,
+    innerInset: rules.innerInset,
+    innerHeight: rules.innerHeight,
+    euroX: rules.euro.x,
+    euroWidth: rules.euro.width,
+    euroHeight: rules.euro.height,
+    characterBandY: getCharacterBand(rules).y,
+    characterBandHeight: getCharacterBand(rules).height,
+    characterFontSize: font.fontSize,
+    characterBaselineY: font.baselineY,
+    fontFitMode: options.fontFit?.mode || "manual",
+    fontFitVisibleHeight: options.fontFit?.measured?.visibleHeight ?? null,
+    fontFitTopY: options.fontFit?.measured?.topY ?? null,
+    fontFitBottomY: options.fontFit?.measured?.bottomY ?? null,
+    sealColumnWidth: layout.actualSealColumnWidth,
+    sealColumnRange: layout.actualSealColumnRangeLabel,
+    sealColumnRule: layout.sealColumnRule,
+    sealColumnMaxWidth: rules.content.seal.columnMaxWidth,
+    huDiameter: rules.content.seal.huDiameter,
+    huCenterY: rules.content.seal.huCenterY,
+    authorityDiameter: rules.content.seal.authorityDiameter,
+    authorityCenterY: rules.content.seal.authorityCenterY,
+    sealVisibleCircleGap: rules.content.seal.visibleCircleGap,
+    sealAdjacentGapPolicy: "none - solved seal column is the complete measured area between adjacent character cells",
+    sealCenterX: sealGeometry?.cx ?? null,
+    remainingLeft: layout.sideMarginLeft,
+    remainingRight: layout.sideMarginRight,
+    modelUnit: "mm",
+    modelNote: "Pure mm model. The viewer may scale the complete SVG, but the model never sees pixels."
+  };
+
+  return { parsed, rules, font, content: positioned, metrics };
+}
+
+function renderPlateSvgMm(input, options = {}) {
+  const model = buildPlateModelMm(input, options);
+  const { rules, metrics } = model;
+  const stage = options.stage || "complete";
+  const showDimensions = options.showDimensions !== false;
+  const layers = [];
+
+  layers.push(renderBody(model));
+
+  if (["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderDxfReferenceGuides(model));
+  }
+  if (["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderGrid(model));
+  }
+  if (["seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderSeals(model));
+  }
+  if (["text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderText(model));
+  }
+  if (stage === "horizontal") {
+    layers.push(renderHorizontalDiagnostics(model));
+  }
+  if (showDimensions) {
+    layers.push(renderDimensions(model));
+  }
+
+  const canvas = getCanvasMm(model, showDimensions);
+  const svg = `
+<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}">
+  <defs>
+    <filter id="plateShadow" x="-5%" y="-20%" width="110%" height="140%">
+      <feDropShadow dx="0" dy="0.8" stdDeviation="0.8" flood-color="black" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  ${layers.join("\n  ")}
+</svg>`.trim();
+
+  return { svg, model, canvas };
+}
+
+function getCanvasMm(model, showDimensions = true) {
+  const { rules, metrics } = model;
+  if (!showDimensions) {
+    return { x: 0, y: 0, width: metrics.width, height: rules.outerHeight };
+  }
+  return {
+    x: 0,
+    y: 0,
+    width: metrics.width + rules.dimensions.enabledMarginRight,
+    height: rules.outerHeight + rules.dimensions.enabledMarginBottom
+  };
+}
+
+function resolveWidthCapMm(widthMode, fallback) {
+  const number = Number(widthMode);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function resolveWidthStrategy(widthMode) {
+  if (widthMode === "balanced") return "balanced";
+  if (widthMode === "auto" || !widthMode) return "compact";
+  return "fixed";
+}
+
+function withSpecialIWidth(font, specialIWidth) {
+  return {
+    ...font,
+    specialWidths: {
+      ...(font.specialWidths || {}),
+      I: specialIWidth
+    }
+  };
+}
+
+function findPlateLayoutForFont(input, rules, font, fontMode, widthMode) {
+  const parsed = parsePlate(input);
+  const sequence = buildUnpositionedContent(parsed, rules, font);
+  const strategy = resolveWidthStrategy(widthMode);
+  const bands = WIDTH_BANDS[fontMode] || WIDTH_BANDS.middle;
+  const fixedWidth = Number(widthMode);
+  const candidateWidths = strategy === "fixed" && Number.isFinite(fixedWidth) && fixedWidth > 0 ? [fixedWidth] : bands;
+  const fallbackFits = [];
+  let compactEdgeFit = null;
+
+  for (const width of candidateWidths) {
+    const solved = solveContentLayout({ sequence, rules, width, strategy });
+    if (!solved.fits) continue;
+    if (strategy === "balanced") {
+      if (solved.preferredFits) return solved;
+      fallbackFits.push(solved);
+      continue;
+    }
+    if (strategy === "compact" && isExactMinimumBoundaryFit(solved)) {
+      compactEdgeFit = compactEdgeFit || solved;
+      continue;
+    }
+    return solved;
+  }
+
+  if (strategy === "compact" && compactEdgeFit) {
+    return {
+      ...compactEdgeFit,
+      reason: `${compactEdgeFit.reason} No larger standard width is available; exact minimum boundary solution remains marked.`
+    };
+  }
+
+  if (strategy === "balanced" && fallbackFits.length) {
+    return {
+      ...fallbackFits[0],
+      reason: `${fallbackFits[0].reason} Preferred spacing did not fit in any width band; compact solution selected as fallback.`
+    };
+  }
+
+  const maxWidth = candidateWidths[candidateWidths.length - 1] || rules.maxWidth;
+  return solveContentLayout({ sequence, rules, width: maxWidth, strategy, allowOverflow: true });
+}
+
+function isExactMinimumBoundaryFit(layout) {
+  if (!layout?.fits) return false;
+  const EPSILON = 0.01;
+  const atMinimumMargins = layout.sideMarginLeft <= SPACING_RULES_MM.outsideMargin.min + EPSILON && layout.sideMarginRight <= SPACING_RULES_MM.outsideMargin.min + EPSILON;
+  const sealMin = layout.actualSealColumnMinWidth ?? SPACING_RULES_MM.sealColumn.min;
+  const squeezedVariables = layout.actualCharGap <= SPACING_RULES_MM.charGap.min + EPSILON
+    || layout.actualGroupGap <= SPACING_RULES_MM.groupGap.min + EPSILON
+    || layout.actualSealColumnWidth <= sealMin + EPSILON;
+  return atMinimumMargins && squeezedVariables;
+}
+
+function buildUnpositionedContent(parsed, rules, font) {
+  const districtCells = makeCells(parsed.district, font, "district");
+  const recognitionGroups = splitRecognition(parsed.recognition);
+  const recognitionCells = recognitionGroups.map((group, index) => ({
+    type: "group",
+    key: `recognition-${index}`,
+    cells: makeCells(group.value, font, group.type)
+  }));
+  return buildContentSequence({ districtCells, recognitionCells, parsed });
+}
+
+function solveContentLayout({ sequence, rules, width, strategy, allowOverflow = false }) {
+  const contentLimits = getContentLimits(rules, width);
+  const available = contentLimits.width;
+  const sideMin = SPACING_RULES_MM.outsideMargin.min;
+  const minContentWidth = sumSequenceWidth(sequence, "min");
+  const preferredContentWidth = sumSequenceWidth(sequence, "preferred");
+  const maxContentWidth = sumSequenceWidth(sequence, "max");
+  const minNeededWidth = neededWidthForContent(rules, minContentWidth);
+  const preferredNeededWidth = neededWidthForContent(rules, preferredContentWidth);
+  const maxNeededWidth = neededWidthForContent(rules, maxContentWidth);
+  const minFits = minContentWidth + sideMin * 2 <= available;
+  const preferredFits = preferredContentWidth + sideMin * 2 <= available;
+  const maxFits = maxContentWidth + sideMin * 2 <= available;
+  const modeLabel = strategy === "balanced" ? "Auto balanced" : strategy === "compact" ? "Auto compact" : "Fixed width";
+
+  let solvedSequence = sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
+  let contentWidth = preferredContentWidth;
+  let reason = `${modeLabel}: preferred spacing used; outside margins distributed equally.`;
+
+  if (preferredFits) {
+    const targetContentWidth = Math.min(maxContentWidth, available - sideMin * 2);
+    solvedSequence = growVariablesToFit(sequence, targetContentWidth);
+    contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+    reason = contentWidth > preferredContentWidth + 0.01
+      ? `${modeLabel}: preferred spacing fits; free width was first distributed into variable gaps up to allowed maxima, remainder stays as equal outside margins.`
+      : `${modeLabel}: preferred spacing used; outside margins distributed equally.`;
+  } else if (!preferredFits && minFits) {
+    solvedSequence = shrinkVariablesToFit(sequence, available - sideMin * 2);
+    contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+    reason = `${modeLabel}: preferred spacing does not fit; variable gaps reduced to allowed minima, outside margins remain equal.`;
+  } else if (!minFits) {
+    solvedSequence = sequence.map((item) => ({ ...item, width: getItemMinWidth(item) }));
+    contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+    reason = `${modeLabel}: minimum spacing does not fit this width.`;
+  }
+
+  const sideMargin = (available - contentWidth) / 2;
+  const xStart = contentLimits.left + sideMargin;
+  const positionedContent = positionContent(solvedSequence, xStart);
+  const actualCharGaps = solvedSequence.filter((item) => item.type === "char-gap").map((item) => item.width);
+  const actualGroupGaps = solvedSequence.filter((item) => item.type === "group-gap").map((item) => item.width);
+  const actualSeal = solvedSequence.find((item) => item.type === "seals");
+
+  return {
+    fits: minFits,
+    renderable: minFits || allowOverflow,
+    minFits,
+    preferredFits,
+    maxFits,
+    width,
+    strategy,
+    modeLabel,
+    policy: "physical solver: variable gaps in min/preferred/max ranges; outside margins are equal and at least 8 mm when the layout fits",
+    reason,
+    availableWidth: available,
+    minContentWidth,
+    preferredContentWidth,
+    maxContentWidth,
+    minNeededWidth,
+    preferredNeededWidth,
+    maxNeededWidth,
+    contentWidth,
+    sideMarginLeft: sideMargin,
+    sideMarginRight: sideMargin,
+    positionedContent,
+    actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
+    actualGroupGap: average(actualGroupGaps) ?? null,
+    actualSealColumnWidth: actualSeal?.width ?? rules.content.seal.columnWidth,
+    actualSealColumnMinWidth: actualSeal?.minWidth ?? SPACING_RULES_MM.sealColumn.min,
+    actualSealColumnRangeLabel: actualSeal ? `${formatNumber(actualSeal.minWidth)}-${formatNumber(actualSeal.maxWidth)}` : `${SPACING_RULES_MM.sealColumn.min}-${SPACING_RULES_MM.sealColumn.max}`,
+    sealColumnRule: actualSeal?.ruleLabel || "Normal: seal column 63.5-67.5 mm"
+  };
+}
+
+function shrinkVariablesToFit(sequence, targetContentWidth) {
+  const preferredTotal = sumSequenceWidth(sequence, "preferred");
+  const deficit = Math.max(0, preferredTotal - targetContentWidth);
+  const variableItems = sequence.filter((item) => isVariableItem(item));
+  const totalShrinkCapacity = variableItems.reduce((sum, item) => sum + Math.max(0, getItemPreferredWidth(item) - getItemMinWidth(item)), 0);
+  if (!deficit || !totalShrinkCapacity) return sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
+  const ratio = Math.min(1, deficit / totalShrinkCapacity);
+  return sequence.map((item) => {
+    const preferred = getItemPreferredWidth(item);
+    if (!isVariableItem(item)) return { ...item, width: preferred };
+    const min = getItemMinWidth(item);
+    return { ...item, width: preferred - (preferred - min) * ratio };
+  });
+}
+
+function growVariablesToFit(sequence, targetContentWidth) {
+  const preferredTotal = sumSequenceWidth(sequence, "preferred");
+  const surplus = Math.max(0, targetContentWidth - preferredTotal);
+  const variableItems = sequence.filter((item) => isVariableItem(item));
+  const totalGrowCapacity = variableItems.reduce((sum, item) => sum + Math.max(0, getItemMaxWidth(item) - getItemPreferredWidth(item)), 0);
+  if (!surplus || !totalGrowCapacity) return sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
+  const ratio = Math.min(1, surplus / totalGrowCapacity);
+  return sequence.map((item) => {
+    const preferred = getItemPreferredWidth(item);
+    if (!isVariableItem(item)) return { ...item, width: preferred };
+    const max = getItemMaxWidth(item);
+    return { ...item, width: preferred + (max - preferred) * ratio };
+  });
+}
+
+function sumSequenceWidth(sequence, mode) {
+  return sequence.reduce((sum, item) => {
+    if (mode === "min") return sum + getItemMinWidth(item);
+    if (mode === "max") return sum + getItemMaxWidth(item);
+    return sum + getItemPreferredWidth(item);
+  }, 0);
+}
+
+function variableItem(type, key, range) {
+  return {
+    type,
+    key,
+    variable: true,
+    minWidth: range.min,
+    preferredWidth: range.preferred,
+    maxWidth: range.max,
+    width: range.preferred,
+    ruleLabel: range.ruleLabel || null
+  };
+}
+
+function isVariableItem(item) {
+  return item.variable === true;
+}
+
+function getItemMinWidth(item) {
+  return isVariableItem(item) ? item.minWidth : item.width;
+}
+
+function getItemPreferredWidth(item) {
+  return isVariableItem(item) ? item.preferredWidth : item.width;
+}
+
+function getItemMaxWidth(item) {
+  return isVariableItem(item) ? item.maxWidth : item.width;
+}
+
+function average(values) {
+  if (!values.length) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function neededWidthForContent(rules, contentWidth) {
+  const geometry = getFixedHorizontalGeometry(rules);
+  return geometry.contentLeft + contentWidth + SPACING_RULES_MM.outsideMargin.min * 2 + rules.innerInset;
+}
+
+function makeCells(text, font, role) {
+  return [...String(text || "")].map((char, index) => ({
+    type: "char",
+    role,
+    key: `${role}-${index}-${char}`,
+    char,
+    width: getCellWidth(char, font),
+    font
+  }));
+}
+
+function hasHistoricalOrElectricSuffix(parsed) {
+  const recognition = String(parsed?.recognition || "").toUpperCase();
+  return /\d[HE]$/.test(recognition);
+}
+
+function getSealColumnRange(parsed) {
+  if (hasHistoricalOrElectricSuffix(parsed)) {
+    return {
+      ...SPACING_RULES_MM.sealColumnHistoricalOrElectric,
+      ruleLabel: "H/E suffix: seal column 58.0-67.5 mm according to Anlage 4 exception"
+    };
+  }
+  return {
+    ...SPACING_RULES_MM.sealColumn,
+    ruleLabel: "Normal: seal column 63.5-67.5 mm"
+  };
+}
+
+function splitRecognition(value) {
+  const normalized = String(value || "");
+  const matches = normalized.match(/[A-ZÄÖÜ]+|\d+/g) || [];
+  return matches.map((part) => ({
+    value: part,
+    type: /^\d+$/.test(part) ? "digits" : "letters"
+  }));
+}
+
+function buildContentSequence({ districtCells, recognitionCells, parsed }) {
+  const sequence = [];
+  appendCells(sequence, districtCells);
+
+  // Anlage-4/DXF interpretation for the seal area:
+  // The seal column itself is a variable measured range. Do not add separate left/right gap items around it.
+  // Normal one-line plates use 63.5-67.5 mm. If the recognition part ends with an Oldtimer H
+  // or Elektro E suffix after a digit, Anlage 4 allows the seal area to shrink to 58.0 mm.
+  sequence.push(variableItem("seals", "seal-zone", getSealColumnRange(parsed)));
+
+  recognitionCells.forEach((group, groupIndex) => {
+    if (groupIndex > 0) {
+      sequence.push(variableItem("group-gap", `recognition-group-gap-${groupIndex}`, SPACING_RULES_MM.groupGap));
+    }
+    appendCells(sequence, group.cells);
+  });
+  return sequence;
+}
+
+function appendCells(sequence, cells) {
+  cells.forEach((cell, index) => {
+    if (index > 0) sequence.push(variableItem("char-gap", `${cell.role}-gap-${index}`, SPACING_RULES_MM.charGap));
+    sequence.push(cell);
+  });
+}
+
+function positionContent(sequence, startX) {
+  let cursor = startX;
+  return sequence.map((item) => {
+    const positioned = { ...item, x: cursor };
+    cursor += item.width;
+    return positioned;
+  });
+}
+
+function getFixedHorizontalGeometry(rules) {
+  const contentLeft = rules.euro.x + rules.euro.width;
+  return {
+    innerLeft: rules.innerInset,
+    innerRightInset: rules.innerInset,
+    contentLeft,
+    euroRight: contentLeft
+  };
+}
+
+function getContentLimits(rules, width) {
+  const geometry = getFixedHorizontalGeometry(rules);
+  const left = geometry.contentLeft;
+  const right = width - geometry.innerRightInset;
+  return { left, right, width: right - left };
+}
+
+function getCharacterBand(rules) {
+  return {
+    y: rules.innerInset + rules.content.topClearance,
+    height: rules.content.characterHeight
+  };
+}
+
+function getSealGeometryForContent(rules, content) {
+  const seal = content.find((item) => item.type === "seals");
+  return seal ? getSealGeometry(rules, seal) : null;
+}
+
+function getSealGeometry(rules, sealItem) {
+  const charBand = getCharacterBand(rules);
+  const sealRules = rules.content.seal;
+  const innerWidth = Number(sealItem.width) || sealRules.columnWidth;
+  const outerWidth = Math.max(innerWidth, Math.min(sealRules.columnMaxWidth, innerWidth + (sealRules.columnMaxWidth - sealRules.columnMinWidth)));
+  const outerX = sealItem.x - (outerWidth - innerWidth) / 2;
+  const cx = sealItem.x + innerWidth / 2;
+  const huRadius = sealRules.huDiameter / 2;
+  const authorityRadius = sealRules.authorityDiameter / 2;
+  return {
+    cx,
+    innerColumnLeft: sealItem.x,
+    innerColumnRight: sealItem.x + innerWidth,
+    innerColumnWidth: innerWidth,
+    outerColumnLeft: outerX,
+    outerColumnRight: outerX + outerWidth,
+    outerColumnWidth: outerWidth,
+    hu: {
+      cy: sealRules.huCenterY,
+      diameter: sealRules.huDiameter,
+      radius: huRadius
+    },
+    authority: {
+      cy: sealRules.authorityCenterY,
+      diameter: sealRules.authorityDiameter,
+      radius: authorityRadius
+    },
+    visibleCircleGap: sealRules.visibleCircleGap,
+    charBand
+  };
+}
+
+function renderBody({ rules, metrics }) {
+  const w = metrics.width;
+  const h = rules.outerHeight;
+  const inset = rules.innerInset;
+  const euro = rules.euro;
+  return `
+<g class="layer layer-body" filter="url(#plateShadow)">
+  <rect x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="#111"/>
+  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>
+  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="#0046ad"/>
+  ${renderEuStars(euro.starsCenterX, euro.starsCenterY, euro.starsRadius)}
+  <text x="${euro.countryCenterX}" y="${euro.countryBaselineY}" text-anchor="middle" font-family="DIN1451Alt, AlteDIN1451Middle script, Arial, sans-serif" font-size="30" font-weight="500" fill="#fff">${escapeText(euro.country)}</text>
+</g>`.trim();
+}
+
+function renderDxfReferenceGuides({ rules, metrics }) {
+  const w = metrics.width;
+  const inset = rules.innerInset;
+  const euro = rules.euro;
+  const charBand = getCharacterBand(rules);
+  return `
+<g class="layer layer-dxf-guides" fill="none" stroke-linecap="square">
+  <rect x="0" y="0" width="${w}" height="${rules.outerHeight}" rx="${rules.outerCornerRadius}" stroke="rgba(255,255,255,.28)" stroke-width="0.45"/>
+  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" stroke="rgba(255,255,255,.42)" stroke-width="0.45"/>
+  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" stroke="rgba(70,170,255,.8)" stroke-width="0.55"/>
+  <line x1="0" y1="${charBand.y}" x2="${w}" y2="${charBand.y}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
+  <line x1="0" y1="${charBand.y + charBand.height}" x2="${w}" y2="${charBand.y + charBand.height}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
+</g>`.trim();
+}
+
+function renderGrid({ content, rules, metrics }) {
+  const charBand = getCharacterBand(rules);
+  const parts = content.map((item) => {
+    if (item.type === "char") {
+      return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(30,165,255,.08)" stroke="rgba(30,165,255,.55)" stroke-width="0.6"/>`;
+    }
+    if (item.type === "seals") {
+      const sealGeometry = getSealGeometry(rules, item);
+      return `
+        <rect x="${sealGeometry.outerColumnLeft}" y="${charBand.y}" width="${sealGeometry.outerColumnWidth}" height="${charBand.height}" fill="rgba(255,211,107,.05)" stroke="rgba(255,211,107,.5)" stroke-width="0.6" stroke-dasharray="2 1.5"/>
+        <rect x="${sealGeometry.innerColumnLeft}" y="${charBand.y}" width="${sealGeometry.innerColumnWidth}" height="${charBand.height}" fill="rgba(255,211,107,.09)" stroke="rgba(255,211,107,.75)" stroke-width="0.8"/>
+        <line x1="${sealGeometry.cx}" y1="${charBand.y - 8}" x2="${sealGeometry.cx}" y2="${charBand.y + charBand.height + 8}" stroke="rgba(255,211,107,.45)" stroke-width="0.5"/>
+        <circle cx="${sealGeometry.cx}" cy="${sealGeometry.hu.cy}" r="${sealGeometry.hu.radius}" fill="none" stroke="rgba(255,211,107,.8)" stroke-width="0.65" stroke-dasharray="2 1.5"/>
+        <circle cx="${sealGeometry.cx}" cy="${sealGeometry.authority.cy}" r="${sealGeometry.authority.radius}" fill="none" stroke="rgba(255,211,107,.8)" stroke-width="0.65" stroke-dasharray="2 1.5"/>`;
+    }
+    return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,99,99,.07)" stroke="rgba(255,99,99,.4)" stroke-width="0.4"/>`;
+  });
+  const centerLine = `<line x1="0" y1="${rules.outerHeight / 2}" x2="${metrics.width}" y2="${rules.outerHeight / 2}" stroke="rgba(255,255,255,.35)" stroke-width="0.5" stroke-dasharray="4 3"/>`;
+  return `<g class="layer layer-grid">${centerLine}${parts.join("")}</g>`;
+}
+
+function renderSeals({ content, rules }) {
+  const seal = content.find((item) => item.type === "seals");
+  if (!seal) return "";
+  const geometry = getSealGeometry(rules, seal);
+  return `
+<g class="layer layer-seals">
+  <g class="seal-slot seal-slot-hu">
+    <circle cx="${geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius}" fill="#1ea5ff" stroke="#111" stroke-width="1.25"/>
+    <circle cx="${geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius * 0.68}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.8" stroke-dasharray="1.4 1.8"/>
+    <text x="${geometry.cx}" y="${geometry.hu.cy + 3.3}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#111">HU</text>
+  </g>
+  <g class="seal-slot seal-slot-authority">
+    <circle cx="${geometry.cx}" cy="${geometry.authority.cy}" r="${geometry.authority.radius}" fill="#d7d7d2" stroke="#999" stroke-width="1"/>
+    <circle cx="${geometry.cx}" cy="${geometry.authority.cy}" r="${geometry.authority.radius * 0.55}" fill="none" stroke="rgba(120,120,115,.65)" stroke-width="1"/>
+  </g>
+</g>`.trim();
+}
+
+function renderText({ content, font }) {
+  const glyphGuide = font.fit?.measured ? `
+    <rect x="0" y="${font.fit.measured.topY}" width="100%" height="${font.fit.measured.visibleHeight}" fill="rgba(92, 214, 255, .035)" stroke="rgba(92, 214, 255, .35)" stroke-width="0.35" stroke-dasharray="2 1.5"/>` : "";
+  const chars = content.filter((item) => item.type === "char").map((cell) => `
+    <text x="${cell.x + cell.width / 2}" y="${font.baselineY}" text-anchor="middle" font-family="${font.fontFamily}, Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
+  return `<g class="layer layer-text">${glyphGuide}${chars}</g>`;
+}
+
+
+function renderHorizontalDiagnostics({ content, rules }) {
+  const charBand = getCharacterBand(rules);
+  const yTop = Math.max(0, charBand.y - 6);
+  const yBottom = Math.min(rules.outerHeight, charBand.y + charBand.height + 6);
+  const labelY = Math.max(6, charBand.y - 2.5);
+  const parts = [];
+
+  for (const item of content) {
+    const x1 = item.x;
+    const x2 = item.x + item.width;
+    const cx = x1 + item.width / 2;
+
+    if (item.type === "char") {
+      parts.push(`<line x1="${x1}" y1="${yTop}" x2="${x1}" y2="${yBottom}" stroke="rgba(30,165,255,.9)" stroke-width="0.45"/>`);
+      parts.push(`<line x1="${x2}" y1="${yTop}" x2="${x2}" y2="${yBottom}" stroke="rgba(30,165,255,.9)" stroke-width="0.45"/>`);
+      parts.push(`<line x1="${cx}" y1="${yTop - 2}" x2="${cx}" y2="${yBottom + 2}" stroke="rgba(255,255,255,.7)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
+      parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.3" fill="#1ea5ff">${escapeText(item.char)} · ${formatMm(item.width)}</text>`);
+      continue;
+    }
+
+    if (item.type === "seals") {
+      const geometry = getSealGeometry(rules, item);
+      parts.push(`<line x1="${geometry.innerColumnLeft}" y1="${yTop}" x2="${geometry.innerColumnLeft}" y2="${yBottom}" stroke="rgba(255,211,107,.95)" stroke-width="0.55"/>`);
+      parts.push(`<line x1="${geometry.innerColumnRight}" y1="${yTop}" x2="${geometry.innerColumnRight}" y2="${yBottom}" stroke="rgba(255,211,107,.95)" stroke-width="0.55"/>`);
+      parts.push(`<line x1="${geometry.cx}" y1="${yTop - 3}" x2="${geometry.cx}" y2="${yBottom + 3}" stroke="rgba(255,211,107,.8)" stroke-width="0.4" stroke-dasharray="1.5 1"/>`);
+      parts.push(`<text x="${geometry.cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.3" fill="#ffd36b">Seal · ${formatMm(geometry.innerColumnWidth)}</text>`);
+      continue;
+    }
+
+    parts.push(`<rect x="${x1}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,99,99,.03)" stroke="rgba(255,99,99,.55)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
+    parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.6" fill="#ff7777">${formatMm(item.width)}</text>`);
+  }
+
+  return `<g class="layer layer-horizontal-diagnostics">${parts.join("")}</g>`;
+}
+
+function renderDimensions(model) {
+  const { metrics, rules, content } = model;
+  const h = rules.outerHeight;
+  const w = metrics.width;
+  const y = h + rules.dimensions.baselineOffset;
+  const localDimensions = renderSolvedSpacingDimensions(model);
+  return `
+<g class="layer layer-dimensions" font-family="Arial, sans-serif" font-size="5" fill="#333" stroke="#333" stroke-width="0.45">
+  <line x1="0" y1="${y}" x2="${w}" y2="${y}"/>
+  <line x1="0" y1="${y - 3}" x2="0" y2="${y + 3}"/>
+  <line x1="${w}" y1="${y - 3}" x2="${w}" y2="${y + 3}"/>
+  <text x="${w / 2}" y="${y + 8}" text-anchor="middle">${w} mm</text>
+  <line x1="${w + 14}" y1="0" x2="${w + 14}" y2="${h}"/>
+  <line x1="${w + 11}" y1="0" x2="${w + 17}" y2="0"/>
+  <line x1="${w + 11}" y1="${h}" x2="${w + 17}" y2="${h}"/>
+  <text x="${w + 23}" y="${h / 2}" dominant-baseline="middle">${h} mm</text>
+  ${localDimensions}
+</g>`.trim();
+}
+
+function renderSolvedSpacingDimensions({ content, rules, metrics }) {
+  const charBand = getCharacterBand(rules);
+  const contentLimits = getContentLimits(rules, metrics.width);
+  const first = content[0];
+  const last = content[content.length - 1];
+  const lines = [];
+  const add = (x1, x2, y, label, color, options = {}) => {
+    if (!Number.isFinite(x1) || !Number.isFinite(x2) || Math.abs(x2 - x1) < 0.25) return;
+    const left = Math.min(x1, x2);
+    const right = Math.max(x1, x2);
+    const tick = options.tick ?? 2.4;
+    const labelOffset = options.labelOffset ?? -1.2;
+    const textY = y + labelOffset;
+    const opacity = options.opacity ?? 0.95;
+    lines.push(`
+      <g class="dimension dimension-${escapeAttr(options.kind || "spacing")}" opacity="${opacity}">
+        <line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="${color}" stroke-width="0.55"/>
+        <line x1="${left}" y1="${y - tick}" x2="${left}" y2="${y + tick}" stroke="${color}" stroke-width="0.55"/>
+        <line x1="${right}" y1="${y - tick}" x2="${right}" y2="${y + tick}" stroke="${color}" stroke-width="0.55"/>
+        <text x="${(left + right) / 2}" y="${textY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${options.fontSize || 3.9}" fill="${color}" stroke="none">${escapeText(label)}</text>
+      </g>`);
+  };
+
+  if (first && last) {
+    const leftMargin = first.x - contentLimits.left;
+    const rightMargin = contentLimits.right - (last.x + last.width);
+    add(contentLimits.left, first.x, charBand.y + charBand.height + 9, `Margin ${formatMm(leftMargin)}`, "#6de28d", { kind: "outside-margin", labelOffset: 5.4, fontSize: 3.7 });
+    add(last.x + last.width, contentLimits.right, charBand.y + charBand.height + 9, `Margin ${formatMm(rightMargin)}`, "#6de28d", { kind: "outside-margin", labelOffset: 5.4, fontSize: 3.7 });
+  }
+
+  let charGapIndex = 0;
+  let groupGapIndex = 0;
+  for (const item of content) {
+    const x1 = item.x;
+    const x2 = item.x + item.width;
+    if (item.type === "seals") {
+      add(x1, x2, charBand.y - 7.5, `Seal ${formatMm(item.width)}`, "#ffd36b", { kind: "seal-column", labelOffset: -1.8, fontSize: 4.0 });
+      continue;
+    }
+    if (item.type === "group-gap") {
+      groupGapIndex += 1;
+      add(x1, x2, charBand.y - 13.5, `Group ${formatMm(item.width)}`, "#ff7777", { kind: "group-gap", labelOffset: -1.8, fontSize: 3.8 });
+      continue;
+    }
+    if (item.type === "char-gap") {
+      charGapIndex += 1;
+      add(x1, x2, charBand.y + charBand.height + 4.2, formatMm(item.width), "#7fd3ff", { kind: "char-gap", labelOffset: 5.1, fontSize: 3.3, opacity: 0.75, tick: 1.8 });
+    }
+  }
+
+  return `<g class="layer layer-solved-dimensions">${lines.join("")}
+  </g>`;
+}
+
+function renderEuStars(cx, cy, r) {
+  const stars = [];
+  for (let i = 0; i < 12; i += 1) {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / 12;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    stars.push(`<text x="${x.toFixed(2)}" y="${(y + 1.6).toFixed(2)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#ffd200">●</text>`);
+  }
+  return `<g class="eu-stars">${stars.join("")}</g>`;
+}
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("de-DE", { maximumFractionDigits: 1 });
+}
+
+function formatMm(value) {
+  return `${formatNumber(value)} mm`;
+}
+
+function getCellWidth(char, font) {
+  const normalized = String(char || "").toUpperCase();
+  const specialWidth = font.specialWidths?.[normalized];
+  if (Number.isFinite(Number(specialWidth)) && Number(specialWidth) > 0) return Number(specialWidth);
+  return isDigit(normalized) ? font.digitWidth : font.letterWidth;
+}
+
+function isDigit(char) {
+  return /\d/.test(char);
+}
+
+function positiveNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function escapeText(value) {
+  return String(value).replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
+}
+
+function escapeAttr(value) {
+  return escapeText(value).replace(/"/g, "&quot;");
+}
+
+return { WIDTH_BANDS: WIDTH_BANDS, SPACING_RULES_MM: SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: DXF_REFERENCE_MM, ONE_LINE_RULES_MM: ONE_LINE_RULES_MM, parsePlate: parsePlate, resolvePlateFontMode: resolvePlateFontMode, buildPlateModelMm: buildPlateModelMm, renderPlateSvgMm: renderPlateSvgMm, getCanvasMm: getCanvasMm, getCharacterBand: getCharacterBand };
+
+})();
+
 // ---- src/plate/font.js ----
 const __m_src_plate_font_js = (() => {
 const FONT_PROBE_BYTES = "bytes=0-15";
@@ -2171,92 +3167,20 @@ return { checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: g
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
 const { tuevColorForYear } = __m_src_badge_profile_js;
+const { buildPlateModelMm, getCanvasMm, getCharacterBand, ONE_LINE_RULES_MM } = __m_src_plate_mm_model_js;
 const { checkPlateFontAvailable, ensurePlateFont, getDefaultPlateFontVariant, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
 
 
 
-// Law-based one-line plate renderer.
-// All coordinates are millimetres. The 110 mm height is the complete outside
-// dimension including the black border. The usable white area is modelled as
-// 101 mm high (110 mm minus a 4.5 mm inner border band on each side).
-const FZV_ONE_LINE = Object.freeze({
-    key: "oneLine",
-    maxWidth: 520,
-    height: 110,
-    // Official law names 520 mm as the one-line maximum, but no one-line
-    // minimum. For rendering short plates we use practical manufacturer bands:
-    // Mittelschrift generally starts at 340 mm, while Engschrift listings can
-    // reach 320 mm. These bands select the outer physical plate size only.
-    // They never scale individual glyphs or seals.
-    widthBandsMtl: Object.freeze([340, 380, 420, 460, 480, 520]),
-    widthBandsEng: Object.freeze([320, 340, 380, 420, 480, 520]),
-    motorcycleWidthBands: Object.freeze([180, 190, 200, 210, 220]),
-    // Anlage-4 Maße: 110 mm Außenhöhe inklusive schwarzem Rand.
-    // 4,5 mm Randband je Seite ergibt eine nutzbare weiße Innenfläche von 101 mm.
-    borderBand: 4.5,
-    borderStroke: 4.5,
-    cornerRadius: 7,
-    euro: Object.freeze({
-        width: 45,
-        // The legal sketch marks a 98 mm Euro field, but most real plates do
-        // not show the optional bright top/bottom light edge. The renderer
-        // therefore fills the full white inner height; all coordinates still
-        // remain fixed in the 110 mm outer plate model.
-        height: 101,
-        starRingDiameter: 30,
-        countryFontSize: 20
-    }),
-    minimumSideGap: 8,
-    // Anlage-4 one-line pattern dimensions. These are physical cells in mm,
-    // not browser-measured glyph widths. Glyphs are centred in fixed cells.
-    sealZoneWidthMtl: 65.5,
-    sealZoneWidthEng: 58,
-    sealZoneWidthMax: 67.5,
-    huDiameter: 35,
-    authorityDiameter: 35,
-    authorityOuterDiameter: 45,
-    sealVerticalGap: 5,
-    textTopGap: 13,
-    fontHeight: 75,
-    letterAdvance: 47.5,
-    digitAdvance: 44.5,
-    charGap: 8,
-    charGapMax: 10,
-    recognitionGroupGap: 24,
-    recognitionGroupGapMax: 30
-});
-
-const FONT_PROFILES = Object.freeze({
-    mtl: Object.freeze({
-        role: "mtl",
-        label: "Mittelschrift 75 mm",
-        fontSize: 75,
-        letterAdvance: 47.5,
-        digitAdvance: 44.5,
-        charGap: 8,
-        yOffset: 1.2
-    }),
-    eng: Object.freeze({
-        role: "eng",
-        label: "Engschrift 75 mm",
-        fontSize: 75,
-        letterAdvance: 40.5,
-        digitAdvance: 38.5,
-        charGap: 8,
-        yOffset: 1.2
-    })
-});
-
-const PLATE_FACE_COLOR = "#f7f7f1";
+const PLATE_FACE_COLOR = "#f4f3ee";
 const PLATE_EDGE_COLOR = "#0d0d0d";
-const EU_BLUE = "#003399";
-const EU_YELLOW = "#ffcc00";
-const AUTHORITY_SEAL_FILL = "#d8d8d2";
-const AUTHORITY_SEAL_STROKE = "#a7a7a2";
+const EU_BLUE = "#0046ad";
+const EU_YELLOW = "#ffd200";
+const AUTHORITY_SEAL_FILL = "#d7d7d2";
+const AUTHORITY_SEAL_STROKE = "#999";
 const AUTHORITY_SEAL_HIGHLIGHT = "#f4f4ed";
 
 let plateFontRequested = false;
-let measureCanvas = null;
 
 function normalizePlate(plate) {
     return String(plate || "")
@@ -2272,15 +3196,15 @@ function renderLicensePlate(plate, options = {}) {
         injectPlateFont();
     }
 
-    const metrics = getLicensePlateMetrics(plate, options);
+    const analysis = getLicensePlateMetrics(plate, options);
 
-    if (!metrics.normalizedPlate) {
+    if (!analysis.normalizedPlate) {
         return "";
     }
 
     const requestedScale = Number(options.scale || 0);
     const maxWidth = Number(options.maxWidth || 0);
-    const scaleBasisWidth = metrics.scaleBasisWidth || metrics.width || FZV_ONE_LINE.maxWidth;
+    const scaleBasisWidth = analysis.scaleBasisWidth || analysis.width || ONE_LINE_RULES_MM.maxWidth;
     const fallbackScale = Number.isFinite(maxWidth) && maxWidth > 0
         ? maxWidth / scaleBasisWidth
         : 1;
@@ -2288,485 +3212,229 @@ function renderLicensePlate(plate, options = {}) {
         ? Math.min(1, requestedScale)
         : Math.min(1, fallbackScale);
 
-    return renderLawPlateSvg({
-        analysis: metrics,
-        displayWidth: Math.max(1, Math.round(metrics.width * scale)),
-        displayHeight: Math.max(1, Math.round(metrics.height * scale)),
+    return renderPhysicalPlateSvg({
+        analysis,
+        displayWidth: Math.max(1, Math.round(analysis.width * scale)),
+        displayHeight: Math.max(1, Math.round(analysis.height * scale)),
         options
     });
 }
 
 function getLicensePlateMetrics(plate, options = {}) {
-    const parsed = parsePlate(plate);
+    const normalizedPlate = normalizePlate(plate);
 
-    if (!parsed.normalizedPlate) {
+    if (!normalizedPlate) {
         return {
             width: 0,
             height: 0,
-            scaleBasisWidth: FZV_ONE_LINE.maxWidth,
+            scaleBasisWidth: ONE_LINE_RULES_MM.maxWidth,
             normalizedPlate: ""
         };
     }
 
-    const availableFonts = getLawFontVariants();
-    const alternatives = [];
-
-    for (const fontVariant of availableFonts.filter((font) => font.lawProfile?.role !== "eng")) {
-        alternatives.push(...buildOneLineLayoutsForBands(parsed, fontVariant, options));
-    }
-
-    for (const fontVariant of availableFonts.filter((font) => font.lawProfile?.role === "eng")) {
-        alternatives.push(...buildOneLineLayoutsForBands(parsed, fontVariant, options));
-    }
-
-    if (!alternatives.length) {
-        alternatives.push(...buildOneLineLayoutsForBands(parsed, getDefaultLawFontVariant(), options));
-    }
-
-    const fitting = alternatives.find((alternative) => !alternative.overflow);
-    const chosen = fitting || alternatives[alternatives.length - 1];
+    const model = buildPlateModelMm(normalizedPlate, {
+        fontMode: options.fontMode || "auto",
+        widthMode: options.widthMode || "balanced",
+        specialIWidth: options.specialIWidth || 35.5
+    });
+    const fontVariant = getFontVariantForMode(model.metrics.fontMode);
+    const canvas = getCanvasMm(model, false);
 
     return {
-        ...chosen,
-        normalizedPlate: parsed.normalizedPlate,
-        parsed,
-        alternatives
+        width: model.metrics.width,
+        height: model.metrics.height,
+        scaleBasisWidth: model.metrics.width,
+        normalizedPlate: model.metrics.normalized,
+        model,
+        canvas,
+        fontVariant,
+        fontMode: model.metrics.fontMode,
+        fontLabel: model.metrics.fontLabel,
+        sealColumnWidth: model.metrics.sealColumnWidth,
+        sealColumnRange: model.metrics.sealColumnRange,
+        sealColumnRule: model.metrics.sealColumnRule,
+        sideMarginLeft: model.metrics.remainingLeft,
+        sideMarginRight: model.metrics.remainingRight,
+        overflow: !model.metrics.width || model.metrics.remainingLeft < ONE_LINE_RULES_MM.content.sideClearance - 0.01
     };
 }
 
-function parsePlate(plate) {
-    const normalizedPlate = normalizePlate(plate);
-    const tokens = normalizedPlate.split(" ").filter(Boolean);
-    const first = tokens[0] || "";
-    const restTokens = tokens.slice(1);
-
-    let prefix = first;
-    let recognition = restTokens.join("");
-
-    if (!recognition && first) {
-        const match = first.match(/^([A-ZÄÖÜ]{1,3})([A-ZÄÖÜ0-9].*)$/u);
-        if (match) {
-            prefix = match[1];
-            recognition = match[2].replace(/\s/g, "");
-        }
-    }
-
-    if (!recognition && tokens.length === 1) {
-        recognition = first;
-        prefix = "";
-    }
-
-    return {
-        normalizedPlate,
-        prefix,
-        recognition,
-        clean: normalizedPlate.replace(/\s/g, ""),
-        tokenCount: tokens.length
-    };
-}
-
-function getLawFontVariants() {
+function getFontVariantForMode(fontMode) {
     const status = getPlateFontStatus();
     const fonts = Array.isArray(status?.fonts) ? status.fonts : [];
-    const mtl = fonts.find((font) => font.source === "gl" && font.role === "mtl");
-    const eng = fonts.find((font) => font.source === "gl" && font.role === "eng");
-    const legacy = fonts.find((font) => font.source === "europlate");
-    const variants = [];
-
-    if (mtl) {
-        variants.push({ ...mtl, lawProfile: FONT_PROFILES.mtl });
-    }
-
-    if (eng) {
-        variants.push({ ...eng, lawProfile: FONT_PROFILES.eng });
-    }
-
-    if (!variants.length && legacy) {
-        variants.push({ ...legacy, lawProfile: FONT_PROFILES.mtl });
-    }
-
-    if (!variants.length) {
-        variants.push(getDefaultLawFontVariant());
-    }
-
-    return variants;
+    const role = fontMode === "narrow" ? "eng" : "mtl";
+    return fonts.find((font) => font.source === "gl" && font.role === role)
+        || fonts.find((font) => font.source === "gl" && font.role === "mtl")
+        || fonts.find((font) => font.source === "gl" && font.role === "eng")
+        || fonts.find((font) => font.source === "europlate")
+        || getDefaultPlateFontVariant();
 }
 
-function getDefaultLawFontVariant() {
-    const fallback = getDefaultPlateFontVariant();
-    return {
-        ...fallback,
-        lawProfile: fallback.role === "eng" ? FONT_PROFILES.eng : FONT_PROFILES.mtl
-    };
-}
-
-function buildOneLineLayoutsForBands(parsed, fontVariant, options = {}) {
-    const layout = FZV_ONE_LINE;
-    const font = fontVariant.lawProfile || FONT_PROFILES.mtl;
-    const prefixBoxes = measureTextBoxes(parsed.prefix, fontVariant, font);
-    const recognitionSegments = measureRecognitionSegments(parsed.recognition, fontVariant, font, layout);
-    const prefixWidth = measureBoxesWidth(prefixBoxes, font);
-    const recognitionWidth = measureTextSegmentsWidth(recognitionSegments);
-    const hasSealColumn = Boolean(parsed.prefix && parsed.recognition);
-    const sealZoneWidth = hasSealColumn ? getSealZoneWidth(font, layout) : 0;
-    const textAndSealWidth = prefixWidth + sealZoneWidth + recognitionWidth;
-    const rawMinimumWidth = getOpenLeftBoundary(layout) + textAndSealWidth + layout.minimumSideGap * 2 + layout.borderBand;
-    const widthBands = getWidthBandsForFont(font, layout);
-    const preferredMinimumBand = parsed.clean.length >= 8 ? layout.maxWidth : widthBands[0];
-    const candidateBands = widthBands.filter((band) => band >= preferredMinimumBand);
-    const bands = candidateBands.length ? candidateBands : [layout.maxWidth];
-
-    return bands.map((band) => buildOneLineLayoutForBand({
-        parsed,
-        fontVariant,
-        font,
-        prefixBoxes,
-        recognitionSegments,
-        prefixWidth,
-        recognitionWidth,
-        hasSealColumn,
-        sealZoneWidth,
-        textAndSealWidth,
-        rawMinimumWidth,
-        width: band,
-        options
-    }));
-}
-
-
-function getWidthBandsForFont(font, layout = FZV_ONE_LINE) {
-    return font.role === "eng" ? layout.widthBandsEng : layout.widthBandsMtl;
-}
-
-function getSealZoneWidth(font, layout = FZV_ONE_LINE) {
-    return font.role === "eng" ? layout.sealZoneWidthEng : layout.sealZoneWidthMtl;
-}
-
-function buildOneLineLayoutForBand({
-    parsed,
-    fontVariant,
-    font,
-    prefixBoxes,
-    recognitionSegments,
-    prefixWidth,
-    recognitionWidth,
-    hasSealColumn,
-    sealZoneWidth,
-    textAndSealWidth,
-    rawMinimumWidth,
-    width,
-    options
-}) {
-    const layout = FZV_ONE_LINE;
-    const inner = getInnerRect(width, layout);
-    const openLeftBoundary = getOpenLeftBoundary(layout);
-    const openRightBoundary = width - layout.borderBand;
-    const availableTextArea = openRightBoundary - openLeftBoundary;
-    const sideGap = (availableTextArea - textAndSealWidth) / 2;
-    const overflow = sideGap < layout.minimumSideGap || width < rawMinimumWidth;
-    const startX = openLeftBoundary + Math.max(layout.minimumSideGap, sideGap);
-    const prefixX = startX;
-    const sealStartX = prefixX + prefixWidth;
-    const sealX = sealStartX + sealZoneWidth / 2;
-    const recognitionX = hasSealColumn
-        ? sealStartX + sealZoneWidth
-        : prefixX + prefixWidth;
-
-    return {
-        width,
-        height: layout.height,
-        // A full-width standard plate remains the display reference. This keeps
-        // very short plates from being enlarged vertically just because they are
-        // physically narrow, while still preserving their shorter rendered width.
-        scaleBasisWidth: layout.maxWidth,
-        rawMinimumWidth,
-        overflow,
-        layout,
-        inner,
-        fontVariant,
-        font,
-        prefixBoxes,
-        recognitionSegments,
-        prefixWidth,
-        recognitionWidth,
-        textAndSealWidth,
-        openLeftBoundary,
-        openRightBoundary,
-        sideGap,
-        prefixX,
-        sealStartX,
-        sealZoneWidth,
-        sealX,
-        recognitionX,
-        hasSealColumn,
-        debug: options.debug === true,
-        parsed
-    };
-}
-
-function getInnerRect(width, layout = FZV_ONE_LINE) {
-    const band = layout.borderBand;
-    return {
-        x: band,
-        y: band,
-        width: width - band * 2,
-        height: layout.height - band * 2,
-        centerY: layout.height / 2
-    };
-}
-
-function getOpenLeftBoundary(layout = FZV_ONE_LINE) {
-    return layout.borderBand + layout.euro.width;
-}
-
-function measureTextBoxes(text, fontVariant, font) {
-    return Array.from(String(text || "")).map((char) => ({
-        char,
-        width: getAnlage4Advance(char, font)
-    }));
-}
-
-function measureBoxesWidth(boxes, font) {
-    if (!boxes.length) {
-        return 0;
-    }
-
-    return boxes.reduce((sum, box) => sum + box.width, 0) + Math.max(0, boxes.length - 1) * font.charGap;
-}
-
-function measureRecognitionSegments(text, fontVariant, font, layout = FZV_ONE_LINE) {
-    const value = String(text || "");
-    const match = value.match(/^([A-ZÄÖÜ]*)([0-9]*)([A-ZÄÖÜ]*)$/u);
-
-    if (!match) {
-        const boxes = measureTextBoxes(value, fontVariant, font);
-        return [{ boxes, width: measureBoxesWidth(boxes, font), gapBefore: 0 }];
-    }
-
-    const [, letters, digits, suffix] = match;
-    const segments = [];
-
-    for (const part of [letters, digits, suffix]) {
-        if (!part) continue;
-        const boxes = measureTextBoxes(part, fontVariant, font);
-        segments.push({
-            boxes,
-            width: measureBoxesWidth(boxes, font),
-            gapBefore: segments.length ? layout.recognitionGroupGap : 0
-        });
-    }
-
-    return segments.length ? segments : [{ boxes: [], width: 0, gapBefore: 0 }];
-}
-
-function measureTextSegmentsWidth(segments) {
-    return segments.reduce((sum, segment) => sum + (segment.gapBefore || 0) + (segment.width || 0), 0);
-}
-
-function getAnlage4Advance(char, font) {
-    if (/[0-9]/.test(char)) {
-        return font.digitAdvance;
-    }
-
-    // Anlage 4 gives the cell-like advances in the sample dimension chain.
-    // We keep even narrow glyphs such as I centred in the full letter cell so
-    // the legal spacing model, not browser text metrics, determines layout.
-    return font.letterAdvance;
-}
-
-function renderLawPlateSvg({ analysis, displayWidth, displayHeight, options }) {
-    const { width, height, layout, inner, fontVariant, font, parsed } = analysis;
-    const clipId = `plateLawClip-${hashString(`${parsed.normalizedPlate}-${fontVariant.key}-${width}`)}`;
-    const debug = options.debug === true || analysis.debug === true;
-    const textY = inner.y + layout.textTopGap + layout.fontHeight / 2 + font.yOffset;
+function renderPhysicalPlateSvg({ analysis, displayWidth, displayHeight, options }) {
+    const { model, fontVariant } = analysis;
+    const { rules, metrics } = model;
+    const clipId = `tuev-physical-plate-${hashString(metrics.normalized)}-${Math.round(metrics.width)}`;
+    const fontFamily = fontVariant?.family || model.font.fontFamily;
+    const fontWeight = fontVariant?.weight || 400;
 
     return `
         <svg
-            viewBox="0 0 ${width} ${height}"
+            class="tuev-plate tuev-plate-physical"
+            xmlns="http://www.w3.org/2000/svg"
             width="${displayWidth}"
             height="${displayHeight}"
+            viewBox="0 0 ${metrics.width} ${rules.outerHeight}"
             role="img"
-            aria-label="${escapeHtml(parsed.normalizedPlate)}"
-            style="
-                display: block;
-                width: ${displayWidth}px;
-                height: ${displayHeight}px;
-                max-width: none;
-                flex: 0 0 auto;
-            "
+            aria-label="${escapeHtml(metrics.normalized)}"
+            data-model-unit="mm"
+            data-plate-width-mm="${metrics.width}"
+            data-plate-height-mm="${rules.outerHeight}"
+            data-font-mode="${escapeHtml(metrics.fontMode)}"
+            data-seal-column-rule="${escapeHtml(metrics.sealColumnRule)}"
+            preserveAspectRatio="xMidYMid meet"
         >
             <defs>
                 <clipPath id="${clipId}">
                     <rect
                         x="0"
                         y="0"
-                        width="${width}"
-                        height="${height}"
-                        rx="${layout.cornerRadius}"
-                        ry="${layout.cornerRadius}"
+                        width="${metrics.width}"
+                        height="${rules.outerHeight}"
+                        rx="${rules.outerCornerRadius}"
+                        ry="${rules.outerCornerRadius}"
                     />
                 </clipPath>
                 <style>
-                    .tuev-law-plate-text-${clipId} {
-                        font-family: "${fontVariant.family}";
-                        font-size: ${font.fontSize}px;
-                        font-weight: ${fontVariant.weight || 400};
-                        dominant-baseline: central;
+                    .tuev-physical-plate-text-${clipId} {
+                        font-family: "${fontFamily}", "Arial Narrow", sans-serif;
+                        font-size: ${model.font.fontSize}px;
+                        font-weight: ${fontWeight};
                         text-anchor: middle;
                     }
                 </style>
             </defs>
-
             <g clip-path="url(#${clipId})">
-                <rect x="0" y="0" width="${width}" height="${height}" fill="${PLATE_EDGE_COLOR}"/>
-                <rect
-                    x="${inner.x}"
-                    y="${inner.y}"
-                    width="${inner.width}"
-                    height="${inner.height}"
-                    fill="${PLATE_FACE_COLOR}"
-                />
-                ${renderEuroField(layout, inner)}
-                ${analysis.hasSealColumn ? renderSealColumn(analysis, options) : ""}
-                ${renderCharacterRun({
-                    boxes: analysis.prefixBoxes,
-                    x: analysis.prefixX,
-                    y: textY,
-                    font,
-                    className: `tuev-law-plate-text-${clipId}`
-                })}
-                ${renderTextSegments({
-                    segments: analysis.recognitionSegments,
-                    x: analysis.recognitionX,
-                    y: textY,
-                    font,
-                    className: `tuev-law-plate-text-${clipId}`
-                })}
-                ${debug ? renderDebugLayer(analysis) : ""}
+                ${renderBody(model)}
+                ${renderSeals(model, options)}
+                ${renderText(model, `tuev-physical-plate-text-${clipId}`)}
+                ${options.debug ? renderDebugLayer(model) : ""}
             </g>
-
             <rect
-                x="${layout.borderStroke / 2}"
-                y="${layout.borderStroke / 2}"
-                width="${width - layout.borderStroke}"
-                height="${height - layout.borderStroke}"
-                rx="${layout.cornerRadius}"
-                ry="${layout.cornerRadius}"
+                x="${rules.innerInset / 2}"
+                y="${rules.innerInset / 2}"
+                width="${metrics.width - rules.innerInset}"
+                height="${rules.outerHeight - rules.innerInset}"
+                rx="${rules.outerCornerRadius}"
+                ry="${rules.outerCornerRadius}"
                 fill="none"
                 stroke="${PLATE_EDGE_COLOR}"
-                stroke-width="${layout.borderStroke}"
+                stroke-width="${rules.innerInset}"
             />
         </svg>
     `;
 }
 
-function renderCharacterRun({ boxes, x, y, font, className }) {
-    let cursor = x;
-
-    return boxes.map((box) => {
-        const center = cursor + box.width / 2;
-        cursor += box.width + font.charGap;
-
-        return `
-            <text
-                class="${className}"
-                x="${center.toFixed(2)}"
-                y="${y.toFixed(2)}"
-                fill="${PLATE_EDGE_COLOR}"
-            >${escapeHtml(box.char)}</text>
-        `;
-    }).join("");
-}
-
-function renderTextSegments({ segments, x, y, font, className }) {
-    let cursor = x;
-
-    return segments.map((segment) => {
-        cursor += segment.gapBefore || 0;
-        const rendered = renderCharacterRun({
-            boxes: segment.boxes || [],
-            x: cursor,
-            y,
-            font,
-            className
-        });
-        cursor += segment.width || 0;
-        return rendered;
-    }).join("");
-}
-
-function renderEuroField(layout, inner) {
-    const euro = layout.euro;
-    const x = inner.x;
-    const y = inner.y;
-    const height = inner.height;
-    const centerX = x + euro.width / 2;
-    const starCenterY = y + height * 0.30;
-    const ringRadius = euro.starRingDiameter / 2 * 0.74;
-    const countryY = y + height - 16;
+function renderBody({ rules, metrics }) {
+    const w = metrics.width;
+    const h = rules.outerHeight;
+    const inset = rules.innerInset;
+    const euro = rules.euro;
 
     return `
-        <g>
-            <rect x="${x}" y="${y}" width="${euro.width}" height="${height}" fill="${EU_BLUE}"/>
-            ${Array.from({ length: 12 }, (_, index) => {
-                const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
-                const starX = centerX + Math.cos(angle) * ringRadius;
-                const starY = starCenterY + Math.sin(angle) * ringRadius;
-                return renderStar(starX, starY, 1.9);
-            }).join("")}
+        <g class="tuev-plate-body">
+            <rect x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="${PLATE_EDGE_COLOR}"/>
+            <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="${PLATE_FACE_COLOR}"/>
+            <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="${EU_BLUE}"/>
+            ${renderEuStars(euro.starsCenterX, euro.starsCenterY, euro.starsRadius)}
             <text
-                x="${centerX}"
-                y="${countryY}"
+                x="${euro.countryCenterX}"
+                y="${euro.countryBaselineY}"
                 text-anchor="middle"
-                dominant-baseline="middle"
-                font-family="Arial, sans-serif"
-                font-size="${euro.countryFontSize}"
-                font-weight="700"
+                font-family="DIN1451Alt, AlteDIN1451Mittelschrift, Arial, sans-serif"
+                font-size="30"
+                font-weight="500"
                 fill="#fff"
-            >D</text>
+            >${escapeHtml(euro.country)}</text>
         </g>
     `;
 }
 
-function renderSealColumn(analysis, options) {
-    const { layout, sealX } = analysis;
-    // One-line pattern: two fixed 35 mm seal circles in the 75 mm character
-    // band, separated by the remaining 5 mm vertical clearance. The authority
-    // seal also reserves a subtle 45 mm outer embossing area without imitating
-    // an official seal graphic.
-    const huY = layout.textTopGap + layout.huDiameter / 2;
-    const authorityY = huY + layout.huDiameter / 2 + layout.sealVerticalGap + layout.authorityDiameter / 2;
+function renderSeals({ content, rules }, options) {
+    const seal = content.find((item) => item.type === "seals");
+
+    if (!seal) {
+        return "";
+    }
+
+    const geometry = getSealGeometry(rules, seal);
 
     return `
-        <g>
+        <g class="tuev-plate-seals">
             ${renderHuSeal({
-                x: sealX,
-                y: huY,
-                diameter: layout.huDiameter,
+                x: geometry.cx,
+                y: geometry.hu.cy,
+                diameter: geometry.hu.diameter,
                 year: Number(options.huYear || new Date().getFullYear()),
                 month: Number(options.huMonth || 1),
                 rotation: Number(options.huRotation || 0)
             })}
             ${renderAuthoritySeal({
-                x: sealX,
-                y: authorityY,
-                diameter: layout.authorityDiameter,
-                outerDiameter: layout.authorityOuterDiameter
+                x: geometry.cx,
+                y: geometry.authority.cy,
+                diameter: geometry.authority.diameter
             })}
         </g>
     `;
 }
 
-function renderAuthoritySeal({ x, y, diameter, outerDiameter }) {
+function renderText({ content, font }, className) {
+    return `
+        <g class="tuev-plate-text">
+            ${content.filter((item) => item.type === "char").map((cell) => `
+                <text
+                    class="${className}"
+                    x="${(cell.x + cell.width / 2).toFixed(2)}"
+                    y="${font.baselineY}"
+                    fill="${PLATE_EDGE_COLOR}"
+                >${escapeHtml(cell.char)}</text>
+            `).join("")}
+        </g>
+    `;
+}
+
+function getSealGeometry(rules, sealItem) {
+    const charBand = getCharacterBand(rules);
+    const sealRules = rules.content.seal;
+    const innerWidth = Number(sealItem.width) || sealRules.columnWidth;
+    const cx = sealItem.x + innerWidth / 2;
+
+    return {
+        cx,
+        innerColumnLeft: sealItem.x,
+        innerColumnRight: sealItem.x + innerWidth,
+        innerColumnWidth: innerWidth,
+        hu: {
+            cy: sealRules.huCenterY,
+            diameter: sealRules.huDiameter,
+            radius: sealRules.huDiameter / 2
+        },
+        authority: {
+            cy: sealRules.authorityCenterY,
+            diameter: sealRules.authorityDiameter,
+            radius: sealRules.authorityDiameter / 2
+        },
+        charBand
+    };
+}
+
+function renderAuthoritySeal({ x, y, diameter }) {
     const r = diameter / 2;
-    const outerR = Number(outerDiameter || diameter) / 2;
 
     return `
         <g opacity="0.96">
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${outerR.toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="1" opacity="0.72"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="0.9"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.66).toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="0.75" opacity="0.85"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.22).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="1"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.55).toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="1" opacity="0.85"/>
+            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.18).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
         </g>
     `;
 }
@@ -2805,28 +3473,31 @@ function renderHuSeal({ x, y, diameter, year, month, rotation }) {
     `;
 }
 
-function renderStar(cx, cy, r) {
-    const points = [];
-
-    for (let index = 0; index < 10; index += 1) {
-        const radius = index % 2 === 0 ? r : r * 0.42;
-        const angle = -Math.PI / 2 + index * Math.PI / 5;
-        points.push(`${(cx + Math.cos(angle) * radius).toFixed(2)},${(cy + Math.sin(angle) * radius).toFixed(2)}`);
-    }
-
-    return `<polygon points="${points.join(" ")}" fill="${EU_YELLOW}"/>`;
+function renderEuStars(cx, cy, r) {
+    return `<g class="tuev-plate-eu-stars">${Array.from({ length: 12 }, (_, index) => {
+        const angle = -Math.PI / 2 + (Math.PI * 2 * index) / 12;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        return `<text x="${x.toFixed(2)}" y="${(y + 1.6).toFixed(2)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="${EU_YELLOW}">●</text>`;
+    }).join("")}</g>`;
 }
 
-function renderDebugLayer(analysis) {
-    const { layout, inner, width, height } = analysis;
+function renderDebugLayer({ content, rules, metrics }) {
+    const charBand = getCharacterBand(rules);
+    const cells = content.map((item) => {
+        if (item.type === "char") {
+            return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="none" stroke="#1ea5ff" stroke-width="0.4"/>`;
+        }
+        if (item.type === "seals") {
+            return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="none" stroke="#ffd36b" stroke-width="0.5"/>`;
+        }
+        return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="none" stroke="#ff7777" stroke-width="0.35" stroke-dasharray="1.5 1"/>`;
+    }).join("");
 
     return `
-        <g opacity="0.72">
-            <rect x="0" y="0" width="${width}" height="${height}" fill="none" stroke="#00aaff" stroke-width="0.6" stroke-dasharray="4 4"/>
-            <rect x="${inner.x}" y="${inner.y}" width="${inner.width}" height="${inner.height}" fill="none" stroke="#44cc44" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <line x1="${analysis.openLeftBoundary}" y1="${inner.y}" x2="${analysis.openLeftBoundary}" y2="${inner.y + inner.height}" stroke="#aa44ff" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <line x1="${analysis.openRightBoundary}" y1="${inner.y}" x2="${analysis.openRightBoundary}" y2="${inner.y + inner.height}" stroke="#aa44ff" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <text x="8" y="${height - 7}" font-family="monospace" font-size="7" fill="#0055aa">${escapeHtml(`${analysis.font.label}, ${Math.round(width)}×${height} mm, white ${Math.round(inner.height)} mm`)}</text>
+        <g class="tuev-plate-debug" opacity="0.72">
+            <rect x="0" y="0" width="${metrics.width}" height="${rules.outerHeight}" fill="none" stroke="#00aaff" stroke-width="0.6" stroke-dasharray="4 4"/>
+            ${cells}
         </g>
     `;
 }
@@ -5813,7 +6484,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b102
+// TÜV Card source entry b114
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
