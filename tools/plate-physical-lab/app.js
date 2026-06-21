@@ -187,15 +187,15 @@ function renderNotes(model, viewer, fontFit) {
     notes.push("Keine Ortskennung erkannt; Siegelzone wird trotzdem als feste physische Zone gerendert.");
   }
   notes.push("CAD-Regel: Das Modell bleibt mm-basiert. Pixel/DPR existieren nur in der Anzeige-Schicht.");
-  notes.push(`b115: Schriftwahl: ${model.metrics.requestedFontMode === "auto" ? "Auto" : "Manuell"} → ${model.metrics.fontLabel}. ${model.metrics.autoFontModeReason}`);
-  if (model.metrics.requestedFontMode === "auto") notes.push("b115: Layout-Solver-Regel: Mittelschrift bleibt Standard; Engschrift wird nur gewählt, wenn Mittelschrift mit zulässigen variablen Abständen und gleichen Außenrändern nicht passt.");
+  notes.push(`b116: Schriftwahl: ${model.metrics.requestedFontMode === "auto" ? "Auto" : "Manuell"} → ${model.metrics.fontLabel}. ${model.metrics.autoFontModeReason}`);
+  if (model.metrics.requestedFontMode === "auto") notes.push("b116: Layout-Solver-Regel: Mittelschrift bleibt Standard; Engschrift wird nur gewählt, wenn Mittelschrift mit zulässigen variablen Abständen und gleichen Außenrändern nicht passt.");
   if (viewer.modeLabel !== "1:1 physisch") {
     notes.push("Aktueller Viewer-Modus ist nicht 1:1; zum Messen auf dem Monitor bitte 1:1 physisch wählen.");
   }
-  notes.push("b115: Die Siegelspalte steht direkt zwischen den angrenzenden Zeichenzellen; normale Kennzeichen nutzen 63,5-67,5 mm, finale H/E-Suffix-Kennzeichen nach Ziffer nutzen 58,0-67,5 mm; es gibt keine zusätzlichen Gap-Elemente vor/nach der Siegelzone.");
-  notes.push("b115: Das Länderkennzeichen D verwendet DIN1451Alt/din1451alt.ttf, wenn die Fontdatei lokal im Lab- oder Repo-Fonts-Ordner liegt.");
-  notes.push("b115: GL-Mittelschrift ist als manueller Kalibrierstand 125 / 92,5 mm festgehalten; die automatische Messung bleibt zuschaltbar.");
-  notes.push(`b115: I nutzt eine gemeinsame mm-Zellbreite für Mittel- und Engschrift: ${format(numberValue(controls.specialIWidth, ONE_LINE_RULES_MM.cells.middle.specialWidths.I), 1)} mm. Status: kalibrierter GL-Fontwert, nicht amtlich einzeln belegtes Maß; Mittel/Eng unterscheiden sich weiterhin bei den übrigen Zeichen.`);
+  notes.push("b116: Die Siegelspalte steht direkt zwischen den angrenzenden Zeichenzellen; normale Kennzeichen nutzen 63,5-67,5 mm, finale H/E-Suffix-Kennzeichen nach Ziffer nutzen 58,0-67,5 mm; es gibt keine zusätzlichen Gap-Elemente vor/nach der Siegelzone.");
+  notes.push("b116: Das Länderkennzeichen D verwendet DIN1451Alt/din1451alt.ttf, wenn die Fontdatei lokal im Lab- oder Repo-Fonts-Ordner liegt.");
+  notes.push("b116: GL-Mittelschrift ist als manueller Kalibrierstand 125 / 92,5 mm festgehalten; die automatische Messung bleibt zuschaltbar.");
+  notes.push(`b116: I nutzt eine gemeinsame mm-Zellbreite für Mittel- und Engschrift: ${format(numberValue(controls.specialIWidth, ONE_LINE_RULES_MM.cells.middle.specialWidths.I), 1)} mm. Status: kalibrierter GL-Fontwert, nicht amtlich einzeln belegtes Maß; Mittel/Eng unterscheiden sich weiterhin bei den übrigen Zeichen.`);
   if (controls.stage?.value === "horizontal") notes.push("Horizontalprüfung aktiv: Zellgrenzen, Zellmitten, Zellbreiten und Gap-Breiten werden sichtbar gemacht, ohne das Modell zu verändern.");
   notes.push("Die automatische Kalibrierung erzeugt nur mm-basierte Modellparameter Font-Kalibriergröße und Baseline; das komplette SVG wird weiterhin erst danach skaliert.");
   if (fontFit?.mode === "fallback") notes.push("Fontmessung war nicht verfügbar; Fallbackwerte aktiv.");

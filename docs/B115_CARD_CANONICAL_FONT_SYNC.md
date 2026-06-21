@@ -1,4 +1,4 @@
-# b115 – Card renderer canonical GL font sync
+# b116 – Card renderer canonical GL font sync
 
 ## Context
 

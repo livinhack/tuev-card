@@ -1,4 +1,4 @@
-// Plate physical mm model b115
+// Kennzeichen Physical Lab b116 / shared plate physical mm model
 // CAD-like model layer: every coordinate, size and distance in this file is millimetres.
 // No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
 // Shared CAD-like one-line plate model used by the Physical Lab and the production Card renderer. Final H/E suffix plates may shrink the one-line seal column to 58.0 mm; normal plates keep 63.5-67.5 mm.
@@ -22,7 +22,7 @@ export const SPACING_RULES_MM = Object.freeze({
 
 export const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
   middleManualB108: {
-    label: "GL middle script · manually calibrated b115",
+    label: "GL middle script · manually calibrated b116",
     targetGlyphHeight: 75,
     fontSize: 125,
     baselineY: 92.5,
@@ -336,20 +336,24 @@ export function renderPlateSvgMm(input, options = {}) {
   const { rules, metrics } = model;
   const stage = options.stage || "complete";
   const showDimensions = options.showDimensions !== false;
+  const showDxfReferenceGuides = options.showDxfReferenceGuides !== false;
+  const showGrid = options.showGrid !== false;
+  const showSeals = options.showSeals !== false;
+  const showText = options.showText !== false;
   const layers = [];
 
   layers.push(renderBody(model));
 
-  if (["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+  if (showDxfReferenceGuides && ["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderDxfReferenceGuides(model));
   }
-  if (["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+  if (showGrid && ["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderGrid(model));
   }
-  if (["seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderSeals(model));
+  if (showSeals && ["seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderSeals(model, options));
   }
-  if (["text", "horizontal", "complete"].includes(stage)) {
+  if (showText && ["text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderText(model));
   }
   if (stage === "horizontal") {
@@ -360,9 +364,11 @@ export function renderPlateSvgMm(input, options = {}) {
   }
 
   const canvas = getCanvasMm(model, showDimensions);
+  const extraDefs = String(options.extraDefs || "").trim();
   const svg = `
-<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}">
+<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}" preserveAspectRatio="xMidYMid meet">
   <defs>
+    ${extraDefs}
     <filter id="plateShadow" x="-5%" y="-20%" width="110%" height="140%">
       <feDropShadow dx="0" dy="0.8" stdDeviation="0.8" flood-color="black" flood-opacity="0.28"/>
     </filter>
@@ -830,7 +836,7 @@ function renderText({ content, font }) {
   const glyphGuide = font.fit?.measured ? `
     <rect x="0" y="${font.fit.measured.topY}" width="100%" height="${font.fit.measured.visibleHeight}" fill="rgba(92, 214, 255, .035)" stroke="rgba(92, 214, 255, .35)" stroke-width="0.35" stroke-dasharray="2 1.5"/>` : "";
   const chars = content.filter((item) => item.type === "char").map((cell) => `
-    <text x="${cell.x + cell.width / 2}" y="${font.baselineY}" text-anchor="middle" font-family="${font.fontFamily}, Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
+    <text x="${cell.x + cell.width / 2}" y="${font.baselineY}" text-anchor="middle" font-family="'${font.fontFamily}', Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
   return `<g class="layer layer-text">${glyphGuide}${chars}</g>`;
 }
 

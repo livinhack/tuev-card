@@ -118,6 +118,20 @@ function canonicalFamilyForRole(role) {
     return null;
 }
 
+export function getPlateFontFaceCss() {
+    return PLATE_FONT_CANDIDATES
+        .filter((candidate) => candidate.source === "gl" && canonicalFamilyForRole(candidate.role))
+        .map((candidate) => `
+        @font-face {
+            font-family: "${canonicalFamilyForRole(candidate.role)}";
+            src: url("${candidate.url}") format("${candidate.format || 'truetype'}");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }`)
+        .join("\n");
+}
+
 function canonicalFontFaceSrc(role) {
     const urls = PLATE_FONT_CANDIDATES
         .filter((candidate) => candidate.source === "gl" && candidate.role === role)
@@ -192,8 +206,16 @@ export function isPlateFontLoaded() {
         return false;
     }
 
-    return availablePlateFonts.length > 0 &&
-        availablePlateFonts.every((candidate) => document.fonts.check(`${candidate.weight} 16px "${candidate.family}"`));
+    if (availablePlateFonts.length <= 0) {
+        return false;
+    }
+
+    const aliases = [...new Set(availablePlateFonts
+        .map((candidate) => canonicalFamilyForRole(candidate.role))
+        .filter(Boolean))];
+
+    return availablePlateFonts.every((candidate) => document.fonts.check(`${candidate.weight} 16px "${candidate.family}"`)) &&
+        aliases.every((family) => document.fonts.check(`400 16px "${family}"`));
 }
 
 export function ensurePlateFont(onReady) {
@@ -212,9 +234,15 @@ export function ensurePlateFont(onReady) {
             ? availablePlateFonts
             : PLATE_FONT_CANDIDATES;
 
-        plateFontLoadPromise = Promise.allSettled(candidates.map((candidate) => (
+        const candidateLoads = candidates.map((candidate) => (
             document.fonts.load(`${candidate.weight} 16px "${candidate.family}"`)
-        )));
+        ));
+        const aliasLoads = [...new Set(candidates
+            .map((candidate) => canonicalFamilyForRole(candidate.role))
+            .filter(Boolean))]
+            .map((family) => document.fonts.load(`400 16px "${family}"`));
+
+        plateFontLoadPromise = Promise.allSettled([...candidateLoads, ...aliasLoads]);
     }
 
     plateFontLoadPromise.then(() => {
@@ -237,26 +265,7 @@ export function injectPlateFont() {
 
     plateFontInjected = true;
 
-    const canonicalMiddleSrc = canonicalFontFaceSrc("mtl");
-    const canonicalNarrowSrc = canonicalFontFaceSrc("eng");
-    const canonicalFaces = [
-        canonicalMiddleSrc ? `
-        @font-face {
-            font-family: "${CANONICAL_GL_MIDDLE_FONT_FAMILY}";
-            src: ${canonicalMiddleSrc};
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }` : "",
-        canonicalNarrowSrc ? `
-        @font-face {
-            font-family: "${CANONICAL_GL_NARROW_FONT_FAMILY}";
-            src: ${canonicalNarrowSrc};
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }` : ""
-    ].filter(Boolean).join("\n");
+    const canonicalFaces = getPlateFontFaceCss();
 
     const candidateFaces = PLATE_FONT_CANDIDATES.map((candidate) => `
         @font-face {

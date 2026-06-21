@@ -1,4 +1,4 @@
-// TÜV Card bundled b115
+// TÜV Card bundled b116
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1928,7 +1928,7 @@ return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVe
 
 // ---- src/plate/mm-model.js ----
 const __m_src_plate_mm_model_js = (() => {
-// Plate physical mm model b115
+// Kennzeichen Physical Lab b116 / shared plate physical mm model
 // CAD-like model layer: every coordinate, size and distance in this file is millimetres.
 // No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
 // Shared CAD-like one-line plate model used by the Physical Lab and the production Card renderer. Final H/E suffix plates may shrink the one-line seal column to 58.0 mm; normal plates keep 63.5-67.5 mm.
@@ -1952,7 +1952,7 @@ const SPACING_RULES_MM = Object.freeze({
 
 const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
   middleManualB108: {
-    label: "GL middle script · manually calibrated b115",
+    label: "GL middle script · manually calibrated b116",
     targetGlyphHeight: 75,
     fontSize: 125,
     baselineY: 92.5,
@@ -2266,20 +2266,24 @@ function renderPlateSvgMm(input, options = {}) {
   const { rules, metrics } = model;
   const stage = options.stage || "complete";
   const showDimensions = options.showDimensions !== false;
+  const showDxfReferenceGuides = options.showDxfReferenceGuides !== false;
+  const showGrid = options.showGrid !== false;
+  const showSeals = options.showSeals !== false;
+  const showText = options.showText !== false;
   const layers = [];
 
   layers.push(renderBody(model));
 
-  if (["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+  if (showDxfReferenceGuides && ["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderDxfReferenceGuides(model));
   }
-  if (["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+  if (showGrid && ["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderGrid(model));
   }
-  if (["seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderSeals(model));
+  if (showSeals && ["seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderSeals(model, options));
   }
-  if (["text", "horizontal", "complete"].includes(stage)) {
+  if (showText && ["text", "horizontal", "complete"].includes(stage)) {
     layers.push(renderText(model));
   }
   if (stage === "horizontal") {
@@ -2290,9 +2294,11 @@ function renderPlateSvgMm(input, options = {}) {
   }
 
   const canvas = getCanvasMm(model, showDimensions);
+  const extraDefs = String(options.extraDefs || "").trim();
   const svg = `
-<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}">
+<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}" preserveAspectRatio="xMidYMid meet">
   <defs>
+    ${extraDefs}
     <filter id="plateShadow" x="-5%" y="-20%" width="110%" height="140%">
       <feDropShadow dx="0" dy="0.8" stdDeviation="0.8" flood-color="black" flood-opacity="0.28"/>
     </filter>
@@ -2760,7 +2766,7 @@ function renderText({ content, font }) {
   const glyphGuide = font.fit?.measured ? `
     <rect x="0" y="${font.fit.measured.topY}" width="100%" height="${font.fit.measured.visibleHeight}" fill="rgba(92, 214, 255, .035)" stroke="rgba(92, 214, 255, .35)" stroke-width="0.35" stroke-dasharray="2 1.5"/>` : "";
   const chars = content.filter((item) => item.type === "char").map((cell) => `
-    <text x="${cell.x + cell.width / 2}" y="${font.baselineY}" text-anchor="middle" font-family="${font.fontFamily}, Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
+    <text x="${cell.x + cell.width / 2}" y="${font.baselineY}" text-anchor="middle" font-family="'${font.fontFamily}', Arial Narrow, sans-serif" font-size="${font.fontSize}" font-weight="400" fill="#080808">${escapeText(cell.char)}</text>`).join("");
   return `<g class="layer layer-text">${glyphGuide}${chars}</g>`;
 }
 
@@ -3044,6 +3050,20 @@ function canonicalFamilyForRole(role) {
     return null;
 }
 
+function getPlateFontFaceCss() {
+    return PLATE_FONT_CANDIDATES
+        .filter((candidate) => candidate.source === "gl" && canonicalFamilyForRole(candidate.role))
+        .map((candidate) => `
+        @font-face {
+            font-family: "${canonicalFamilyForRole(candidate.role)}";
+            src: url("${candidate.url}") format("${candidate.format || 'truetype'}");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }`)
+        .join("\n");
+}
+
 function canonicalFontFaceSrc(role) {
     const urls = PLATE_FONT_CANDIDATES
         .filter((candidate) => candidate.source === "gl" && candidate.role === role)
@@ -3118,8 +3138,16 @@ function isPlateFontLoaded() {
         return false;
     }
 
-    return availablePlateFonts.length > 0 &&
-        availablePlateFonts.every((candidate) => document.fonts.check(`${candidate.weight} 16px "${candidate.family}"`));
+    if (availablePlateFonts.length <= 0) {
+        return false;
+    }
+
+    const aliases = [...new Set(availablePlateFonts
+        .map((candidate) => canonicalFamilyForRole(candidate.role))
+        .filter(Boolean))];
+
+    return availablePlateFonts.every((candidate) => document.fonts.check(`${candidate.weight} 16px "${candidate.family}"`)) &&
+        aliases.every((family) => document.fonts.check(`400 16px "${family}"`));
 }
 
 function ensurePlateFont(onReady) {
@@ -3138,9 +3166,15 @@ function ensurePlateFont(onReady) {
             ? availablePlateFonts
             : PLATE_FONT_CANDIDATES;
 
-        plateFontLoadPromise = Promise.allSettled(candidates.map((candidate) => (
+        const candidateLoads = candidates.map((candidate) => (
             document.fonts.load(`${candidate.weight} 16px "${candidate.family}"`)
-        )));
+        ));
+        const aliasLoads = [...new Set(candidates
+            .map((candidate) => canonicalFamilyForRole(candidate.role))
+            .filter(Boolean))]
+            .map((family) => document.fonts.load(`400 16px "${family}"`));
+
+        plateFontLoadPromise = Promise.allSettled([...candidateLoads, ...aliasLoads]);
     }
 
     plateFontLoadPromise.then(() => {
@@ -3163,26 +3197,7 @@ function injectPlateFont() {
 
     plateFontInjected = true;
 
-    const canonicalMiddleSrc = canonicalFontFaceSrc("mtl");
-    const canonicalNarrowSrc = canonicalFontFaceSrc("eng");
-    const canonicalFaces = [
-        canonicalMiddleSrc ? `
-        @font-face {
-            font-family: "${CANONICAL_GL_MIDDLE_FONT_FAMILY}";
-            src: ${canonicalMiddleSrc};
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }` : "",
-        canonicalNarrowSrc ? `
-        @font-face {
-            font-family: "${CANONICAL_GL_NARROW_FONT_FAMILY}";
-            src: ${canonicalNarrowSrc};
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }` : ""
-    ].filter(Boolean).join("\n");
+    const canonicalFaces = getPlateFontFaceCss();
 
     const candidateFaces = PLATE_FONT_CANDIDATES.map((candidate) => `
         @font-face {
@@ -3200,25 +3215,16 @@ function injectPlateFont() {
     document.head.appendChild(style);
 }
 
-return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANONICAL_GL_NARROW_FONT_FAMILY: CANONICAL_GL_NARROW_FONT_FAMILY, checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: getPlateFontStatus, getPlateFontVariantForText: getPlateFontVariantForText, getDefaultPlateFontVariant: getDefaultPlateFontVariant, isPlateFontLoaded: isPlateFontLoaded, ensurePlateFont: ensurePlateFont, injectPlateFont: injectPlateFont };
+return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANONICAL_GL_NARROW_FONT_FAMILY: CANONICAL_GL_NARROW_FONT_FAMILY, getPlateFontFaceCss: getPlateFontFaceCss, checkPlateFontAvailable: checkPlateFontAvailable, getPlateFontStatus: getPlateFontStatus, getPlateFontVariantForText: getPlateFontVariantForText, getDefaultPlateFontVariant: getDefaultPlateFontVariant, isPlateFontLoaded: isPlateFontLoaded, ensurePlateFont: ensurePlateFont, injectPlateFont: injectPlateFont };
 
 })();
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-const { tuevColorForYear } = __m_src_badge_profile_js;
-const { buildPlateModelMm, getCanvasMm, getCharacterBand, ONE_LINE_RULES_MM } = __m_src_plate_mm_model_js;
-const { CANONICAL_GL_MIDDLE_FONT_FAMILY, CANONICAL_GL_NARROW_FONT_FAMILY, checkPlateFontAvailable, ensurePlateFont, getDefaultPlateFontVariant, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
+const { buildPlateModelMm, ONE_LINE_RULES_MM, renderPlateSvgMm } = __m_src_plate_mm_model_js;
+const { checkPlateFontAvailable, ensurePlateFont, getPlateFontFaceCss, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
 
 
-
-const PLATE_FACE_COLOR = "#f4f3ee";
-const PLATE_EDGE_COLOR = "#0d0d0d";
-const EU_BLUE = "#0046ad";
-const EU_YELLOW = "#ffd200";
-const AUTHORITY_SEAL_FILL = "#d7d7d2";
-const AUTHORITY_SEAL_STROKE = "#999";
-const AUTHORITY_SEAL_HIGHLIGHT = "#f4f4ed";
 
 let plateFontRequested = false;
 
@@ -3233,7 +3239,9 @@ function normalizePlate(plate) {
 function renderLicensePlate(plate, options = {}) {
     if (!plateFontRequested) {
         plateFontRequested = true;
-        injectPlateFont();
+        if (typeof document !== "undefined") {
+            injectPlateFont();
+        }
     }
 
     const analysis = getLicensePlateMetrics(plate, options);
@@ -3251,12 +3259,30 @@ function renderLicensePlate(plate, options = {}) {
     const scale = Number.isFinite(requestedScale) && requestedScale > 0
         ? Math.min(1, requestedScale)
         : Math.min(1, fallbackScale);
+    const displayWidth = Math.max(1, Math.round(analysis.width * scale));
+    const displayHeight = Math.max(1, Math.round(analysis.height * scale));
 
-    return renderPhysicalPlateSvg({
-        analysis,
-        displayWidth: Math.max(1, Math.round(analysis.width * scale)),
-        displayHeight: Math.max(1, Math.round(analysis.height * scale)),
-        options
+    const result = renderPlateSvgMm(analysis.normalizedPlate, {
+        fontMode: options.fontMode || "auto",
+        widthMode: options.widthMode || "balanced",
+        specialIWidth: options.specialIWidth || 35.5,
+        stage: "complete",
+        showDimensions: false,
+        showDxfReferenceGuides: options.debug === true,
+        showGrid: options.debug === true,
+        showSeals: true,
+        showText: true,
+        huYear: options.huYear,
+        huMonth: options.huMonth,
+        huRotation: options.huRotation,
+        extraDefs: renderEmbeddedFontDefs()
+    });
+
+    return addCardSvgAttributes(result.svg, {
+        displayWidth,
+        displayHeight,
+        normalizedPlate: analysis.normalizedPlate,
+        model: analysis.model
     });
 }
 
@@ -3277,8 +3303,6 @@ function getLicensePlateMetrics(plate, options = {}) {
         widthMode: options.widthMode || "balanced",
         specialIWidth: options.specialIWidth || 35.5
     });
-    const fontVariant = getFontVariantForMode(model.metrics.fontMode);
-    const canvas = getCanvasMm(model, false);
 
     return {
         width: model.metrics.width,
@@ -3286,8 +3310,8 @@ function getLicensePlateMetrics(plate, options = {}) {
         scaleBasisWidth: model.metrics.width,
         normalizedPlate: model.metrics.normalized,
         model,
-        canvas,
-        fontVariant,
+        canvas: { x: 0, y: 0, width: model.metrics.width, height: model.metrics.height },
+        fontVariant: null,
         fontMode: model.metrics.fontMode,
         fontLabel: model.metrics.fontLabel,
         sealColumnWidth: model.metrics.sealColumnWidth,
@@ -3299,267 +3323,24 @@ function getLicensePlateMetrics(plate, options = {}) {
     };
 }
 
-function getCanonicalFontFamilyForMode(fontMode) {
-    return fontMode === "narrow"
-        ? CANONICAL_GL_NARROW_FONT_FAMILY
-        : CANONICAL_GL_MIDDLE_FONT_FAMILY;
-}
+function renderEmbeddedFontDefs() {
+    const css = getPlateFontFaceCss();
 
-function getFontVariantForMode(fontMode) {
-    const status = getPlateFontStatus();
-    const fonts = Array.isArray(status?.fonts) ? status.fonts : [];
-    const role = fontMode === "narrow" ? "eng" : "mtl";
-    return fonts.find((font) => font.source === "gl" && font.role === role)
-        || fonts.find((font) => font.source === "gl" && font.role === "mtl")
-        || fonts.find((font) => font.source === "gl" && font.role === "eng")
-        || fonts.find((font) => font.source === "europlate")
-        || getDefaultPlateFontVariant();
-}
-
-function renderPhysicalPlateSvg({ analysis, displayWidth, displayHeight, options }) {
-    const { model, fontVariant } = analysis;
-    const { rules, metrics } = model;
-    const clipId = `tuev-physical-plate-${hashString(metrics.normalized)}-${Math.round(metrics.width)}`;
-    const fontFamily = getCanonicalFontFamilyForMode(metrics.fontMode);
-    const fontWeight = 400;
-
-    return `
-        <svg
-            class="tuev-plate tuev-plate-physical"
-            xmlns="http://www.w3.org/2000/svg"
-            width="${displayWidth}"
-            height="${displayHeight}"
-            viewBox="0 0 ${metrics.width} ${rules.outerHeight}"
-            role="img"
-            aria-label="${escapeHtml(metrics.normalized)}"
-            data-model-unit="mm"
-            data-plate-width-mm="${metrics.width}"
-            data-plate-height-mm="${rules.outerHeight}"
-            data-font-mode="${escapeHtml(metrics.fontMode)}"
-            data-seal-column-rule="${escapeHtml(metrics.sealColumnRule)}"
-            preserveAspectRatio="xMidYMid meet"
-        >
-            <defs>
-                <clipPath id="${clipId}">
-                    <rect
-                        x="0"
-                        y="0"
-                        width="${metrics.width}"
-                        height="${rules.outerHeight}"
-                        rx="${rules.outerCornerRadius}"
-                        ry="${rules.outerCornerRadius}"
-                    />
-                </clipPath>
-                <style>
-                    .tuev-physical-plate-text-${clipId} {
-                        font-family: "${fontFamily}", "Arial Narrow", sans-serif;
-                        font-size: ${model.font.fontSize}px;
-                        font-weight: ${fontWeight};
-                        text-anchor: middle;
-                    }
-                </style>
-            </defs>
-            <g clip-path="url(#${clipId})">
-                ${renderBody(model)}
-                ${renderSeals(model, options)}
-                ${renderText(model, `tuev-physical-plate-text-${clipId}`)}
-                ${options.debug ? renderDebugLayer(model) : ""}
-            </g>
-            <rect
-                x="${rules.innerInset / 2}"
-                y="${rules.innerInset / 2}"
-                width="${metrics.width - rules.innerInset}"
-                height="${rules.outerHeight - rules.innerInset}"
-                rx="${rules.outerCornerRadius}"
-                ry="${rules.outerCornerRadius}"
-                fill="none"
-                stroke="${PLATE_EDGE_COLOR}"
-                stroke-width="${rules.innerInset}"
-            />
-        </svg>
-    `;
-}
-
-function renderBody({ rules, metrics }) {
-    const w = metrics.width;
-    const h = rules.outerHeight;
-    const inset = rules.innerInset;
-    const euro = rules.euro;
-
-    return `
-        <g class="tuev-plate-body">
-            <rect x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="${PLATE_EDGE_COLOR}"/>
-            <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="${PLATE_FACE_COLOR}"/>
-            <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="${EU_BLUE}"/>
-            ${renderEuStars(euro.starsCenterX, euro.starsCenterY, euro.starsRadius)}
-            <text
-                x="${euro.countryCenterX}"
-                y="${euro.countryBaselineY}"
-                text-anchor="middle"
-                font-family="DIN1451Alt, AlteDIN1451Mittelschrift, Arial, sans-serif"
-                font-size="30"
-                font-weight="500"
-                fill="#fff"
-            >${escapeHtml(euro.country)}</text>
-        </g>
-    `;
-}
-
-function renderSeals({ content, rules }, options) {
-    const seal = content.find((item) => item.type === "seals");
-
-    if (!seal) {
+    if (!css.trim()) {
         return "";
     }
 
-    const geometry = getSealGeometry(rules, seal);
-
-    return `
-        <g class="tuev-plate-seals">
-            ${renderHuSeal({
-                x: geometry.cx,
-                y: geometry.hu.cy,
-                diameter: geometry.hu.diameter,
-                year: Number(options.huYear || new Date().getFullYear()),
-                month: Number(options.huMonth || 1),
-                rotation: Number(options.huRotation || 0)
-            })}
-            ${renderAuthoritySeal({
-                x: geometry.cx,
-                y: geometry.authority.cy,
-                diameter: geometry.authority.diameter
-            })}
-        </g>
-    `;
+    return `<style>${css}</style>`;
 }
 
-function renderText({ content, font }, className) {
-    return `
-        <g class="tuev-plate-text">
-            ${content.filter((item) => item.type === "char").map((cell) => `
-                <text
-                    class="${className}"
-                    x="${(cell.x + cell.width / 2).toFixed(2)}"
-                    y="${font.baselineY}"
-                    fill="${PLATE_EDGE_COLOR}"
-                >${escapeHtml(cell.char)}</text>
-            `).join("")}
-        </g>
-    `;
+function addCardSvgAttributes(svg, { displayWidth, displayHeight, normalizedPlate, model }) {
+    return svg.replace(
+        /<svg\s+class="physical-plate-svg"/,
+        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
+    );
 }
 
-function getSealGeometry(rules, sealItem) {
-    const charBand = getCharacterBand(rules);
-    const sealRules = rules.content.seal;
-    const innerWidth = Number(sealItem.width) || sealRules.columnWidth;
-    const cx = sealItem.x + innerWidth / 2;
-
-    return {
-        cx,
-        innerColumnLeft: sealItem.x,
-        innerColumnRight: sealItem.x + innerWidth,
-        innerColumnWidth: innerWidth,
-        hu: {
-            cy: sealRules.huCenterY,
-            diameter: sealRules.huDiameter,
-            radius: sealRules.huDiameter / 2
-        },
-        authority: {
-            cy: sealRules.authorityCenterY,
-            diameter: sealRules.authorityDiameter,
-            radius: sealRules.authorityDiameter / 2
-        },
-        charBand
-    };
-}
-
-function renderAuthoritySeal({ x, y, diameter }) {
-    const r = diameter / 2;
-
-    return `
-        <g opacity="0.96">
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}" fill="${AUTHORITY_SEAL_FILL}" stroke="${AUTHORITY_SEAL_STROKE}" stroke-width="1"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.55).toFixed(2)}" fill="none" stroke="${AUTHORITY_SEAL_HIGHLIGHT}" stroke-width="1" opacity="0.85"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.18).toFixed(2)}" fill="${AUTHORITY_SEAL_STROKE}" opacity="0.55"/>
-        </g>
-    `;
-}
-
-function renderHuSeal({ x, y, diameter, year, month, rotation }) {
-    const r = diameter / 2;
-    const color = tuevColorForYear(year);
-    const shortYear = String(year || "").slice(-2) || "--";
-    const markerRotation = Number.isFinite(rotation) ? rotation : ((month % 12) * 30);
-
-    return `
-        <g transform="rotate(${markerRotation} ${x.toFixed(2)} ${y.toFixed(2)})">
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="${color}" stroke="${PLATE_EDGE_COLOR}" stroke-width="0.95"/>
-            ${Array.from({ length: 12 }, (_, index) => {
-                const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
-                const x1 = x + Math.cos(angle) * r * 0.62;
-                const y1 = y + Math.sin(angle) * r * 0.62;
-                const x2 = x + Math.cos(angle) * r * 0.86;
-                const y2 = y + Math.sin(angle) * r * 0.86;
-                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${PLATE_EDGE_COLOR}" stroke-width="0.55"/>`;
-            }).join("")}
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.31).toFixed(2)}" fill="${PLATE_EDGE_COLOR}"/>
-            <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(r * 0.23).toFixed(2)}" fill="${color}"/>
-            <text
-                x="${x.toFixed(2)}"
-                y="${y.toFixed(2)}"
-                text-anchor="middle"
-                dominant-baseline="middle"
-                font-family="Arial, sans-serif"
-                font-size="${(r * 0.48).toFixed(2)}"
-                font-weight="700"
-                fill="${PLATE_EDGE_COLOR}"
-                transform="rotate(${-markerRotation} ${x.toFixed(2)} ${y.toFixed(2)})"
-            >${escapeHtml(shortYear)}</text>
-        </g>
-    `;
-}
-
-function renderEuStars(cx, cy, r) {
-    return `<g class="tuev-plate-eu-stars">${Array.from({ length: 12 }, (_, index) => {
-        const angle = -Math.PI / 2 + (Math.PI * 2 * index) / 12;
-        const x = cx + Math.cos(angle) * r;
-        const y = cy + Math.sin(angle) * r;
-        return `<text x="${x.toFixed(2)}" y="${(y + 1.6).toFixed(2)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="${EU_YELLOW}">●</text>`;
-    }).join("")}</g>`;
-}
-
-function renderDebugLayer({ content, rules, metrics }) {
-    const charBand = getCharacterBand(rules);
-    const cells = content.map((item) => {
-        if (item.type === "char") {
-            return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="none" stroke="#1ea5ff" stroke-width="0.4"/>`;
-        }
-        if (item.type === "seals") {
-            return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="none" stroke="#ffd36b" stroke-width="0.5"/>`;
-        }
-        return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="none" stroke="#ff7777" stroke-width="0.35" stroke-dasharray="1.5 1"/>`;
-    }).join("");
-
-    return `
-        <g class="tuev-plate-debug" opacity="0.72">
-            <rect x="0" y="0" width="${metrics.width}" height="${rules.outerHeight}" fill="none" stroke="#00aaff" stroke-width="0.6" stroke-dasharray="4 4"/>
-            ${cells}
-        </g>
-    `;
-}
-
-function hashString(value) {
-    let hash = 0;
-
-    for (let index = 0; index < value.length; index += 1) {
-        hash = ((hash << 5) - hash) + value.charCodeAt(index);
-        hash |= 0;
-    }
-
-    return Math.abs(hash);
-}
-
-function escapeHtml(value) {
+function escapeAttr(value) {
     return String(value || "")
         .replaceAll("&", "&amp;")
         .replaceAll('"', "&quot;")
@@ -6530,7 +6311,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b115
+// TÜV Card source entry b116
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
