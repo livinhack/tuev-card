@@ -72,12 +72,13 @@ if errorlevel 1 (
 )
 
 echo.
-echo Fuehre JavaScript-Syntaxcheck aus...
+echo Fuehre JavaScript- und Release-Asset-Check aus...
 echo.
 call npm.cmd run check
 if errorlevel 1 (
     echo.
     echo FEHLER: npm run check ist fehlgeschlagen.
+echo Pruefe insbesondere, ob lokale Fontdateien nach dist\fonts kopiert wurden.
     echo.
     pause
     exit /b 1
@@ -96,6 +97,21 @@ if exist "dist\tuev-card.js" (
     echo Bitte pruefe package.json und scripts\build-bundle.mjs.
 )
 
+echo.
+
+if exist "dist\fonts\GL-Nummernschild-Mtl.ttf" (
+    echo Vorhanden: dist\fonts\GL-Nummernschild-Mtl.ttf
+) else (
+    echo HINWEIS: dist\fonts\GL-Nummernschild-Mtl.ttf fehlt.
+    echo Fuer HACS/GitHub-Tests muss die lokale Fontdatei vor dem Build in fonts\ liegen.
+)
+
+if exist "dist\fonts\GL-Nummernschild-Eng.ttf" (
+    echo Vorhanden: dist\fonts\GL-Nummernschild-Eng.ttf
+) else (
+    echo HINWEIS: dist\fonts\GL-Nummernschild-Eng.ttf fehlt.
+    echo Fuer HACS/GitHub-Tests muss die lokale Fontdatei vor dem Build in fonts\ liegen.
+)
 echo.
 echo Naechster Schritt:
 echo In GitHub Desktop die geaenderten Dateien committen und pushen.

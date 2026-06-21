@@ -1,10 +1,12 @@
 {
   "name": "tuev-card",
-  "version": "0.1.1-b116",
+  "version": "0.1.1-b117",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-bundle.mjs",
-    "check": "node scripts/check-js.mjs"
+    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs",
+    "check:js": "node scripts/check-js.mjs",
+    "check:release": "node scripts/check-release-assets.mjs"
   }
 }

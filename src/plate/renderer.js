@@ -2,7 +2,7 @@ import {
     buildPlateModelMm,
     ONE_LINE_RULES_MM,
     renderPlateSvgMm
-} from "./mm-model.js?v=b116";
+} from "./mm-model.js?v=b117";
 import {
     checkPlateFontAvailable,
     ensurePlateFont,
@@ -10,7 +10,7 @@ import {
     getPlateFontStatus,
     injectPlateFont,
     isPlateFontLoaded
-} from "./font.js?v=b116";
+} from "./font.js?v=b117";
 
 export {
     checkPlateFontAvailable,

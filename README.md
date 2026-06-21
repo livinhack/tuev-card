@@ -38,6 +38,15 @@ type: module
 
 After installing or updating, reload the dashboard. In the Home Assistant app or browser, a full reload may be needed before the updated card appears.
 
+For graphical license plates, the HACS installation must also contain the bundled font files:
+
+```text
+/config/www/community/tuev-card/fonts/GL-Nummernschild-Mtl.ttf
+/config/www/community/tuev-card/fonts/GL-Nummernschild-Eng.ttf
+```
+
+If these files are missing, the browser will use a fallback font and the graphical plate geometry will look wrong.
+
 ### Manual installation
 
 Copy the contents of the `dist` folder to:
@@ -45,6 +54,8 @@ Copy the contents of the `dist` folder to:
 ```text
 /config/www/community/tuev-card/
 ```
+
+When graphical license plates are used, copy the complete `dist` folder including `dist/fonts/`.
 
 Add this Lovelace resource:
 
@@ -154,6 +165,17 @@ groups:
 ```
 
 `columns: auto` uses as many readable columns as fit. Manual values `1` to `4` act as maximums and may be reduced automatically if the available width is too small.
+
+## Developer release notes
+
+Before committing a GitHub/HACS test build, keep the local font binaries in `fonts/`, run the build, and verify that they were mirrored into `dist/fonts/`:
+
+```bash
+npm run build
+npm run check
+```
+
+`npm run check` includes a release asset check. It fails if local font binaries exist in `fonts/` but are missing or mismatched in `dist/fonts/`. Chat handover ZIPs intentionally do not include font binaries, so local release builds must be run again before pushing.
 
 ## Notes
 

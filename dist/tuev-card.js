@@ -1,4 +1,4 @@
-// TÜV Card bundled b116
+// TÜV Card bundled b117
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1928,7 +1928,7 @@ return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVe
 
 // ---- src/plate/mm-model.js ----
 const __m_src_plate_mm_model_js = (() => {
-// Kennzeichen Physical Lab b116 / shared plate physical mm model
+// Kennzeichen Physical Lab b117 / shared plate physical mm model
 // CAD-like model layer: every coordinate, size and distance in this file is millimetres.
 // No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
 // Shared CAD-like one-line plate model used by the Physical Lab and the production Card renderer. Final H/E suffix plates may shrink the one-line seal column to 58.0 mm; normal plates keep 63.5-67.5 mm.
@@ -1952,7 +1952,7 @@ const SPACING_RULES_MM = Object.freeze({
 
 const FONT_CALIBRATION_PROFILES_MM = Object.freeze({
   middleManualB108: {
-    label: "GL middle script · manually calibrated b116",
+    label: "GL middle script · manually calibrated b117",
     targetGlyphHeight: 75,
     fontSize: 125,
     baselineY: 92.5,
@@ -6311,7 +6311,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b116
+// TÜV Card source entry b117
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;

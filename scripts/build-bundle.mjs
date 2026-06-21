@@ -102,10 +102,17 @@ function transformModule(path, isEntry) {
   return `${code}\nreturn { ${exports.join(", ")} };\n`;
 }
 
+function isFontBinary(path) {
+  return /\.(ttf|otf|woff2?)$/i.test(path);
+}
+
 function copyDirectoryContents(sourceDir, targetDir) {
-  if (!existsSync(sourceDir)) return;
+  if (!existsSync(sourceDir)) return { files: 0, fontBinaries: 0 };
 
   mkdirSync(targetDir, { recursive: true });
+
+  let files = 0;
+  let fontBinaries = 0;
 
   for (const entryName of readdirSync(sourceDir)) {
     const sourcePath = join(sourceDir, entryName);
@@ -113,12 +120,18 @@ function copyDirectoryContents(sourceDir, targetDir) {
     const stat = statSync(sourcePath);
 
     if (stat.isDirectory()) {
-      copyDirectoryContents(sourcePath, targetPath);
+      const child = copyDirectoryContents(sourcePath, targetPath);
+      files += child.files;
+      fontBinaries += child.fontBinaries;
       continue;
     }
 
     copyFileSync(sourcePath, targetPath);
+    files += 1;
+    if (isFontBinary(sourcePath)) fontBinaries += 1;
   }
+
+  return { files, fontBinaries };
 }
 
 collect(entry);
@@ -135,4 +148,9 @@ for (const path of modules) {
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 writeFileSync(bundlePath, bundled);
-copyDirectoryContents(resolve(root, "fonts"), resolve(dist, "fonts"));
+const copiedFonts = copyDirectoryContents(resolve(root, "fonts"), resolve(dist, "fonts"));
+console.log(`Built dist/tuev-card.js for ${version}.`);
+console.log(`Copied ${copiedFonts.files} file(s) from fonts/ to dist/fonts/ (${copiedFonts.fontBinaries} font binary file(s)).`);
+if (copiedFonts.fontBinaries === 0) {
+  console.warn("No font binary files were copied. This is expected for ChatGPT ZIPs, but local GitHub/HACS release builds should include the GL font files.");
+}

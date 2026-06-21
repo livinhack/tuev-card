@@ -1,4 +1,4 @@
-# Kennzeichen Physical Lab b116
+# Kennzeichen Physical Lab b117
 
 Eigenständiges Renderer-Lab für VS Code Live Server. Dieses Lab bleibt bewusst von Home Assistant getrennt und ist der neue Ausgangspunkt für den Kennzeichenrenderer.
 
