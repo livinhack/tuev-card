@@ -36,14 +36,10 @@ const card = read(cardPath);
 const adapter = read(adapterPath);
 const renderer = read(rendererPath);
 
-assert(editor.includes('from "../plate/renderer.js?v=b338"'), "Editor must consume the b338 public renderer cache boundary.");
-assert(card.includes('from "./plate/renderer.js?v=b338"'), "Card entry must consume the b338 public renderer cache boundary.");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b338"'), "Public renderer entry must delegate to the b338 adapter cache boundary.");
+assert(editor.includes('from "../plate/renderer.js?v=b339"'), "Editor must consume the b339 public renderer cache boundary.");
+assert(card.includes('from "./plate/renderer.js?v=b339"'), "Card entry must consume the b339 public renderer cache boundary.");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b339"'), "Public renderer entry must delegate to the b339 adapter cache boundary.");
 
-assert(editor.includes("checkPlateFontAvailability(force = false)"), "Editor font availability check must accept a force flag.");
-assert(editor.includes("this._plateFontCheckInProgress"), "Editor must guard against overlapping font checks.");
-assert(editor.includes("this._plateFontLastCheckedAt"), "Editor must throttle repeated font checks.");
-assert(editor.includes("now - (this._plateFontLastCheckedAt || 0) < 10000"), "Editor must keep a stable 10s font-check throttle to avoid preview jitter.");
 
 for (const forbidden of [
   'this._config.plate_style = "text"',
@@ -57,12 +53,15 @@ for (const forbidden of [
 }
 
 assert(count(editor, "renderUnlessEditingGroupTitle();") <= 4, "Editor font check should not trigger excessive immediate renders.");
-assert(editor.includes("const canRenderPlate = this._plateFontAvailable === true;"), "Editor preview availability must remain derived from the stable font availability state.");
+assert(editor.includes("checkPlateFontAvailability(force = false)"), "Editor keeps a compatibility no-op font availability method.");
+assert(!editor.includes("checkPlateFontAvailable"), "Editor must not run asynchronous font probes that can jitter the preview.");
+assert(!editor.includes("ensurePlateFont"), "Editor must not trigger font-load renders from preview options.");
+assert(editor.includes("const canRenderPlate = true;"), "Editor preview availability must be stable because fonts are bundled.");
 
-assert(card.includes("checkPlateFontAvailability(force = false)"), "Card runtime must keep its guarded font availability check.");
-assert(card.includes("this._plateFontCheckInProgress"), "Card runtime must guard overlapping font checks.");
-assert(card.includes("now - (this._plateFontLastCheckedAt || 0) < 10000"), "Card runtime must keep throttled font checks.");
+assert(card.includes("checkPlateFontAvailability(force = false)"), "Card runtime must keep the compatibility font-check method. ");
+assert(card.includes("this._plateFontAvailable = true;") && card.includes("this._plateFontLoaded = true;"), "Card runtime font check must be a stable no-op because fonts are bundled.");
 assert(card.includes("isGraphicalPlateAvailable()"), "Card runtime must keep one graphical-plate availability gate.");
+assert(card.includes("return true;"), "Card graphical-plate availability must not depend on asynchronous font probes.");
 
 assert(adapter.includes("const CARD_LAB_RENDERER_DEFAULTS = Object.freeze"), "Adapter defaults must remain centralized.");
 assert(adapter.includes('huBadgeRenderer: "full"'), "Card adapter must keep Full-HU badge as the production default.");
@@ -78,7 +77,7 @@ for (const forbidden of ["legacyRenderer", "useLegacy", "rendererToggle", "fallb
 }
 
 if (!process.exitCode) {
-  console.log("Card editor/preview final audit OK: font checks are guarded/throttled, editor no longer mutates plate_style on availability changes, and Card options remain explicit.");
+  console.log("Card editor/preview final audit OK: editor preview no longer jitters from font probes, and Card options remain explicit.");
 }
 
 if (process.exitCode) process.exit(process.exitCode);

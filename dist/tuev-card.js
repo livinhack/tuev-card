@@ -1,4 +1,4 @@
-// TÜV Card bundled b338
+// TÜV Card bundled b339
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -2824,7 +2824,7 @@ return { renderEuStarWreath: __reexport_renderEuStarWreath, resolveEuStarWreathG
 
 // ---- src/plate/lab-renderer/plate-body.js ----
 const __m_src_plate_lab_renderer_plate_body_js = (() => {
-// Kennzeichen Physical Lab b239 / plate body and background component
+// Kennzeichen Physical Lab b339 / plate body and background component
 // Renders only the invariant physical plate body: black frame, white reflective
 // field, blue Euro field background and Euro-field subcomponents.
 // It does not solve layout or change any physical coordinates.
@@ -2837,12 +2837,18 @@ function renderPlateBody({ rules, metrics }) {
   const inset = rules.innerInset;
   const euro = rules.euro;
   const frameColor = metrics?.frameColor || "#111";
+  const frameOverlayX = inset / 2;
+  const frameOverlayY = inset / 2;
+  const frameOverlayWidth = Math.max(0, w - inset);
+  const frameOverlayHeight = Math.max(0, h - inset);
+  const frameOverlayRadius = Math.max(0, rules.outerCornerRadius - frameOverlayX);
   return `
 <g class="layer layer-body" filter="url(#plateShadow)">
-  <rect data-plate-frame="true" x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="${frameColor}"/>
+  <rect data-plate-frame-base="true" x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="${frameColor}"/>
   <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>
   <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="#0046ad"/>
   ${renderEuroFieldComponents(euro)}
+  <rect data-plate-frame="true" x="${frameOverlayX}" y="${frameOverlayY}" width="${frameOverlayWidth}" height="${frameOverlayHeight}" rx="${frameOverlayRadius}" fill="none" stroke="${frameColor}" stroke-width="${inset}"/>
 </g>`.trim();
 }
 
@@ -7900,7 +7906,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b338 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b339 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -8062,7 +8068,7 @@ return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLic
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-// TÜV Reminder Card b338 / direct Card plate renderer integration
+// TÜV Reminder Card b339 / direct Card plate renderer integration
 //
 // The active Card plate renderer now delegates directly to the staged Physical
 // Lab renderer adapter. There is intentionally no legacy renderer toggle and no
@@ -9850,11 +9856,16 @@ const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig, removeLegacyCardConfigOptions } = __m_src_card_config_js;
 const { getAvailableTuevEntities, getEntityLabel, sortEntityIds } = __m_src_card_entities_js;
 const { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } = __m_src_card_groups_js;
-const { checkPlateFontAvailable, ensurePlateFont } = __m_src_plate_renderer_js;
+// Fonts are bundled with the card release. Keep the public renderer boundary
+// imported for the editor/plate dependency boundary, but do not probe fonts or
+// re-toggle the graphical plate option from asynchronous font checks.
+const { normalizePlate: rendererBoundaryNormalizePlate } = __m_src_plate_renderer_js;
 const { getColumnLabel } = __m_src_editor_columns_js;
 const { renderEntitySection, renderGroupsSection } = __m_src_editor_render_parts_js;
 const { renderEditorStyles } = __m_src_editor_styles_js;
 const { renderEditorFloatingPanels } = __m_src_editor_floating_panels_js;
+
+const RENDERER_BOUNDARY_IMPORTED = typeof rendererBoundaryNormalizePlate === "function";
 
 class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -9867,9 +9878,7 @@ class TuevCardEditor extends HTMLElement {
 
         this._config = normalizeCardConfig(config, { requireEntity: false });
 
-        this._plateFontAvailable = this._plateFontAvailable === true;
-        this._plateFontCheckInProgress = this._plateFontCheckInProgress === true;
-        this._plateFontLastCheckedAt = this._plateFontLastCheckedAt || 0;
+        this._plateFontAvailable = true;
         this._draftGroups = normalizeGroups(this._config.groups);
         this._draftEntityIds = this.getUngroupedEntityIdsFromConfig();
         this._pickerOpen = false;
@@ -9888,7 +9897,6 @@ class TuevCardEditor extends HTMLElement {
         this._sortConfirmAnchor = sortConfirmAnchor || null;
         this._draggedGroupEntity = null;
 
-        this.checkPlateFontAvailability(true);
         this.render();
     }
 
@@ -10001,50 +10009,10 @@ class TuevCardEditor extends HTMLElement {
     }
 
     checkPlateFontAvailability(force = false) {
-        if (this._plateFontCheckInProgress) {
-            return;
-        }
-
-        const now = Date.now();
-        if (!force && now - (this._plateFontLastCheckedAt || 0) < 10000) {
-            return;
-        }
-
-        this._plateFontCheckInProgress = true;
-        this._plateFontLastCheckedAt = now;
-
-        checkPlateFontAvailable().then((available) => {
-            const changed = this._plateFontAvailable !== available;
-            this._plateFontAvailable = available;
-
-            if (!available) {
-                if (changed) {
-                    this.renderUnlessEditingGroupTitle();
-                }
-                return;
-            }
-
-            ensurePlateFont(() => {
-                const changedAfterLoad = this._plateFontAvailable !== true;
-                this._plateFontAvailable = true;
-                if (changedAfterLoad) {
-                    this.renderUnlessEditingGroupTitle();
-                }
-            });
-
-            if (changed) {
-                this.renderUnlessEditingGroupTitle();
-            }
-        }).catch(() => {
-            const changed = this._plateFontAvailable !== false;
-            this._plateFontAvailable = false;
-
-            if (changed) {
-                this.renderUnlessEditingGroupTitle();
-            }
-        }).finally(() => {
-            this._plateFontCheckInProgress = false;
-        });
+        // Kept as a compatibility no-op for older editor flows. Fonts are part
+        // of the card package now, so this must not trigger additional renders
+        // or hide the graphical-plate checkbox.
+        this._plateFontAvailable = true;
     }
 
     getUngroupedEntityIdsFromConfig() {
@@ -10111,7 +10079,7 @@ class TuevCardEditor extends HTMLElement {
         const entityHint = availableTuevEntities.length > 0 && !hasAvailableToAdd
             ? this.localize("editor.all_entities_added")
             : this.localize("editor.single_entity_hint");
-        const canRenderPlate = this._plateFontAvailable === true;
+        const canRenderPlate = true;
         const showColumnSetting = selectedAllEntityIds.length > 1;
         const columnLabel = getColumnLabel(
             this._config.columns,
@@ -10812,13 +10780,8 @@ class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        if (currentSort === "manual" && nextSort !== "manual") {
-            this._pendingGroupSort = { groupId, sort: nextSort };
-            this._sortConfirmAnchor = anchor;
-            this.render();
-            return;
-        }
-
+        this._pendingGroupSort = null;
+        this._sortConfirmAnchor = null;
         this.applyGroupSort(groupId, nextSort);
     }
 
@@ -11182,64 +11145,18 @@ class TuevCard extends HTMLElement {
     }
 
     checkPlateFontAvailability(force = false) {
-        const now = Date.now();
-
-        if (this._plateFontCheckInProgress) {
-            return;
-        }
-
-        if (!force && now - (this._plateFontLastCheckedAt || 0) < 10000) {
-            return;
-        }
-
-        this._plateFontCheckInProgress = true;
-        this._plateFontLastCheckedAt = now;
-
-        checkPlateFontAvailable().then((available) => {
-            const changed = this._plateFontAvailable !== available;
-            this._plateFontAvailable = available;
-
-            if (!available) {
-                this._plateFontLoaded = false;
-
-                if (changed && this._hass) {
-                    this.hass = this._hass;
-                }
-
-                return;
-            }
-
-            this._plateFontLoaded = isPlateFontLoaded();
-
-            ensurePlateFont(() => {
-                this._plateFontLoaded = true;
-
-                if (this._hass) {
-                    this.hass = this._hass;
-                }
-            });
-
-            if (changed && this._hass) {
-                this.hass = this._hass;
-            }
-        }).catch(() => {
-            const changed = this._plateFontAvailable !== false || this._plateFontLoaded !== false;
-            this._plateFontAvailable = false;
-            this._plateFontLoaded = false;
-
-            if (changed && this._hass) {
-                this.hass = this._hass;
-            }
-        }).finally(() => {
-            this._plateFontCheckInProgress = false;
-        });
+        // Compatibility no-op: GL fonts are bundled and the renderer injects
+        // @font-face definitions on first graphical render. Availability probes
+        // must not cause extra Card re-renders or text/plate flicker.
+        this._plateFontAvailable = true;
+        this._plateFontLoaded = true;
     }
 
     isGraphicalPlateAvailable() {
-        return (
-            this._plateFontAvailable === true &&
-            this._plateFontLoaded === true
-        );
+        // The GL plate fonts are part of the card release. Rendering must obey
+        // only the user-facing plate_style option and must not temporarily fall
+        // back to text while asynchronous font probes/load callbacks settle.
+        return true;
     }
 
     set hass(hass) {
@@ -11694,7 +11611,7 @@ class TuevCard extends HTMLElement {
                 entityIds,
                 hass,
                 tileWidth: layout.tileWidth,
-                isGraphicalPlateAvailable: graphicalPlateEnabled && this.isGraphicalPlateAvailable(),
+                isGraphicalPlateAvailable: graphicalPlateEnabled,
                 getLicensePlateMetrics
             });
             const grid = `

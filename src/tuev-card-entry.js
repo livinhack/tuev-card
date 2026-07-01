@@ -22,8 +22,8 @@ import {
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b338";
-import { TuevCardEditor } from "./editor/editor.js?v=b338";
+} from "./plate/renderer.js?v=b339";
+import { TuevCardEditor } from "./editor/editor.js?v=b339";
 
 window.customCards = window.customCards || [];
 
@@ -132,64 +132,18 @@ class TuevCard extends HTMLElement {
     }
 
     checkPlateFontAvailability(force = false) {
-        const now = Date.now();
-
-        if (this._plateFontCheckInProgress) {
-            return;
-        }
-
-        if (!force && now - (this._plateFontLastCheckedAt || 0) < 10000) {
-            return;
-        }
-
-        this._plateFontCheckInProgress = true;
-        this._plateFontLastCheckedAt = now;
-
-        checkPlateFontAvailable().then((available) => {
-            const changed = this._plateFontAvailable !== available;
-            this._plateFontAvailable = available;
-
-            if (!available) {
-                this._plateFontLoaded = false;
-
-                if (changed && this._hass) {
-                    this.hass = this._hass;
-                }
-
-                return;
-            }
-
-            this._plateFontLoaded = isPlateFontLoaded();
-
-            ensurePlateFont(() => {
-                this._plateFontLoaded = true;
-
-                if (this._hass) {
-                    this.hass = this._hass;
-                }
-            });
-
-            if (changed && this._hass) {
-                this.hass = this._hass;
-            }
-        }).catch(() => {
-            const changed = this._plateFontAvailable !== false || this._plateFontLoaded !== false;
-            this._plateFontAvailable = false;
-            this._plateFontLoaded = false;
-
-            if (changed && this._hass) {
-                this.hass = this._hass;
-            }
-        }).finally(() => {
-            this._plateFontCheckInProgress = false;
-        });
+        // Compatibility no-op: GL fonts are bundled and the renderer injects
+        // @font-face definitions on first graphical render. Availability probes
+        // must not cause extra Card re-renders or text/plate flicker.
+        this._plateFontAvailable = true;
+        this._plateFontLoaded = true;
     }
 
     isGraphicalPlateAvailable() {
-        return (
-            this._plateFontAvailable === true &&
-            this._plateFontLoaded === true
-        );
+        // The GL plate fonts are part of the card release. Rendering must obey
+        // only the user-facing plate_style option and must not temporarily fall
+        // back to text while asynchronous font probes/load callbacks settle.
+        return true;
     }
 
     set hass(hass) {
@@ -644,7 +598,7 @@ class TuevCard extends HTMLElement {
                 entityIds,
                 hass,
                 tileWidth: layout.tileWidth,
-                isGraphicalPlateAvailable: graphicalPlateEnabled && this.isGraphicalPlateAvailable(),
+                isGraphicalPlateAvailable: graphicalPlateEnabled,
                 getLicensePlateMetrics
             });
             const grid = `

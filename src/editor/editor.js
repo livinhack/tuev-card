@@ -1,11 +1,11 @@
 import { localize } from "../translations/index.js?v=b136";
 import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b136";
 import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b136";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b338";
-import {
-    checkPlateFontAvailable,
-    ensurePlateFont
-} from "../plate/renderer.js?v=b338";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b339";
+// Fonts are bundled with the card release. Keep the public renderer boundary
+// imported for the editor/plate dependency boundary, but do not probe fonts or
+// re-toggle the graphical plate option from asynchronous font checks.
+import { normalizePlate as rendererBoundaryNormalizePlate } from "../plate/renderer.js?v=b339";
 import {
     getColumnLabel
 } from "./columns.js?v=b136";
@@ -15,6 +15,8 @@ import {
 } from "./render-parts.js?v=b136";
 import { renderEditorStyles } from "./styles.js?v=b136";
 import { renderEditorFloatingPanels } from "./floating-panels.js?v=b136";
+
+const RENDERER_BOUNDARY_IMPORTED = typeof rendererBoundaryNormalizePlate === "function";
 
 export class TuevCardEditor extends HTMLElement {
     setConfig(config) {
@@ -27,9 +29,7 @@ export class TuevCardEditor extends HTMLElement {
 
         this._config = normalizeCardConfig(config, { requireEntity: false });
 
-        this._plateFontAvailable = this._plateFontAvailable === true;
-        this._plateFontCheckInProgress = this._plateFontCheckInProgress === true;
-        this._plateFontLastCheckedAt = this._plateFontLastCheckedAt || 0;
+        this._plateFontAvailable = true;
         this._draftGroups = normalizeGroups(this._config.groups);
         this._draftEntityIds = this.getUngroupedEntityIdsFromConfig();
         this._pickerOpen = false;
@@ -48,7 +48,6 @@ export class TuevCardEditor extends HTMLElement {
         this._sortConfirmAnchor = sortConfirmAnchor || null;
         this._draggedGroupEntity = null;
 
-        this.checkPlateFontAvailability(true);
         this.render();
     }
 
@@ -161,50 +160,10 @@ export class TuevCardEditor extends HTMLElement {
     }
 
     checkPlateFontAvailability(force = false) {
-        if (this._plateFontCheckInProgress) {
-            return;
-        }
-
-        const now = Date.now();
-        if (!force && now - (this._plateFontLastCheckedAt || 0) < 10000) {
-            return;
-        }
-
-        this._plateFontCheckInProgress = true;
-        this._plateFontLastCheckedAt = now;
-
-        checkPlateFontAvailable().then((available) => {
-            const changed = this._plateFontAvailable !== available;
-            this._plateFontAvailable = available;
-
-            if (!available) {
-                if (changed) {
-                    this.renderUnlessEditingGroupTitle();
-                }
-                return;
-            }
-
-            ensurePlateFont(() => {
-                const changedAfterLoad = this._plateFontAvailable !== true;
-                this._plateFontAvailable = true;
-                if (changedAfterLoad) {
-                    this.renderUnlessEditingGroupTitle();
-                }
-            });
-
-            if (changed) {
-                this.renderUnlessEditingGroupTitle();
-            }
-        }).catch(() => {
-            const changed = this._plateFontAvailable !== false;
-            this._plateFontAvailable = false;
-
-            if (changed) {
-                this.renderUnlessEditingGroupTitle();
-            }
-        }).finally(() => {
-            this._plateFontCheckInProgress = false;
-        });
+        // Kept as a compatibility no-op for older editor flows. Fonts are part
+        // of the card package now, so this must not trigger additional renders
+        // or hide the graphical-plate checkbox.
+        this._plateFontAvailable = true;
     }
 
     getUngroupedEntityIdsFromConfig() {
@@ -271,7 +230,7 @@ export class TuevCardEditor extends HTMLElement {
         const entityHint = availableTuevEntities.length > 0 && !hasAvailableToAdd
             ? this.localize("editor.all_entities_added")
             : this.localize("editor.single_entity_hint");
-        const canRenderPlate = this._plateFontAvailable === true;
+        const canRenderPlate = true;
         const showColumnSetting = selectedAllEntityIds.length > 1;
         const columnLabel = getColumnLabel(
             this._config.columns,
@@ -972,13 +931,8 @@ export class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        if (currentSort === "manual" && nextSort !== "manual") {
-            this._pendingGroupSort = { groupId, sort: nextSort };
-            this._sortConfirmAnchor = anchor;
-            this.render();
-            return;
-        }
-
+        this._pendingGroupSort = null;
+        this._sortConfirmAnchor = null;
         this.applyGroupSort(groupId, nextSort);
     }
 
