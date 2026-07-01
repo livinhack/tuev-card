@@ -1,7 +1,7 @@
-# TÜV Reminder Card b328
+# TÜV Reminder Card b329
 
-Full handover ZIP for b328.
+Full handover ZIP for b329.
 
-b328 is a conservative HU smoke-check checkpoint on top of b327. The active Card renderer still uses the complete HU badge renderer for Reminder-fed year/month/rotation data, including the Wechselkennzeichen vehicle-specific supplement. New smoke checks assert that the productive full-badge path no longer emits the old blue HU placeholder.
+b329 is a conservative Card renderer legacy-path audit on top of b328. It keeps the full HU badge integration unchanged and adds an automated audit proving that the active Card boundary delegates through the Lab adapter, while old/unimported renderer paths remain documented instead of being merged or removed blindly.
 
-No geometry changes and no legacy renderer switch were introduced.
+No geometry changes, no file deletion, and no legacy renderer switch were introduced.

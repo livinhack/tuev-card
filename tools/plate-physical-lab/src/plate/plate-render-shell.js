@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b328 / SVG render shell component
+// Kennzeichen Physical Lab b329 / SVG render shell component
 // Owns final SVG layer composition, canvas expansion and purely visual text/reference layers.
 // It must not calculate physical layout positions; it only renders the solved model.
 

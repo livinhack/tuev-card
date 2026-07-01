@@ -1,5 +1,5 @@
 export const cardTransferDryRun = {
-  version: "b328",
+  version: "b329",
   sourceProject: "plate-physical-lab",
   targetProject: "tuev-card",
   sourceBase: ".",

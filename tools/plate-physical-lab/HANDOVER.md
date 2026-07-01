@@ -1,20 +1,19 @@
-# Handover – b328 HU Badge Full Renderer Change Supplement
+# Handover – b329 Card Renderer Legacy Audit
 
-Current Lab stand: b328.
+Current Lab stand: b329.
 
-b328 is a conservative HU smoke-check checkpoint after b327. It keeps the full badge integration unchanged and adds automated coverage for normal HU slots, Wechselkennzeichen supplements and the old Lab-only blue placeholder fallback.
+b329 keeps the b328 HU smoke checkpoint unchanged and adds a conservative renderer legacy-path audit. No geometry was changed and no renderer files were deleted.
 
-The blue HU placeholder remains available only when the full badge option is not enabled, so Lab A/B comparison is still possible. No plate geometry was changed; the existing 35 mm HU positions and supplement frame are reused.
+## Changes
 
-Changed files of interest:
+- Added `check:renderer-legacy-audit`.
+- The audit confirms the standalone Lab still exposes the active renderer through `src/plate/plate-public-api.js`.
+- Compatibility boundaries such as `src/plate/mm-model.js` and `src/plate/spacing-solver.js` remain present, but they are documented rather than mixed into the active Card cleanup.
+- The blue HU placeholder remains available only when the full badge option is not enabled, so Lab A/B comparison is still possible.
 
-- `src/plate/plate-render-shell.js` resolves one `huBadge` object and passes it to normal seals and the Wechselkennzeichen supplement.
-- `src/plate/change-plate-supplement-renderer.js` uses `renderFullHuBadgeMarker()` for the supplement HU slot when the full renderer is active.
-- `src/plate/hu-badge-marker.js` remains the bridge to the existing full badge renderer.
-
-Checks run:
+## Validation
 
 - `npm run check` passed.
 
-Matching full ZIP: `tuev-card-full-b328-hu-badge-smoke-checkpoint-handover.zip`.
-Rollback: previous ZIP b326.
+Matching full ZIP: `tuev-card-full-b329-card-renderer-legacy-audit-handover.zip`.
+Rollback: previous ZIP b328.

@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b328 / HU badge marker bridge
+// Kennzeichen Physical Lab b329 / HU badge marker bridge
 // Lab-only experiment: render the existing full TÜV badge SVG into the 35-mm HU seal slot.
 
 import { renderBadge } from "./badge/renderer.js";

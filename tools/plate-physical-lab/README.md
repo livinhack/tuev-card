@@ -1,7 +1,7 @@
-# Kennzeichen Physical Lab b328
+# Kennzeichen Physical Lab b329
 
-Standalone Physical Lab for the TÜV Reminder plate renderer.
+Standalone physical renderer Lab for German licence plate geometry.
 
-b328 is a HU smoke-check checkpoint on top of b327. The full HU badge path remains unchanged, and an automated check now proves that normal HU slots and Wechselkennzeichen supplements no longer use the old blue placeholder when the full renderer is active. The standalone Lab still keeps the placeholder switch for visual comparison.
+b329 is a Card renderer legacy-path audit checkpoint on top of b328. The full HU badge path remains unchanged, and an automated audit now proves which renderer boundary is active and which old/compatibility files are not part of the active Card path.
 
-The matching full ZIP activates the full badge path in the active Card adapter.
+The Lab still keeps the HU placeholder switch for visual comparison; the productive Card path uses the full HU badge renderer.
