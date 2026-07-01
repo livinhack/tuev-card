@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b330 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b342 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -30,13 +30,15 @@ export function renderChangePlateSupplement({ content, metrics, rules }, options
   const seal = getFirstItemOfType(items, "change-plate-hu");
   const vehicleChars = getItemsOfType(items, "change-plate-vehicle-char");
   const label = getFirstItemOfType(items, "change-plate-common-label");
+  const plateInkColor = metrics?.frameColor || metrics?.textColor || "#111";
+  const plateTextColor = metrics?.textColor || plateInkColor || "#080808";
   return `
 <g class="layer layer-change-plate" data-change-plate="true">
-  ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="#111"/>
+  ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="${plateInkColor}"/>
   <rect x="${frame.x + rules.innerInset}" y="${frame.y + rules.innerInset}" width="${frame.width - rules.innerInset * 2}" height="${frame.height - rules.innerInset * 2}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>` : ""}
   ${seal ? renderChangePlateHuMarker(seal, options.huBadge) : ""}
-  ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${metrics.textColor || '#080808'}">${escapeText(char.text)}</text>`).join("\n  ")}
-  ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="#111">${escapeText(label.text)}</text>` : ""}
+  ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${plateTextColor}">${escapeText(char.text)}</text>`).join("\n  ")}
+  ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="${plateInkColor}">${escapeText(label.text)}</text>` : ""}
 </g>`.trim();
 }
 

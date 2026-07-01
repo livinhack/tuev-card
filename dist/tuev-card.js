@@ -1,4 +1,4 @@
-// TÜV Card bundled b341
+// TÜV Card bundled b342
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -3744,20 +3744,20 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b297 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b342 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
 const { escapeSvgAttrOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
 const { renderFullHuBadgeMarker } = __m_src_plate_lab_renderer_hu_badge_marker_js;
 
-function renderChangePlateWMarker({ seal, geometry }) {
+function renderChangePlateWMarker({ seal, geometry, plateInkColor = "#111" }) {
   const wGeometry = geometry.hu;
   const wHeight = Number(seal.wHeight) || 20;
   const wWidth = Number(seal.wWidth) || 25;
   return `
   <g class="seal-slot seal-slot-change-w" data-seal-row="${escapeText(seal.rowKey || "top")}" data-change-plate-w="true">
-    <text x="${wGeometry.cx ?? geometry.cx}" y="${wGeometry.cy + wHeight * 0.36}" text-anchor="middle" font-family="'GL-Nummernschild-Mtl', Arial Narrow, sans-serif" font-size="${wHeight * 1.42}" font-weight="400" textLength="${wWidth}" lengthAdjust="spacingAndGlyphs" fill="#111">W</text>
+    <text x="${wGeometry.cx ?? geometry.cx}" y="${wGeometry.cy + wHeight * 0.36}" text-anchor="middle" font-family="'GL-Nummernschild-Mtl', Arial Narrow, sans-serif" font-size="${wHeight * 1.42}" font-weight="400" textLength="${wWidth}" lengthAdjust="spacingAndGlyphs" fill="${plateInkColor}">W</text>
   </g>`;
 }
 
@@ -3947,7 +3947,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b301 / seal component helpers
+// Kennzeichen Physical Lab b342 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -3958,10 +3958,11 @@ const { getItemsOfType } = __m_src_plate_lab_renderer_plate_sequence_width_utils
 
 
 
-function renderSeals({ content, rules }, options = {}) {
+function renderSeals({ content, rules, metrics }, options = {}) {
   const sealItems = getItemsOfType(content, "seals");
   if (!sealItems.length) return "";
-  const parts = sealItems.map((seal) => renderSealItem(rules, seal, options)).filter(Boolean).join("\n");
+  const plateInkColor = metrics?.frameColor || metrics?.textColor || "#111";
+  const parts = sealItems.map((seal) => renderSealItem(rules, seal, { ...options, plateInkColor })).filter(Boolean).join("\n");
   return `<g class="layer layer-seals">${parts}</g>`;
 }
 
@@ -3970,7 +3971,7 @@ function renderSealItem(rules, seal, options = {}) {
   const markerPlan = createSealMarkerPlan({ rules, seal, geometry });
   const parts = [];
   if (markerPlan.renderChangePlateW) {
-    parts.push(renderChangePlateWMarker({ seal, geometry }));
+    parts.push(renderChangePlateWMarker({ seal, geometry, plateInkColor: options.plateInkColor }));
   }
   if (markerPlan.renderHu) {
     parts.push(renderHuSealMarker({ seal, geometry, huBadge: options.huBadge }));
@@ -4092,7 +4093,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b330 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b342 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -4124,13 +4125,15 @@ function renderChangePlateSupplement({ content, metrics, rules }, options = {}) 
   const seal = getFirstItemOfType(items, "change-plate-hu");
   const vehicleChars = getItemsOfType(items, "change-plate-vehicle-char");
   const label = getFirstItemOfType(items, "change-plate-common-label");
+  const plateInkColor = metrics?.frameColor || metrics?.textColor || "#111";
+  const plateTextColor = metrics?.textColor || plateInkColor || "#080808";
   return `
 <g class="layer layer-change-plate" data-change-plate="true">
-  ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="#111"/>
+  ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="${plateInkColor}"/>
   <rect x="${frame.x + rules.innerInset}" y="${frame.y + rules.innerInset}" width="${frame.width - rules.innerInset * 2}" height="${frame.height - rules.innerInset * 2}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>` : ""}
   ${seal ? renderChangePlateHuMarker(seal, options.huBadge) : ""}
-  ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${metrics.textColor || '#080808'}">${escapeText(char.text)}</text>`).join("\n  ")}
-  ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="#111">${escapeText(label.text)}</text>` : ""}
+  ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${plateTextColor}">${escapeText(char.text)}</text>`).join("\n  ")}
+  ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="${plateInkColor}">${escapeText(label.text)}</text>` : ""}
 </g>`.trim();
 }
 

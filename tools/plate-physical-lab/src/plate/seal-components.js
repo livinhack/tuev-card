@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b301 / seal component helpers
+// Kennzeichen Physical Lab b342 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 import { getEffectiveSealGeometry, getSealGeometry } from "./seal-geometry-plan.js";
@@ -9,10 +9,11 @@ import { getItemsOfType } from "./plate-sequence-width-utils.js";
 
 export { getEffectiveSealGeometry, getSealGeometry };
 
-export function renderSeals({ content, rules }, options = {}) {
+export function renderSeals({ content, rules, metrics }, options = {}) {
   const sealItems = getItemsOfType(content, "seals");
   if (!sealItems.length) return "";
-  const parts = sealItems.map((seal) => renderSealItem(rules, seal, options)).filter(Boolean).join("\n");
+  const plateInkColor = metrics?.frameColor || metrics?.textColor || "#111";
+  const parts = sealItems.map((seal) => renderSealItem(rules, seal, { ...options, plateInkColor })).filter(Boolean).join("\n");
   return `<g class="layer layer-seals">${parts}</g>`;
 }
 
@@ -21,7 +22,7 @@ function renderSealItem(rules, seal, options = {}) {
   const markerPlan = createSealMarkerPlan({ rules, seal, geometry });
   const parts = [];
   if (markerPlan.renderChangePlateW) {
-    parts.push(renderChangePlateWMarker({ seal, geometry }));
+    parts.push(renderChangePlateWMarker({ seal, geometry, plateInkColor: options.plateInkColor }));
   }
   if (markerPlan.renderHu) {
     parts.push(renderHuSealMarker({ seal, geometry, huBadge: options.huBadge }));

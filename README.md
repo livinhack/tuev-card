@@ -1,39 +1,33 @@
-# TÜV Reminder Card b341
+# TÜV Reminder Card b342
 
-Full/Card handover ZIP for **b341 Card Text Preview Stability**.
+Full/Card handover ZIP for **b342 Plate Color Source Unification**.
 
-## Stand
+## Inhalt
 
-b341 builds on b340.
+b342 vereinheitlicht die Farbquelle für schwarze Nicht-HU-Siegel-Elemente im Kennzeichenrenderer:
 
-- b340 kept the b337 sorting flow and preserved the b339 fixes for integrated GL-font behavior, group color movement, and Euro-field/frame layering.
-- b341 fixes the remaining issue where the Home-Assistant editor preview jittered after disabling **Kennzeichen grafisch darstellen**.
+- Wechselkennzeichen-Zusatzrahmen folgt der zentralen Rahmenfarbe.
+- W-Markierung im großen Schild folgt der zentralen Plattenfarbe.
+- kleiner gemeinsamer Text im Wechselkennzeichen-Zusatzteil folgt der zentralen Plattenfarbe.
+- HU-/TÜV-Siegel bleibt eigenständig.
 
-## b341 change
-
-When `plate_style` is `text`, the editor preview no longer uses the simulated multi-column preview scaling wrapper. Text plates do not have a fixed SVG box, so the scaled editor wrapper could react to its own height changes and remeasure/repaint repeatedly.
-
-The text plate display also has a fixed line-height/min-height to keep the text branch stable.
-
-## Not changed
-
-- no sorting logic change from b340/b337 rollback
-- no license plate geometry change
-- no HU badge logic change
-- no Wechselkennzeichen geometry change
-- no Reminder integration
-- no legacy renderer switch
+Keine Geometrie, HU-Logik, Sortierlogik oder Reminder-Integration wurde geändert.
 
 ## Checks
 
-- Full/Card: `npm run check` passed
-- Full/Card: `npm run build` passed
-- Lab companion: `npm run check` passed
+- `npm run check`
+- `npm run build`
 
-## Font note
+## Hinweis Fonts
 
-ChatGPT ZIPs do not include font binaries. For the real GitHub/HACS release, the selected GL font binaries must be present under `fonts/` / `dist/fonts/`.
+Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein.
 
-No plate geometry changed. Later Reminder integration remains separate.
+## Renderer-Grenze
 
-TTF reminder: The ZIP generated here may contain placeholders/readmes only. A real release must include the GL `.ttf` files before building/publishing for HACS.
+Keine Kennzeichen-Geometrie geändert. Der Nummernschildrenderer bleibt nach b336/b337 vorbereitet/eingefroren; b342 ändert nur die gemeinsame Farbquelle für Nicht-HU-Elemente.
+
+Reminder-Integration folgt später mit aktuellem Reminder-ZIP.
+
+## Beibehaltene Editor-Fixes
+
+Die frühere Option **Kennzeichen grafisch darstellen** bleibt wirksam. Die Sortierlogik bleibt auf dem zurückgesetzten b337-Fluss, und Gruppen-Farben bleiben beim Verschieben erhalten.

@@ -1,17 +1,17 @@
-// Kennzeichen Physical Lab b297 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b342 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
 import { escapeSvgAttrOrEmpty as escapeText } from "./svg-escape-utils.js";
 import { renderFullHuBadgeMarker } from "./hu-badge-marker.js";
 
-export function renderChangePlateWMarker({ seal, geometry }) {
+export function renderChangePlateWMarker({ seal, geometry, plateInkColor = "#111" }) {
   const wGeometry = geometry.hu;
   const wHeight = Number(seal.wHeight) || 20;
   const wWidth = Number(seal.wWidth) || 25;
   return `
   <g class="seal-slot seal-slot-change-w" data-seal-row="${escapeText(seal.rowKey || "top")}" data-change-plate-w="true">
-    <text x="${wGeometry.cx ?? geometry.cx}" y="${wGeometry.cy + wHeight * 0.36}" text-anchor="middle" font-family="'GL-Nummernschild-Mtl', Arial Narrow, sans-serif" font-size="${wHeight * 1.42}" font-weight="400" textLength="${wWidth}" lengthAdjust="spacingAndGlyphs" fill="#111">W</text>
+    <text x="${wGeometry.cx ?? geometry.cx}" y="${wGeometry.cy + wHeight * 0.36}" text-anchor="middle" font-family="'GL-Nummernschild-Mtl', Arial Narrow, sans-serif" font-size="${wHeight * 1.42}" font-weight="400" textLength="${wWidth}" lengthAdjust="spacingAndGlyphs" fill="${plateInkColor}">W</text>
   </g>`;
 }
 

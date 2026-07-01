@@ -1,51 +1,61 @@
-# Handover – b341 Card Text Preview Stability
+# Handover – b342 Plate Color Source Unification
 
-Current stand: **b341**.
+Current stand: **b342**.
 
-## Anlass
+## Basis
 
-Nach b340 funktionierte das Abwählen von **Kennzeichen grafisch darstellen** grundsätzlich: Die grafischen Kennzeichen verschwanden und Text wurde angezeigt. Die Editor-Preview begann dabei aber zu zittern.
+b342 baut auf **b341 Card Text Preview Stability** auf.
 
-## Ursache / Einordnung
+## Änderung in b342
 
-Der Fontcheck war nach b339/b340 nicht mehr die wahrscheinliche Ursache. Der Fehler lag im Preview-Layout: Der Textmodus hat keinen festen SVG-Kennzeichenblock. In HA's Editor-Preview konnte die simulierte Multi-Column-Preview-Skalierung dadurch auf ihre eigene Höhenänderung reagieren und wiederholt neu messen/rendern.
+- Die Farbe von schwarzen Nicht-HU-Siegel-Elementen im Kennzeichenrenderer wurde vereinheitlicht.
+- Wechselkennzeichen-Zusatzrahmen nutzt jetzt die zentrale Platten-/Rahmenfarbe.
+- Der kleine gemeinsame Text im Wechselkennzeichen-Zusatzteil nutzt jetzt dieselbe Plattenfarbe.
+- Die W-Markierung im großen Hauptschild nutzt jetzt dieselbe Plattenfarbe.
+- Fahrzeugbezogener Zusatztext bleibt an die zentrale Textfarbe angebunden.
+- HU-/TÜV-Siegel bleibt eigenständig und wird nicht über diese Plattenfarbe umgefärbt.
 
-## Änderung in b341
+## Wichtig
 
-- In `src/tuev-card-entry.js` wird im Editor-Preview-Kontext bei `plate_style !== "plate"` keine simulierte Preview-Skalierung mehr verwendet.
-- In `src/card/render-parts.js` bekommt der Text-Kennzeichenblock feste `line-height` und `min-height`.
-- Neuer Check: `check:card-editor-text-preview-stability`.
-- Cache-/Versionsmarker auf b341 aktualisiert.
-
-## Beibehalten aus b340/b339
-
-- Sortierlogik bleibt auf dem b337-Rollback-Stand aus b340.
-- Integrierte GL-Fonts werden als Release-Assets behandelt; keine asynchronen Fontchecks im Editor.
-- Checkbox **Kennzeichen grafisch darstellen** bleibt wirksam.
-- Gruppenfarben-Mitnahme beim Verschieben bleibt aktiv.
-- Eurofeld/Rahmen-Overlay-Fix bleibt aktiv.
+Die Kombination **grünes Kennzeichen + Wechselkennzeichen** wird dadurch nicht als echte fachliche Variante freigeschaltet. Der Testfall dient nur dazu, Farbquellenfehler sichtbar zu machen.
 
 ## Nicht geändert
 
 - keine Kennzeichen-Geometrie
-- keine HU-Logik
+- keine HU-Plakettenlogik
 - keine Wechselkennzeichen-Geometrie
 - keine Reminder-Integration
-- kein Legacy-Renderer
+- keine Sortierlogik
+- kein Legacy-/Umschalter
 
-## Checks
+## Neue/aktualisierte Checks
 
-- Lab: `npm run check` bestanden
-- Full/Card: `npm run check` bestanden
-- Full/Card: `npm run build` bestanden
+- `check:plate-color-source-unification`
 
-## ZIPs
+Der Check prüft grüne und schwarze Wechselkennzeichen-Ausgaben und schützt insbesondere:
 
-- `plate-physical-lab-b341-card-text-preview-stability.zip`
-- `tuev-card-full-b341-card-text-preview-stability-handover.zip`
+- Zusatzrahmenfarbe
+- W-Markierung
+- kleiner Zusatztext
+- Standard-Schwarz-Fallback
 
-## Hinweis
+## Durchgeführte Checks
 
-Die ChatGPT-ZIPs enthalten weiterhin keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein.
+- Lab: `npm run check`
+- Full/Card: `npm run check`
+- Full/Card: `npm run build`
 
-No plate geometry changed. Later Reminder integration remains separate.
+## Artefakte
+
+- `plate-physical-lab-b342-plate-color-source-unification.zip`
+- `tuev-card-full-b342-plate-color-source-unification-handover.zip`
+
+## Nächster Einstieg
+
+b342 ist ein kleiner Renderer-Farbquellen-Fix nach b341. Wenn der Screenshot-Test passt, kann wieder mit Card-/Editor-Fertigstellung weitergemacht werden.
+
+## Beibehalten aus vorherigen Card-Fixes
+
+- Option **Kennzeichen grafisch darstellen** bleibt wirksam.
+- Sortierlogik bleibt auf dem b337-Rollback-Pfad.
+- Gruppen-Farben bleiben beim Verschieben materialisiert und wandern mit.
