@@ -1,4 +1,4 @@
-// TÜV Card bundled b342
+// TÜV Card bundled b343
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -664,6 +664,24 @@ return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED
 
 })();
 
+// ---- src/utils/html-escape.js ----
+const __m_src_utils_html_escape_js = (() => {
+// TÜV Reminder Card b343 / shared HTML escaping helpers
+// Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
+// separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+}
+
+return { escapeHtml: escapeHtml };
+
+})();
+
 // ---- src/card/layout.js ----
 const __m_src_card_layout_js = (() => {
 const HORIZONTAL_PADDING = 32;
@@ -853,7 +871,9 @@ const __m_src_card_ui_state_js = (() => {
 const CONFIRM_TIMING = {
     minConfirmMs: 700,
     successMs: 800,
-    crossfadeMs: 800
+    crossfadeMs: 800,
+    stampHideMs: 1980,
+    serviceCallMs: 2160
 };
 
 function getEntityUiState(uiStateByEntity, entityId) {
@@ -1489,6 +1509,7 @@ return { tuevColorForYear: __reexport_tuevColorForYear, renderBadge: renderBadge
 // ---- src/card/render-parts.js ----
 const __m_src_card_render_parts_js = (() => {
 const { renderBadge } = __m_src_badge_renderer_js;
+const { escapeHtml } = __m_src_utils_html_escape_js;
 
 function renderMissingEntity(entityId, localize) {
     return `
@@ -1502,7 +1523,7 @@ function renderMissingEntity(entityId, localize) {
                 ${localize("error.entity_not_found")}
             </div>
             <div style="font-size: 13px; opacity: 0.75;">
-                ${entityId}
+                ${escapeHtml(entityId)}
             </div>
         </div>
     `;
@@ -1531,7 +1552,7 @@ function renderVehicleHeader({
                 text-overflow: ellipsis;
                 white-space: nowrap;
             ">
-                ${vehicleName}
+                ${escapeHtml(vehicleName)}
             </div>
 
             ${plateLayout && plate ? `
@@ -1556,7 +1577,7 @@ function renderVehicleHeader({
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 ">
-                    ${plate}
+                    ${escapeHtml(plate)}
                 </div>
             `}
         </div>
@@ -3744,7 +3765,7 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b342 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b343 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
@@ -3947,7 +3968,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b342 / seal component helpers
+// Kennzeichen Physical Lab b343 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -4093,7 +4114,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b342 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b343 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -7918,6 +7939,7 @@ const __m_src_plate_lab_renderer_adapter_js = (() => {
 
 const { ONE_LINE_RULES_MM: LAB_ONE_LINE_RULES_MM, buildPlateModelMm: buildLabPlateModelMm, renderPlateSvgMm: renderLabPlateSvgMm } = __m_src_plate_lab_renderer_plate_public_api_js;
 const { checkPlateFontAvailable, ensurePlateFont, getPlateFontFaceCss, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
+const { escapeSvgAttr: escapeAttr } = __m_src_plate_lab_renderer_svg_escape_utils_js;
 
 
 
@@ -8057,14 +8079,6 @@ function addLabRendererCardSvgAttributes(svg, { displayWidth, displayHeight, mod
         /<svg\s+class="physical-plate-svg"/,
         `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
     );
-}
-
-function escapeAttr(value) {
-    return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
 }
 
 return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLicensePlateMetrics: getLabRendererLicensePlateMetrics, renderLicensePlateWithLabRenderer: renderLicensePlateWithLabRenderer, normalizePlate: normalizePlate, getLicensePlateMetrics: getLicensePlateMetrics, renderLicensePlate: renderLicensePlate, checkPlateFontAvailable: checkPlateFontAvailable, ensurePlateFont: ensurePlateFont, getPlateFontStatus: getPlateFontStatus, isPlateFontLoaded: isPlateFontLoaded };
@@ -9858,6 +9872,7 @@ return { renderFloatingPanelStyles: renderFloatingPanelStyles, renderEditorFloat
 // ---- src/editor/editor.js ----
 const __m_src_editor_editor_js = (() => {
 const { localize } = __m_src_translations_index_js;
+const { escapeHtml } = __m_src_utils_html_escape_js;
 const { normalizeCardConfig, removeLegacyCardConfigOptions } = __m_src_card_config_js;
 const { getAvailableTuevEntities, getEntityLabel, sortEntityIds } = __m_src_card_entities_js;
 const { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } = __m_src_card_groups_js;
@@ -11007,11 +11022,7 @@ class TuevCardEditor extends HTMLElement {
     }
 
     escapeHtml(value) {
-        return String(value || "")
-            .replaceAll("&", "&amp;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;");
+        return escapeHtml(value);
     }
 }
 
@@ -11025,13 +11036,14 @@ const __m_src_tuev_card_entry_js = (() => {
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
+const { escapeHtml } = __m_src_utils_html_escape_js;
 const { findFirstTuevEntity } = __m_src_card_entities_js;
 const { getAllEntityIdsFromConfig, getEntitySections } = __m_src_card_groups_js;
 const { calculateAutomaticBadgeSize, calculateLayoutInfo } = __m_src_card_layout_js;
 const { getSharedPlateLayout } = __m_src_card_plate_layout_js;
 const { CONFIRM_TIMING, getEntityUiState, resetEntityUiStateAfterError, startEntityConfirmation } = __m_src_card_ui_state_js;
 const { renderBadgeArea, renderCompactConfirmPanel, renderBadgeLayer, renderCrossfadeLayer, renderMissingEntity, renderVehicleDetails, renderVehicleHeader } = __m_src_card_render_parts_js;
-const { checkPlateFontAvailable, ensurePlateFont, getLicensePlateMetrics, isPlateFontLoaded, renderLicensePlate } = __m_src_plate_renderer_js;
+const { getLicensePlateMetrics, renderLicensePlate } = __m_src_plate_renderer_js;
 const { TuevCardEditor } = __m_src_editor_editor_js;
 
 window.customCards = window.customCards || [];
@@ -11052,14 +11064,6 @@ class TuevCard extends HTMLElement {
         if (!this._onWindowResize) {
             this._onWindowResize = () => this.scheduleWidthRefresh(true);
             window.addEventListener("resize", this._onWindowResize);
-        }
-
-        if (!this._plateFontRefreshTimer) {
-            this._plateFontRefreshTimer = window.setInterval(() => {
-                if (this.config) {
-                    this.checkPlateFontAvailability(true);
-                }
-            }, 15000);
         }
 
         if (this._resizeObserver || typeof ResizeObserver === "undefined") {
@@ -11099,10 +11103,7 @@ class TuevCard extends HTMLElement {
             this._onWindowResize = null;
         }
 
-        if (this._plateFontRefreshTimer) {
-            window.clearInterval(this._plateFontRefreshTimer);
-            this._plateFontRefreshTimer = null;
-        }
+        this.clearManagedTimeouts();
     }
 
     static getConfigElement() {
@@ -11131,12 +11132,6 @@ class TuevCard extends HTMLElement {
 
         this._entityUiState = this._entityUiState || {};
 
-        this._plateFontAvailable = false;
-        this._plateFontLoaded = false;
-        this._plateFontCheckInProgress = false;
-        this._plateFontLastCheckedAt = 0;
-
-        this.checkPlateFontAvailability(true);
         this.scheduleWidthRefresh(true);
     }
 
@@ -11155,10 +11150,30 @@ class TuevCard extends HTMLElement {
         return true;
     }
 
+    setManagedTimeout(callback, delay) {
+        this._managedTimeouts = this._managedTimeouts || new Set();
+
+        const timeoutId = window.setTimeout(() => {
+            this._managedTimeouts?.delete(timeoutId);
+            callback();
+        }, delay);
+
+        this._managedTimeouts.add(timeoutId);
+        return timeoutId;
+    }
+
+    clearManagedTimeouts() {
+        if (!this._managedTimeouts) {
+            return;
+        }
+
+        this._managedTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+        this._managedTimeouts.clear();
+    }
+
     set hass(hass) {
         this._hass = hass;
         this._entityUiState = this._entityUiState || {};
-        this.checkPlateFontAvailability(false);
 
         const sections = getEntitySections(this.config, hass);
         const allEntityIds = getAllEntityIdsFromConfig(this.config)
@@ -11508,7 +11523,7 @@ class TuevCard extends HTMLElement {
         this._widthRefreshScheduled = true;
 
         const scheduleFrame = (delay, isLast = false) => {
-            window.setTimeout(() => {
+            this.setManagedTimeout(() => {
                 window.requestAnimationFrame(() => {
                     this.refreshMeasuredWidth(false);
 
@@ -11708,7 +11723,7 @@ class TuevCard extends HTMLElement {
                                 text-overflow: ellipsis;
                                 min-width: 0;
                             ">
-                                ${section.title}
+                                ${escapeHtml(section.title)}
                             </span>
                             <span style="
                                 font-size: 11px;
@@ -11956,7 +11971,7 @@ class TuevCard extends HTMLElement {
             const elapsed = Date.now() - (ui.confirmStartedAt || 0);
             const remaining = Math.max(0, CONFIRM_TIMING.minConfirmMs - elapsed);
 
-            window.setTimeout(() => {
+            this.setManagedTimeout(() => {
                 ui.confirming = false;
                 ui.confirmFinishScheduled = false;
                 ui.confirmServiceScheduled = false;
@@ -11979,7 +11994,7 @@ class TuevCard extends HTMLElement {
                     this.hass = this._hass;
                 }
 
-                window.setTimeout(() => {
+                this.setManagedTimeout(() => {
                     ui.showSuccessUntil = 0;
                     ui.crossfadeBadge = null;
 
@@ -12023,17 +12038,17 @@ class TuevCard extends HTMLElement {
 
         ui.confirmServiceScheduled = true;
 
-        window.setTimeout(() => {
+        this.setManagedTimeout(() => {
             ui.confirmStampHidden = true;
 
             if (this._hass) {
                 this.hass = this._hass;
             }
-        }, 1980);
+        }, CONFIRM_TIMING.stampHideMs);
 
-        window.setTimeout(() => {
+        this.setManagedTimeout(() => {
             this.callConfirmPassedService(entityId, ui);
-        }, 2160);
+        }, CONFIRM_TIMING.serviceCallMs);
     }
 
     async callConfirmPassedService(entityId, ui) {

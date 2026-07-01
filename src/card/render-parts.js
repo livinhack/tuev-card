@@ -1,4 +1,5 @@
 import { renderBadge } from "../badge/renderer.js?v=b136";
+import { escapeHtml } from "../utils/html-escape.js?v=b343";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -12,7 +13,7 @@ export function renderMissingEntity(entityId, localize) {
                 ${localize("error.entity_not_found")}
             </div>
             <div style="font-size: 13px; opacity: 0.75;">
-                ${entityId}
+                ${escapeHtml(entityId)}
             </div>
         </div>
     `;
@@ -41,7 +42,7 @@ export function renderVehicleHeader({
                 text-overflow: ellipsis;
                 white-space: nowrap;
             ">
-                ${vehicleName}
+                ${escapeHtml(vehicleName)}
             </div>
 
             ${plateLayout && plate ? `
@@ -66,7 +67,7 @@ export function renderVehicleHeader({
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 ">
-                    ${plate}
+                    ${escapeHtml(plate)}
                 </div>
             `}
         </div>

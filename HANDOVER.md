@@ -1,43 +1,38 @@
-# Handover – b342 Plate Color Source Unification
+# Handover – b343 Card Security / Timer Cleanup
 
-Current stand: **b342**.
+Current stand: **b343**.
 
 ## Basis
 
-b342 baut auf **b341 Card Text Preview Stability** auf.
+b343 baut auf **b342 Plate Color Source Unification** auf.
 
-## Änderung in b342
+## Änderung in b343
 
-- Die Farbe von schwarzen Nicht-HU-Siegel-Elementen im Kennzeichenrenderer wurde vereinheitlicht.
-- Wechselkennzeichen-Zusatzrahmen nutzt jetzt die zentrale Platten-/Rahmenfarbe.
-- Der kleine gemeinsame Text im Wechselkennzeichen-Zusatzteil nutzt jetzt dieselbe Plattenfarbe.
-- Die W-Markierung im großen Hauptschild nutzt jetzt dieselbe Plattenfarbe.
-- Fahrzeugbezogener Zusatztext bleibt an die zentrale Textfarbe angebunden.
-- HU-/TÜV-Siegel bleibt eigenständig und wird nicht über diese Plattenfarbe umgefärbt.
+Dieser Schritt setzt die konkreten, kleinen Punkte aus den externen Bewertungen um, die vor einem späteren Release sinnvoll und risikoarm sind:
 
-## Wichtig
-
-Die Kombination **grünes Kennzeichen + Wechselkennzeichen** wird dadurch nicht als echte fachliche Variante freigeschaltet. Der Testfall dient nur dazu, Farbquellenfehler sichtbar zu machen.
+- Toter Font-Refresh-Timer in der Card entfernt.
+- Font-Verfügbarkeits-No-op wird nicht mehr bei `setConfig()` oder jedem `hass`-Update aufgerufen.
+- Gemeinsames HTML-Escape-Util ergänzt: `src/utils/html-escape.js`.
+- Card-Renderpfad escaped jetzt Fahrzeugname, Text-Kennzeichen, Gruppenüberschrift und Missing-Entity-ID.
+- Editor nutzt das gemeinsame HTML-Escape-Util statt eigener lokaler Escape-Kopie.
+- Confirm-Timings `1980` und `2160` sind jetzt als `CONFIRM_TIMING.stampHideMs` und `CONFIRM_TIMING.serviceCallMs` benannt.
+- Card-Timeouts werden über `setManagedTimeout()` verwaltet und in `disconnectedCallback()` aufgeräumt.
+- `lab-renderer-adapter.js` nutzt den bestehenden SVG-Escape-Helper statt eigener `escapeAttr`-Kopie.
 
 ## Nicht geändert
 
 - keine Kennzeichen-Geometrie
 - keine HU-Plakettenlogik
 - keine Wechselkennzeichen-Geometrie
-- keine Reminder-Integration
 - keine Sortierlogik
+- keine Reminder-Integration
 - kein Legacy-/Umschalter
+- kein Vite-/Rollup-/Lit-Umbau
 
 ## Neue/aktualisierte Checks
 
-- `check:plate-color-source-unification`
-
-Der Check prüft grüne und schwarze Wechselkennzeichen-Ausgaben und schützt insbesondere:
-
-- Zusatzrahmenfarbe
-- W-Markierung
-- kleiner Zusatztext
-- Standard-Schwarz-Fallback
+- `check:card-security-timer-cleanup`
+- bestehende b342/b343 Boundary-/Smoke-Checks bleiben aktiv.
 
 ## Durchgeführte Checks
 
@@ -47,12 +42,12 @@ Der Check prüft grüne und schwarze Wechselkennzeichen-Ausgaben und schützt in
 
 ## Artefakte
 
-- `plate-physical-lab-b342-plate-color-source-unification.zip`
-- `tuev-card-full-b342-plate-color-source-unification-handover.zip`
+- `plate-physical-lab-b343-card-security-timer-cleanup.zip`
+- `tuev-card-full-b343-card-security-timer-cleanup-handover.zip`
 
 ## Nächster Einstieg
 
-b342 ist ein kleiner Renderer-Farbquellen-Fix nach b341. Wenn der Screenshot-Test passt, kann wieder mit Card-/Editor-Fertigstellung weitergemacht werden.
+b343 ist ein Card-Sicherheits-/Wartbarkeitscheckpoint nach b342. Der nächste sinnvolle Schritt ist ein kurzer Praxistest von b343 in Home Assistant. Danach können README/HACS/Release-Struktur oder die spätere Reminder-Integration folgen.
 
 ## Beibehalten aus vorherigen Card-Fixes
 

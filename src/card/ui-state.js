@@ -1,7 +1,9 @@
 export const CONFIRM_TIMING = {
     minConfirmMs: 700,
     successMs: 800,
-    crossfadeMs: 800
+    crossfadeMs: 800,
+    stampHideMs: 1980,
+    serviceCallMs: 2160
 };
 
 export function getEntityUiState(uiStateByEntity, entityId) {

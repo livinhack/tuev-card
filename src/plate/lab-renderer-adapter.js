@@ -16,6 +16,7 @@ import {
     injectPlateFont,
     isPlateFontLoaded
 } from "./font.js";
+import { escapeSvgAttr as escapeAttr } from "./lab-renderer/svg-escape-utils.js";
 
 export {
     checkPlateFontAvailable,
@@ -160,12 +161,4 @@ function addLabRendererCardSvgAttributes(svg, { displayWidth, displayHeight, mod
         /<svg\s+class="physical-plate-svg"/,
         `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
     );
-}
-
-function escapeAttr(value) {
-    return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
 }

@@ -1,17 +1,23 @@
-# TÜV Reminder Card b342
+# TÜV Reminder Card b343
 
-Full/Card handover ZIP for **b342 Plate Color Source Unification**.
+Full/Card handover ZIP for **b343 Card Security / Timer Cleanup**.
 
 ## Inhalt
 
-b342 vereinheitlicht die Farbquelle für schwarze Nicht-HU-Siegel-Elemente im Kennzeichenrenderer:
+b343 setzt kleine, konkrete Review-Punkte vor einem späteren Release um:
 
-- Wechselkennzeichen-Zusatzrahmen folgt der zentralen Rahmenfarbe.
-- W-Markierung im großen Schild folgt der zentralen Plattenfarbe.
-- kleiner gemeinsamer Text im Wechselkennzeichen-Zusatzteil folgt der zentralen Plattenfarbe.
-- HU-/TÜV-Siegel bleibt eigenständig.
+- toter Font-Refresh-Timer entfernt
+- keine wiederholten Font-No-op-Aufrufe mehr bei `setConfig()`/`hass`
+- gemeinsames HTML-Escape-Util ergänzt
+- Card-Renderpfad escaped Fahrzeugname, Text-Kennzeichen, Gruppenüberschrift und Missing-Entity-ID
+- Editor nutzt das gemeinsame HTML-Escape-Util
+- Confirm-Timings `stampHideMs` und `serviceCallMs` benannt
+- Card-Timeouts werden verwaltet und beim Entfernen der Card aufgeräumt
+- Adapter nutzt den vorhandenen SVG-Escape-Helper statt lokaler Kopie
 
-Keine Geometrie, HU-Logik, Sortierlogik oder Reminder-Integration wurde geändert.
+## Nicht geändert
+
+Keine Kennzeichen-Geometrie, HU-Logik, Sortierlogik oder Reminder-Integration wurde geändert. Kein Buildsystem-/Lit-Refactor.
 
 ## Checks
 
@@ -24,10 +30,8 @@ Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-F
 
 ## Renderer-Grenze
 
-Keine Kennzeichen-Geometrie geändert. Der Nummernschildrenderer bleibt nach b336/b337 vorbereitet/eingefroren; b342 ändert nur die gemeinsame Farbquelle für Nicht-HU-Elemente.
-
-Reminder-Integration folgt später mit aktuellem Reminder-ZIP.
+Der Nummernschildrenderer bleibt Card-seitig vorbereitet/eingefroren. b343 ist ein Sicherheits-/Wartbarkeitscheckpoint, kein neuer Renderer-Schritt.
 
 ## Beibehaltene Editor-Fixes
 
-Die frühere Option **Kennzeichen grafisch darstellen** bleibt wirksam. Die Sortierlogik bleibt auf dem zurückgesetzten b337-Fluss, und Gruppen-Farben bleiben beim Verschieben erhalten.
+Die Option **Kennzeichen grafisch darstellen** bleibt wirksam. Die Sortierlogik bleibt auf dem zurückgesetzten b337-Fluss, und Gruppen-Farben bleiben beim Verschieben erhalten.

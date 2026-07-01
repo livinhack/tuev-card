@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b342 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b343 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 

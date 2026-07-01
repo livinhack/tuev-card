@@ -70,9 +70,9 @@ if (isFullCardRoot) {
   assert(rendererImports.length === 1 && rendererImports[0] === adapterPath, `renderer.js must be a thin boundary that only re-exports the Card/Lab adapter, got: ${rendererImports.join(", ")}`);
 
   const adapterImports = importsFor(adapterPath);
-  const allowedAdapterImports = new Set([publicApiPath, "src/plate/font.js"]);
+  const allowedAdapterImports = new Set([publicApiPath, "src/plate/font.js", "src/plate/lab-renderer/svg-escape-utils.js"]);
   const unexpectedAdapterImports = adapterImports.filter((target) => !allowedAdapterImports.has(target));
-  assert(unexpectedAdapterImports.length === 0, `lab-renderer-adapter.js must only import the Lab public API plus Card font helper, got unexpected imports: ${unexpectedAdapterImports.join(", ")}`);
+  assert(unexpectedAdapterImports.length === 0, `lab-renderer-adapter.js must only import the Lab public API, Card font helper and shared SVG escape helper, got unexpected imports: ${unexpectedAdapterImports.join(", ")}`);
 
   const adapter = read(adapterPath);
   for (const forbidden of [

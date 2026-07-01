@@ -2,6 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
+import { escapeHtml } from "./utils/html-escape.js?v=b343";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -17,13 +18,10 @@ import {
     renderVehicleHeader
 } from "./card/render-parts.js?v=b136";
 import {
-    checkPlateFontAvailable,
-    ensurePlateFont,
     getLicensePlateMetrics,
-    isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b342";
-import { TuevCardEditor } from "./editor/editor.js?v=b342";
+} from "./plate/renderer.js?v=b343";
+import { TuevCardEditor } from "./editor/editor.js?v=b343";
 
 window.customCards = window.customCards || [];
 
@@ -43,14 +41,6 @@ class TuevCard extends HTMLElement {
         if (!this._onWindowResize) {
             this._onWindowResize = () => this.scheduleWidthRefresh(true);
             window.addEventListener("resize", this._onWindowResize);
-        }
-
-        if (!this._plateFontRefreshTimer) {
-            this._plateFontRefreshTimer = window.setInterval(() => {
-                if (this.config) {
-                    this.checkPlateFontAvailability(true);
-                }
-            }, 15000);
         }
 
         if (this._resizeObserver || typeof ResizeObserver === "undefined") {
@@ -90,10 +80,7 @@ class TuevCard extends HTMLElement {
             this._onWindowResize = null;
         }
 
-        if (this._plateFontRefreshTimer) {
-            window.clearInterval(this._plateFontRefreshTimer);
-            this._plateFontRefreshTimer = null;
-        }
+        this.clearManagedTimeouts();
     }
 
     static getConfigElement() {
@@ -122,12 +109,6 @@ class TuevCard extends HTMLElement {
 
         this._entityUiState = this._entityUiState || {};
 
-        this._plateFontAvailable = false;
-        this._plateFontLoaded = false;
-        this._plateFontCheckInProgress = false;
-        this._plateFontLastCheckedAt = 0;
-
-        this.checkPlateFontAvailability(true);
         this.scheduleWidthRefresh(true);
     }
 
@@ -146,10 +127,30 @@ class TuevCard extends HTMLElement {
         return true;
     }
 
+    setManagedTimeout(callback, delay) {
+        this._managedTimeouts = this._managedTimeouts || new Set();
+
+        const timeoutId = window.setTimeout(() => {
+            this._managedTimeouts?.delete(timeoutId);
+            callback();
+        }, delay);
+
+        this._managedTimeouts.add(timeoutId);
+        return timeoutId;
+    }
+
+    clearManagedTimeouts() {
+        if (!this._managedTimeouts) {
+            return;
+        }
+
+        this._managedTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+        this._managedTimeouts.clear();
+    }
+
     set hass(hass) {
         this._hass = hass;
         this._entityUiState = this._entityUiState || {};
-        this.checkPlateFontAvailability(false);
 
         const sections = getEntitySections(this.config, hass);
         const allEntityIds = getAllEntityIdsFromConfig(this.config)
@@ -499,7 +500,7 @@ class TuevCard extends HTMLElement {
         this._widthRefreshScheduled = true;
 
         const scheduleFrame = (delay, isLast = false) => {
-            window.setTimeout(() => {
+            this.setManagedTimeout(() => {
                 window.requestAnimationFrame(() => {
                     this.refreshMeasuredWidth(false);
 
@@ -699,7 +700,7 @@ class TuevCard extends HTMLElement {
                                 text-overflow: ellipsis;
                                 min-width: 0;
                             ">
-                                ${section.title}
+                                ${escapeHtml(section.title)}
                             </span>
                             <span style="
                                 font-size: 11px;
@@ -947,7 +948,7 @@ class TuevCard extends HTMLElement {
             const elapsed = Date.now() - (ui.confirmStartedAt || 0);
             const remaining = Math.max(0, CONFIRM_TIMING.minConfirmMs - elapsed);
 
-            window.setTimeout(() => {
+            this.setManagedTimeout(() => {
                 ui.confirming = false;
                 ui.confirmFinishScheduled = false;
                 ui.confirmServiceScheduled = false;
@@ -970,7 +971,7 @@ class TuevCard extends HTMLElement {
                     this.hass = this._hass;
                 }
 
-                window.setTimeout(() => {
+                this.setManagedTimeout(() => {
                     ui.showSuccessUntil = 0;
                     ui.crossfadeBadge = null;
 
@@ -1014,17 +1015,17 @@ class TuevCard extends HTMLElement {
 
         ui.confirmServiceScheduled = true;
 
-        window.setTimeout(() => {
+        this.setManagedTimeout(() => {
             ui.confirmStampHidden = true;
 
             if (this._hass) {
                 this.hass = this._hass;
             }
-        }, 1980);
+        }, CONFIRM_TIMING.stampHideMs);
 
-        window.setTimeout(() => {
+        this.setManagedTimeout(() => {
             this.callConfirmPassedService(entityId, ui);
-        }, 2160);
+        }, CONFIRM_TIMING.serviceCallMs);
     }
 
     async callConfirmPassedService(entityId, ui) {

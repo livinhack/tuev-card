@@ -71,7 +71,7 @@ const nonCommentLines = renderer
 
 assert(nonCommentLines.length >= 2, "renderer.js must contain only comments plus its public export block.");
 assert(nonCommentLines[0] === "export {", "renderer.js must start its executable content with a single public export block.");
-assert(nonCommentLines.at(-1) === '} from "./lab-renderer-adapter.js?v=b342";', "renderer.js must delegate only to the b342 Card/Lab adapter cache boundary.");
+assert(nonCommentLines.at(-1) === '} from "./lab-renderer-adapter.js?v=b343";', "renderer.js must delegate only to the b343 Card/Lab adapter cache boundary.");
 assert(importTargets(rendererPath).length === 1 && importTargets(rendererPath)[0] === adapterPath, "renderer.js must import/re-export only lab-renderer-adapter.js.");
 
 for (const name of expectedExports) {
@@ -107,8 +107,8 @@ for (const forbidden of [
 
 const cardEntry = read("src/tuev-card-entry.js");
 const editor = read("src/editor/editor.js");
-assert(cardEntry.includes('from "./plate/renderer.js?v=b342"'), "Card entry must consume the b342 public renderer cache boundary.");
-assert(editor.includes('from "../plate/renderer.js?v=b342"'), "Editor must consume the b342 public renderer cache boundary.");
+assert(cardEntry.includes('from "./plate/renderer.js?v=b343"'), "Card entry must consume the b343 public renderer cache boundary.");
+assert(editor.includes('from "../plate/renderer.js?v=b343"'), "Editor must consume the b343 public renderer cache boundary.");
 
 const files = listJsFiles("src");
 const badConsumers = [];
@@ -123,7 +123,7 @@ for (const file of files) {
 assert(badConsumers.length === 0, `Card-facing source must use renderer.js, not adapter/Lab internals: ${badConsumers.join("; ")}`);
 
 if (!process.exitCode) {
-  console.log("Plate renderer public entry cleanup OK: renderer.js is a thin b342 public boundary with the established Card API only.");
+  console.log("Plate renderer public entry cleanup OK: renderer.js is a thin b343 public boundary with the established Card API only.");
 }
 
 if (process.exitCode) process.exit(process.exitCode);
