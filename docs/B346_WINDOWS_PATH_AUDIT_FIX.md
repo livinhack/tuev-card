@@ -1,6 +1,6 @@
-# b346 – Windows Path Audit Fix
+# b347 – Windows Path Audit Fix
 
-b346 builds on b345 and fixes a Windows-only check failure in `check:renderer-legacy-audit`.
+b347 builds on b345 and fixes a Windows-only check failure in `check:renderer-legacy-audit`.
 
 ## Problem
 
@@ -36,4 +36,4 @@ Updated scripts:
 
 ## No runtime changes
 
-No Card runtime behavior, renderer geometry, HU logic, sort logic, popup logic, font logic or Reminder integration changed in b346.
+No Card runtime behavior, renderer geometry, HU logic, sort logic, popup logic, font logic or Reminder integration changed in b347.

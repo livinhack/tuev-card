@@ -2,7 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b346";
+import { escapeHtml } from "./utils/html-escape.js?v=b347";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b346";
-import { TuevCardEditor } from "./editor/editor.js?v=b346";
+} from "./plate/renderer.js?v=b347";
+import { TuevCardEditor } from "./editor/editor.js?v=b347";
 
 window.customCards = window.customCards || [];
 
@@ -401,7 +401,20 @@ class TuevCard extends HTMLElement {
         // For scaled editor previews the visible card element is the relevant
         // limit. Parent containers can be wider than the clipped preview pane,
         // so using the maximum here would make the scaled preview too large.
-        return Math.min(...candidates);
+        const visibleWidth = Math.min(...candidates);
+        const previousWidth = Number(this._previewVisibleWidth || 0);
+
+        // In the Home Assistant editor preview a vertical scrollbar can appear
+        // or disappear when text plates are shown. That changes the measured
+        // preview width by roughly one scrollbar gutter and can start a
+        // width/height feedback loop. Treat scrollbar-sized width changes as
+        // noise so the text preview keeps one stable scale/grid contract.
+        if (previousWidth > 0 && Math.abs(previousWidth - visibleWidth) < 24) {
+            return previousWidth;
+        }
+
+        this._previewVisibleWidth = visibleWidth;
+        return visibleWidth;
     }
 
     renderPreviewScaledContent(content, layoutContext) {
@@ -420,6 +433,8 @@ class TuevCard extends HTMLElement {
                     height: ${height};
                     overflow: hidden;
                     width: 100%;
+                    scrollbar-gutter: stable both-edges;
+                    contain: layout paint;
                 "
             >
                 <div
@@ -453,8 +468,12 @@ class TuevCard extends HTMLElement {
                 return;
             }
 
-            if (Math.abs((this._previewScaledHeight || 0) - height) < 2) {
-                outer.style.height = `${height}px`;
+            const previousHeight = Number(this._previewScaledHeight || 0);
+            const textPlatePreview = this.isEditorPreviewContext() && this.config?.plate_style !== "plate";
+            const tolerance = textPlatePreview ? 8 : 2;
+
+            if (previousHeight > 0 && Math.abs(previousHeight - height) < tolerance) {
+                outer.style.height = `${previousHeight}px`;
                 return;
             }
 
@@ -567,7 +586,8 @@ class TuevCard extends HTMLElement {
             });
         });
 
-        const delays = [80, 180, 360, 750, 1500, 3000];
+        const textPlatePreview = this.isEditorPreviewContext() && this.config?.plate_style !== "plate";
+        const delays = textPlatePreview ? [120, 360] : [80, 180, 360, 750, 1500, 3000];
         delays.forEach((delay, index) => {
             scheduleFrame(delay, index === delays.length - 1);
         });

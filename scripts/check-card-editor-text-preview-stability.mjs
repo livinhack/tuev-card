@@ -13,7 +13,12 @@ if (!entry.includes('The editor preview must keep the same column decision for g
   fail('shared text/graphic preview column guard rationale is missing');
 }
 
-if (entry.includes('this.config?.plate_style !== "plate"')) {
+const layoutContextBlock = entry.slice(
+  entry.indexOf('getLayoutContext(isMulti)'),
+  entry.indexOf('getPreviewSimulation(requestedColumns, measuredWidth)')
+);
+
+if (layoutContextBlock.includes('this.config?.plate_style !== "plate"')) {
   fail('text mode must not bypass the shared editor preview column simulation');
 }
 
@@ -29,8 +34,8 @@ if (!renderParts.includes('min-height: ${compact ? "18px" : "20px"};')) {
   fail('text plate min-height stabilizer is missing');
 }
 
-if (!pkg.version.endsWith('-b346')) {
-  fail('package version is not b346');
+if (!pkg.version.endsWith('-b347')) {
+  fail('package version is not b347');
 }
 
 console.log('[check:card-editor-text-preview-stability] OK');

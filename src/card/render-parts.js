@@ -1,5 +1,5 @@
 import { renderBadge } from "../badge/renderer.js?v=b136";
-import { escapeHtml } from "../utils/html-escape.js?v=b346";
+import { escapeHtml } from "../utils/html-escape.js?v=b347";
 
 export function renderMissingEntity(entityId, localize) {
     return `
@@ -58,14 +58,20 @@ export function renderVehicleHeader({
                 </div>
             ` : `
                 <div style="
+                    display: block;
+                    box-sizing: border-box;
+                    width: 100%;
+                    max-width: 100%;
                     font-size: ${compact ? "13px" : "15px"};
                     line-height: ${compact ? "18px" : "20px"};
+                    height: ${compact ? "18px" : "20px"};
                     min-height: ${compact ? "18px" : "20px"};
                     opacity: 0.75;
                     letter-spacing: 0.08em;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    flex: 0 0 auto;
                 ">
                     ${escapeHtml(plate)}
                 </div>

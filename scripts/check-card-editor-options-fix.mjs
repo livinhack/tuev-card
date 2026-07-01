@@ -19,9 +19,9 @@ const renderer = read("src/plate/renderer.js");
 const readme = read("README.md");
 const handover = read("HANDOVER.md");
 
-assert(card.includes('from "./plate/renderer.js?v=b346"'), "Card must use the b346 renderer cache marker.");
-assert(editor.includes('from "../plate/renderer.js?v=b346"'), "Editor must use the b346 renderer cache marker.");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b346"'), "Public renderer must use the b346 adapter cache marker.");
+assert(card.includes('from "./plate/renderer.js?v=b347"'), "Card must use the b347 renderer cache marker.");
+assert(editor.includes('from "../plate/renderer.js?v=b347"'), "Editor must use the b347 renderer cache marker.");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b347"'), "Public renderer must use the b347 adapter cache marker.");
 
 assert(card.includes('const graphicalPlateEnabled = this.config?.plate_style === "plate";'), "Card must gate graphical plate layout by plate_style.");
 assert(card.includes('isGraphicalPlateAvailable: graphicalPlateEnabled,'), "Card must obey the user plate_style option without asynchronous font availability gating.");
@@ -30,11 +30,11 @@ assert(!editor.includes('getSortedUngroupedDraftEntityIds'), "Editor must keep b
 assert(editor.includes('this.fireConfigChanged();') && editor.includes('sort: nextSort'), "Ungrouped sort chips must use the b337 config-only flow.");
 assert(editor.includes('this.releaseUngroupedEntities();'), "Release ungrouped button must call its handler.");
 assert(editor.includes('color: group.color || getGroupAccentColor(group, groupIndex)'), "Group moves must materialize fallback colors before reordering.");
-assert(editor.includes('getGroupAccentColor') && editor.includes('../card/groups.js?v=b346'), "Editor must import the group color helper through the b346 groups boundary.");
-assert(groups.includes('./entities.js?v=b346'), "Groups helper must use the b346 entities cache marker.");
+assert(editor.includes('getGroupAccentColor') && editor.includes('../card/groups.js?v=b347'), "Editor must import the group color helper through the b347 groups boundary.");
+assert(groups.includes('./entities.js?v=b347'), "Groups helper must use the b347 entities cache marker.");
 
-assert(readme.includes("b346") && /Kennzeichen grafisch darstellen/i.test(readme), "README must document the b346 editor option fix.");
-assert(handover.includes("b346") && /Sortier/i.test(handover) && /Farben/i.test(handover), "HANDOVER must document b346 sort and color fixes.");
+assert(readme.includes("b347") && /Kennzeichen grafisch darstellen/i.test(readme), "README must document the b347 editor option fix.");
+assert(handover.includes("b347") && /Sortier/i.test(handover) && /Farben/i.test(handover), "HANDOVER must document b347 sort and color fixes.");
 
 if (!process.exitCode) {
   console.log("Card/editor options fix OK: plate_style gates rendering, sort controls use b337 config flow, and group colors travel with moved groups.");

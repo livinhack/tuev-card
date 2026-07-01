@@ -1,12 +1,12 @@
 import { localize } from "../translations/index.js?v=b136";
-import { escapeHtml } from "../utils/html-escape.js?v=b346";
+import { escapeHtml } from "../utils/html-escape.js?v=b347";
 import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b136";
 import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b136";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b346";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b347";
 // Fonts are bundled with the card release. Keep the public renderer boundary
 // imported for the editor/plate dependency boundary, but do not probe fonts or
 // re-toggle the graphical plate option from asynchronous font checks.
-import { normalizePlate as rendererBoundaryNormalizePlate } from "../plate/renderer.js?v=b346";
+import { normalizePlate as rendererBoundaryNormalizePlate } from "../plate/renderer.js?v=b347";
 import {
     getColumnLabel
 } from "./columns.js?v=b136";

@@ -1,4 +1,4 @@
-// TÜV Card bundled b346
+// TÜV Card bundled b347
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -666,7 +666,7 @@ return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED
 
 // ---- src/utils/html-escape.js ----
 const __m_src_utils_html_escape_js = (() => {
-// TÜV Reminder Card b346 / shared HTML escaping helpers
+// TÜV Reminder Card b347 / shared HTML escaping helpers
 // Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
 // separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
 
@@ -1568,14 +1568,20 @@ function renderVehicleHeader({
                 </div>
             ` : `
                 <div style="
+                    display: block;
+                    box-sizing: border-box;
+                    width: 100%;
+                    max-width: 100%;
                     font-size: ${compact ? "13px" : "15px"};
                     line-height: ${compact ? "18px" : "20px"};
+                    height: ${compact ? "18px" : "20px"};
                     min-height: ${compact ? "18px" : "20px"};
                     opacity: 0.75;
                     letter-spacing: 0.08em;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    flex: 0 0 auto;
                 ">
                     ${escapeHtml(plate)}
                 </div>
@@ -3765,7 +3771,7 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b346 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b347 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
@@ -3968,7 +3974,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b346 / seal component helpers
+// Kennzeichen Physical Lab b347 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -4114,7 +4120,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b346 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b347 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -11444,7 +11450,20 @@ class TuevCard extends HTMLElement {
         // For scaled editor previews the visible card element is the relevant
         // limit. Parent containers can be wider than the clipped preview pane,
         // so using the maximum here would make the scaled preview too large.
-        return Math.min(...candidates);
+        const visibleWidth = Math.min(...candidates);
+        const previousWidth = Number(this._previewVisibleWidth || 0);
+
+        // In the Home Assistant editor preview a vertical scrollbar can appear
+        // or disappear when text plates are shown. That changes the measured
+        // preview width by roughly one scrollbar gutter and can start a
+        // width/height feedback loop. Treat scrollbar-sized width changes as
+        // noise so the text preview keeps one stable scale/grid contract.
+        if (previousWidth > 0 && Math.abs(previousWidth - visibleWidth) < 24) {
+            return previousWidth;
+        }
+
+        this._previewVisibleWidth = visibleWidth;
+        return visibleWidth;
     }
 
     renderPreviewScaledContent(content, layoutContext) {
@@ -11463,6 +11482,8 @@ class TuevCard extends HTMLElement {
                     height: ${height};
                     overflow: hidden;
                     width: 100%;
+                    scrollbar-gutter: stable both-edges;
+                    contain: layout paint;
                 "
             >
                 <div
@@ -11496,8 +11517,12 @@ class TuevCard extends HTMLElement {
                 return;
             }
 
-            if (Math.abs((this._previewScaledHeight || 0) - height) < 2) {
-                outer.style.height = `${height}px`;
+            const previousHeight = Number(this._previewScaledHeight || 0);
+            const textPlatePreview = this.isEditorPreviewContext() && this.config?.plate_style !== "plate";
+            const tolerance = textPlatePreview ? 8 : 2;
+
+            if (previousHeight > 0 && Math.abs(previousHeight - height) < tolerance) {
+                outer.style.height = `${previousHeight}px`;
                 return;
             }
 
@@ -11610,7 +11635,8 @@ class TuevCard extends HTMLElement {
             });
         });
 
-        const delays = [80, 180, 360, 750, 1500, 3000];
+        const textPlatePreview = this.isEditorPreviewContext() && this.config?.plate_style !== "plate";
+        const delays = textPlatePreview ? [120, 360] : [80, 180, 360, 750, 1500, 3000];
         delays.forEach((delay, index) => {
             scheduleFrame(delay, index === delays.length - 1);
         });
