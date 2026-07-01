@@ -1,13 +1,14 @@
 {
   "name": "plate-physical-lab",
-  "version": "0.1.1-b327",
+  "version": "0.1.1-b328",
   "private": true,
   "type": "module",
   "scripts": {
     "check:regression": "node scripts/run-regression.mjs",
     "check:production-boundary": "node scripts/check-production-import-boundary.mjs",
-    "check": "npm run check:regression && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest",
+    "check": "npm run check:regression && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:hu-badge-smoke",
     "check:card-transfer-dry-run": "node scripts/check-card-transfer-dry-run.mjs",
-    "check:card-transfer-manifest": "node scripts/check-card-transfer-manifest.mjs"
+    "check:card-transfer-manifest": "node scripts/check-card-transfer-manifest.mjs",
+    "check:hu-badge-smoke": "node scripts/check-hu-badge-smoke.mjs"
   }
 }

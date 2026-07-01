@@ -1,7 +1,7 @@
-# TÜV Reminder Card b327
+# TÜV Reminder Card b328
 
-Full handover ZIP for b327.
+Full handover ZIP for b328.
 
-b327 activates the full HU badge renderer in the active Card adapter so the Reminder year/month/rotation data renders the real 35 mm TÜV badge instead of the old blue placeholder. The same full badge path is also applied to the Wechselkennzeichen vehicle-specific supplement in the staged Lab renderer.
+b328 is a conservative HU smoke-check checkpoint on top of b327. The active Card renderer still uses the complete HU badge renderer for Reminder-fed year/month/rotation data, including the Wechselkennzeichen vehicle-specific supplement. New smoke checks assert that the productive full-badge path no longer emits the old blue HU placeholder.
 
-Rollback: previous ZIP b326.
+No geometry changes and no legacy renderer switch were introduced.

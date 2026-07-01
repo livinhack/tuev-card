@@ -1,30 +1,34 @@
-# Handover – b327 HU Badge Card Activation and Change Supplement
+# Handover – b328 HU Badge Smoke Checkpoint
 
-Current stand: b327.
+Current stand: b328.
 
-b327 turns the successful b326 HU-badge Lab test into the active Card path and closes the Wechselkennzeichen supplement gap.
+b328 keeps the b327 Card activation unchanged and adds a focused HU badge smoke checkpoint. The goal is to guard against regressions where the old blue HU placeholder accidentally reappears in the active full-badge path.
 
-Main changes:
+## Changes
 
-- `src/plate/lab-renderer-adapter.js` now sets `huBadgeRenderer: "full"` for the active Card renderer.
-- Existing Card data from `src/tuev-card-entry.js` (`huYear`, `huMonth`, `huRotation`) is still used; b327 only activates the full renderer path.
-- The staged Lab renderer resolves one `huBadge` object and passes it to both normal seals and the Wechselkennzeichen vehicle-specific supplement.
-- `change-plate-supplement-renderer.js` now uses the same `renderFullHuBadgeMarker()` bridge for the supplement HU slot.
-- `changePlate` options are forwarded through the Card adapter so the supplement path can be smoke-tested through the active Card renderer boundary.
+- Added `check:hu-badge-smoke` in the Lab and Full/Card packages.
+- Smoke coverage checks normal HU badge rendering with `huBadgeRenderer: "full"`.
+- Smoke coverage checks Wechselkennzeichen supplement rendering with `huBadgeRenderer: "full"`.
+- Smoke coverage verifies different HU years produce different badge output.
+- Lab placeholder mode remains available as an explicit comparison path only.
+- No geometry, spacing, adapter mapping, or legacy switch changes.
 
-Intentionally unchanged:
+## Card state
 
-- No legacy/old-renderer toggle was added.
-- No plate geometry was changed. The existing 35 mm HU slot/supplement positions are reused.
-- The blue placeholder remains available only in standalone Lab comparison mode when the full renderer is not requested. The Card requests the full renderer by default.
+- The Card adapter still sets `huBadgeRenderer: "full"`.
+- Existing Reminder-fed `huYear`, `huMonth` and `huRotation` are still passed into the Lab renderer.
+- The Wechselkennzeichen supplement receives the same resolved HU badge options through the render shell.
 
-Checks run:
+## Validation
 
 - `npm run check` passed.
-- `npm run build` passed and rebuilt `dist/tuev-card.js` for b327.
+- `npm run build` passed and rebuilt `dist/tuev-card.js` for b328.
 
-Known release note:
+## Files
 
-- The ZIP intentionally contains only font readmes/placeholders, not local `.ttf` font binaries. The release asset check reports this as expected for ChatGPT handover ZIPs; GitHub/HACS release builds still need the GL font binaries present locally.
+- Matching standalone Lab ZIP: `plate-physical-lab-b328-hu-badge-smoke-checkpoint.zip`.
+- Full/Card handover ZIP: `tuev-card-full-b328-hu-badge-smoke-checkpoint-handover.zip`.
 
-Rollback: previous ZIP b326.
+## Next suggested step
+
+If b328 is visually confirmed, continue with the planned Card-renderer cleanup/audit: remove only demonstrably dead old paths, with no legacy toggle and no geometry changes.
