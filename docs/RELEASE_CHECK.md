@@ -1,6 +1,6 @@
 # Release / Check Notes
 
-Current checked version: `b117`.
+Current checked version: `b120`.
 
 ## b117 release asset guard
 
@@ -55,11 +55,11 @@ The release asset check:
 
 ## Version sync
 
-- `package.json`: `0.1.1-b117`
-- `package-lock.json`: `0.1.1-b117`
-- `dist/tuev-card.js` should start with `// TÜV Card bundled b117` after build.
-- `src/tuev-card-entry.js` should start with `// TÜV Card source entry b117`.
-- Source imports should use `?v=b117`.
+- `package.json`: `0.1.1-b120`
+- `package-lock.json`: `0.1.1-b120`
+- `dist/tuev-card.js` should start with `// TÜV Card bundled b120` after build.
+- `src/tuev-card-entry.js` should start with `// TÜV Card source entry b120`.
+- Source imports should use `?v=b120`.
 
 ## Next renderer work
 

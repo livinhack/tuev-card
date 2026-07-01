@@ -1,6 +1,6 @@
 # HACS release / update trigger flow
 
-Current checked version: `b117`.
+Current checked version: `b120`.
 
 ## Delivery layout
 

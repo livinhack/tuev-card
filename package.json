@@ -1,12 +1,16 @@
 {
   "name": "tuev-card",
-  "version": "0.1.1-b117",
+  "version": "0.1.1-b321",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-bundle.mjs",
-    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs",
+    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy",
     "check:js": "node scripts/check-js.mjs",
-    "check:release": "node scripts/check-release-assets.mjs"
+    "check:release": "node scripts/check-release-assets.mjs",
+    "check:production-boundary": "node tools/plate-physical-lab/scripts/check-production-import-boundary.mjs",
+    "check:card-transfer-dry-run": "node tools/plate-physical-lab/scripts/check-card-transfer-dry-run.mjs",
+    "check:card-transfer-manifest": "node tools/plate-physical-lab/scripts/check-card-transfer-manifest.mjs",
+    "check:card-transfer-staged-copy": "node scripts/check-card-transfer-staged-copy.mjs"
   }
 }

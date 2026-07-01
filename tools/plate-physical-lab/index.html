@@ -3,137 +3,252 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kennzeichen Physical Lab b117</title>
+  <title>Kennzeichen Physical Lab b321</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="hero">
     <div>
-      <p class="eyebrow">TÜV Card · Renderer-Neustart</p>
-      <h1>Kennzeichen Physical Lab b117</h1>
-      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b117 nutzt weiterhin die b111-Maßlinien und die b112-Anlage-4-Ausnahme für finale H/E-Suffix-Kennzeichen: Die Siegelspalte darf dann von 58,0 bis 67,5 mm gelöst werden; normale Kennzeichen bleiben bei 63,5 bis 67,5 mm. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige. Das gleiche mm-Modell ist ab b117 auch die produktive Card-Renderer-Basis; Pixel/DPR bleiben weiterhin nur Anzeige-/Card-Skalierung.</p>
+      <p class="eyebrow">TÜV Card · Exact-Helper-Cleanup</p>
+      <h1>Kennzeichen Physical Lab b321</h1>
+      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b321 dokumentiert die Card Transfer Staged Copy Preview: Die produktiven Renderer-Dateien werden im Full-ZIP in einen inaktiven Card-Zielordner gespiegelt und per Hash geprüft; das Lab bleibt autoritative Quelle. Renderer, Geometrie, Solver, UI-Controls, Wechselkennzeichen-Logik und aktiver Card-Code bleiben unverändert. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige.</p>
     </div>
-    <div class="version">b117</div>
+    <div class="version">b321</div>
   </header>
 
   <main>
     <section class="panel controls">
-      <h2>1:1-Kalibrierung</h2>
-      <div class="grid two">
-        <label>
-          Monitor-Profil
-          <select id="monitorProfile">
-            <option value="acer-vg272u-v" selected>Acer VG272U V · 4,2918 px/mm</option>
-            <option value="custom">Manuell</option>
-          </select>
-        </label>
-        <label>
-          Geräte-px/mm
-          <input id="devicePxPerMm" type="number" min="1" max="20" step="0.0001" value="4.2918" />
-        </label>
-      </div>
-      <div class="grid three">
-        <label>
-          Anzeige-Modus
-          <select id="displayMode">
-            <option value="physical" selected>1:1 physisch</option>
-            <option value="fit">Fit to screen</option>
-            <option value="debug-2">2× Debug</option>
-            <option value="debug-3">3× Debug</option>
-          </select>
-        </label>
-        <label>
-          Korrekturfaktor
-          <input id="calibrationFactor" type="number" min="0.5" max="1.5" step="0.001" value="1" />
-        </label>
-        <label>
-          Gemessene 100-mm-Linie
-          <input id="measured100" type="number" min="50" max="150" step="0.1" placeholder="optional" />
-        </label>
-      </div>
-      <div class="readout" id="calibrationReadout"></div>
-      <div class="calibration-card">
-        <div class="ruler-line" id="ruler100"><span>100 mm Kontrolllinie</span></div>
-        <div class="ruler-hint">Bei 1:1 und 100% Browser-Zoom mit Lineal prüfen. Falls abweichend: gemessene Länge eintragen und „Faktor übernehmen“ klicken.</div>
-        <button type="button" id="applyMeasured">Faktor übernehmen</button>
-      </div>
-
-      <h2>Renderer-Schritt</h2>
-      <label>
-        Schritt/Layer
-        <select id="stage">
-          <option value="body">1 · Schildkörper, Außenmaß, Rand, Eurofeld</option>
-          <option value="dxf">2 · DXF-Referenzlinien für Körper/Euro/Siegel</option>
-          <option value="grid">3 · Raster, Zeichen- und Siegelzellen</option>
-          <option value="seals">4 · HU- und Behördensiegelplätze</option>
-          <option value="text">5 · Zeichen in festen Zellen</option>
-          <option value="horizontal">6 · Horizontale Zeichen-/Zellprüfung</option>
-          <option value="complete" selected>7 · Komplettbild</option>
-        </select>
-      </label>
-
-      <h2>Kennzeichen</h2>
-      <label>
-        Eingabe
-        <input id="plateInput" value="HH HU 199" autocomplete="off" />
-      </label>
-      <div class="examples" id="examples"></div>
-      <div class="grid two">
-        <label>
-          Breite
-          <select id="widthMode">
-            <option value="auto">Auto kompakt: Mindestmaße ohne Grenzquetschung</option>
-            <option value="balanced" selected>Auto ausgewogen: bevorzugte Abstände</option>
-            <option value="320">320 mm</option>
-            <option value="340">340 mm</option>
-            <option value="380">380 mm</option>
-            <option value="420">420 mm</option>
-            <option value="460">460 mm</option>
-            <option value="480">480 mm</option>
-            <option value="520">520 mm</option>
-          </select>
-        </label>
-        <label>
-          Schrift
-          <select id="fontMode">
-            <option value="auto" selected>Auto: Mittelschrift, Engschrift nur wenn nötig</option>
-            <option value="middle">Mittelschrift manuell</option>
-            <option value="narrow">Engschrift manuell</option>
-          </select>
-        </label>
-      </div>
-      <label class="checkbox">
-        <input id="autoFitFont" type="checkbox" />
-        Schrift automatisch ins 75-mm-Zeichenband einpassen
-      </label>
-      <div class="grid three">
-        <label>
-          Ziel-Glyphenhöhe in mm
-          <input id="targetGlyphHeight" type="number" min="60" max="75" step="0.25" value="75" />
-        </label>
-        <label>
-          Font-Kalibriergröße (SVG)
-          <input id="fontSize" type="number" min="60" max="160" step="0.25" value="125" />
-        </label>
-        <label>
-          Baseline Y in mm
-          <input id="baselineY" type="number" min="60" max="105" step="0.25" value="92.5" />
-        </label>
-      </div>
-      <div class="grid two">
-        <label>
-          I-Sonderbreite in mm
-          <input id="specialIWidth" type="number" min="8" max="47.5" step="0.1" value="35.5" />
-        </label>
-        <div class="hint-box">
-          Gemeinsamer kalibrierter GL-Wert für Mittel- und Engschrift. Nicht als amtlich einzeln belegtes I-Maß dokumentieren. Standardbuchstaben bleiben 47,5 mm in Mittelschrift und 40,5 mm in Engschrift.
+      <div class="controls-title">
+        <div>
+          <h2>Bedienung</h2>
+          <p>Die Lab-Oberfläche ist in aufklappbare Bereiche gegliedert. Presets setzen nur Kennzeichenstrings; Format, Saison, Reduced und Breite bleiben Handarbeit.</p>
         </div>
       </div>
-      <div class="font-fit-readout" id="fontFitReadout"></div>
-      <label class="checkbox">
-        <input id="showDimensions" type="checkbox" checked />
-        Maßlinien anzeigen
-      </label>
+
+      <div class="controls-stack">
+        <details class="control-group" open>
+          <summary><span>1:1-Kalibrierung</span><small>Monitor, Maßstab, Kontrolllinie</small></summary>
+          <div class="control-group-body">
+            <div class="grid two">
+              <label>
+                Monitor-Profil
+                <select id="monitorProfile">
+                  <option value="acer-vg272u-v" selected>Acer VG272U V · 4,2918 px/mm</option>
+                  <option value="custom">Manuell</option>
+                </select>
+              </label>
+              <label>
+                Geräte-px/mm
+                <input id="devicePxPerMm" type="number" min="1" max="20" step="0.0001" value="4.2918" />
+              </label>
+            </div>
+            <div class="grid three">
+              <label>
+                Anzeige-Modus
+                <select id="displayMode">
+                  <option value="physical" selected>1:1 physisch</option>
+                  <option value="fit">Fit to screen</option>
+                  <option value="debug-2">2× Debug</option>
+                  <option value="debug-3">3× Debug</option>
+                </select>
+              </label>
+              <label>
+                Korrekturfaktor
+                <input id="calibrationFactor" type="number" min="0.5" max="1.5" step="0.001" value="1" />
+              </label>
+              <label>
+                Gemessene 100-mm-Linie
+                <input id="measured100" type="number" min="50" max="150" step="0.1" placeholder="optional" />
+              </label>
+            </div>
+            <div class="readout" id="calibrationReadout"></div>
+            <div class="calibration-card compact">
+              <div class="ruler-line" id="ruler100"><span>100 mm Kontrolllinie</span></div>
+              <div class="ruler-hint">Mit Lineal prüfen. Falls abweichend: gemessene Länge eintragen und Faktor übernehmen.</div>
+              <button type="button" id="applyMeasured">Faktor übernehmen</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="control-group" open>
+          <summary><span>Renderer-Schritt</span><small>Layer / Debugstufe</small></summary>
+          <div class="control-group-body">
+            <label>
+              Schritt/Layer
+              <select id="stage">
+                <option value="body">1 · Schildkörper, Außenmaß, Rand, Eurofeld</option>
+                <option value="dxf">2 · DXF-Referenzlinien</option>
+                <option value="grid">3 · Raster, Zeichen- und Siegelzellen</option>
+                <option value="seals">4 · HU- und Behördensiegelplätze</option>
+                <option value="text">5 · Zeichen in festen Zellen</option>
+                <option value="horizontal">6 · Horizontale Zeichen-/Zellprüfung</option>
+                <option value="complete" selected>7 · Komplettbild</option>
+              </select>
+            </label>
+            <label class="checkbox">
+              <input id="showDimensions" type="checkbox" checked />
+              Maßlinien anzeigen
+            </label>
+          </div>
+        </details>
+
+        <details class="control-group" open>
+          <summary><span>Format & Eingabe</span><small>Kennzeichenart, Text, Wechselkennzeichen</small></summary>
+          <div class="control-group-body">
+            <label>
+              Format
+              <select id="plateFormat">
+                <option value="oneLine">Einzeilig</option>
+                <option value="twoLine" selected>Zweizeilig</option>
+                <option value="motorcycle">Kraftrad</option>
+                <option value="reducedTwoLine">Verkleinert zweizeilig</option>
+              </select>
+            </label>
+            <label id="twoLineWidthRuleWrap">
+              Zweizeilige Breitenregel
+              <select id="twoLineWidthRule">
+                <option value="standard" selected>Standard zweizeilig · bis 340 mm</option>
+                <option value="twoAndThreeWheel">Zwei-/dreirädrig · bis 280 mm</option>
+                <option value="motorcycle">Kraftrad · 180–220 × 200 mm</option>
+                <option value="reducedTwoLine">Verkleinert zweizeilig · Auto 180–255 mm</option>
+              </select>
+            </label>
+            <label>
+              Eingabe
+              <input id="plateInput" value="DD GD 645" autocomplete="off" />
+            </label>
+            <label class="checkbox">
+              <input id="greenPlate" type="checkbox" />
+              Grünes Kennzeichen
+            </label>
+            <label class="checkbox">
+              <input id="changePlateEnabled" type="checkbox" />
+              Wechselkennzeichen-Labmodell
+            </label>
+            <div class="grid two" id="changePlateSplitFields">
+              <label>
+                Gemeinsamer Teil
+                <input id="changePlateCommonInput" value="DD GD 64" autocomplete="off" />
+              </label>
+              <label>
+                Fahrzeugbezogener Teil
+                <input id="changePlateVehicleInput" value="5" autocomplete="off" />
+              </label>
+            </div>
+            <div class="hint-box">Produktiv gehören Wechselkennzeichen-Daten später in die Fahrzeug-Entitäten/Integration. Das Lab nutzt getrennte Felder nur zur Geometrieprüfung.</div>
+          </div>
+        </details>
+
+        <details class="control-group">
+          <summary><span>Presets</span><small>reine Kennzeichenstrings</small></summary>
+          <div class="control-group-body preset-section">
+            <div class="preset-card">
+              <div class="preset-card-title">Kennzeichenstrings</div>
+              <div class="hint">Setzt nur den Text in Eingabe und gemeinsamer Wechselkennzeichen-Teil. Format, Saison, Reduced, Breite und Fahrzeugteil bleiben unverändert.</div>
+              <div class="check-preset-buttons" id="plateStringPresets"></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="control-group">
+          <summary><span>Saisonfeld</span><small>Monate und Saison-Typografie</small></summary>
+          <div class="control-group-body">
+            <div class="grid three">
+              <label class="checkbox">
+                <input id="seasonEnabled" type="checkbox" checked />
+                Saisonfeld anzeigen
+              </label>
+              <label>
+                Saison von
+                <input id="seasonFrom" type="number" min="1" max="12" step="1" value="4" />
+              </label>
+              <label>
+                Saison bis
+                <input id="seasonTo" type="number" min="1" max="12" step="1" value="10" />
+              </label>
+            </div>
+            <div class="grid three">
+              <label>
+                Ziel-Glyphenhöhe
+                <input id="seasonTargetGlyphHeight" type="number" autocomplete="off" min="8" max="30" step="0.25" value="20" />
+              </label>
+              <label>
+                Font-Kalibriergröße
+                <input id="seasonFontSize" type="number" autocomplete="off" min="8" max="60" step="0.25" value="28" />
+              </label>
+              <label>
+                Baseline Y
+                <input id="seasonBaselineY" type="number" autocomplete="off" min="17.5" max="92.5" step="0.25" value="37.5" />
+              </label>
+            </div>
+            <div class="grid two">
+              <label>
+                Breitenfaktor
+                <input id="seasonWidthScale" type="number" autocomplete="off" min="0.60" max="1.20" step="0.01" value="1" />
+              </label>
+              <label>
+                Zifferngap in mm
+                <input id="seasonDigitGap" type="number" autocomplete="off" min="-5" max="10" step="0.25" value="1.5" />
+              </label>
+            </div>
+            <div class="hint" id="seasonFitReadout">Saison-Messung: noch nicht gemessen</div>
+          </div>
+        </details>
+
+        <details class="control-group">
+          <summary><span>Breite & Schrift</span><small>Breitenwahl, Fontmodus, GL-Kalibrierung</small></summary>
+          <div class="control-group-body">
+            <div class="hint" id="fontStatus">Fontstatus: noch nicht geprüft</div>
+            <div class="grid two">
+              <label>
+                Breite
+                <select id="widthMode">
+                  <option value="auto">Auto kompakt</option>
+                  <option value="balanced" selected>Auto ausgewogen</option>
+                  <option value="340">340 mm</option>
+                  <option value="320">320 mm</option>
+                  <option value="280">280 mm</option>
+                  <option value="260">260 mm</option>
+                </select>
+              </label>
+              <label>
+                Schrift
+                <select id="fontMode">
+                  <option value="auto" selected>Auto</option>
+                  <option value="middle">Mittelschrift</option>
+                  <option value="narrow">Engschrift</option>
+                </select>
+              </label>
+            </div>
+            <label class="checkbox">
+              <input id="autoFitFont" type="checkbox" />
+              Schrift automatisch ins aktuelle Zeichenband einpassen
+            </label>
+            <div class="grid three">
+              <label>
+                Ziel-Glyphenhöhe
+                <input id="targetGlyphHeight" type="number" min="40" max="75" step="0.25" value="75" />
+              </label>
+              <label>
+                Font-Kalibriergröße
+                <input id="fontSize" type="number" min="40" max="160" step="0.25" value="125" />
+              </label>
+              <label>
+                Baseline Y
+                <input id="baselineY" type="number" min="40" max="200" step="0.25" value="92.5" />
+              </label>
+            </div>
+            <div class="grid two">
+              <label>
+                I-Sonderbreite in mm
+                <input id="specialIWidth" type="number" min="8" max="47.5" step="0.1" value="35.5" />
+              </label>
+              <div class="hint-box">Gemeinsamer kalibrierter GL-Wert für Mittel- und Engschrift. Standardbuchstaben bleiben 47,5 mm in Mittelschrift und 40,5 mm in Engschrift.</div>
+            </div>
+            <div class="font-fit-readout" id="fontFitReadout"></div>
+          </div>
+        </details>
+      </div>
     </section>
 
     <section class="panel preview-panel">
@@ -150,18 +265,47 @@
       <div class="notes" id="notes"></div>
     </section>
 
+
+
+    <section class="panel regression-panel">
+      <div class="preview-header">
+        <div>
+          <h2>b209 Regression/Testmatrix</h2>
+          <p>Feste Varianten zum schnellen Umschalten und Prüfen. b204 ergänzt direkte Eingabe-Presets; b237 behält die b209-Prüfkette inklusive 8-Slot-/I-Gegenproben, 9-Slot-Saison/H-E-Grenzfall und die b212-Eurofeld-a/D-Prüfung für Nr. 1, Nr. 2, Nr. 2c und Reduced bei. Die Regression bleibt weiterhin die technische Sicherheitsmatrix. Die b200-Schwelle bleibt aktiv: vier sichtbare Unterzeilenzeichen bleiben vertikal, ab fünf darf der Standard-Fallback nach oben wechseln; H/E und Saison erzwingen weiterhin die obere Nebeneinander-Siegelreihe ab 180 mm.</p>
+        </div>
+        <button type="button" id="runRegression">Matrix neu prüfen</button>
+      </div>
+      <div class="regression-table-wrap">
+        <table class="regression-table">
+          <thead>
+            <tr>
+              <th>Fall</th>
+              <th>Format</th>
+              <th>Kennzeichen</th>
+              <th>Status</th>
+              <th>Messwerte</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="regressionMatrix"></tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="panel metrics-panel">
       <h2>Messwerte</h2>
       <table><tbody id="metrics"></tbody></table>
-      <h2>Feste b117-Regeln</h2>
+      <h2>Feste b157–b237-Regeln</h2>
       <ul>
         <li>Alle Modell-Koordinaten sind Millimeter.</li>
         <li>Das Außenmaß enthält den schwarzen Rand.</li>
         <li>Nach dem physischen Aufbau wird nur das komplette SVG in der Anzeige-Schicht skaliert.</li>
+        <li>Zweizeilige Standardkennzeichen nutzen die Breiten 260/280/320/340 mm; die Untervariante für zwei-/dreirädrige Kfz begrenzt die Auswahl auf 260/280 mm und darf nicht auf 320/340 mm ausweichen.</li>
+        <li>b170 bestätigt den b169-Kraftradstand: 180/200/220 mm Breitenbänder, 200 mm Höhe, 49-mm-Zeichenfelder, verkleinerte Mittelschrift ohne Engschrift-Automatik, horizontales Plakettenband, Saison-Sonderband und fallbezogene Siegel-x-Positionen. b225 hält verkleinert zweizeilig bei 180/200/220/240/255 mm bis zum 255 × 130-mm-Größtmaß, 35 × 56-mm-Eurofeld, 49-mm-Zeichenfelder, ausschließlich verkleinerte Mittelschrift, ** 8–10 mm, *** 15–18 mm, Text→Siegel 5–20 mm, vollständigen Text-/Siegelketten ohne Überlappung, gemeinsamer X-Achse für vertikale Standard-Siegel, Standard-Upper-Seal-Fallback erst ab fünf unteren Zeichen, verpflichtender oberer Nebeneinander-Siegelreihe bei H/E oder Saison und feldlokalem Reduced-Saisonfeld, verankerter kurzer Oberzeile im Eurofeld→Siegelfeld-Korridor direkten Prüfkette-Presets und dem 9-Slot-Saison/H-E-Tight-Fit mit ≥6 mm rechts sowie dem b209-8-Slot-Tight-Fit mit 3/4/8 oben; b237 bestätigt EU-Sternenkranz/Euro-D, Siegel, Saisonfeld, Debuglayer, Reduced-Row-Chain-Solver, Text-/Glyph-Helfer, Plate-Body/Background, Render-Shell, Variant-Rules-Grenze, Layout-Model-Gruppierung, Row-/Sequence-Builder, Format-Strategy-Helfer, Public-API-Grenze, Generic-Chain-Solver-Primitives, Common-Row-Layout-Adapter, Waterfill-Loop-Helper, Spacing-Surface-Result-Helper und Formula-Width-Helpers als Komponenten; grüne Kennzeichen färben weiterhin Text und Rahmen/Rand; Nr. 2/Nr. 2c nutzen a=30 mm, Reduced nutzt a=22.5 mm.</li>
         <li>Keine nachträgliche Einzel-Skalierung von Zeichen, Eurofeld oder Siegeln.</li>
         <li>Schildkörper, Eurofeld und Siegelpositionen sind aus den gelieferten DXF-Skizzen übernommen.</li>
-        <li>Siegel werden getrennt berechnet: HU-Kreis 35 mm, Behördensiegel 45 mm, Spalte 63,5 mm bzw. äußerer Referenzraum 67,5 mm.</li>
-        <li>GL-Mittelschrift ist aktuell als manuelles Kalibrierprofil festgehalten: Ziel 75 mm, Font-Kalibriergröße 125, Baseline 92,5 mm.</li>
+        <li>Siegel werden getrennt berechnet: einzeilig HU-Kreis 35 mm, Behördensiegel 45 mm, Spalte 63,5 mm bzw. äußerer Referenzraum 67,5 mm; zweizeilig obere Siegelspalte 45 mm mit einzeiliger oberer Vertikalreferenz.</li>
+        <li>GL-Mittelschrift ist aktuell als manuelles Kalibrierprofil festgehalten: Ziel 75 mm, Font-Kalibriergröße 125, Baseline 92,5 mm. Zweizeilig nutzt dieser Wert die obere Zeile und leitet die untere Baseline mit gleichem Band-Offset ab.</li>
         <li>Automatische Messung bleibt zuschaltbar, ist aber nicht mehr der Standard für die weitere manuelle Maßarbeit.</li>
         <li>Der Schritt „Horizontale Zeichen-/Zellprüfung“ zeigt Zellgrenzen, Zellmitten, Zellbreiten und Gap-Breiten ohne Änderung der physikalischen Geometrie.</li>
         <li>I wird als Sonderfall mit gemeinsamer physischer Zellbreite behandelt: 35,5 mm. Status: kalibrierter GL-Mittel-/Engschrift-Wert, nicht amtlich einzeln belegt. Die übrigen Buchstaben bleiben je nach Mittel-/Engschrift unterschiedlich breit.</li>
@@ -169,11 +313,13 @@
         <li>Breite „Auto kompakt“ nimmt die kleinste Stufe, in der Mindestabstände und gleiche Außenränder ohne exakte Grenzquetschung passen.</li>
         <li>Breite „Auto ausgewogen“ nimmt die kleinste Stufe, in der bevorzugte variable Abstände und gleiche Außenränder passen; wenn keine Stufe das schafft, wird die kompakte Lösung als Fallback verwendet.</li>
         <li>Wenn in der gewählten Breite zusätzlicher Platz vorhanden ist, werden Zeichenabstand, Gruppengap und Siegelspalte zuerst bis zu ihren Maximalwerten erweitert; erst danach wächst der gleichmäßige Außenrand.</li>
-        <li>b111/b112/b117 zeigen die gelösten Abstände zusätzlich als Maßlinien direkt am Kennzeichen: Außenränder, Zeichenabstände, Gruppengaps und Siegelspalte.</li>
-        <li>Variable Bereiche: Außenrand mindestens 8 mm, Zeichenabstand 8–10 mm, Gruppengap 20–30 mm, normale Siegelspalte 63,5–67,5 mm. Bei finalem Oldtimer-/Elektro-Suffix H/E nach einer Ziffer schaltet die Siegelspalte auf 58,0–67,5 mm um; 63,5 mm bleibt der bevorzugte DXF-Wert.</li>
+        <li>b111/b112/b117/b119 zeigen die gelösten Abstände zusätzlich als Maßlinien direkt am Kennzeichen: Außenränder, Zeichenabstände, Gruppengaps und Siegelspalte.</li>
+        <li>Variable Bereiche einzeilig: Außenrand mindestens 8 mm, Zeichenabstand 8–10 mm, Gruppengap 20–30 mm, normale Siegelspalte 63,5–67,5 mm. Bei finalem Oldtimer-/Elektro-Suffix H/E nach einer Ziffer schaltet die Siegelspalte auf 58,0–67,5 mm um; 63,5 mm bleibt der bevorzugte DXF-Wert. Einzeiliges Saisonfeld b145/b157: rechts nach der Erkennungsnummer als 30 × 75-mm-Block, zwei 30 × 20-mm-Monatsfelder, 30 × 3,25-mm-Trennstrich, Saisonblock vor und nach dem Feld von *-Abstandsflächen umgeben. Zweizeilig b145/b157: Breitenwahl 340 / 320 / 280 / 260 mm, Größtmaß 340 × 200 mm, Eurofeld 40 × 88 mm ab Innenoberkante; Eurofeld-Innenaufteilung vertikal 10 / 30 / 17 / 20 / 11 mm; einzeiliges Eurofeld nutzt separat 17 / 30 / 17 / 20 / 17 mm innerhalb 101 mm; obere Zeichenzeile 17,5–92,5 mm, 15 mm Zeilenzwischenraum, untere Zeichenzeile 107,5–182,5 mm; Abstand Ortskennung zum Siegelfeld 8–25 mm; Gruppengaps unten normal 24–30 mm, bei finalem H/E-Suffix in der gesamten unteren Zeile 20–30 mm; Siegel vertikal mit einzeiliger oberer Referenz: HU-Mitte 29,5 mm, Behördensiegel-Mitte 75,5 mm. Saisonfeld b145/b157: 30 mm breit rechts in der oberen Zeile, Saisongap zum Siegelfeld ist eine *-Abstandsfläche mit mindestens 8 mm und wird zusammen mit linken/rechten *-Flächen sowie dem 8–25-mm-Siegelabstand ausgewogen verteilt, zwei eigene DIN-Felder je 30 × 20 mm, oberes Feld beginnt an der Oberkante der oberen großen Textfelder, unteres Feld endet an deren Unterkante, sichtbare Ziel-Glyphenhöhe (SVG-getBBox) / SVG-Fontgröße / obere Baseline sind separat einstellbar, Trennstrich 30 × 3,25 mm und höhenzentriert, Standard 04/10. Die Saisonzentrierung ist konstruktiv: Monatszahl 1 + Zifferngap + Monatszahl 2 bilden je Monatszeile den Monatsblock; ab b155/b157 gibt es keine automatische Nachmess-Zentrierung mehr; die Monatszeile wird konstruktiv aus Zifferbreite + Gap + Zifferbreite im eigenen 30-mm-Feld zentriert. Die frühere manuelle X-Korrektur und der Mess-/Kalibrierknopf bleiben entfernt. Saison-Breitenfaktor und Saison-Zifferngap bleiben eigene Typografie-Kalibrierungen. b157 verteilt im H/E-Fall mit und ohne Saison die untere Zeile nach der Referenz-Kette * 47,5 ** 47,5 *** 44,5 ** 44,5 *** 47,5 *: Außenflächen mindestens 8 mm, Zeichenabstände 8–10 mm und H/E-Gruppenabstände 20–30 mm werden gemeinsam gewaterfilled.</li>
+        <li>b157 schützt die Saison-Typografiefelder gegen alte Browser-/Live-Server-Formwerte: bekannte verschobene Kombinationen wie 28 / 37,5 / 17,5 oder Werte außerhalb der zulässigen Bereiche werden automatisch auf 20 / 28 / 37,5 / 1 / 1,5 zurückgesetzt.</li>
         <li>Amtliche Siegelgrafiken werden nicht nachgebildet; nur neutrale Platzhalter.</li>
         <li>Das Länderkennzeichen D nutzt im Lab <code>din1451alt.ttf</code>, falls die Datei lokal in <code>tools/plate-physical-lab/fonts/</code> oder <code>fonts/</code> liegt.</li>
         <li>Pixel, DPR, Browser-Zoom und Monitorprofil kommen nicht in das Modell, sondern nur in <code>viewer-calibration.js</code>.</li>
+      <li>b157 hält den kompletten Nachrender-Zentriercode entfernt. Die obere und untere Saison-Monatszeile werden nur noch aus Zifferbreite + Gap + Zifferbreite konstruiert und als diese Breite im jeweiligen 30-mm-Saisonfeld zentriert.</li>
       </ul>
     </section>
   </main>
