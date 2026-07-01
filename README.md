@@ -1,16 +1,16 @@
-# TÜV Reminder Card b330
+# TÜV Reminder Card b332
 
-Full handover ZIP for b330.
+Full handover ZIP for b332.
 
-b330 is a small cleanup checkpoint on top of b329. It removes only the old, unimported Full/Card file `src/plate/mm-model.js` and updates the renderer legacy audit so the removal is checked automatically.
+b332 is a Card/Lab adapter-options audit checkpoint on top of b331. It keeps the renderer boundary unchanged and centralizes Card-owned Lab renderer defaults inside `src/plate/lab-renderer-adapter.js`.
 
-No renderer geometry, HU badge behavior, editor behavior, or legacy switch logic was changed.
+No renderer geometry was changed, no HU behavior was changed, and no files were removed in this step.
 
 ## Checks
 
-- `npm run check` passed.
-- `npm run build` passed.
+- `npm run check`
+- `npm run build`
 
-## Font note
+## Notes
 
-This ChatGPT ZIP does not include GL TTF font binaries. For GitHub/HACS release builds, make sure the GL font files are present locally before building.
+Font binaries are not included in this ChatGPT ZIP. For GitHub/HACS, the GL font TTF files still need to be present in the real repository/release assets.

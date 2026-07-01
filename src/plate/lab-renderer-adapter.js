@@ -1,4 +1,4 @@
-// TÜV Reminder Card b330 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b332 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -25,6 +25,17 @@ export {
 };
 
 let labPlateFontRequested = false;
+
+const CARD_LAB_RENDERER_DEFAULTS = Object.freeze({
+    fontMode: "auto",
+    widthMode: "balanced",
+    specialIWidth: 35.5,
+    stage: "complete",
+    showDimensions: false,
+    showSeals: true,
+    showText: true,
+    huBadgeRenderer: "full"
+});
 
 export function normalizeLabRendererPlate(plate) {
     return String(plate || "")
@@ -118,17 +129,15 @@ export function renderLicensePlate(plate, options = {}) {
 }
 
 function createLabRendererOptions(options = {}) {
+    const debugEnabled = options.debug === true;
+
     return {
-        fontMode: options.fontMode || "auto",
-        widthMode: options.widthMode || "balanced",
-        specialIWidth: options.specialIWidth || 35.5,
-        stage: "complete",
-        showDimensions: false,
-        showDxfReferenceGuides: options.debug === true,
-        showGrid: options.debug === true,
-        showSeals: true,
-        showText: true,
-        huBadgeRenderer: "full",
+        ...CARD_LAB_RENDERER_DEFAULTS,
+        fontMode: options.fontMode || CARD_LAB_RENDERER_DEFAULTS.fontMode,
+        widthMode: options.widthMode || CARD_LAB_RENDERER_DEFAULTS.widthMode,
+        specialIWidth: options.specialIWidth || CARD_LAB_RENDERER_DEFAULTS.specialIWidth,
+        showDxfReferenceGuides: debugEnabled,
+        showGrid: debugEnabled,
         huYear: options.huYear,
         huMonth: options.huMonth,
         huRotation: options.huRotation,

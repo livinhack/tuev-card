@@ -1,47 +1,60 @@
-# Handover – b330 Remove Unused Legacy mm-model
+# Handover – b332 Card/Lab Adapter Options Audit
 
-Current stand: b330.
+Current stand: b332.
 
-b330 is a deliberately small cleanup checkpoint after the b329 Card renderer legacy audit. It removes only the demonstrably unimported old Full/Card path `src/plate/mm-model.js`. No renderer geometry was changed and no legacy/alternate renderer switch was added.
+b332 is a deliberately small cleanup/audit checkpoint after b331. It keeps the protected Card/Lab renderer boundary unchanged and only tidies the Card-specific option mapping inside the adapter.
 
-## Changes
+## Previous checkpoint
 
-- Removed obsolete Full/Card file:
-  - `src/plate/mm-model.js`
-- Kept the active Card renderer chain unchanged:
-  - `src/plate/renderer.js`
-  - `src/plate/lab-renderer-adapter.js`
-  - `src/plate/lab-renderer/plate-public-api.js`
-- Updated `check:renderer-legacy-audit` so it now proves the old Full/Card `src/plate/mm-model.js` path is absent and still not imported.
-- Left standalone Lab compatibility boundaries intact. The Lab still keeps its own `src/plate/mm-model.js` compatibility facade.
-- Updated visible b330 version markers/package versions.
+- b327 activated the full HU badge renderer in the Card and in the Wechselkennzeichen vehicle-specific supplement.
+- b328 added HU smoke checks.
+- b329 audited legacy renderer paths.
+- b330 removed only the old unimported Full/Card `src/plate/mm-model.js` file.
+- b331 added the Card/Lab renderer boundary guard.
 
-## Explicit non-changes
+## b332 changes
+
+- Centralized Card-owned Lab renderer defaults in `CARD_LAB_RENDERER_DEFAULTS` inside `src/plate/lab-renderer-adapter.js`.
+- Kept Reminder/vehicle-specific data as explicit pass-through values:
+  - `huYear`
+  - `huMonth`
+  - `huRotation`
+  - `changePlate`
+- Normalized the adapter debug option once before mapping it to Lab debug flags.
+- Added `scripts/check-card-lab-adapter-options-audit.mjs`.
+- Added npm script `check:card-lab-adapter-options-audit`.
+- Included the new check in `npm run check`.
+- Updated package/version markers to b332.
+- Added `docs/B332_CARD_LAB_ADAPTER_OPTIONS_AUDIT.md`.
+
+## Boundary still protected
+
+```text
+tuev-card-entry.js / editor.js
+→ src/plate/renderer.js
+→ src/plate/lab-renderer-adapter.js
+→ src/plate/lab-renderer/plate-public-api.js
+→ Lab renderer internals
+```
+
+## Not changed
 
 - No geometry changes.
-- No HU badge changes beyond b327/b328 behavior.
-- No Card/editor UX changes.
-- No additional renderer cleanup beyond the single unused file removal.
-- No merging of fachlich ähnliche, aber nicht identische Abläufe.
+- No HU renderer logic changes.
+- No Wechselkennzeichen geometry changes.
+- No additional file removals.
+- No legacy/alternate renderer switch.
 
-## Checks
-
-Full/Card:
+## Checks run
 
 - `npm run check` passed.
-- `npm run build` passed and rebuilt `dist/tuev-card.js` for b330.
+- `npm run build` passed and rebuilt `dist/tuev-card.js` for b332.
 
-Standalone Lab:
+## Next suggested step
 
-- `npm run check` passed.
+Use b332 as the adapter-options checkpoint. The next safe step should again be audit-first: inspect the remaining Card-facing renderer/export compatibility names and remove only aliases that are proven unnecessary, or leave them if the editor/card boundary still uses them.
 
-Font note: the ChatGPT handover ZIP does not include GL TTF binaries. This remains expected here. For a real GitHub/HACS release, the GL font files must be present before building/releasing.
+## Matching ZIPs
 
-## ZIPs
-
-- Matching standalone Lab ZIP: `plate-physical-lab-b330-remove-unused-legacy-mm-model.zip`.
-- Full/Card handover ZIP: `tuev-card-full-b330-remove-unused-legacy-mm-model-handover.zip`.
-
-## Suggested next step
-
-After visual confirmation, continue with another one-at-a-time legacy audit/removal step. Do not remove compatibility files just because they look similar; only remove files that a check proves are not used by the active Card/Lab paths.
+- Matching standalone Lab ZIP: `plate-physical-lab-b332-card-lab-adapter-options-audit.zip`.
+- Full/Card handover ZIP: `tuev-card-full-b332-card-lab-adapter-options-audit-handover.zip`.

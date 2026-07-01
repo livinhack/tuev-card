@@ -1,4 +1,4 @@
-// TÜV Card bundled b330
+// TÜV Card bundled b332
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -7900,7 +7900,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b330 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b332 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -7911,6 +7911,17 @@ const { checkPlateFontAvailable, ensurePlateFont, getPlateFontFaceCss, getPlateF
 
 
 let labPlateFontRequested = false;
+
+const CARD_LAB_RENDERER_DEFAULTS = Object.freeze({
+    fontMode: "auto",
+    widthMode: "balanced",
+    specialIWidth: 35.5,
+    stage: "complete",
+    showDimensions: false,
+    showSeals: true,
+    showText: true,
+    huBadgeRenderer: "full"
+});
 
 function normalizeLabRendererPlate(plate) {
     return String(plate || "")
@@ -8004,17 +8015,15 @@ function renderLicensePlate(plate, options = {}) {
 }
 
 function createLabRendererOptions(options = {}) {
+    const debugEnabled = options.debug === true;
+
     return {
-        fontMode: options.fontMode || "auto",
-        widthMode: options.widthMode || "balanced",
-        specialIWidth: options.specialIWidth || 35.5,
-        stage: "complete",
-        showDimensions: false,
-        showDxfReferenceGuides: options.debug === true,
-        showGrid: options.debug === true,
-        showSeals: true,
-        showText: true,
-        huBadgeRenderer: "full",
+        ...CARD_LAB_RENDERER_DEFAULTS,
+        fontMode: options.fontMode || CARD_LAB_RENDERER_DEFAULTS.fontMode,
+        widthMode: options.widthMode || CARD_LAB_RENDERER_DEFAULTS.widthMode,
+        specialIWidth: options.specialIWidth || CARD_LAB_RENDERER_DEFAULTS.specialIWidth,
+        showDxfReferenceGuides: debugEnabled,
+        showGrid: debugEnabled,
         huYear: options.huYear,
         huMonth: options.huMonth,
         huRotation: options.huRotation,
@@ -8053,7 +8062,7 @@ return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLic
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-// TÜV Reminder Card b325 / direct Card plate renderer integration
+// TÜV Reminder Card b332 / direct Card plate renderer integration
 //
 // The active Card plate renderer now delegates directly to the staged Physical
 // Lab renderer adapter. There is intentionally no legacy renderer toggle and no
