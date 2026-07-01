@@ -32,7 +32,7 @@ No Card renderer code was changed, and no font binaries are included.
 ```text
 existing 14 non-motorcycle cases: 7e15978c05e2b4e5066a93840bb2fec09716a4959b67737737ec2e2add1df699
 motorcycle 5 cases: 3bd9e42d7ef43c695de81012a5f6c2396817656f87206bb4a571ef7b28d56248
-complete 19 cases: 7583885b68666bc87f2713c2485595a1b6cc56165676ef61f3ab336d37003773
+complete 19 cases: 7583885b68666bc87f2713c2485595a1b6cc56165676ef61f3ab337d37003773
 ```
 
 ## Next

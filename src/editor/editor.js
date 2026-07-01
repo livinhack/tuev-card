@@ -5,7 +5,7 @@ import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normali
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b335";
+} from "../plate/renderer.js?v=b337";
 import {
     getColumnLabel
 } from "./columns.js?v=b136";

@@ -1,4 +1,4 @@
-// TÜV Reminder Card b335 / direct Card plate renderer integration
+// TÜV Reminder Card b337 / direct Card plate renderer integration
 //
 // The active Card plate renderer now delegates directly to the staged Physical
 // Lab renderer adapter. There is intentionally no legacy renderer toggle and no
@@ -12,4 +12,4 @@ export {
     normalizePlate,
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./lab-renderer-adapter.js?v=b335";
+} from "./lab-renderer-adapter.js?v=b337";

@@ -1,23 +1,21 @@
-# TÜV Reminder Card b335
+# TÜV Reminder Card b337
 
-Full handover ZIP for b335.
+Full handover ZIP for **b337 Post-Plate Card Cleanup / Open Tasks Audit**.
 
-b335 is a **Card Editor/Preview Final Check** checkpoint on top of b334. It does not change renderer geometry or HU/Wechselkennzeichen rendering. It stabilizes the editor-side font availability handling and keeps Card renderer options explicit.
+b337 starts the Card-finish phase after the technically prepared number-plate renderer checkpoint b336. It does not change number-plate geometry, HU badge rendering, Wechselkennzeichen geometry, font paths, or Reminder integration. The purpose is to freeze the plate renderer as a prepared Card-side checkpoint and to sort the remaining Card work before the current Reminder ZIP is connected later.
 
 ## Main points
 
-- Card/Editor now use the b335 renderer cache boundary.
-- Editor font availability checks are guarded and throttled.
-- Temporary font unavailability no longer rewrites `plate_style` to `text`.
-- The editor font check no longer fires config changes.
-- `huBadgeRenderer: "full"` remains the Card default.
-- Reminder/vehicle values remain explicit pass-through:
-  - `huYear`
-  - `huMonth`
-  - `huRotation`
-  - `changePlate`
-- New check: `check:card-editor-preview-final`.
-- No geometry, HU, Wechselkennzeichen, or font path changes.
+- Number-plate renderer status is now documented as **prepared/frozen in the Card** until real Reminder-side options are available for end-to-end tests.
+- b336 remains the technical plate-renderer checkpoint; b337 only updates version/cache markers and post-plate documentation.
+- Open Card work is re-sorted into clear buckets:
+  - Card/editor finish work
+  - Layout/group/overlay follow-ups
+  - HACS/font release checks
+  - Later Reminder integration and real end-to-end plate tests
+- New check: `check:post-plate-card-open-tasks`.
+- No plate geometry changed.
+- No geometry, HU, Wechselkennzeichen, font path, or Reminder-data changes.
 
 ## Checks
 
@@ -29,3 +27,7 @@ Both passed for this handover build.
 ## Font note
 
 The ChatGPT ZIP does not include GL TTF binaries. A real GitHub/HACS release must include the GL font files before build so the graphical plate renderer is available in Home Assistant.
+
+## Status
+
+Use b337 as the **post-plate Card cleanup/audit checkpoint**. The plate renderer should now only be touched for concrete bugs or for the later Reminder integration tests when the current Reminder ZIP is supplied.
