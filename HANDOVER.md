@@ -1,60 +1,80 @@
-# Handover – b332 Card/Lab Adapter Options Audit
+# Handover – b334 Lab Public API Boundary Audit
 
-Current stand: b332.
+Current stand: b334.
 
-b332 is a deliberately small cleanup/audit checkpoint after b331. It keeps the protected Card/Lab renderer boundary unchanged and only tidies the Card-specific option mapping inside the adapter.
+b334 is the first condensed finalization step after b333. It combines the planned Lab public API audit and Lab-internal boundary audit into one guarded checkpoint.
 
-## Previous checkpoint
+## Base
 
-- b327 activated the full HU badge renderer in the Card and in the Wechselkennzeichen vehicle-specific supplement.
-- b328 added HU smoke checks.
-- b329 audited legacy renderer paths.
-- b330 removed only the old unimported Full/Card `src/plate/mm-model.js` file.
-- b331 added the Card/Lab renderer boundary guard.
+Started from:
 
-## b332 changes
+- `plate-physical-lab-b333-plate-renderer-public-entry-cleanup.zip`
+- `tuev-card-full-b333-plate-renderer-public-entry-cleanup-handover.zip`
 
-- Centralized Card-owned Lab renderer defaults in `CARD_LAB_RENDERER_DEFAULTS` inside `src/plate/lab-renderer-adapter.js`.
-- Kept Reminder/vehicle-specific data as explicit pass-through values:
-  - `huYear`
-  - `huMonth`
-  - `huRotation`
-  - `changePlate`
-- Normalized the adapter debug option once before mapping it to Lab debug flags.
-- Added `scripts/check-card-lab-adapter-options-audit.mjs`.
-- Added npm script `check:card-lab-adapter-options-audit`.
-- Included the new check in `npm run check`.
-- Updated package/version markers to b332.
-- Added `docs/B332_CARD_LAB_ADAPTER_OPTIONS_AUDIT.md`.
+## b334 changes
 
-## Boundary still protected
+- Added `scripts/check-lab-public-api-boundary.mjs` to the Full/Card package.
+- Added the same boundary check to the standalone Lab package.
+- Added npm script `check:lab-public-api-boundary`.
+- Added the new check to `npm run check` in both packages.
+- Updated version/cache markers to b334:
+  - Card entry imports `./plate/renderer.js?v=b334`.
+  - Editor imports `../plate/renderer.js?v=b334`.
+  - `src/plate/renderer.js` re-exports from `./lab-renderer-adapter.js?v=b334`.
+- Added `docs/B334_LAB_PUBLIC_API_BOUNDARY_AUDIT.md`.
+
+## Boundary now protected
 
 ```text
-tuev-card-entry.js / editor.js
+Card/Editor
 → src/plate/renderer.js
 → src/plate/lab-renderer-adapter.js
 → src/plate/lab-renderer/plate-public-api.js
 → Lab renderer internals
 ```
 
+The new check verifies:
+
+- `plate-public-api.js` remains the single Lab entry from the Card adapter.
+- Card-facing source does not bypass the Lab public API.
+- The public API only delegates to the established renderer/rules helper modules.
+- The public API remains declarative export glue and does not grow executable renderer logic, defaults, font handling, placeholder handling, or legacy toggles.
+- Stable public exports remain present.
+
 ## Not changed
 
-- No geometry changes.
-- No HU renderer logic changes.
-- No Wechselkennzeichen geometry changes.
-- No additional file removals.
-- No legacy/alternate renderer switch.
+- No plate geometry changed.
+- No HU badge rendering changed.
+- No Wechselkennzeichen geometry changed.
+- No font loading logic changed.
+- No further files were removed.
+- No legacy/old renderer toggle was added.
 
 ## Checks run
 
+Standalone Lab:
+
 - `npm run check` passed.
-- `npm run build` passed and rebuilt `dist/tuev-card.js` for b332.
 
-## Next suggested step
+Full/Card:
 
-Use b332 as the adapter-options checkpoint. The next safe step should again be audit-first: inspect the remaining Card-facing renderer/export compatibility names and remove only aliases that are proven unnecessary, or leave them if the editor/card boundary still uses them.
+- `npm run check` passed.
+- `npm run build` passed and rebuilt `dist/tuev-card.js` for b334.
 
-## Matching ZIPs
+## Font note
 
-- Matching standalone Lab ZIP: `plate-physical-lab-b332-card-lab-adapter-options-audit.zip`.
-- Full/Card handover ZIP: `tuev-card-full-b332-card-lab-adapter-options-audit-handover.zip`.
+As in previous ChatGPT ZIPs, the actual GL font binaries are not included. The release asset check therefore reports missing local font binaries but passes with the existing handover warning. A real GitHub/HACS release still needs the GL TTF files present before building.
+
+## Next recommended step
+
+Proceed with the condensed plan:
+
+- b335: Renderer Options + Editor/Preview Final Check.
+- b336: Final Smoke Matrix + Docs/HACS/Release Checkpoint.
+
+b334 should be used as the boundary/Public-API checkpoint.
+
+## Artifacts
+
+- Matching standalone Lab ZIP: `plate-physical-lab-b334-lab-public-api-boundary-audit.zip`.
+- Full/Card handover ZIP: `tuev-card-full-b334-lab-public-api-boundary-audit-handover.zip`.

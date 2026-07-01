@@ -1,4 +1,4 @@
-// TÜV Card bundled b332
+// TÜV Card bundled b334
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -7900,7 +7900,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b332 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b334 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -8062,7 +8062,7 @@ return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLic
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-// TÜV Reminder Card b332 / direct Card plate renderer integration
+// TÜV Reminder Card b334 / direct Card plate renderer integration
 //
 // The active Card plate renderer now delegates directly to the staged Physical
 // Lab renderer adapter. There is intentionally no legacy renderer toggle and no

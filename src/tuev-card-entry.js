@@ -22,7 +22,7 @@ import {
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b136";
+} from "./plate/renderer.js?v=b334";
 import { TuevCardEditor } from "./editor/editor.js?v=b136";
 
 window.customCards = window.customCards || [];
