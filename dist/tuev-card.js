@@ -1,4 +1,4 @@
-// TÜV Card bundled b340
+// TÜV Card bundled b341
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1548,6 +1548,8 @@ function renderVehicleHeader({
             ` : `
                 <div style="
                     font-size: ${compact ? "13px" : "15px"};
+                    line-height: ${compact ? "18px" : "20px"};
+                    min-height: ${compact ? "18px" : "20px"};
                     opacity: 0.75;
                     letter-spacing: 0.08em;
                     overflow: hidden;
@@ -11248,6 +11250,23 @@ class TuevCard extends HTMLElement {
         const previewContext = this.isEditorPreviewContext();
 
         if (!isMulti || !previewContext) {
+            return {
+                measuredWidth,
+                layoutWidth: measuredWidth,
+                requestedColumns,
+                previewContext,
+                previewScaled: false,
+                scale: 1
+            };
+        }
+
+        if (this.config?.plate_style !== "plate") {
+            // Text plates have no fixed SVG box. In HA's editor preview the
+            // simulated multi-column wrapper can otherwise react to its own
+            // text-height changes and repeatedly remeasure/repaint. Keep the
+            // text preview at the native editor width; the real dashboard uses
+            // the same non-graphical plate branch without changing renderer
+            // geometry or sorting behavior.
             return {
                 measuredWidth,
                 layoutWidth: measuredWidth,

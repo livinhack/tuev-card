@@ -1,31 +1,39 @@
-# b340 – Sortierlogik-Rollback auf b337
+# TÜV Reminder Card b341
 
-Dieser Stand setzt die Sortierbedienung wieder auf den bewährten b337-Fluss zurück. Die b339-Korrekturen für integrierte Fonts, Preview-Stabilität und Eurofeld/Rahmen bleiben erhalten.
+Full/Card handover ZIP for **b341 Card Text Preview Stability**.
 
-# TÜV Reminder Card b340
+## Stand
 
-Full handover ZIP for **b340 Card Editor Sort / Font / Frame Fix**.
+b341 builds on b340.
 
-b340 follows b338 and fixes the concrete findings from the HA test:
+- b340 kept the b337 sorting flow and preserved the b339 fixes for integrated GL-font behavior, group color movement, and Euro-field/frame layering.
+- b341 fixes the remaining issue where the Home-Assistant editor preview jittered after disabling **Kennzeichen grafisch darstellen**.
 
-- Sortierchips for name, plate, HU/due date, status, and asc/desc are treated as active editor/runtime options.
-- Group sorting now applies directly instead of getting stuck behind the manual-sort confirmation path.
-- The graphical plate checkbox is no longer hidden or controlled by asynchronous font availability probes. The GL fonts are treated as bundled release assets; the checkbox only controls `plate_style`.
-- Card and editor no longer repaint/fallback because of font availability checks, which should remove the text-preview jitter after disabling graphical plates.
-- The Euro field is still drawn as part of the physical plate body, but the black frame is drawn again as the top border layer so the blue field no longer appears in front of the frame at the rounded corners.
+## b341 change
 
-No intended changes:
+When `plate_style` is `text`, the editor preview no longer uses the simulated multi-column preview scaling wrapper. Text plates do not have a fixed SVG box, so the scaled editor wrapper could react to its own height changes and remeasure/repaint repeatedly.
 
-- no plate geometry recalculation
+The text plate display also has a fixed line-height/min-height to keep the text branch stable.
+
+## Not changed
+
+- no sorting logic change from b340/b337 rollback
+- no license plate geometry change
 - no HU badge logic change
 - no Wechselkennzeichen geometry change
 - no Reminder integration
 - no legacy renderer switch
 
-Important Font/TTF note: ChatGPT ZIPs do not include font binaries. For the real GitHub/HACS release, the previously selected GL font binaries still need to be present in the release package under `fonts/` / `dist/fonts/`. The UI no longer treats the option as unavailable while probes settle, but the actual release still needs the font files.
+## Checks
 
-Use b340 as the current Card/editor fix checkpoint after b337/b338.
+- Full/Card: `npm run check` passed
+- Full/Card: `npm run build` passed
+- Lab companion: `npm run check` passed
+
+## Font note
+
+ChatGPT ZIPs do not include font binaries. For the real GitHub/HACS release, the selected GL font binaries must be present under `fonts/` / `dist/fonts/`.
 
 No plate geometry changed. Later Reminder integration remains separate.
 
-Option „Kennzeichen grafisch darstellen“ bleibt der sichtbare Schalter für grafisch/text.
+TTF reminder: The ZIP generated here may contain placeholders/readmes only. A real release must include the GL `.ttf` files before building/publishing for HACS.

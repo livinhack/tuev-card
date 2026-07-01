@@ -22,8 +22,8 @@ import {
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b340";
-import { TuevCardEditor } from "./editor/editor.js?v=b340";
+} from "./plate/renderer.js?v=b341";
+import { TuevCardEditor } from "./editor/editor.js?v=b341";
 
 window.customCards = window.customCards || [];
 
@@ -244,6 +244,23 @@ class TuevCard extends HTMLElement {
         const previewContext = this.isEditorPreviewContext();
 
         if (!isMulti || !previewContext) {
+            return {
+                measuredWidth,
+                layoutWidth: measuredWidth,
+                requestedColumns,
+                previewContext,
+                previewScaled: false,
+                scale: 1
+            };
+        }
+
+        if (this.config?.plate_style !== "plate") {
+            // Text plates have no fixed SVG box. In HA's editor preview the
+            // simulated multi-column wrapper can otherwise react to its own
+            // text-height changes and repeatedly remeasure/repaint. Keep the
+            // text preview at the native editor width; the real dashboard uses
+            // the same non-graphical plate branch without changing renderer
+            // geometry or sorting behavior.
             return {
                 measuredWidth,
                 layoutWidth: measuredWidth,

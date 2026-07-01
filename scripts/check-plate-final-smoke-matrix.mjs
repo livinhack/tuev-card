@@ -54,9 +54,9 @@ const editor = read("src/editor/editor.js");
 const publicRenderer = read("src/plate/renderer.js");
 const adapter = read("src/plate/lab-renderer-adapter.js");
 
-assert(card.includes('./plate/renderer.js?v=b340'), "Card runtime must use the b340 public renderer cache marker.");
-assert(editor.includes('../plate/renderer.js?v=b340'), "Editor must use the b340 public renderer cache marker.");
-assert(publicRenderer.includes('./lab-renderer-adapter.js?v=b340'), "Public renderer entry must delegate to the b340 adapter cache marker.");
+assert(card.includes('./plate/renderer.js?v=b341'), "Card runtime must use the b341 public renderer cache marker.");
+assert(editor.includes('../plate/renderer.js?v=b341'), "Editor must use the b341 public renderer cache marker.");
+assert(publicRenderer.includes('./lab-renderer-adapter.js?v=b341'), "Public renderer entry must delegate to the b341 adapter cache marker.");
 assert(adapter.includes('huBadgeRenderer: "full"'), "Card adapter must keep Full-HU badge enabled for production rendering.");
 assert(adapter.includes("huYear: options.huYear"), "Card adapter must pass reminder HU year through.");
 assert(adapter.includes("huMonth: options.huMonth"), "Card adapter must pass reminder HU month through.");
@@ -91,10 +91,10 @@ assert(renderBadge(2026, 0, false, 300) !== renderBadge(2027, 0, false, 300), "d
 
 const readme = read("README.md");
 const handover = read("HANDOVER.md");
-assert(readme.includes("b340"), "README must identify the b340 checkpoint.");
-assert(handover.includes("b340"), "HANDOVER must identify the b340 checkpoint.");
+assert(readme.includes("b341"), "README must identify the b341 checkpoint.");
+assert(handover.includes("b341"), "HANDOVER must identify the b341 checkpoint.");
 assert(/Font/i.test(readme) && /TTF/i.test(readme), "README must keep the HACS/font binary note visible.");
 assert(!existsSync(resolve(root, "src/plate/mm-model.js")), "Removed legacy Full/Card src/plate/mm-model.js must stay absent.");
 
-if (!process.exitCode) console.log(`Final card plate smoke matrix OK: ${cases.length} core Card/Lab plate variants render, b340 cache markers are current, and release docs keep the font note.`);
+if (!process.exitCode) console.log(`Final card plate smoke matrix OK: ${cases.length} core Card/Lab plate variants render, b341 cache markers are current, and release docs keep the font note.`);
 if (process.exitCode) process.exit(process.exitCode);

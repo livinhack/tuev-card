@@ -1,62 +1,51 @@
-# b340 – Sortierlogik-Rollback auf b337
+# Handover – b341 Card Text Preview Stability
 
-Status: baut auf b339 auf. Die in b338/b339 geänderten Sortierfunktionen für ungruppiert/Gruppen wurden auf den bewährten b337-Fluss zurückgesetzt, weil die gemeldete Fehlbeobachtung durch Testen im falschen Bereich entstand. Beibehalten aus b339: integrierte GL-Fonts ohne asynchronen Editor-Fontcheck, stabile Text/Grafik-Umschaltung, Gruppenfarben-Mitnahme beim Verschieben und Eurofeld/Rahmen-Overlay-Fix.
+Current stand: **b341**.
 
-# Handover – b340 Card Editor Sort / Font / Frame Fix
+## Anlass
 
-Current stand: **b340**.
+Nach b340 funktionierte das Abwählen von **Kennzeichen grafisch darstellen** grundsätzlich: Die grafischen Kennzeichen verschwanden und Text wurde angezeigt. Die Editor-Preview begann dabei aber zu zittern.
 
-b340 fixes the issues reported after testing b338 in Home Assistant:
+## Ursache / Einordnung
 
-1. Sorting still not working
-   - Group sorting no longer waits behind the manual-sort confirmation popover.
-   - Clicking group sort fields applies the sort directly.
-   - Ungrouped sorting keeps the b338 saved-order behavior.
-   - Asc/desc continues to rewrite the corresponding entity order.
+Der Fontcheck war nach b339/b340 nicht mehr die wahrscheinliche Ursache. Der Fehler lag im Preview-Layout: Der Textmodus hat keinen festen SVG-Kennzeichenblock. In HA's Editor-Preview konnte die simulierte Multi-Column-Preview-Skalierung dadurch auf ihre eigene Höhenänderung reagieren und wiederholt neu messen/rendern.
 
-2. `Kennzeichen grafisch darstellen` and font availability
-   - The option is now independent from asynchronous font availability probes.
-   - Editor preview always exposes the checkbox.
-   - The editor keeps the public renderer boundary import, but no longer imports or calls `checkPlateFontAvailable()` / `ensurePlateFont()`.
-   - Card font availability is now a stable compatibility no-op; graphical/text rendering obeys `plate_style`.
-   - This should remove the preview jitter seen after switching to text plate display.
+## Änderung in b341
 
-3. Euro field/frame layer order
-   - The physical plate body now draws a black base frame, then reflective field + Euro field, then a black top frame stroke.
-   - This keeps the Euro field visually behind the black frame at rounded corners.
-   - No physical dimensions were changed.
+- In `src/tuev-card-entry.js` wird im Editor-Preview-Kontext bei `plate_style !== "plate"` keine simulierte Preview-Skalierung mehr verwendet.
+- In `src/card/render-parts.js` bekommt der Text-Kennzeichenblock feste `line-height` und `min-height`.
+- Neuer Check: `check:card-editor-text-preview-stability`.
+- Cache-/Versionsmarker auf b341 aktualisiert.
 
-Changed files of interest:
+## Beibehalten aus b340/b339
 
-- `src/editor/editor.js`
-- `src/tuev-card-entry.js`
-- `src/card/groups.js`
-- `src/plate/lab-renderer/plate-body.js`
-- `tools/plate-physical-lab/src/plate/plate-body.js`
-- `scripts/check-card-editor-sort-font-frame-fix.mjs`
-- updated b340 cache/version markers and existing check expectations
+- Sortierlogik bleibt auf dem b337-Rollback-Stand aus b340.
+- Integrierte GL-Fonts werden als Release-Assets behandelt; keine asynchronen Fontchecks im Editor.
+- Checkbox **Kennzeichen grafisch darstellen** bleibt wirksam.
+- Gruppenfarben-Mitnahme beim Verschieben bleibt aktiv.
+- Eurofeld/Rahmen-Overlay-Fix bleibt aktiv.
 
-Checks run:
+## Nicht geändert
 
-- Full/Card: `npm run build` passed
-- Full/Card: `npm run check` passed
-- Lab: `npm run check` passed
+- keine Kennzeichen-Geometrie
+- keine HU-Logik
+- keine Wechselkennzeichen-Geometrie
+- keine Reminder-Integration
+- kein Legacy-Renderer
 
-Notes:
+## Checks
 
-- No Kennzeichen layout/geometric solver changes.
-- No HU-Plakettenrenderer changes.
-- No Wechselkennzeichen geometry changes.
-- No Reminder integration yet.
-- ChatGPT ZIPs do not contain TTF binaries; final GitHub/HACS release still needs the selected GL font files locally.
+- Lab: `npm run check` bestanden
+- Full/Card: `npm run check` bestanden
+- Full/Card: `npm run build` bestanden
 
-Next suggested test in HA:
+## ZIPs
 
-- Confirm all group sort chips and asc/desc work.
-- Confirm disabling graphical plate display shows text and no longer jitters.
-- Confirm graphical plate display still works.
-- Confirm the blue Euro field no longer appears over the black frame corner.
+- `plate-physical-lab-b341-card-text-preview-stability.zip`
+- `tuev-card-full-b341-card-text-preview-stability-handover.zip`
+
+## Hinweis
+
+Die ChatGPT-ZIPs enthalten weiterhin keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein.
 
 No plate geometry changed. Later Reminder integration remains separate.
-
-Sortier- und Farben-Verhalten aus b338 bleibt erhalten; b340 korrigiert die noch blockierte Sortierausführung.

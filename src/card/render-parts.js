@@ -58,6 +58,8 @@ export function renderVehicleHeader({
             ` : `
                 <div style="
                     font-size: ${compact ? "13px" : "15px"};
+                    line-height: ${compact ? "18px" : "20px"};
+                    min-height: ${compact ? "18px" : "20px"};
                     opacity: 0.75;
                     letter-spacing: 0.08em;
                     overflow: hidden;
