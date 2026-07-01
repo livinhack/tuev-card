@@ -5,7 +5,7 @@ import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normali
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b334";
+} from "../plate/renderer.js?v=b335";
 import {
     getColumnLabel
 } from "./columns.js?v=b136";
@@ -28,6 +28,8 @@ export class TuevCardEditor extends HTMLElement {
         this._config = normalizeCardConfig(config, { requireEntity: false });
 
         this._plateFontAvailable = this._plateFontAvailable === true;
+        this._plateFontCheckInProgress = this._plateFontCheckInProgress === true;
+        this._plateFontLastCheckedAt = this._plateFontLastCheckedAt || 0;
         this._draftGroups = normalizeGroups(this._config.groups);
         this._draftEntityIds = this.getUngroupedEntityIdsFromConfig();
         this._pickerOpen = false;
@@ -46,7 +48,7 @@ export class TuevCardEditor extends HTMLElement {
         this._sortConfirmAnchor = sortConfirmAnchor || null;
         this._draggedGroupEntity = null;
 
-        this.checkPlateFontAvailability();
+        this.checkPlateFontAvailability(true);
         this.render();
     }
 
@@ -158,40 +160,50 @@ export class TuevCardEditor extends HTMLElement {
         return localize(this._hass, key);
     }
 
-    checkPlateFontAvailability() {
+    checkPlateFontAvailability(force = false) {
+        if (this._plateFontCheckInProgress) {
+            return;
+        }
+
+        const now = Date.now();
+        if (!force && now - (this._plateFontLastCheckedAt || 0) < 10000) {
+            return;
+        }
+
+        this._plateFontCheckInProgress = true;
+        this._plateFontLastCheckedAt = now;
+
         checkPlateFontAvailable().then((available) => {
+            const changed = this._plateFontAvailable !== available;
             this._plateFontAvailable = available;
 
             if (!available) {
-                const hadGraphicalPlate = this._config.plate_style === "plate";
-                this._config.plate_style = "text";
-                removeLegacyCardConfigOptions(this._config);
-
-                if (hadGraphicalPlate) {
-                    this.fireConfigChanged();
+                if (changed) {
+                    this.renderUnlessEditingGroupTitle();
                 }
-
-                this.renderUnlessEditingGroupTitle();
                 return;
             }
 
             ensurePlateFont(() => {
+                const changedAfterLoad = this._plateFontAvailable !== true;
                 this._plateFontAvailable = true;
-                this.renderUnlessEditingGroupTitle();
+                if (changedAfterLoad) {
+                    this.renderUnlessEditingGroupTitle();
+                }
             });
 
-            this.renderUnlessEditingGroupTitle();
-        }).catch(() => {
-            const hadGraphicalPlate = this._config.plate_style === "plate";
-            this._plateFontAvailable = false;
-            this._config.plate_style = "text";
-            removeLegacyCardConfigOptions(this._config);
-
-            if (hadGraphicalPlate) {
-                this.fireConfigChanged();
+            if (changed) {
+                this.renderUnlessEditingGroupTitle();
             }
+        }).catch(() => {
+            const changed = this._plateFontAvailable !== false;
+            this._plateFontAvailable = false;
 
-            this.renderUnlessEditingGroupTitle();
+            if (changed) {
+                this.renderUnlessEditingGroupTitle();
+            }
+        }).finally(() => {
+            this._plateFontCheckInProgress = false;
         });
     }
 

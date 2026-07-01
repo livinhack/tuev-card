@@ -1,11 +1,11 @@
 {
   "name": "tuev-card",
-  "version": "0.1.1-b334",
+  "version": "0.1.1-b335",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-bundle.mjs",
-    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy && npm run check:card-renderer-adapter-scaffold && npm run check:card-renderer-adapter-smoke && npm run check:card-renderer-direct-integration && npm run check:hu-badge-smoke && npm run check:renderer-legacy-audit && npm run check:card-lab-renderer-boundary && npm run check:card-lab-adapter-options-audit && npm run check:plate-renderer-public-entry && npm run check:lab-public-api-boundary",
+    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy && npm run check:card-renderer-adapter-scaffold && npm run check:card-renderer-adapter-smoke && npm run check:card-renderer-direct-integration && npm run check:hu-badge-smoke && npm run check:renderer-legacy-audit && npm run check:card-lab-renderer-boundary && npm run check:card-lab-adapter-options-audit && npm run check:plate-renderer-public-entry && npm run check:lab-public-api-boundary && npm run check:card-editor-preview-final",
     "check:js": "node scripts/check-js.mjs",
     "check:release": "node scripts/check-release-assets.mjs",
     "check:production-boundary": "node tools/plate-physical-lab/scripts/check-production-import-boundary.mjs",
@@ -20,6 +20,7 @@
     "check:card-lab-renderer-boundary": "node scripts/check-card-lab-renderer-boundary.mjs",
     "check:card-lab-adapter-options-audit": "node scripts/check-card-lab-adapter-options-audit.mjs",
     "check:plate-renderer-public-entry": "node scripts/check-plate-renderer-public-entry.mjs",
-    "check:lab-public-api-boundary": "node scripts/check-lab-public-api-boundary.mjs"
+    "check:lab-public-api-boundary": "node scripts/check-lab-public-api-boundary.mjs",
+    "check:card-editor-preview-final": "node scripts/check-card-editor-preview-final.mjs"
   }
 }

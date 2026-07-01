@@ -1,29 +1,35 @@
-# Handover – b334 Lab Public API Boundary Audit
+# Handover – b335 Card Editor/Preview Final Check
 
-Current stand: b334.
+Current stand: b335.
 
-b334 is the first condensed finalization step after b333. It combines the planned Lab public API audit and Lab-internal boundary audit into one guarded checkpoint.
+b335 is the second condensed finalization step after b334. It combines the planned renderer options audit with the editor/preview stability checkpoint.
 
 ## Base
 
 Started from:
 
-- `plate-physical-lab-b333-plate-renderer-public-entry-cleanup.zip`
-- `tuev-card-full-b333-plate-renderer-public-entry-cleanup-handover.zip`
+- `plate-physical-lab-b334-lab-public-api-boundary-audit.zip`
+- `tuev-card-full-b334-lab-public-api-boundary-audit-handover.zip`
 
-## b334 changes
+## b335 changes
 
-- Added `scripts/check-lab-public-api-boundary.mjs` to the Full/Card package.
-- Added the same boundary check to the standalone Lab package.
-- Added npm script `check:lab-public-api-boundary`.
-- Added the new check to `npm run check` in both packages.
-- Updated version/cache markers to b334:
-  - Card entry imports `./plate/renderer.js?v=b334`.
-  - Editor imports `../plate/renderer.js?v=b334`.
-  - `src/plate/renderer.js` re-exports from `./lab-renderer-adapter.js?v=b334`.
-- Added `docs/B334_LAB_PUBLIC_API_BOUNDARY_AUDIT.md`.
+- Updated version/cache markers to b335:
+  - Card entry imports `./plate/renderer.js?v=b335`.
+  - Editor imports `../plate/renderer.js?v=b335`.
+  - `src/plate/renderer.js` re-exports from `./lab-renderer-adapter.js?v=b335`.
+- Stabilized the editor font availability check:
+  - added in-progress guard;
+  - added 10-second throttle;
+  - retained the existing UI availability flag;
+  - removed automatic config mutation from the font check.
+- The editor no longer rewrites `plate_style` to `text` when fonts are temporarily unavailable.
+- The editor font check no longer fires config changes.
+- Removed one duplicate unreachable return in `src/plate/lab-renderer-adapter.js`.
+- Added `scripts/check-card-editor-preview-final.mjs`.
+- Added npm script `check:card-editor-preview-final` and included it in `npm run check`.
+- Added `docs/B335_CARD_EDITOR_PREVIEW_FINAL_CHECK.md`.
 
-## Boundary now protected
+## Still protected from earlier checkpoints
 
 ```text
 Card/Editor
@@ -33,21 +39,24 @@ Card/Editor
 → Lab renderer internals
 ```
 
-The new check verifies:
+The b335 check additionally verifies:
 
-- `plate-public-api.js` remains the single Lab entry from the Card adapter.
-- Card-facing source does not bypass the Lab public API.
-- The public API only delegates to the established renderer/rules helper modules.
-- The public API remains declarative export glue and does not grow executable renderer logic, defaults, font handling, placeholder handling, or legacy toggles.
-- Stable public exports remain present.
+- Card/Editor use the b335 public renderer cache boundary.
+- Editor font checks are guarded and throttled.
+- Editor font checks do not mutate `plate_style`.
+- Editor font checks do not call `fireConfigChanged()`.
+- Card runtime keeps its guarded graphical-plate availability gate.
+- `huBadgeRenderer: "full"` remains active in the Card adapter.
+- `huYear`, `huMonth`, `huRotation`, and `changePlate` remain explicit pass-through values.
+- The adapter/editor remain legacy-toggle free.
 
 ## Not changed
 
 - No plate geometry changed.
 - No HU badge rendering changed.
 - No Wechselkennzeichen geometry changed.
-- No font loading logic changed.
-- No further files were removed.
+- No font file paths changed.
+- No renderer boundary was collapsed.
 - No legacy/old renderer toggle was added.
 
 ## Checks run
@@ -59,7 +68,7 @@ Standalone Lab:
 Full/Card:
 
 - `npm run check` passed.
-- `npm run build` passed and rebuilt `dist/tuev-card.js` for b334.
+- `npm run build` passed and rebuilt `dist/tuev-card.js` for b335.
 
 ## Font note
 
@@ -69,12 +78,11 @@ As in previous ChatGPT ZIPs, the actual GL font binaries are not included. The r
 
 Proceed with the condensed plan:
 
-- b335: Renderer Options + Editor/Preview Final Check.
 - b336: Final Smoke Matrix + Docs/HACS/Release Checkpoint.
 
-b334 should be used as the boundary/Public-API checkpoint.
+b335 should be used as the editor/preview/options final checkpoint.
 
 ## Artifacts
 
-- Matching standalone Lab ZIP: `plate-physical-lab-b334-lab-public-api-boundary-audit.zip`.
-- Full/Card handover ZIP: `tuev-card-full-b334-lab-public-api-boundary-audit-handover.zip`.
+- Matching standalone Lab ZIP: `plate-physical-lab-b335-card-editor-preview-final-check.zip`.
+- Full/Card handover ZIP: `tuev-card-full-b335-card-editor-preview-final-check-handover.zip`.

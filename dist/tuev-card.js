@@ -1,4 +1,4 @@
-// TÜV Card bundled b334
+// TÜV Card bundled b335
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -7900,7 +7900,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b334 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b335 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -8062,7 +8062,7 @@ return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLic
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-// TÜV Reminder Card b334 / direct Card plate renderer integration
+// TÜV Reminder Card b335 / direct Card plate renderer integration
 //
 // The active Card plate renderer now delegates directly to the staged Physical
 // Lab renderer adapter. There is intentionally no legacy renderer toggle and no
@@ -9868,6 +9868,8 @@ class TuevCardEditor extends HTMLElement {
         this._config = normalizeCardConfig(config, { requireEntity: false });
 
         this._plateFontAvailable = this._plateFontAvailable === true;
+        this._plateFontCheckInProgress = this._plateFontCheckInProgress === true;
+        this._plateFontLastCheckedAt = this._plateFontLastCheckedAt || 0;
         this._draftGroups = normalizeGroups(this._config.groups);
         this._draftEntityIds = this.getUngroupedEntityIdsFromConfig();
         this._pickerOpen = false;
@@ -9886,7 +9888,7 @@ class TuevCardEditor extends HTMLElement {
         this._sortConfirmAnchor = sortConfirmAnchor || null;
         this._draggedGroupEntity = null;
 
-        this.checkPlateFontAvailability();
+        this.checkPlateFontAvailability(true);
         this.render();
     }
 
@@ -9998,40 +10000,50 @@ class TuevCardEditor extends HTMLElement {
         return localize(this._hass, key);
     }
 
-    checkPlateFontAvailability() {
+    checkPlateFontAvailability(force = false) {
+        if (this._plateFontCheckInProgress) {
+            return;
+        }
+
+        const now = Date.now();
+        if (!force && now - (this._plateFontLastCheckedAt || 0) < 10000) {
+            return;
+        }
+
+        this._plateFontCheckInProgress = true;
+        this._plateFontLastCheckedAt = now;
+
         checkPlateFontAvailable().then((available) => {
+            const changed = this._plateFontAvailable !== available;
             this._plateFontAvailable = available;
 
             if (!available) {
-                const hadGraphicalPlate = this._config.plate_style === "plate";
-                this._config.plate_style = "text";
-                removeLegacyCardConfigOptions(this._config);
-
-                if (hadGraphicalPlate) {
-                    this.fireConfigChanged();
+                if (changed) {
+                    this.renderUnlessEditingGroupTitle();
                 }
-
-                this.renderUnlessEditingGroupTitle();
                 return;
             }
 
             ensurePlateFont(() => {
+                const changedAfterLoad = this._plateFontAvailable !== true;
                 this._plateFontAvailable = true;
-                this.renderUnlessEditingGroupTitle();
+                if (changedAfterLoad) {
+                    this.renderUnlessEditingGroupTitle();
+                }
             });
 
-            this.renderUnlessEditingGroupTitle();
-        }).catch(() => {
-            const hadGraphicalPlate = this._config.plate_style === "plate";
-            this._plateFontAvailable = false;
-            this._config.plate_style = "text";
-            removeLegacyCardConfigOptions(this._config);
-
-            if (hadGraphicalPlate) {
-                this.fireConfigChanged();
+            if (changed) {
+                this.renderUnlessEditingGroupTitle();
             }
+        }).catch(() => {
+            const changed = this._plateFontAvailable !== false;
+            this._plateFontAvailable = false;
 
-            this.renderUnlessEditingGroupTitle();
+            if (changed) {
+                this.renderUnlessEditingGroupTitle();
+            }
+        }).finally(() => {
+            this._plateFontCheckInProgress = false;
         });
     }
 
