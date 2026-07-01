@@ -1,25 +1,23 @@
-# TÜV Reminder Card b324
+# TÜV Reminder Card b325
 
-## b324 – Direct Card Renderer Replacement Prep
+## b325 – Direct Card Plate Renderer Integration
 
-b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
+b325 baut auf **b324 – Direct Card Renderer Replacement Prep** auf.
 
-## Änderung in b324
+## Änderung in b325
 
-- Full-/Lab-Version auf `0.1.1-b324` aktualisiert
-- sichtbarer Lab-Titel/Version auf b324 aktualisiert
-- inaktiver Adapter `src/plate/lab-renderer-adapter.js` erhält eine `renderer.js`-kompatible API:
-  - `normalizePlate()`
-  - `getLicensePlateMetrics()`
-  - `renderLicensePlate()`
-- neuer Check: `scripts/check-card-renderer-direct-replacement-prep.mjs`
-- neues Script: `npm run check:card-renderer-direct-replacement-prep`
-- Full-`npm run check` führt den neuen Check mit aus
-- neue Doku: `docs/B324_DIRECT_CARD_RENDERER_REPLACEMENT_PREP.md`
+- Full-/Lab-Version auf `0.1.1-b325` aktualisiert
+- sichtbarer Lab-Titel/Version auf b325 aktualisiert
+- `src/plate/renderer.js` delegiert jetzt direkt an `src/plate/lab-renderer-adapter.js`
+- kein Umschalter, kein Legacy-Fallback, kein paralleler Alt-/Neu-Pfad
+- `isGraphicalPlateAvailable()` hängt nicht mehr an `config.plate_style === "plate"`
+- neuer Check: `npm run check:card-renderer-direct-integration`
+- neue Doku: `docs/B325_DIRECT_CARD_PLATE_RENDERER_INTEGRATION.md`
 
 ## Wichtig
 
-Der aktive Card-Renderer wurde noch nicht ersetzt. Es gibt keinen Umschalter und keinen Legacy-Fallback. Der Rückweg bleibt das vorherige ZIP.
+Der aktive Card-Kennzeichenrenderer ist damit der vorbereitete Physical-Lab-Renderer-Adapter.
+Ein Rollback erfolgt über das vorherige ZIP, nicht über einen Code-Umschalter.
 
 ## Checks
 
@@ -30,13 +28,11 @@ Der aktive Card-Renderer wurde noch nicht ersetzt. Es gibt keinen Umschalter und
 - Card Transfer Staged Copy: 35/35 OK
 - Card Renderer Adapter Scaffold: bestanden
 - Card Renderer Adapter Smoke: bestanden
-- Card Renderer Direct Replacement Prep: bestanden
-- b323 → b324 Modell-Hashes: 41/41 identisch
-- b323 → b324 SVG-Hashes: 41/41 identisch
+- Card Renderer Direct Integration: bestanden
 - Full/Card JS Check: bestanden
 - Release Asset Check: bestanden
 - ZIP-Test: beide ZIPs fehlerfrei
 
 ## Artefakt
 
-`tuev-card-full-b324-direct-card-renderer-replacement-prep-handover.zip`
+`tuev-card-full-b325-direct-card-plate-renderer-integration-handover.zip`

@@ -187,7 +187,6 @@ class TuevCard extends HTMLElement {
 
     isGraphicalPlateAvailable() {
         return (
-            this.config?.plate_style === "plate" &&
             this._plateFontAvailable === true &&
             this._plateFontLoaded === true
         );

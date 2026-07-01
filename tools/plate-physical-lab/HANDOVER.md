@@ -1,27 +1,27 @@
-# Übergabe Lab b324 – Direct Card Renderer Replacement Prep
+# Übergabe Lab b325 – Direct Card Plate Renderer Integration
 
-b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
+b325 baut auf **b324 – Direct Card Renderer Replacement Prep** auf.
 
-## Änderung
+## Änderungen
 
-- sichtbare Lab-Version/Titel auf b324 aktualisiert
-- Lab-Version auf `0.1.1-b324` aktualisiert
-- Doku `docs/B324_DIRECT_CARD_RENDERER_REPLACEMENT_PREP.md` ergänzt
+- sichtbare Lab-Version/Titel auf b325 aktualisiert
+- Lab-Version auf `0.1.1-b325` aktualisiert
+- keine Lab-Renderer-/Geometrie-/Solveränderung
+- keine Debug-Abhängigkeitsänderung im Lab
 
-## Nicht geändert
+## Full/Card-Bezug
 
-- keine Geometrie
-- keine Rendererlogik
-- keine Solver-Zusammenführung
-- keine Wechselkennzeichen-Fachlogik
-- keine UI-Control-Änderung
+Die Full/Card integriert in b325 den vorbereiteten Lab-Renderer-Adapter direkt als aktiven Kennzeichenrenderer.
+Das Lab bleibt weiterhin autoritativ; der Full-ZIP enthält einen synchronisierten Lab-Spiegel.
 
 ## Checks
 
 - Lab Regression: 41/41 OK
-- b323 → b324 Modell-Hashes: 41/41 identisch
-- b323 → b324 SVG-Hashes: 41/41 identisch
+- Production Import Boundary Guard: bestanden
+- Card Transfer Dry Run Scaffold: bestanden
+- Card Transfer Manifest Preview: bestanden
+- Lab-Modell-/SVG-Hashes bleiben gegenüber b324 identisch, da keine Lab-Rendererlogik geändert wurde
 
-## Nächster sinnvoller Schritt
+## Artefakt
 
-Direkte Card-Renderer-Ersetzung in einem eigenen Stand durchführen, ohne Toggle und ohne Alt-Renderer-Fallback.
+- `plate-physical-lab-b325-direct-card-plate-renderer-integration.zip`

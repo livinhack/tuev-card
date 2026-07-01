@@ -10,7 +10,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const labRoot = resolve(root, "tools/plate-physical-lab");
 const targetBase = String(cardTransferDryRun.targetBase || "src/plate/lab-renderer").replace(/\\/g, "/");
 const labOnlySet = new Set(labOnlyModules.map((entry) => String(entry).replace(/\\/g, "/")));
-const activeCardFiles = ["src/plate/font.js", "src/plate/mm-model.js", "src/plate/renderer.js"];
+const activeCardFiles = ["src/plate/font.js", "src/plate/mm-model.js"];
+const activeRendererPath = "src/plate/renderer.js";
 
 function fail(message) {
   console.error(message);
@@ -85,10 +86,17 @@ for (const activeFile of activeCardFiles) {
   if (!existsSync(resolve(root, activeFile))) continue;
   const content = read(activeFile);
   if (content.includes("lab-renderer")) {
-    fail(`Active Card file must not import staged lab renderer yet: ${activeFile}`);
+    fail(`Non-renderer Card support file must not import staged lab renderer: ${activeFile}`);
+  }
+}
+
+if (existsSync(resolve(root, activeRendererPath))) {
+  const activeRenderer = read(activeRendererPath);
+  if (!activeRenderer.includes("lab-renderer-adapter")) {
+    fail("Active Card renderer must delegate through lab-renderer-adapter after direct integration.");
   }
 }
 
 if (!process.exitCode) {
-  console.log(`Card transfer staged copy OK: ${mappings.length}/${mappings.length} files copied under ${targetBase}, active Card renderer unchanged.`);
+  console.log(`Card transfer staged copy OK: ${mappings.length}/${mappings.length} files copied under ${targetBase}, active Card renderer delegates through adapter.`);
 }

@@ -1,9 +1,7 @@
-// TÜV Reminder Card b324 / direct replacement prep adapter scaffold
+// TÜV Reminder Card b325 / direct Card plate renderer integration adapter
 //
-// This module is intentionally not imported by the active Card renderer yet.
-// It is the future direct replacement boundary around the staged Lab renderer
-// copy in src/plate/lab-renderer/. No legacy toggle or fallback is planned;
-// rollback remains the previous ZIP.
+// This module is imported by the active Card renderer boundary in renderer.js.
+// No legacy toggle or fallback is planned; rollback remains the previous ZIP.
 
 import {
     ONE_LINE_RULES_MM as LAB_ONE_LINE_RULES_MM,
@@ -149,7 +147,7 @@ function renderEmbeddedFontDefs() {
 function addLabRendererCardSvgAttributes(svg, { displayWidth, displayHeight, model }) {
     return svg.replace(
         /<svg\s+class="physical-plate-svg"/,
-        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab-staged" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
+        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
     );
 }
 

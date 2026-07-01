@@ -5,7 +5,8 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const adapterPath = "src/plate/lab-renderer-adapter.js";
-const activeCardFiles = ["src/plate/renderer.js", "src/plate/mm-model.js"];
+const activeRendererPath = "src/plate/renderer.js";
+const activeSupportFiles = ["src/plate/mm-model.js"];
 const forbiddenAdapterImports = [
   "debug-dimensions",
   "plate-lab-debug-renderers",
@@ -25,31 +26,38 @@ function read(relativePath) {
 }
 
 if (!existsSync(resolve(root, adapterPath))) {
-  fail(`Missing inactive Card Lab renderer adapter scaffold: ${adapterPath}`);
+  fail(`Missing Card Lab renderer adapter: ${adapterPath}`);
 } else {
   const adapter = read(adapterPath);
   if (!adapter.includes("./lab-renderer/plate-public-api.js")) {
-    fail("Adapter scaffold must enter staged renderer through lab-renderer/plate-public-api.js.");
+    fail("Adapter must enter staged renderer through lab-renderer/plate-public-api.js.");
   }
   if (!adapter.includes("./font.js")) {
-    fail("Adapter scaffold must keep Card font integration at the adapter boundary.");
+    fail("Adapter must keep Card font integration at the adapter boundary.");
   }
   for (const forbidden of forbiddenAdapterImports) {
     if (adapter.includes(forbidden)) {
-      fail(`Adapter scaffold must not import Lab/debug-only code: ${forbidden}`);
+      fail(`Adapter must not import Lab/debug-only code: ${forbidden}`);
     }
   }
 }
 
-for (const activeFile of activeCardFiles) {
+for (const activeFile of activeSupportFiles) {
   const activePath = resolve(root, activeFile);
   if (!existsSync(activePath)) continue;
   const content = read(activeFile);
   if (content.includes("lab-renderer-adapter")) {
-    fail(`Active Card renderer must not import inactive adapter yet: ${activeFile}`);
+    fail(`Support file must not import adapter directly: ${activeFile}`);
+  }
+}
+
+if (existsSync(resolve(root, activeRendererPath))) {
+  const activeRenderer = read(activeRendererPath);
+  if (!activeRenderer.includes("lab-renderer-adapter")) {
+    fail("Active renderer.js must delegate through the adapter after direct integration.");
   }
 }
 
 if (!process.exitCode) {
-  console.log("Card renderer adapter scaffold OK: inactive adapter present, active Card renderer unchanged, no Lab/debug-only imports.");
+  console.log("Card renderer adapter scaffold OK: adapter present, active renderer delegates through adapter, no Lab/debug-only imports.");
 }

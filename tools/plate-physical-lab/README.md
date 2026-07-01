@@ -1,27 +1,29 @@
-# Kennzeichen Physical Lab b324
+# Kennzeichen Physical Lab b325
 
-## b324 – Direct Card Renderer Replacement Prep
+## b325 – Direct Card Plate Renderer Integration
 
-b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
+b325 baut auf **b324 – Direct Card Renderer Replacement Prep** auf.
 
-## Änderung in b324
+## Änderung in b325
 
-- Lab-Version/Titel auf b324 aktualisiert
-- Lab-Version auf `0.1.1-b324` aktualisiert
-- Doku zur direkten Card-Renderer-Ersetzung ergänzt
-- keine Geometrieänderung
-- keine Rendererlogikänderung
+- Lab-Version/Titel auf b325 aktualisiert
+- Lab-Version auf `0.1.1-b325` aktualisiert
+- Lab-Renderer/Geometrie/Solver bleiben unverändert
+- b325 dokumentiert, dass die Full/Card den vorbereiteten Lab-Renderer-Adapter direkt integriert
 
-## Full/Card-Kontext
+## Wichtig
 
-Im Full-ZIP wird der inaktive Card-Adapter so vorbereitet, dass er später `src/plate/renderer.js` direkt ersetzen kann. Es wird kein Umschalter und kein Legacy-Fallback eingebaut.
+Das separate Lab-ZIP bleibt autoritativ für die Renderer-Geometrie.
+Debug-/Lab-only-Dateien bleiben weiterhin Lab-only.
 
 ## Checks
 
 - Lab Regression: 41/41 OK
-- b323 → b324 Modell-Hashes: 41/41 identisch
-- b323 → b324 SVG-Hashes: 41/41 identisch
+- Production Import Boundary Guard: bestanden
+- Card Transfer Dry Run Scaffold: bestanden
+- Card Transfer Manifest Preview: bestanden
+- b324 → b325 Lab-Modell-/SVG-Hashes: 41/41 identisch erwartet, da Lab-Renderer unverändert bleibt
 
 ## Artefakt
 
-`plate-physical-lab-b324-direct-card-renderer-replacement-prep.zip`
+`plate-physical-lab-b325-direct-card-plate-renderer-integration.zip`

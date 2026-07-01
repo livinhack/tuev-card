@@ -1,4 +1,4 @@
-// TÜV Card bundled b294
+// TÜV Card bundled b325
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -1926,26 +1926,28 @@ return { renderMissingEntity: renderMissingEntity, renderVehicleHeader: renderVe
 
 })();
 
-// ---- src/plate/mm-model.js ----
-const __m_src_plate_mm_model_js = (() => {
-// Kennzeichen Physical Lab b157 / shared plate physical mm model
-// CAD-like model layer: every coordinate, size and distance in this file is millimetres.
-// No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
-// Shared CAD-like plate model used by the Physical Lab and the production Card renderer. b157 keeps the b156 geometry and adds a Physical-Lab regression/preset matrix for the known one-line/two-line standard, H/E, season and green variants: final H/E suffix plates use the 20-30 mm bottom-row group-gap rule and the balanced bottom-row surface solver both with and without a season field.
-
+// ---- src/plate/lab-renderer/plate-variant-rules.js ----
+const __m_src_plate_lab_renderer_plate_variant_rules_js = (() => {
+// Kennzeichen Physical Lab b227 / central plate variant and rule objects
+//
+// Pure data/rule module: no renderer imports, no SVG generation, no layout side effects.
+// The goal is to keep variant dimensions, width bands and common spacing
+// definitions in one place so the physical renderer does not duplicate them.
 
 const PLATE_TEXT_COLORS_MM = Object.freeze({
   black: {
     key: "black",
     label: "Standard black",
     color: "#080808",
-    note: "Standard German plate text colour used for normal white plates."
+    frameColor: "#111",
+    note: "Standard German plate text and frame colour used for normal white plates."
   },
   green: {
     key: "green",
     label: "Green plate · RAL 6001 approximation",
     color: "#287233",
-    note: "Project approximation for German green plates: green text on otherwise normal white plate geometry. Intended for standard plates, not combined with H/E or season."
+    frameColor: "#287233",
+    note: "Project approximation for German green plates: green text and frame/border on otherwise normal white reflective plate geometry. Intended for standard plates, not combined with H/E or season."
   }
 });
 
@@ -1959,12 +1961,58 @@ const TWO_LINE_WIDTH_BANDS = Object.freeze({
   narrow: [260, 280, 320, 340]
 });
 
+const TWO_LINE_WIDTH_RULES = Object.freeze({
+  standard: {
+    key: "standard",
+    label: "Two-line standard · max 340 mm",
+    maxWidth: 340,
+    widthBands: TWO_LINE_WIDTH_BANDS,
+    ruleLabel: "Two-line standard width bands up to 340 mm"
+  },
+  twoAndThreeWheel: {
+    key: "twoAndThreeWheel",
+    label: "Two-line two-/three-wheel · max 280 mm",
+    maxWidth: 280,
+    widthBands: Object.freeze({
+      middle: [260, 280],
+      narrow: [260, 280]
+    }),
+    ruleLabel: "Two-line width limit for two- and three-wheeled motor vehicles: max 280 mm"
+  },
+  motorcycle: {
+    key: "motorcycle",
+    label: "Motorcycle plate · 180-220 × 200 mm",
+    maxWidth: 220,
+    widthBands: Object.freeze({
+      middle: [180, 200, 220],
+      narrow: [180, 200, 220]
+    }),
+    ruleLabel: "Motorcycle plate width range: 180-220 mm; height 200 mm; motorcycle raster is not the generic two-line raster"
+  },
+  reducedTwoLine: {
+    key: "reducedTwoLine",
+    label: "Reduced two-line standard · max 255 × 130 mm",
+    maxWidth: 255,
+    widthBands: Object.freeze({
+      middle: [180, 200, 220, 240, 255]
+    }),
+    ruleLabel: "Verkleinertes zweizeiliges Kennzeichen: b225 auto width keeps b209 logic and uses complete reduced-middle-script row chains including seal fields against 180/200/220/240/255 mm candidates up to the 255 × 130 mm maximum; Euro-field, seal and season-field subcomponents are centralised; the 180-mm candidate is checked by the real row chains; Standard upper-seal fallback starts at 200 mm, H/E/season use upper side-by-side seals from 180 mm; no reduced narrow-script fallback exists; H/E and season require the upper side-by-side seal template; b225 keeps b209 E/H suffix counting and season field in Reduced H/E/Saison slot guards; 8-slot upper rows use 3/4/8, while 9-slot season cases keep the tight >=6 mm right-margin fallback"
+  }
+});
+
 const SPACING_RULES_MM = Object.freeze({
   outsideMargin: { min: 8 },
   charGap: { min: 8, preferred: 9, max: 10 },
   groupGap: { min: 20, preferred: 24, max: 30 },
   twoLineBottomGroupGap: { min: 24, preferred: 24, max: 30, ruleLabel: "Two-line bottom row group gap: 24-30 mm" },
   twoLineBottomGroupGapHistoricalOrElectric: { min: 20, preferred: 24, max: 30, ruleLabel: "Two-line H/E suffix row group gap: 20-30 mm for the complete bottom row" },
+  motorcycleRecognitionGroupGap: { min: 15, preferred: 15, max: 18, ruleLabel: "Kraftradkennzeichen bottom recognition group gap: 15-18 mm range; b169 keeps the template-preferred 15 mm instead of waterfilling to the maximum" },
+  motorcycleRecognitionGroupGapHistoricalOrElectric: { min: 14, preferred: 14, max: 18, ruleLabel: "Kraftradkennzeichen H/E bottom recognition group gap: 14-18 mm range; b169 keeps the template-preferred 14 mm instead of waterfilling to the maximum" },
+  reducedRecognitionGroupGap: { min: 15, preferred: 15, max: 18, ruleLabel: "Verkleinertes zweizeiliges Standardkennzeichen: recognition group gap *** is a legal 15-18 mm range; b209 fits with the 15-mm minimum and expands only within the legal range before equal outside margins grow" },
+  reducedUpperSealPairGap: { min: 5, preferred: 15, max: 20, ruleLabel: "Verkleinertes zweizeiliges Standardkennzeichen: gap between side-by-side authority and HU seal fields in the upper row; b209 solves it as a real dynamic row-chain gap so the free corridor is shared between text→seal, seal→seal and the equal outside margins" },
+  reducedTopSealGap: { min: 5, preferred: 15, max: 20, ruleLabel: "Verkleinertes zweizeiliges Standardkennzeichen: gap from last top-row district letter to HU field uses the *** 5-20 mm corridor" },
+  reducedBottomSealGap: { min: 5, preferred: 15, max: 20, ruleLabel: "Verkleinertes zweizeiliges Standardkennzeichen: gap from last lower-row digit to authority seal uses the *** 5-20 mm corridor" },
+  reducedSeasonGap: { min: 8, preferred: 8, max: Number.POSITIVE_INFINITY, ruleLabel: "Verkleinertes zweizeiliges H/E/Saison-Template: Abstand von letzter Ziffer bzw. H/E-Suffix zum Saisonfeld ist eine *-Fläche mit mindestens 8 mm" },
   twoLineTopSealGap: { min: 8, preferred: 25, max: 25, ruleLabel: "Two-line top row district-to-seal gap: 8-25 mm" },
   twoLineSeasonGap: { min: 8, preferred: 8, max: 8, ruleLabel: "Two-line season star gap: at least 8 mm; balanced with the other top-row spacing surfaces" },
   oneLineSeasonGap: { min: 8, preferred: 8, max: 8, ruleLabel: "One-line season star gap: at least 8 mm; balanced with the one-line seasonal spacing surfaces" },
@@ -2016,12 +2064,15 @@ const DXF_REFERENCE_MM = Object.freeze({
     starsCenterX: 27,
     starsCenterY: 36.5,
     starsRadius: 15,
+    starWreath: { centerX: 27, centerY: 36.5, a: 30, ruleLabel: "EU star wreath component: a = 30 mm; star size = a / 6" },
     countryCenterX: 27,
     countryCenterY: 78.5,
     countryBaselineY: 88.5,
+    countryHeight: 20,
     countryFontSize: 27,
     countryFontWeight: 400,
-    countryDominantBaseline: "central"
+    countryDominantBaseline: "central",
+    countryMark: { text: "D", centerX: 27, centerY: 78.5, height: 20, ruleLabel: "Euro country mark component: 20 mm D" }
   },
   seals: {
     columnInnerWidth: 63.5,
@@ -2124,7 +2175,9 @@ const ONE_LINE_RULES_MM = Object.freeze({
 
 const TWO_LINE_RULES_MM = Object.freeze({
   name: "Two-line standard plate",
+  formatKey: "twoLine",
   layoutType: "two-line",
+  widthRuleDefault: "standard",
   reference: "Anlage 4 FZV Abschnitt 2 Nummer 2 / Euro two-line reference",
   outerHeight: 200,
   maxWidth: 340,
@@ -2145,14 +2198,17 @@ const TWO_LINE_RULES_MM = Object.freeze({
     innerBottomClearance: 11,
     starsCenterX: 24.5,
     starsCenterY: 29.5,
-    starsRadius: 13.5,
+    starsRadius: 15,
+    starWreath: { centerX: 24.5, centerY: 29.5, a: 30, ruleLabel: "EU star wreath component: a = 30 mm; star size = a / 6" },
     countryCenterX: 24.5,
     countryCenterY: 71.5,
     countryBaselineY: 81.5,
+    countryHeight: 20,
     countryFontSize: 27,
     countryFontWeight: 400,
     countryDominantBaseline: "central",
-    country: "D"
+    country: "D",
+    countryMark: { text: "D", centerX: 24.5, centerY: 71.5, height: 20, ruleLabel: "Euro country mark component: 20 mm D" }
   },
   content: {
     sideClearance: SPACING_RULES_MM.outsideMargin.min,
@@ -2235,9 +2291,231 @@ const TWO_LINE_RULES_MM = Object.freeze({
   }
 });
 
+const MOTORCYCLE_RULES_MM = Object.freeze({
+  ...TWO_LINE_RULES_MM,
+  name: "Motorcycle plate",
+  formatKey: "motorcycle",
+  widthRuleDefault: "motorcycle",
+  reference: "Anlage 4 FZV Abschnitt 2 Nummer 2c / Kraftradkennzeichen, Abschnitt 2.2.3 reduced middle script",
+  outerHeight: 200,
+  maxWidth: 220,
+  motorcycleMinWidth: 180,
+  euro: {
+    ...TWO_LINE_RULES_MM.euro,
+    ruleLabel: "Euro field for two-line and motorcycle plates: identical geometry according to Anlage 4 section 4/2a context"
+  },
+  content: {
+    ...TWO_LINE_RULES_MM.content,
+    topRow: {
+      label: "Motorcycle top row: district in reduced middle script",
+      y: 10.5,
+      characterHeight: 49,
+      baselineY: 59.5,
+      ruleLabel: "Kraftradkennzeichen top character field: 49 mm height, reduced middle script, 6 mm inner top clearance"
+    },
+    bottomRow: {
+      label: "Motorcycle bottom row: recognition number in reduced middle script",
+      y: 140.5,
+      characterHeight: 49,
+      baselineY: 189.5,
+      ruleLabel: "Kraftradkennzeichen bottom character field: 49 mm height, reduced middle script, 6 mm inner bottom clearance"
+    },
+    seal: {
+      columnMinWidth: 0,
+      columnWidth: 0,
+      columnMaxWidth: 0,
+      arrangement: "motorcycle-horizontal",
+      centerY: 100,
+      huDiameter: 35,
+      authorityDiameter: 45,
+      visibleCircleGap: 10,
+      nonSeasonVisibleCircleGap: 20,
+      seasonReservedGap: 8,
+      seasonSealXOffset: 8,
+      historicalOrElectricSealXOffset: -5,
+      ruleLabel: "Kraftradkennzeichen: HU (35 mm) and authority seal (45 mm) are placed horizontally in the middle zone. b169 uses case-specific x templates: seasonal Kraftrad keeps the compact 10-mm b167 reference before the validity column, while non-seasonal Kraftrad uses a wider 20-mm seal pair; H/E without season is shifted 5 mm left to match the Anlage-4 reference. Seals are never placed below the Euro field"
+    },
+    season: {
+      ...TWO_LINE_RULES_MM.content.season,
+      fieldY: 73.375,
+      contentHeight: 53.25,
+      upperBaselineY: 93.375,
+      ruleLabel: "Kraftrad seasonal field: separate right-hand 30 mm validity column in the middle zone; separator h=3.25 mm is centered at plate y=100 mm, fields are 20 mm high with 5 mm from separator edge; month digit baselines sit at the lower edge of each 20 mm month field; not aligned to the top text row"
+    }
+  },
+  cells: {
+    middle: {
+      label: "Reduced middle script 49 mm",
+      fontFamily: "GL-Nummernschild-Mtl",
+      letterWidth: 31,
+      digitWidth: 29,
+      gap: SPACING_RULES_MM.charGap.preferred,
+      characterHeight: 49,
+      fontSize: 81.67,
+      baselineY: 59.5,
+      specialWidths: {
+        I: 23.2
+      },
+      ruleLabel: "Kraftradkennzeichen uses reduced middle script: 49 mm glyph field; example widths A=31 mm, 8=29 mm"
+    },
+    narrow: {
+      label: "Reduced middle script 49 mm (Engschrift disabled for Kraftrad)",
+      fontFamily: "GL-Nummernschild-Mtl",
+      letterWidth: 31,
+      digitWidth: 29,
+      gap: SPACING_RULES_MM.charGap.preferred,
+      characterHeight: 49,
+      fontSize: 81.67,
+      baselineY: 59.5,
+      specialWidths: {
+        I: 23.2
+      },
+      ruleLabel: "No separate narrow-script fallback is used for Kraftradkennzeichen in this Lab model"
+    }
+  },
+  dimensions: {
+    ...TWO_LINE_RULES_MM.dimensions,
+    enabledMarginRight: 42,
+    enabledMarginBottom: 34
+  }
+});
+
+
+const REDUCED_TWO_LINE_RULES_MM = Object.freeze({
+  ...TWO_LINE_RULES_MM,
+  name: "Reduced two-line standard plate",
+  formatKey: "reducedTwoLine",
+  widthRuleDefault: "reducedTwoLine",
+  reference: "Anlage 4 FZV Abschnitt 2 Nummer 3 / verkleinertes zweizeiliges Kennzeichen – b174 standard-only template correction",
+  outerHeight: 130,
+  maxWidth: 255,
+  innerInset: 4,
+  innerHeight: 122,
+  outerCornerRadius: 7.5,
+  innerCornerRadius: 3.75,
+  euro: {
+    x: 4,
+    y: 4,
+    width: 35,
+    height: 56,
+    innerTopClearance: 5,
+    starsBoxHeight: 22.5,
+    starsToCountryGap: 8,
+    countryBoxHeight: 15,
+    innerBottomClearance: 5.5,
+    starsCenterX: 21.5,
+    starsCenterY: 20.25,
+    starsRadius: 11.25,
+    starWreath: { centerX: 21.5, centerY: 20.25, a: 22.5, ruleLabel: "Reduced two-line EU star wreath component: a = 22.5 mm through star centres; star size = a / 6" },
+    countryCenterX: 21.5,
+    countryCenterY: 47.0,
+    countryBaselineY: 51.0,
+    countryHeight: 15,
+    countryFontSize: 20,
+    countryFontWeight: 400,
+    countryDominantBaseline: "central",
+    country: "D",
+    countryMark: { text: "D", centerX: 21.5, centerY: 47.0, height: 15, ruleLabel: "Reduced two-line Euro country mark component: 15 mm D centred in the 15-mm D band" },
+    ruleLabel: "Reduced two-line Euro field: 35 × 56 mm with 5 / 22.5 / 8 / 15 / 5.5 vertical raster; b225 keeps the central Euro-field component with star wreath a=22.5 and a 15-mm country D centred in its band"
+  },
+  content: {
+    ...TWO_LINE_RULES_MM.content,
+    sideClearance: 8,
+    topRow: {
+      label: "Reduced two-line top row · standard only",
+      y: 10,
+      characterHeight: 49,
+      baselineY: 59,
+      ruleLabel: "Verkleinertes zweizeiliges Kennzeichen top row: 6 mm inner top clearance plus 49-mm field"
+    },
+    bottomRow: {
+      label: "Reduced two-line bottom row · standard only",
+      y: 71,
+      characterHeight: 49,
+      baselineY: 120,
+      ruleLabel: "Verkleinertes zweizeiliges Kennzeichen bottom row: 12 mm inter-row gap, 49-mm field, 6 mm inner bottom clearance"
+    },
+    seal: {
+      columnMinWidth: 45,
+      columnWidth: 45,
+      columnMaxWidth: 45,
+      arrangement: "reduced-standard-vertical",
+      huDiameter: 35,
+      huCenterY: 34.5,
+      authorityDiameter: 45,
+      authorityCenterY: 95.5,
+      visibleCircleGap: 0,
+      ruleLabel: "Reduced two-line standard b209: standard remains Lab-only; seal fields are real row-chain elements and participate in fit/collision checks. H/E and season are b209 upper-side-by-side-seal variants."
+    },
+    season: {
+      ...TWO_LINE_RULES_MM.content.season,
+      enabledDefault: false,
+      ruleLabel: "Reduced two-line season b209: upper side-by-side seals are mandatory; the lower row may append a 30 mm season field after the recognition/H/E text with a * gap of at least 8 mm before the season field"
+    }
+  },
+  cells: {
+    middle: {
+      label: "Reduced middle script 49 mm",
+      fontFamily: "GL-Nummernschild-Mtl",
+      letterWidth: 31,
+      digitWidth: 29,
+      gap: SPACING_RULES_MM.charGap.preferred,
+      characterHeight: 49,
+      fontSize: 81.67,
+      baselineY: 59,
+      specialWidths: { I: 23.2 },
+      ruleLabel: "Reduced two-line b209 standard template uses fixed reduced middle-script cells: letters 31 mm, digits 29 mm"
+    },
+    narrow: {
+      label: "Reduced middle script 49 mm (narrow disabled for b198)",
+      fontFamily: "GL-Nummernschild-Mtl",
+      letterWidth: 31,
+      digitWidth: 29,
+      gap: SPACING_RULES_MM.charGap.preferred,
+      characterHeight: 49,
+      fontSize: 81.67,
+      baselineY: 59,
+      specialWidths: { I: 23.2 },
+      ruleLabel: "No Engschrift fallback is used or calculated in the b209 reduced standard template"
+    }
+  },
+  dimensions: {
+    ...TWO_LINE_RULES_MM.dimensions,
+    enabledMarginRight: 38,
+    enabledMarginBottom: 30
+  }
+});
+
 function resolvePlateRules(plateFormat = "oneLine") {
+  if (plateFormat === "motorcycle" || plateFormat === "motorcyclePlate" || plateFormat === "kraftrad") return MOTORCYCLE_RULES_MM;
+  if (plateFormat === "reducedTwoLine" || plateFormat === "reduced-two-line" || plateFormat === "verkleinertTwoLine") return REDUCED_TWO_LINE_RULES_MM;
   return plateFormat === "twoLine" || plateFormat === "two-line" ? TWO_LINE_RULES_MM : ONE_LINE_RULES_MM;
 }
+
+return { PLATE_TEXT_COLORS_MM: PLATE_TEXT_COLORS_MM, WIDTH_BANDS: WIDTH_BANDS, TWO_LINE_WIDTH_BANDS: TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES: TWO_LINE_WIDTH_RULES, SPACING_RULES_MM: SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: DXF_REFERENCE_MM, ONE_LINE_RULES_MM: ONE_LINE_RULES_MM, TWO_LINE_RULES_MM: TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM: MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM: REDUCED_TWO_LINE_RULES_MM, resolvePlateRules: resolvePlateRules };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-rules.js ----
+const __m_src_plate_lab_renderer_plate_rules_js = (() => {
+// Kennzeichen Physical Lab b225 / plate dimensions and variant rules
+//
+// Public rule boundary. b225 keeps this a real boundary over the central
+// plate-variant-rules module instead of re-exporting through the renderer.
+
+const { WIDTH_BANDS, TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES, SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM, ONE_LINE_RULES_MM, TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM, PLATE_TEXT_COLORS_MM, resolvePlateRules } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+
+return { WIDTH_BANDS: WIDTH_BANDS, TWO_LINE_WIDTH_BANDS: TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES: TWO_LINE_WIDTH_RULES, SPACING_RULES_MM: SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: DXF_REFERENCE_MM, ONE_LINE_RULES_MM: ONE_LINE_RULES_MM, TWO_LINE_RULES_MM: TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM: MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM: REDUCED_TWO_LINE_RULES_MM, PLATE_TEXT_COLORS_MM: PLATE_TEXT_COLORS_MM, resolvePlateRules: resolvePlateRules };
+
+})();
+
+// ---- src/plate/lab-renderer/text-utils.js ----
+const __m_src_plate_lab_renderer_text_utils_js = (() => {
+// Kennzeichen Physical Lab b285 / pure text and glyph helpers
+//
+// This module intentionally contains only plate-text parsing, GL cell metrics
+// and row/text helper decisions. It must not import the renderer, so the
+// public API can depend on real utilities instead of re-export facades.
 
 function parsePlate(input) {
   const normalized = String(input || "")
@@ -2264,13 +2542,2660 @@ function parsePlate(input) {
   };
 }
 
+function withSpecialIWidth(font, specialIWidth) {
+  return {
+    ...font,
+    specialWidths: {
+      ...(font.specialWidths || {}),
+      I: specialIWidth
+    }
+  };
+}
+
+function makeCells(text, font, role) {
+  return [...String(text || "")].map((char, index) => ({
+    type: "char",
+    role,
+    key: `${role}-${index}-${char}`,
+    char,
+    width: getCellWidth(char, font),
+    font
+  }));
+}
+
+function getCellWidth(char, font) {
+  const normalized = String(char || "").toUpperCase();
+  const specialWidth = font.specialWidths?.[normalized];
+  if (Number.isFinite(Number(specialWidth)) && Number(specialWidth) > 0) return Number(specialWidth);
+  return isDigit(normalized) ? font.digitWidth : font.letterWidth;
+}
+
+function splitRecognition(value) {
+  const normalized = String(value || "");
+  const matches = normalized.match(/[A-ZÄÖÜ]+|\d+/g) || [];
+  return matches.map((part) => ({
+    value: part,
+    type: /^\d+$/.test(part) ? "digits" : "letters"
+  }));
+}
+
+function hasHistoricalOrElectricSuffix(parsed) {
+  const recognition = String(parsed?.recognition || "").toUpperCase();
+  // Usual valid form: final H/E suffix after a digit, e.g. Q1H or Q1E.
+  // The Lab also accepts manually spaced input like "Q 1 H/E" so Reduced
+  // cannot accidentally fall back to the vertical-seal standard template.
+  if (/\d[HE]$/.test(recognition)) return true;
+  if (/\d[HE]+$/.test(recognition)) return true;
+  const parts = Array.isArray(parsed?.parts) ? parsed.parts.map((part) => String(part || "").toUpperCase()) : [];
+  const last = parts[parts.length - 1] || "";
+  const beforeLast = parts[parts.length - 2] || "";
+  const beforeTwo = parts[parts.length - 3] || "";
+  if (/^[HE]$/.test(last) && /\d$/.test(beforeLast)) return true;
+  if (/^[HE]$/.test(last) && /^[HE]$/.test(beforeLast) && /\d$/.test(beforeTwo)) return true;
+  return false;
+}
+
+function getCharacterBand(rules, rowKey = "top") {
+  if (rules.layoutType === "two-line") {
+    const row = rowKey === "bottom" ? rules.content.bottomRow : rules.content.topRow;
+    return {
+      y: row.y,
+      height: row.characterHeight,
+      baselineY: row.baselineY
+    };
+  }
+  return {
+    y: rules.innerInset + rules.content.topClearance,
+    height: rules.content.characterHeight,
+    baselineY: rules.cells?.middle?.baselineY || 92.5
+  };
+}
+
+function getBandForItem(rules, item) {
+  if (Number.isFinite(Number(item?.bandY)) && Number.isFinite(Number(item?.bandHeight))) {
+    return { y: Number(item.bandY), height: Number(item.bandHeight), baselineY: Number(item.baselineY) || null };
+  }
+  return getCharacterBand(rules, item?.rowKey);
+}
+
+function isDigit(char) {
+  return /\d/.test(char);
+}
+
+return { parsePlate: parsePlate, withSpecialIWidth: withSpecialIWidth, makeCells: makeCells, getCellWidth: getCellWidth, splitRecognition: splitRecognition, hasHistoricalOrElectricSuffix: hasHistoricalOrElectricSuffix, getCharacterBand: getCharacterBand, getBandForItem: getBandForItem, isDigit: isDigit };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-number-utils.js ----
+const __m_src_plate_lab_renderer_plate_number_utils_js = (() => {
+// Kennzeichen Physical Lab b306 / shared numeric helpers.
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("de-DE", { maximumFractionDigits: 1 });
+}
+
+function positiveNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function clampNumber(value, min, max) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return min;
+  return Math.min(max, Math.max(min, number));
+}
+
+function numberOrFallback(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function formatSvgNumber(value) {
+  return numberOrFallback(value).toFixed(3).replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
+}
+
+return { formatNumber: formatNumber, positiveNumber: positiveNumber, clampNumber: clampNumber, numberOrFallback: numberOrFallback, formatSvgNumber: formatSvgNumber };
+
+})();
+
+// ---- src/plate/lab-renderer/eu-star-wreath.js ----
+const __m_src_plate_lab_renderer_eu_star_wreath_js = (() => {
+// Kennzeichen Physical Lab b306 / EU star wreath component
+// Geometry-only SVG helper. Euro-field variants provide only the wreath centre
+// and the legal diameter "a" through the star centre points. The star size is
+// derived as a / 6 unless explicitly overridden for a measured reference.
+
+const { numberOrFallback: n, formatSvgNumber: format } = __m_src_plate_lab_renderer_plate_number_utils_js;
+
+function starPolygonPoints(cx, cy, outerRadius) {
+  const innerRadius = outerRadius * 0.38196601125;
+  const points = [];
+  for (let i = 0; i < 10; i += 1) {
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const angle = -Math.PI / 2 + i * Math.PI / 5;
+    points.push(`${format(cx + Math.cos(angle) * radius)},${format(cy + Math.sin(angle) * radius)}`);
+  }
+  return points.join(" ");
+}
+
+function resolveEuStarWreathGeometry(config = {}) {
+  const centerX = n(config.centerX ?? config.cx, 0);
+  const centerY = n(config.centerY ?? config.cy, 0);
+  const diameterThroughCenters = n(config.diameterThroughCenters ?? config.a ?? config.diameter, n(config.radius, 0) * 2);
+  const starSize = n(config.starSize, diameterThroughCenters / 6);
+  return Object.freeze({
+    centerX,
+    centerY,
+    diameterThroughCenters,
+    radiusThroughCenters: diameterThroughCenters / 2,
+    starSize,
+    starOuterRadius: starSize / 2
+  });
+}
+
+function renderEuStarWreath(config = {}) {
+  const geometry = resolveEuStarWreathGeometry(config);
+  const stars = [];
+  for (let i = 0; i < 12; i += 1) {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / 12;
+    const x = geometry.centerX + Math.cos(angle) * geometry.radiusThroughCenters;
+    const y = geometry.centerY + Math.sin(angle) * geometry.radiusThroughCenters;
+    stars.push(`<polygon class="eu-star" points="${starPolygonPoints(x, y, geometry.starOuterRadius)}" fill="#ffd200"/>`);
+  }
+  return `<g class="eu-stars" data-eu-star-a="${format(geometry.diameterThroughCenters)}" data-eu-star-size="${format(geometry.starSize)}">${stars.join("")}</g>`;
+}
+
+return { resolveEuStarWreathGeometry: resolveEuStarWreathGeometry, renderEuStarWreath: renderEuStarWreath };
+
+})();
+
+// ---- src/plate/lab-renderer/svg-escape-utils.js ----
+const __m_src_plate_lab_renderer_svg_escape_utils_js = (() => {
+// Kennzeichen Physical Lab b297 / SVG escape helpers
+// Centralises only exact text/attribute escaping formulas. This module does not
+// alter renderer geometry, layout or component-specific semantics.
+
+function escapeSvgText(value) {
+  return String(value).replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
+}
+
+function escapeSvgTextOrEmpty(value) {
+  return String(value ?? "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
+}
+
+function escapeSvgAttr(value) {
+  return escapeSvgText(value).replace(/"/g, "&quot;");
+}
+
+function escapeSvgAttrOrEmpty(value) {
+  return escapeSvgTextOrEmpty(value).replace(/"/g, "&quot;");
+}
+
+return { escapeSvgText: escapeSvgText, escapeSvgTextOrEmpty: escapeSvgTextOrEmpty, escapeSvgAttr: escapeSvgAttr, escapeSvgAttrOrEmpty: escapeSvgAttrOrEmpty };
+
+})();
+
+// ---- src/plate/lab-renderer/eu-country-mark.js ----
+const __m_src_plate_lab_renderer_eu_country_mark_js = (() => {
+// Kennzeichen Physical Lab b306 / Euro country mark component
+// Euro-field variants provide the country mark centre and visible height. The
+// renderer keeps a text-based D for now, but all size decisions are centralised
+// here so reduced two-line can use its own 15-mm D independently of the other
+// Euro fields.
+
+const { numberOrFallback: n, formatSvgNumber: format } = __m_src_plate_lab_renderer_plate_number_utils_js;
+const { escapeSvgTextOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+
+function resolveEuroCountryMarkGeometry(euro = {}) {
+  const mark = euro.countryMark || {};
+  const text = mark.text ?? euro.country ?? "D";
+  const centerX = n(mark.centerX ?? euro.countryCenterX, 0);
+  const centerY = n(mark.centerY ?? euro.countryCenterY ?? euro.countryBaselineY, 0);
+  const height = n(mark.height ?? euro.countryHeight ?? euro.countryBoxHeight, 20);
+  const fontSize = n(mark.fontSize ?? euro.countryFontSize, height * 4 / 3);
+  const fontWeight = mark.fontWeight ?? euro.countryFontWeight ?? 400;
+  const dominantBaseline = mark.dominantBaseline ?? euro.countryDominantBaseline ?? "central";
+  return Object.freeze({ text, centerX, centerY, height, fontSize, fontWeight, dominantBaseline });
+}
+
+function renderEuroCountryMark(euro = {}) {
+  const geometry = resolveEuroCountryMarkGeometry(euro);
+  return `<text class="eu-country-mark" data-eu-country-height="${format(geometry.height)}" x="${format(geometry.centerX)}" y="${format(geometry.centerY)}" text-anchor="middle" dominant-baseline="${geometry.dominantBaseline}" font-family="DIN1451Alt, AlteDIN1451Mittelschrift, AlteDIN1451Middle script, Arial, sans-serif" font-size="${format(geometry.fontSize)}" font-weight="${geometry.fontWeight}" fill="#fff">${escapeText(geometry.text)}</text>`;
+}
+
+return { resolveEuroCountryMarkGeometry: resolveEuroCountryMarkGeometry, renderEuroCountryMark: renderEuroCountryMark };
+
+})();
+
+// ---- src/plate/lab-renderer/euro-field.js ----
+const __m_src_plate_lab_renderer_euro_field_js = (() => {
+// Kennzeichen Physical Lab b289 / Euro field component entry point
+// Keep Euro-field dimensions/raster in the plate rules. The reusable
+// subcomponents live here so the main renderer no longer contains legacy EU
+// star/D placement code.
+
+const { numberOrFallback: n } = __m_src_plate_lab_renderer_plate_number_utils_js;
+const { renderEuStarWreath, resolveEuStarWreathGeometry } = __m_src_plate_lab_renderer_eu_star_wreath_js;
+const { renderEuroCountryMark, resolveEuroCountryMarkGeometry } = __m_src_plate_lab_renderer_eu_country_mark_js;
+
+const { renderEuStarWreath: __reexport_renderEuStarWreath, resolveEuStarWreathGeometry: __reexport_resolveEuStarWreathGeometry } = __m_src_plate_lab_renderer_eu_star_wreath_js;
+const { renderEuroCountryMark: __reexport_renderEuroCountryMark, resolveEuroCountryMarkGeometry: __reexport_resolveEuroCountryMarkGeometry } = __m_src_plate_lab_renderer_eu_country_mark_js;
+
+
+function resolveEuroStarWreathInput(euro = {}) {
+  const wreath = euro.starWreath || {};
+  const diameterThroughCenters = wreath.a
+    ?? wreath.diameterThroughCenters
+    ?? euro.starsDiameter
+    ?? (Number.isFinite(Number(euro.starsRadius)) ? Number(euro.starsRadius) * 2 : undefined);
+  return {
+    centerX: wreath.centerX ?? euro.starsCenterX,
+    centerY: wreath.centerY ?? euro.starsCenterY,
+    diameterThroughCenters,
+    starSize: wreath.starSize ?? (Number.isFinite(Number(diameterThroughCenters)) ? Number(diameterThroughCenters) / 6 : undefined)
+  };
+}
+
+function resolveEuroFieldComponentGeometry(euro = {}) {
+  const starWreath = resolveEuStarWreathGeometry(resolveEuroStarWreathInput(euro));
+  const countryMark = resolveEuroCountryMarkGeometry(euro);
+  return Object.freeze({ starWreath, countryMark });
+}
+
+function renderEuroFieldComponents(euro = {}) {
+  return `${renderEuStarWreath(resolveEuroStarWreathInput(euro))}\n  ${renderEuroCountryMark(euro)}`;
+}
+
+function getEuroFieldSummary(euro = {}) {
+  const geometry = resolveEuroFieldComponentGeometry(euro);
+  return Object.freeze({
+    width: n(euro.width, null),
+    height: n(euro.height, null),
+    starDiameterThroughCenters: geometry.starWreath.diameterThroughCenters,
+    starSize: geometry.starWreath.starSize,
+    countryHeight: geometry.countryMark.height,
+    countryFontSize: geometry.countryMark.fontSize
+  });
+}
+
+return { renderEuStarWreath: __reexport_renderEuStarWreath, resolveEuStarWreathGeometry: __reexport_resolveEuStarWreathGeometry, renderEuroCountryMark: __reexport_renderEuroCountryMark, resolveEuroCountryMarkGeometry: __reexport_resolveEuroCountryMarkGeometry, resolveEuroStarWreathInput: resolveEuroStarWreathInput, resolveEuroFieldComponentGeometry: resolveEuroFieldComponentGeometry, renderEuroFieldComponents: renderEuroFieldComponents, getEuroFieldSummary: getEuroFieldSummary };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-body.js ----
+const __m_src_plate_lab_renderer_plate_body_js = (() => {
+// Kennzeichen Physical Lab b239 / plate body and background component
+// Renders only the invariant physical plate body: black frame, white reflective
+// field, blue Euro field background and Euro-field subcomponents.
+// It does not solve layout or change any physical coordinates.
+
+const { renderEuroFieldComponents } = __m_src_plate_lab_renderer_euro_field_js;
+
+function renderPlateBody({ rules, metrics }) {
+  const w = metrics.changePlateMainPlateWidth || metrics.width;
+  const h = rules.outerHeight;
+  const inset = rules.innerInset;
+  const euro = rules.euro;
+  const frameColor = metrics?.frameColor || "#111";
+  return `
+<g class="layer layer-body" filter="url(#plateShadow)">
+  <rect data-plate-frame="true" x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="${frameColor}"/>
+  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>
+  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="#0046ad"/>
+  ${renderEuroFieldComponents(euro)}
+</g>`.trim();
+}
+
+return { renderPlateBody: renderPlateBody };
+
+})();
+
+// ---- src/plate/lab-renderer/change-plate-slot-plan.js ----
+const __m_src_plate_lab_renderer_change_plate_slot_plan_js = (() => {
+// Kennzeichen Physical Lab b258 / Wechselkennzeichen main-seal slot plan helpers
+// Keeps the geometric decision for W/authority slot placement separate from
+// the marker rendering. No standalone renderer logic belongs here.
+
+function getChangePlateSealSlotPlan(rules, seal, geometry) {
+  if (seal?.changePlateW !== true || seal?.changePlateSwapWAndAuthority !== true) return null;
+  return getSwappedChangePlateSealSlotPlan(rules, seal, geometry);
+}
+
+function getSwappedChangePlateSealSlotPlan(rules, seal, geometry) {
+  if (geometry.arrangement === "motorcycle-horizontal") {
+    const authorityRadius = geometry.authority.radius;
+    const authorityCx = seal.x + authorityRadius;
+    const currentB252VisualCenterCorrectionX = -4.0;
+    const wCx = geometry.authority.cx + currentB252VisualCenterCorrectionX;
+    return {
+      // Kraftrad-Wechselkennzeichen keeps the W rendering formula from b247.
+      // To preserve the visually approved W location from b252 without shifting
+      // the glyph inside its slot, the complete 35-mm W/HU slot is moved to the
+      // former b252 visual W center. Authority remains 45 mm on the left.
+      authority: { ...geometry.authority, cx: authorityCx, cy: geometry.authority.cy },
+      w: { ...geometry.hu, cx: wCx, cy: geometry.hu.cy }
+    };
+  }
+  return {
+    w: { ...geometry.hu, cx: geometry.authority.cx, cy: geometry.authority.cy },
+    authority: { ...geometry.authority, cx: geometry.hu.cx, cy: geometry.hu.cy }
+  };
+}
+
+return { getChangePlateSealSlotPlan: getChangePlateSealSlotPlan };
+
+})();
+
+// ---- src/plate/lab-renderer/seal-geometry-plan.js ----
+const __m_src_plate_lab_renderer_seal_geometry_plan_js = (() => {
+// Kennzeichen Physical Lab b303 / seal geometry plan helpers
+// Resolves physical seal slot geometry and Wechselkennzeichen-effective
+// W/authority placement. Marker drawing stays in seal-slot-marker.js.
+
+const { getChangePlateSealSlotPlan } = __m_src_plate_lab_renderer_change_plate_slot_plan_js;
+const { numberOrFallback, positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+
+function numberOrNull(value) {
+  return numberOrFallback(value, null);
+}
+
+function getFallbackCharacterBand(rules, rowKey = "top") {
+  if (rules?.layoutType === "two-line") {
+    const row = rowKey === "bottom" ? rules.content?.bottomRow : rules.content?.topRow;
+    return {
+      y: numberOrNull(row?.y) ?? 0,
+      height: numberOrNull(row?.characterHeight) ?? 45,
+      baselineY: numberOrNull(row?.baselineY)
+    };
+  }
+  return {
+    y: (numberOrNull(rules?.innerInset) ?? 0) + (numberOrNull(rules?.content?.topClearance) ?? 0),
+    height: numberOrNull(rules?.content?.characterHeight) ?? 75,
+    baselineY: numberOrNull(rules?.cells?.middle?.baselineY)
+  };
+}
+
+function getBandForSealItem(rules, sealItem) {
+  if (Number.isFinite(Number(sealItem?.bandY)) && Number.isFinite(Number(sealItem?.bandHeight))) {
+    return {
+      y: Number(sealItem.bandY),
+      height: Number(sealItem.bandHeight),
+      baselineY: numberOrNull(sealItem.baselineY)
+    };
+  }
+  return getFallbackCharacterBand(rules, sealItem?.rowKey);
+}
+function createSealColumnBounds(innerX, innerWidth, outerX = innerX, outerWidth = innerWidth) {
+  return {
+    innerColumnLeft: innerX,
+    innerColumnRight: innerX + innerWidth,
+    innerColumnWidth: innerWidth,
+    outerColumnLeft: outerX,
+    outerColumnRight: outerX + outerWidth,
+    outerColumnWidth: outerWidth
+  };
+}
+
+function createSealCircleGeometry(cx, cy, diameter, radius) {
+  return { cx, cy, diameter, radius };
+}
+
+function getSealGeometry(rules, sealItem) {
+  const charBand = getBandForSealItem(rules, sealItem);
+  const sealRules = rules.content.seal;
+  const arrangement = sealItem?.arrangement || sealRules.arrangement;
+  const huRadius = sealRules.huDiameter / 2;
+  const authorityRadius = sealRules.authorityDiameter / 2;
+
+  if (arrangement === "reduced-standard-upper-row") {
+    const sealKind = sealItem?.sealKind || "pair";
+    const cy = sealRules.huCenterY;
+    if (sealKind === "authority") {
+      const innerWidth = sealRules.authorityDiameter;
+      const authorityCx = sealItem.x + authorityRadius;
+      return {
+        cx: authorityCx,
+        ...createSealColumnBounds(sealItem.x, innerWidth),
+        arrangement,
+        sealKind,
+        hu: createSealCircleGeometry(authorityCx, cy, sealRules.huDiameter, huRadius),
+        authority: createSealCircleGeometry(authorityCx, cy, sealRules.authorityDiameter, authorityRadius),
+        visibleCircleGap: null,
+        authorityOfficialDiameter: innerWidth,
+        visualBorrowLeft: 0,
+        huVisualShiftLeft: 0,
+        charBand
+      };
+    }
+    if (sealKind === "hu") {
+      const innerWidth = sealRules.huDiameter;
+      const huCx = sealItem.x + huRadius;
+      return {
+        cx: huCx,
+        ...createSealColumnBounds(sealItem.x, innerWidth),
+        arrangement,
+        sealKind,
+        hu: createSealCircleGeometry(huCx, cy, sealRules.huDiameter, huRadius),
+        authority: createSealCircleGeometry(huCx, cy, sealRules.authorityDiameter, authorityRadius),
+        visibleCircleGap: null,
+        authorityOfficialDiameter: 0,
+        visualBorrowLeft: 0,
+        huVisualShiftLeft: 0,
+        charBand
+      };
+    }
+    const officialAuthorityWidth = sealRules.authorityDiameter;
+    const officialHuWidth = sealRules.huDiameter;
+    const authorityCx = sealItem.x + authorityRadius;
+    const huCx = sealItem.x + officialAuthorityWidth + huRadius;
+    const innerWidth = officialAuthorityWidth + officialHuWidth;
+    return {
+      cx: (authorityCx + huCx) / 2,
+      ...createSealColumnBounds(sealItem.x, innerWidth),
+      arrangement,
+      sealKind,
+      hu: createSealCircleGeometry(huCx, cy, sealRules.huDiameter, huRadius),
+      authority: createSealCircleGeometry(authorityCx, cy, sealRules.authorityDiameter, authorityRadius),
+      visibleCircleGap: 0,
+      authorityOfficialDiameter: officialAuthorityWidth,
+      visualBorrowLeft: 0,
+      huVisualShiftLeft: 0,
+      charBand
+    };
+  }
+
+  if (arrangement === "reduced-standard-vertical") {
+    const cx = sealItem.x + (Number(sealItem.width) || sealRules.columnWidth) / 2;
+    const innerWidth = Number(sealItem.width) || sealRules.columnWidth;
+    return {
+      cx,
+      ...createSealColumnBounds(sealItem.x, innerWidth),
+      arrangement,
+      hu: createSealCircleGeometry(cx, sealRules.huCenterY, sealRules.huDiameter, huRadius),
+      authority: createSealCircleGeometry(cx, sealRules.authorityCenterY, sealRules.authorityDiameter, authorityRadius),
+      visibleCircleGap: sealItem?.visibleCircleGap ?? sealRules.visibleCircleGap,
+      charBand
+    };
+  }
+
+  if (sealRules.arrangement === "motorcycle-horizontal") {
+    const pairGap = positiveNumber(sealItem?.visibleCircleGap, positiveNumber(sealRules.visibleCircleGap, 6));
+    const huCx = sealItem.x + huRadius;
+    const authorityCx = sealItem.x + sealRules.huDiameter + pairGap + authorityRadius;
+    const cy = sealRules.centerY;
+    return {
+      cx: (huCx + authorityCx) / 2,
+      ...createSealColumnBounds(sealItem.x, sealItem.width),
+      arrangement: sealRules.arrangement,
+      hu: createSealCircleGeometry(huCx, cy, sealRules.huDiameter, huRadius),
+      authority: createSealCircleGeometry(authorityCx, cy, sealRules.authorityDiameter, authorityRadius),
+      visibleCircleGap: pairGap,
+      charBand
+    };
+  }
+
+  const innerWidth = Number(sealItem.width) || sealRules.columnWidth;
+  const outerWidth = Math.max(innerWidth, Math.min(sealRules.columnMaxWidth, innerWidth + (sealRules.columnMaxWidth - sealRules.columnMinWidth)));
+  const outerX = sealItem.x - (outerWidth - innerWidth) / 2;
+  const cx = sealItem.x + innerWidth / 2;
+  return {
+    cx,
+    ...createSealColumnBounds(sealItem.x, innerWidth, outerX, outerWidth),
+    hu: createSealCircleGeometry(cx, sealRules.huCenterY, sealRules.huDiameter, huRadius),
+    authority: createSealCircleGeometry(cx, sealRules.authorityCenterY, sealRules.authorityDiameter, authorityRadius),
+    visibleCircleGap: sealRules.visibleCircleGap,
+    charBand
+  };
+}
+
+function getEffectiveSealGeometry(rules, seal) {
+  const geometry = getSealGeometry(rules, seal);
+  const swapped = getChangePlateSealSlotPlan(rules, seal, geometry);
+  if (!swapped) return geometry;
+  return {
+    ...geometry,
+    cx: ((swapped.w?.cx ?? geometry.hu.cx ?? geometry.cx) + (swapped.authority?.cx ?? geometry.authority.cx ?? geometry.cx)) / 2,
+    hu: swapped.w || geometry.hu,
+    authority: swapped.authority || geometry.authority,
+    changePlateEffectiveSealGeometry: true
+  };
+}
+
+return { getSealGeometry: getSealGeometry, getEffectiveSealGeometry: getEffectiveSealGeometry };
+
+})();
+
+// ---- src/plate/lab-renderer/seal-marker-plan.js ----
+const __m_src_plate_lab_renderer_seal_marker_plan_js = (() => {
+// Kennzeichen Physical Lab b261 / seal marker selection plan
+// Decides which visual seal markers are rendered for an already resolved seal
+// slot. Geometry stays in seal-geometry-plan.js; SVG drawing stays in
+// seal-slot-marker.js.
+
+function isReducedVerticalSealSlot(rules, geometry) {
+  return rules.formatKey === "reducedTwoLine" && geometry.arrangement === "reduced-standard-vertical";
+}
+
+function isReducedUpperSingleSealSlot(rules, geometry, seal) {
+  return rules.formatKey === "reducedTwoLine"
+    && geometry.arrangement === "reduced-standard-upper-row"
+    && Boolean(seal.sealKind);
+}
+
+function shouldRenderHuMarker({ seal, isReducedVertical, isReducedUpperSingleSeal, isChangePlateW }) {
+  if (isChangePlateW) return false;
+  if (isReducedUpperSingleSeal) return seal.sealKind === "hu";
+  return !isReducedVertical || seal.rowKey === "top";
+}
+
+function shouldRenderAuthorityMarker({ seal, isReducedVertical, isReducedUpperSingleSeal }) {
+  if (isReducedUpperSingleSeal) return seal.sealKind === "authority";
+  return !isReducedVertical || seal.rowKey === "bottom";
+}
+
+function createSealMarkerPlan({ rules, seal, geometry }) {
+  const isReducedVertical = isReducedVerticalSealSlot(rules, geometry);
+  const isReducedUpperSingleSeal = isReducedUpperSingleSealSlot(rules, geometry, seal);
+  const isChangePlateW = seal.changePlateW === true;
+  return {
+    renderChangePlateW: isChangePlateW,
+    renderHu: shouldRenderHuMarker({ seal, isReducedVertical, isReducedUpperSingleSeal, isChangePlateW }),
+    renderAuthority: shouldRenderAuthorityMarker({ seal, isReducedVertical, isReducedUpperSingleSeal }),
+  };
+}
+
+return { createSealMarkerPlan: createSealMarkerPlan };
+
+})();
+
+// ---- src/plate/lab-renderer/seal-slot-marker.js ----
+const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
+// Kennzeichen Physical Lab b297 / seal slot marker rendering helpers
+// Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
+// resolved by seal-components.js and change-plate-slot-plan.js.
+
+const { escapeSvgAttrOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+
+function renderChangePlateWMarker({ seal, geometry }) {
+  const wGeometry = geometry.hu;
+  const wHeight = Number(seal.wHeight) || 20;
+  const wWidth = Number(seal.wWidth) || 25;
+  return `
+  <g class="seal-slot seal-slot-change-w" data-seal-row="${escapeText(seal.rowKey || "top")}" data-change-plate-w="true">
+    <text x="${wGeometry.cx ?? geometry.cx}" y="${wGeometry.cy + wHeight * 0.36}" text-anchor="middle" font-family="'GL-Nummernschild-Mtl', Arial Narrow, sans-serif" font-size="${wHeight * 1.42}" font-weight="400" textLength="${wWidth}" lengthAdjust="spacingAndGlyphs" fill="#111">W</text>
+  </g>`;
+}
+
+function renderHuSealMarker({ seal, geometry }) {
+  return `
+  <g class="seal-slot seal-slot-hu" data-seal-row="${escapeText(seal.rowKey || "top")}">
+    <circle cx="${geometry.hu.cx ?? geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius}" fill="#1ea5ff" stroke="#111" stroke-width="1.25"/>
+    <circle cx="${geometry.hu.cx ?? geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius * 0.68}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.8" stroke-dasharray="1.4 1.8"/>
+    <text x="${geometry.hu.cx ?? geometry.cx}" y="${geometry.hu.cy + 3.3}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#111">HU</text>
+  </g>`;
+}
+
+function renderAuthoritySealMarker({ seal, geometry }) {
+  const authorityGeometry = geometry.authority;
+  return `
+  <g class="seal-slot seal-slot-authority" data-seal-row="${escapeText(seal.rowKey || "bottom")}">
+    <circle cx="${authorityGeometry.cx ?? geometry.cx}" cy="${authorityGeometry.cy}" r="${authorityGeometry.radius}" fill="#d7d7d2" stroke="#999" stroke-width="1"/>
+    <circle cx="${authorityGeometry.cx ?? geometry.cx}" cy="${authorityGeometry.cy}" r="${authorityGeometry.radius * 0.55}" fill="none" stroke="rgba(120,120,115,.65)" stroke-width="1"/>
+  </g>`;
+}
+
+return { renderChangePlateWMarker: renderChangePlateWMarker, renderHuSealMarker: renderHuSealMarker, renderAuthoritySealMarker: renderAuthoritySealMarker };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-sequence-width-utils.js ----
+const __m_src_plate_lab_renderer_plate_sequence_width_utils_js = (() => {
+// Kennzeichen Physical Lab b304 / generic sequence width helpers.
+// Formula-only helpers for variable-width content sequences.
+
+const { formatNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+
+function shrinkVariablesToFit(sequence, targetContentWidth) {
+  const preferredTotal = sumSequenceWidth(sequence, "preferred");
+  const deficit = Math.max(0, preferredTotal - targetContentWidth);
+  const variableItems = sequence.filter((item) => isVariableItem(item));
+  const totalShrinkCapacity = variableItems.reduce((sum, item) => sum + Math.max(0, getItemPreferredWidth(item) - getItemMinWidth(item)), 0);
+  if (!deficit || !totalShrinkCapacity) return sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
+  const ratio = Math.min(1, deficit / totalShrinkCapacity);
+  return sequence.map((item) => {
+    const preferred = getItemPreferredWidth(item);
+    if (!isVariableItem(item)) return { ...item, width: preferred };
+    const min = getItemMinWidth(item);
+    return { ...item, width: preferred - (preferred - min) * ratio };
+  });
+}
+
+function growVariablesToFit(sequence, targetContentWidth) {
+  const preferredTotal = sumSequenceWidth(sequence, "preferred");
+  const surplus = Math.max(0, targetContentWidth - preferredTotal);
+  const variableItems = sequence.filter((item) => isVariableItem(item));
+  const totalGrowCapacity = variableItems.reduce((sum, item) => sum + Math.max(0, getItemMaxWidth(item) - getItemPreferredWidth(item)), 0);
+  if (!surplus || !totalGrowCapacity) return sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
+  const ratio = Math.min(1, surplus / totalGrowCapacity);
+  return sequence.map((item) => {
+    const preferred = getItemPreferredWidth(item);
+    if (!isVariableItem(item)) return { ...item, width: preferred };
+    const max = getItemMaxWidth(item);
+    return { ...item, width: preferred + (max - preferred) * ratio };
+  });
+}
+
+function sumSequenceWidth(sequence, mode) {
+  return sequence.reduce((sum, item) => {
+    if (mode === "min") return sum + getItemMinWidth(item);
+    if (mode === "max") return sum + getItemMaxWidth(item);
+    return sum + getItemPreferredWidth(item);
+  }, 0);
+}
+
+function sumItemWidths(items, getWidth) {
+  return items.reduce((sum, item) => sum + getWidth(item), 0);
+}
+
+function sumResolvedItemWidths(items) {
+  return items.reduce((sum, item) => sum + item.width, 0);
+}
+
+function createItemWidthMap(items, getWidth) {
+  return new Map(items.map((item) => [item.key, getWidth(item)]));
+}
+
+function createRangeMinWidthMap(items, getRange) {
+  return new Map(items.map((item) => [item.key, getRange(item)?.min ?? 0]));
+}
+
+function sumItemWidthsExcept(items, shouldSkip) {
+  return items.reduce((sum, item) => sum + (shouldSkip(item) ? 0 : item.width), 0);
+}
+
+function sumItemWidthsWhere(items, shouldInclude) {
+  return items.reduce((sum, item) => sum + (shouldInclude(item) ? (Number(item.width) || 0) : 0), 0);
+}
+
+function getItemsOfType(items, type) {
+  return items.filter((item) => item.type === type);
+}
+
+function getFirstItemOfType(items, type) {
+  return items.find((item) => item.type === type);
+}
+
+function countItemsOfType(items, type) {
+  return getItemsOfType(items, type).length;
+}
+
+function applySharedTypeWidth(item, type, totalWidth, itemCount) {
+  if (item.type !== type) return item;
+  return { ...item, width: totalWidth / Math.max(1, itemCount) };
+}
+
+function getItemWidthsByType(items, type) {
+  return getItemsOfType(items, type).map((item) => item.width);
+}
+
+function isVariableItem(item) {
+  return item.variable === true;
+}
+
+function getItemMinWidth(item) {
+  return isVariableItem(item) ? item.minWidth : item.width;
+}
+
+function getItemPreferredWidth(item) {
+  return isVariableItem(item) ? item.preferredWidth : item.width;
+}
+
+function getItemMaxWidth(item) {
+  return isVariableItem(item) ? item.maxWidth : item.width;
+}
+
+function getFixedTypeOrItemMinWidth(item, fixedType, fixedWidth) {
+  if (item.type === fixedType) return fixedWidth;
+  return getItemMinWidth(item);
+}
+
+function getFixedTypeOrItemPreferredWidth(item, fixedType, fixedWidth) {
+  if (item.type === fixedType) return fixedWidth;
+  return getItemPreferredWidth(item);
+}
+
+function getFixedTypeOrItemFiniteMaxWidth(item, fixedType, fixedWidth) {
+  if (item.type === fixedType) return fixedWidth;
+  return getItemMaxWidth(item);
+}
+
+function getFixedTypeOrItemMaxWidth(item, fixedType, fixedMaxWidth) {
+  if (item.type === fixedType) return fixedMaxWidth;
+  return getItemMaxWidth(item);
+}
+
+function sumValues(values) {
+  return values.reduce((sum, value) => sum + value, 0);
+}
+
+function sumVariableRangeMinWidths(items, getRange) {
+  return items.reduce((sum, item) => sum + (getRange(item)?.min ?? 0), 0);
+}
+
+function sumResolvedOrRangeMinWidths(items, itemWidths, getRange) {
+  return items.reduce((sum, item) => sum + (itemWidths.get(item.key) ?? getRange(item)?.min ?? 0), 0);
+}
+
+function average(values) {
+  if (!values.length) return null;
+  return sumValues(values) / values.length;
+}
+
+function getVariableRangeLabel(item, fallbackRange) {
+  const range = item || fallbackRange;
+  if (!range) return null;
+  return `${formatNumber(range.minWidth ?? range.min)}-${formatNumber(range.maxWidth ?? range.max)}`;
+}
+
+function minVariableWidth(items) {
+  const values = items.map((item) => item.minWidth).filter((value) => Number.isFinite(value));
+  return values.length ? Math.min(...values) : null;
+}
+
+return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVariablesToFit, sumSequenceWidth: sumSequenceWidth, sumItemWidths: sumItemWidths, sumResolvedItemWidths: sumResolvedItemWidths, createItemWidthMap: createItemWidthMap, createRangeMinWidthMap: createRangeMinWidthMap, sumItemWidthsExcept: sumItemWidthsExcept, sumItemWidthsWhere: sumItemWidthsWhere, getItemsOfType: getItemsOfType, getFirstItemOfType: getFirstItemOfType, countItemsOfType: countItemsOfType, applySharedTypeWidth: applySharedTypeWidth, getItemWidthsByType: getItemWidthsByType, isVariableItem: isVariableItem, getItemMinWidth: getItemMinWidth, getItemPreferredWidth: getItemPreferredWidth, getItemMaxWidth: getItemMaxWidth, getFixedTypeOrItemMinWidth: getFixedTypeOrItemMinWidth, getFixedTypeOrItemPreferredWidth: getFixedTypeOrItemPreferredWidth, getFixedTypeOrItemFiniteMaxWidth: getFixedTypeOrItemFiniteMaxWidth, getFixedTypeOrItemMaxWidth: getFixedTypeOrItemMaxWidth, sumValues: sumValues, sumVariableRangeMinWidths: sumVariableRangeMinWidths, sumResolvedOrRangeMinWidths: sumResolvedOrRangeMinWidths, average: average, getVariableRangeLabel: getVariableRangeLabel, minVariableWidth: minVariableWidth };
+
+})();
+
+// ---- src/plate/lab-renderer/seal-components.js ----
+const __m_src_plate_lab_renderer_seal_components_js = (() => {
+// Kennzeichen Physical Lab b301 / seal component helpers
+// Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
+
+const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
+const { createSealMarkerPlan } = __m_src_plate_lab_renderer_seal_marker_plan_js;
+const { renderAuthoritySealMarker, renderChangePlateWMarker, renderHuSealMarker } = __m_src_plate_lab_renderer_seal_slot_marker_js;
+const { getItemsOfType } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+
+
+
+
+function renderSeals({ content, rules }) {
+  const sealItems = getItemsOfType(content, "seals");
+  if (!sealItems.length) return "";
+  const parts = sealItems.map((seal) => renderSealItem(rules, seal)).filter(Boolean).join("\n");
+  return `<g class="layer layer-seals">${parts}</g>`;
+}
+
+function renderSealItem(rules, seal) {
+  const geometry = getEffectiveSealGeometry(rules, seal);
+  const markerPlan = createSealMarkerPlan({ rules, seal, geometry });
+  const parts = [];
+  if (markerPlan.renderChangePlateW) {
+    parts.push(renderChangePlateWMarker({ seal, geometry }));
+  }
+  if (markerPlan.renderHu) {
+    parts.push(renderHuSealMarker({ seal, geometry }));
+  }
+  if (markerPlan.renderAuthority) {
+    parts.push(renderAuthoritySealMarker({ seal, geometry }));
+  }
+  return parts.join("");
+}
+
+return { renderSeals: renderSeals, getEffectiveSealGeometry: getEffectiveSealGeometry, getSealGeometry: getSealGeometry };
+
+})();
+
+// ---- src/plate/lab-renderer/season-field.js ----
+const __m_src_plate_lab_renderer_season_field_js = (() => {
+// Kennzeichen Physical Lab b297 / season field component
+//
+// Rendering-only component for the physical seasonal validity field. The row
+// solver still owns x/y placement and gap calculation; this module only turns a
+// solved `season-field` item into SVG using the same mm data as the large
+// renderer.
+
+const { clampNumber, numberOrFallback, positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+const { escapeSvgTextOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+const { getBandForItem, getCharacterBand } = __m_src_plate_lab_renderer_text_utils_js;
+
+function normalizeSeasonMonth(value, fallback) {
+  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 2);
+  const number = Number(digits);
+  if (!Number.isFinite(number) || number < 1 || number > 12) return fallback;
+  return String(number).padStart(2, "0");
+}
+
+function getSeasonFieldLayout(rules, item) {
+  if (!item) return null;
+  const band = getBandForItem(rules, item);
+  const seasonRules = rules.content.season;
+  const rowHeight = seasonRules.monthBoxHeight;
+  const separatorHeight = seasonRules.separatorHeight;
+  const upperFieldY = band.y;
+  const lowerFieldY = band.y + band.height - rowHeight;
+  const separatorY = band.y + band.height / 2 - separatorHeight / 2;
+  // Reduced season fields are appended to the bottom-row chain. The old shared
+  // season baseline was an absolute two-line top-row value and moved the 04/10
+  // digits into the upper seal/HU area. For Reduced, derive the baselines from
+  // the actual field row; other formats keep their reference baseline behavior.
+  const referenceBandY = Number.isFinite(Number(seasonRules.fieldY))
+    ? Number(seasonRules.fieldY)
+    : rules.formatKey === "oneLine"
+      ? getCharacterBand(rules).y
+      : rules.content?.topRow?.y ?? band.y;
+  const referenceOffset = Number(seasonRules.upperBaselineY) - referenceBandY;
+  const baselineOffset = rules.formatKey === "reducedTwoLine"
+    ? rowHeight
+    : Number.isFinite(referenceOffset)
+      ? referenceOffset
+      : rowHeight;
+  return {
+    band,
+    rowHeight,
+    separatorHeight,
+    upperFieldY,
+    lowerFieldY,
+    separatorY,
+    upperBaselineY: upperFieldY + baselineOffset,
+    lowerBaselineY: lowerFieldY + baselineOffset
+  };
+}
+
+function renderSeasonField({ content, rules, metrics }) {
+  const item = content.find((candidate) => candidate.type === "season-field");
+  if (!item) return "";
+  const seasonRules = rules.content.season;
+  const layout = getSeasonFieldLayout(rules, item);
+  const separatorHeight = layout.separatorHeight;
+  const separatorY = layout.separatorY;
+  const xCenter = item.x + item.width / 2;
+  const widthScale = clampNumber(Number(seasonRules.widthScale) || 1, 0.6, 1.2);
+  const digitGap = clampNumber(numberOrFallback(seasonRules.digitGap, 0), -5, 10);
+  const baseDigitWidth = positiveNumber(seasonRules.digitSlotWidth, 12.5);
+  const baseFontSize = positiveNumber(seasonRules.digitSlotFontSize, 28);
+  const activeFontSize = positiveNumber(seasonRules.fontSize, baseFontSize);
+  const fontSizeScale = activeFontSize / baseFontSize;
+  const digitWidth = baseDigitWidth * widthScale * fontSizeScale;
+  const totalMonthWidth = digitWidth * 2 + digitGap;
+  const monthLeft = xCenter - totalMonthWidth / 2;
+  const firstDigitX = monthLeft;
+  const secondDigitX = monthLeft + digitWidth + digitGap;
+  const lineX1 = item.x + seasonRules.separatorInset;
+  const lineWidth = item.width - seasonRules.separatorInset * 2;
+  const upperBaselineY = layout.upperBaselineY;
+  const lowerBaselineY = layout.lowerBaselineY;
+  const from = normalizeSeasonMonth(item.season?.from || "04", "04");
+  const to = normalizeSeasonMonth(item.season?.to || "10", "10");
+  const textColor = metrics?.textColor || "#080808";
+  const textStyle = `font-family="${seasonRules.fontFamily}" font-size="${seasonRules.fontSize}" font-weight="${seasonRules.fontWeight}" fill="${textColor}"`;
+
+  const renderMonth = (value, key, baselineY) => {
+    const digitLength = Number(digitWidth).toFixed(4).replace(/\.?0+$/, "");
+    return `
+  <g data-season-row="${key}" data-season-width-scale="${widthScale}" data-season-digit-gap="${digitGap}" data-season-digit-width="${digitWidth}" data-season-total-width="${totalMonthWidth}" data-season-layout="deterministic-font-size-scaled" data-season-font-size-scale="${fontSizeScale}">
+    <text class="season-digit season-digit-first" data-season-row-key="${key}" data-season-digit="first" data-season-digit-text="first" x="${firstDigitX}" y="${baselineY}" text-anchor="start" textLength="${digitLength}" lengthAdjust="spacingAndGlyphs" ${textStyle}>${escapeText(value[0])}</text>
+    <text class="season-digit season-digit-second" data-season-row-key="${key}" data-season-digit="second" data-season-digit-text="second" x="${secondDigitX}" y="${baselineY}" text-anchor="start" textLength="${digitLength}" lengthAdjust="spacingAndGlyphs" ${textStyle}>${escapeText(value[1])}</text>
+  </g>`;
+  };
+
+  return `
+<g class="layer layer-season-field">
+  <rect x="${lineX1}" y="${separatorY}" width="${lineWidth}" height="${separatorHeight}" fill="${textColor}" data-season-separator="true"/>
+${renderMonth(from, "from", upperBaselineY)}
+${renderMonth(to, "to", lowerBaselineY)}
+</g>`.trim();
+}
+
+return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSeasonFieldLayout, renderSeasonField: renderSeasonField };
+
+})();
+
+// ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
+const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
+// Kennzeichen Physical Lab b305 / Wechselkennzeichen supplement renderer
+// Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
+// decisions stay in the already solved base model; this module renders and
+// builds only the attached supplementary plate frame, HU marker, vehicle mark
+// and small common-label line.
+
+const { positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+const { getFirstItemOfType, getItemsOfType, sumValues } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+const { escapeSvgTextOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+
+
+const DEFAULT_CHANGE_PLATE = Object.freeze({
+  supplementSealCenterY: 26.5,
+  supplementVehicleTopY: 55,
+  supplementVehicleTargetHeight: 34,
+  supplementVehicleBaselineY: 88,
+  supplementDigitTargetWidth: 18.5,
+  supplementHeTargetWidth: 14,
+  supplementVehicleCharGap: 1.5,
+  supplementLabelFontSize: 6,
+  supplementLabelBaselineY: 100
+});
+
+function renderChangePlateSupplement({ content, metrics, rules }) {
+  if (!metrics?.changePlateEnabled) return "";
+  const items = content.filter((item) => String(item.type || "").startsWith("change-plate-"));
+  if (!items.length) return "";
+  const frame = getFirstItemOfType(items, "change-plate-frame");
+  const seal = getFirstItemOfType(items, "change-plate-hu");
+  const vehicleChars = getItemsOfType(items, "change-plate-vehicle-char");
+  const label = getFirstItemOfType(items, "change-plate-common-label");
+  return `
+<g class="layer layer-change-plate" data-change-plate="true">
+  ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="#111"/>
+  <rect x="${frame.x + rules.innerInset}" y="${frame.y + rules.innerInset}" width="${frame.width - rules.innerInset * 2}" height="${frame.height - rules.innerInset * 2}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>` : ""}
+  ${seal ? `<g class="change-plate-supplement-hu"><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter / 2}" fill="#1ea5ff" stroke="#111" stroke-width="1.1"/><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter * 0.34}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.7" stroke-dasharray="1.2 1.6"/><text x="${seal.cx}" y="${seal.cy + 2.8}" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.8" font-weight="700" fill="#111">HU</text></g>` : ""}
+  ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${metrics.textColor || '#080808'}">${escapeText(char.text)}</text>`).join("\n  ")}
+  ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="#111">${escapeText(label.text)}</text>` : ""}
+</g>`.trim();
+}
+
+function createChangePlateSupplementItems({ x, width, height, split, changePlate, rules }) {
+  const centerX = x + width / 2;
+  const huDiameter = positiveNumber(changePlate.supplementSealDiameter, rules.content.seal.huDiameter);
+  const huCenterY = positiveNumber(changePlate.supplementSealCenterY, DEFAULT_CHANGE_PLATE.supplementSealCenterY);
+  const vehicleChars = createVehicleSpecificCharItems({
+    text: split.vehicleText,
+    centerX,
+    baselineY: changePlate.supplementVehicleBaselineY,
+    fontSize: changePlate.supplementVehicleFontSize,
+    topY: changePlate.supplementVehicleTopY,
+    targetHeight: changePlate.supplementVehicleTargetHeight,
+    digitTargetWidth: changePlate.supplementDigitTargetWidth,
+    heTargetWidth: changePlate.supplementHeTargetWidth,
+    gap: changePlate.supplementVehicleCharGap
+  });
+  return [
+    { type: "change-plate-frame", key: "change-plate-frame", x, y: 0, width, height },
+    { type: "change-plate-hu", key: "change-plate-hu", cx: centerX, cy: huCenterY, diameter: huDiameter },
+    ...vehicleChars,
+    { type: "change-plate-common-label", key: "change-plate-common-label", text: split.commonLabel, x: centerX, baselineY: changePlate.supplementLabelBaselineY, fontSize: changePlate.supplementLabelFontSize }
+  ];
+}
+
+function createVehicleSpecificCharItems({ text, centerX, baselineY, fontSize, topY, targetHeight, digitTargetWidth, heTargetWidth, gap }) {
+  const chars = [...String(text || "1").toUpperCase()];
+  const widths = chars.map((char) => /[HE]/.test(char) ? heTargetWidth : digitTargetWidth);
+  const totalWidth = sumValues(widths) + Math.max(0, chars.length - 1) * gap;
+  let cursor = centerX - totalWidth / 2;
+  return chars.map((char, index) => {
+    const targetWidth = widths[index];
+    const item = {
+      type: "change-plate-vehicle-char",
+      key: `change-plate-vehicle-char-${index}-${char}`,
+      text: char,
+      x: cursor + targetWidth / 2,
+      baselineY,
+      fontFamily: "GL-Nummernschild-Mtl",
+      fontSize,
+      topY,
+      targetHeight,
+      targetWidth
+    };
+    cursor += targetWidth + gap;
+    return item;
+  });
+}
+
+
+return { renderChangePlateSupplement: renderChangePlateSupplement, createChangePlateSupplementItems: createChangePlateSupplementItems };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-render-shell.js ----
+const __m_src_plate_lab_renderer_plate_render_shell_js = (() => {
+// Kennzeichen Physical Lab b312 / SVG render shell component
+// Owns final SVG layer composition, canvas expansion and purely visual text/reference layers.
+// It must not calculate physical layout positions; it only renders the solved model.
+
+const { getCharacterBand } = __m_src_plate_lab_renderer_text_utils_js;
+const { renderPlateBody } = __m_src_plate_lab_renderer_plate_body_js;
+const { renderSeals } = __m_src_plate_lab_renderer_seal_components_js;
+const { renderSeasonField } = __m_src_plate_lab_renderer_season_field_js;
+const { renderChangePlateSupplement } = __m_src_plate_lab_renderer_change_plate_supplement_renderer_js;
+const { escapeSvgAttr: escapeAttr, escapeSvgText: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+const { getItemsOfType } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+
+const DEFAULT_TEXT_COLOR = "#080808";
+
+function renderPlateSvgDocument(model, options = {}) {
+  const { rules, metrics } = model;
+  const stage = options.stage || "complete";
+  const showDimensions = options.showDimensions !== false;
+  const showDxfReferenceGuides = options.showDxfReferenceGuides !== false;
+  const showGrid = options.showGrid !== false;
+  const showSeals = options.showSeals !== false;
+  const showText = options.showText !== false;
+  const layers = [];
+  const debugRenderers = options.debugRenderers || {};
+
+  layers.push(renderPlateBody(model));
+
+  if (showDxfReferenceGuides && ["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderDxfReferenceGuides(model));
+  }
+  if (showGrid && ["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderOptionalLayer(debugRenderers.renderGrid, model));
+  }
+  if (showSeals && ["seals", "text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderSeals(model, options));
+    const changePlateSupplement = renderChangePlateSupplement(model);
+    if (changePlateSupplement) layers.push(changePlateSupplement);
+  }
+  if (["seals", "text", "horizontal", "complete"].includes(stage)) {
+    // Season is a text/validity component, not a seal. Keep it visible even if
+    // the seal layer is toggled off, and render it before the main glyphs so
+    // its field stays in the physical row chain without covering characters.
+    layers.push(renderSeasonField(model));
+  }
+  if (showText && ["text", "horizontal", "complete"].includes(stage)) {
+    layers.push(renderTextLayer(model));
+  }
+  if (stage === "horizontal") {
+    layers.push(renderOptionalLayer(debugRenderers.renderHorizontalDiagnostics, model));
+  }
+  if (showDimensions) {
+    layers.push(renderOptionalLayer(debugRenderers.renderDimensions, model));
+  }
+
+  const canvas = getCanvasMm(model, showDimensions);
+  const extraDefs = String(options.extraDefs || "").trim();
+  const svg = `
+<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    ${extraDefs}
+    <filter id="plateShadow" x="-5%" y="-20%" width="110%" height="140%">
+      <feDropShadow dx="0" dy="0.8" stdDeviation="0.8" flood-color="black" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  ${layers.join("\n  ")}
+</svg>`.trim();
+
+  return { svg, model, canvas };
+}
+
+function renderOptionalLayer(renderer, model) {
+  return typeof renderer === "function" ? renderer(model) : "";
+}
+
+function getCanvasMm(model, showDimensions = true) {
+  const { rules, metrics } = model;
+  if (!showDimensions) {
+    return { x: 0, y: 0, width: metrics.width, height: rules.outerHeight };
+  }
+  return {
+    x: 0,
+    y: 0,
+    width: metrics.width + rules.dimensions.enabledMarginRight,
+    height: rules.outerHeight + rules.dimensions.enabledMarginBottom
+  };
+}
+
+function renderDxfReferenceGuides({ rules, metrics }) {
+  const w = metrics.width;
+  const inset = rules.innerInset;
+  const euro = rules.euro;
+  const charBand = getCharacterBand(rules);
+  return `
+<g class="layer layer-dxf-guides" fill="none" stroke-linecap="square">
+  <rect x="0" y="0" width="${w}" height="${rules.outerHeight}" rx="${rules.outerCornerRadius}" stroke="rgba(255,255,255,.28)" stroke-width="0.45"/>
+  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" stroke="rgba(255,255,255,.42)" stroke-width="0.45"/>
+  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" stroke="rgba(70,170,255,.8)" stroke-width="0.55"/>
+  <line x1="0" y1="${charBand.y}" x2="${w}" y2="${charBand.y}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
+  <line x1="0" y1="${charBand.y + charBand.height}" x2="${w}" y2="${charBand.y + charBand.height}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
+</g>`.trim();
+}
+
+function renderTextLayer({ content, font, metrics }) {
+  const glyphGuide = font.fit?.measured ? `
+    <rect x="0" y="${font.fit.measured.topY}" width="100%" height="${font.fit.measured.visibleHeight}" fill="rgba(92, 214, 255, .035)" stroke="rgba(92, 214, 255, .35)" stroke-width="0.35" stroke-dasharray="2 1.5"/>` : "";
+  const textColor = metrics?.textColor || DEFAULT_TEXT_COLOR;
+  const chars = getItemsOfType(content, "char").map((cell) => `
+    <text x="${cell.x + cell.width / 2}" y="${cell.baselineY || font.baselineY}" text-anchor="middle" font-family="'${font.fontFamily}', Arial Narrow, sans-serif" font-size="${cell.fontSize || font.fontSize}" font-weight="400" fill="${textColor}">${escapeText(cell.char)}</text>`).join("");
+  return `<g class="layer layer-text">${glyphGuide}${chars}</g>`;
+}
+
+
+return { renderPlateSvgDocument: renderPlateSvgDocument, getCanvasMm: getCanvasMm };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-visual-style.js ----
+const __m_src_plate_lab_renderer_plate_visual_style_js = (() => {
+// Kennzeichen Physical Lab b263 / visual style and color-mode helpers
+
+const { PLATE_TEXT_COLORS_MM } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+
+function resolveSeasonForVisualStyle(season, visualStyle) {
+  if (visualStyle?.key !== "green") return season;
+  return {
+    ...(season || {}),
+    enabled: false
+  };
+}
+
+function resolveVisualStyle(visualStyle = {}) {
+  const key = visualStyle?.plateColorMode === "green" || visualStyle?.textColorMode === "green" ? "green" : "black";
+  return PLATE_TEXT_COLORS_MM[key] || PLATE_TEXT_COLORS_MM.black;
+}
+
+return { resolveSeasonForVisualStyle: resolveSeasonForVisualStyle, resolveVisualStyle: resolveVisualStyle };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-season-options.js ----
+const __m_src_plate_lab_renderer_plate_season_options_js = (() => {
+const { clampNumber, numberOrFallback, positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+// Kennzeichen Physical Lab b266 / season option normalization helpers
+// Keeps season input/default normalization outside of the main SVG renderer orchestrator.
+
+const { TWO_LINE_RULES_MM } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+const { normalizeSeasonMonth } = __m_src_plate_lab_renderer_season_field_js;
+
+function resolveRulesForSeason(rules, season) {
+  if (!season?.enabled) return rules;
+  return {
+    ...rules,
+    content: {
+      ...rules.content,
+      season: {
+        ...rules.content.season,
+        targetDigitHeight: season.targetDigitHeight,
+        fontSize: season.fontSize,
+        widthScale: season.widthScale,
+        digitGap: season.digitGap,
+        upperBaselineY: rules.formatKey === "motorcycle" ? rules.content.season.upperBaselineY : season.upperBaselineY,
+      }
+    }
+  };
+}
+
+function resolveSeasonOptions(season = {}, rules = TWO_LINE_RULES_MM) {
+  const defaults = rules?.content?.season || TWO_LINE_RULES_MM.content.season;
+  const enabled = season?.enabled === true;
+  return {
+    enabled,
+    from: normalizeSeasonMonth(season?.from, "04"),
+    to: normalizeSeasonMonth(season?.to, "10"),
+    targetDigitHeight: positiveNumber(season?.targetDigitHeight, defaults.targetDigitHeight),
+    fontSize: positiveNumber(season?.fontSize, defaults.fontSize),
+    widthScale: clampNumber(positiveNumber(season?.widthScale, defaults.widthScale), 0.6, 1.2),
+    digitGap: clampNumber(numberOrFallback(season?.digitGap, defaults.digitGap), -5, 10),
+    upperBaselineY: positiveNumber(season?.baselineY, defaults.upperBaselineY)
+  };
+}
+
+
+return { resolveRulesForSeason: resolveRulesForSeason, resolveSeasonOptions: resolveSeasonOptions };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-render-context.js ----
+const __m_src_plate_lab_renderer_plate_render_context_js = (() => {
+// Kennzeichen Physical Lab b307 / render context helpers
+// Keeps renderer input/font normalization outside the main renderer orchestrator.
+
+const { positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+
+function resolveSpecialIWidth(baseFont, options = {}) {
+  return positiveNumber(options.specialIWidth, baseFont.specialWidths?.I || baseFont.letterWidth);
+}
+
+function createOneLineRenderFont(baseFont, options = {}) {
+  const specialIWidth = resolveSpecialIWidth(baseFont, options);
+  return {
+    ...baseFont,
+    specialWidths: {
+      ...(baseFont.specialWidths || {}),
+      I: specialIWidth
+    },
+    fontSize: positiveNumber(options.fontSize, baseFont.fontSize),
+    baselineY: positiveNumber(options.baselineY, baseFont.baselineY),
+    fit: options.fontFit || null
+  };
+}
+
+function createTwoLineRenderFont(baseFont, options = {}) {
+  const specialIWidth = resolveSpecialIWidth(baseFont, options);
+  const fixedReducedFont = options.fixedReducedFont === true;
+  return {
+    ...baseFont,
+    specialWidths: {
+      ...(baseFont.specialWidths || {}),
+      I: fixedReducedFont ? baseFont.specialWidths?.I ?? specialIWidth : specialIWidth
+    },
+    fontSize: fixedReducedFont ? baseFont.fontSize : positiveNumber(options.fontSize, baseFont.fontSize),
+    baselineY: fixedReducedFont ? baseFont.baselineY : positiveNumber(options.baselineY, baseFont.baselineY),
+    fit: fixedReducedFont ? null : options.fontFit || null
+  };
+}
+
+function resolveChangePlateBaseInput(input, changePlate, split) {
+  return split.commonLabel || changePlate.commonText || input;
+}
+
+function createFontResolutionResult({
+  requestedFontMode,
+  fontMode,
+  reason,
+  policy,
+  widthCapMm,
+  middleLayout,
+  narrowLayout,
+  chosenLayout,
+  middleFitsWidthCap,
+  narrowFitsWidthCap
+}) {
+  return {
+    requestedFontMode,
+    fontMode,
+    reason,
+    policy,
+    widthCapMm,
+    middleRawContentWidth: middleLayout.preferredContentWidth,
+    narrowRawContentWidth: narrowLayout.preferredContentWidth,
+    middleNeededWidth: middleLayout.preferredNeededWidth,
+    narrowNeededWidth: narrowLayout.preferredNeededWidth,
+    middleFitsWidthCap,
+    narrowFitsWidthCap,
+    middleLayout,
+    narrowLayout,
+    chosenLayout
+  };
+}
+
+return { resolveSpecialIWidth: resolveSpecialIWidth, createOneLineRenderFont: createOneLineRenderFont, createTwoLineRenderFont: createTwoLineRenderFont, resolveChangePlateBaseInput: resolveChangePlateBaseInput, createFontResolutionResult: createFontResolutionResult };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-width-strategy.js ----
+const __m_src_plate_lab_renderer_plate_width_strategy_js = (() => {
+const { positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+const { TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+
+function resolveTwoLineWidthRule(value = "standard") {
+  if (value === "motorcycle" || value === "motorcyclePlate" || value === "kraftrad") return TWO_LINE_WIDTH_RULES.motorcycle;
+  if (value === "reducedTwoLine" || value === "reduced-two-line" || value === "verkleinertTwoLine") return TWO_LINE_WIDTH_RULES.reducedTwoLine;
+  return value === "twoAndThreeWheel" || value === "two-and-three-wheel" || value === "two_or_three_wheel"
+    ? TWO_LINE_WIDTH_RULES.twoAndThreeWheel
+    : TWO_LINE_WIDTH_RULES.standard;
+}
+
+function getTwoLineWidthBandsForFont(fontMode, widthRule = resolveTwoLineWidthRule()) {
+  const bands = widthRule.widthBands?.[fontMode] || widthRule.widthBands?.middle || TWO_LINE_WIDTH_BANDS.middle;
+  return bands.filter((width) => width <= widthRule.maxWidth);
+}
+
+function resolveTwoLineWidthCapMm(widthMode, widthRule = resolveTwoLineWidthRule()) {
+  const number = Number(widthMode);
+  return Number.isFinite(number) && number > 0 ? Math.min(number, widthRule.maxWidth) : widthRule.maxWidth;
+}
+
+function resolveWidthCapMm(widthMode, fallback) {
+  return positiveNumber(widthMode, fallback);
+}
+
+function resolveWidthStrategy(widthMode) {
+  if (widthMode === "balanced") return "balanced";
+  if (widthMode === "auto" || !widthMode) return "compact";
+  return "fixed";
+}
+
+return { resolveTwoLineWidthRule: resolveTwoLineWidthRule, getTwoLineWidthBandsForFont: getTwoLineWidthBandsForFont, resolveTwoLineWidthCapMm: resolveTwoLineWidthCapMm, resolveWidthCapMm: resolveWidthCapMm, resolveWidthStrategy: resolveWidthStrategy };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-spacing-surface-utils.js ----
+const __m_src_plate_lab_renderer_plate_spacing_surface_utils_js = (() => {
+// Kennzeichen Physical Lab b272 / shared spacing-surface utilities
+// Formula-only helpers for water-filling spacing surfaces.
+
+function createSpacingSurfaces(spacingItems, sideMin, { getMinWidth, getMaxWidth }) {
+  return [
+    { key: "__left_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin },
+    ...spacingItems.map((item) => {
+      const min = getMinWidth(item);
+      return {
+        key: item.key,
+        min,
+        max: getMaxWidth(item),
+        width: min,
+        type: item.type
+      };
+    }),
+    { key: "__right_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin }
+  ];
+}
+
+function waterFillSpacingSurfaces(surfaces, targetWidth) {
+  const minTotal = surfaces.reduce((sum, item) => sum + item.min, 0);
+  let remaining = Math.max(0, targetWidth - minTotal);
+
+  while (remaining > 0.0001) {
+    const active = surfaces.filter((item) => item.width < item.max - 0.0001);
+    if (!active.length) break;
+    const equalStep = remaining / active.length;
+    let consumed = 0;
+    for (const item of active) {
+      const cap = item.max - item.width;
+      const applied = Math.min(equalStep, cap);
+      item.width += applied;
+      consumed += applied;
+    }
+    if (consumed <= 0.0001) break;
+    remaining -= consumed;
+  }
+
+  return { minTotal, surplus: Math.max(0, targetWidth - minTotal) };
+}
+
+function spacingSurfaceResult(surfaces, sideMin, reason) {
+  const widths = new Map();
+  for (const surface of surfaces) {
+    if (surface.key !== "__left_margin" && surface.key !== "__right_margin") widths.set(surface.key, surface.width);
+  }
+  return {
+    leftMargin: surfaces.find((item) => item.key === "__left_margin")?.width ?? sideMin,
+    rightMargin: surfaces.find((item) => item.key === "__right_margin")?.width ?? sideMin,
+    widths,
+    reason
+  };
+}
+
+return { createSpacingSurfaces: createSpacingSurfaces, waterFillSpacingSurfaces: waterFillSpacingSurfaces, spacingSurfaceResult: spacingSurfaceResult };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-layout-result-utils.js ----
+const __m_src_plate_lab_renderer_plate_layout_result_utils_js = (() => {
+// Kennzeichen Physical Lab b302 / layout result object helpers
+// Shared helpers for identical, already-solved layout result object fields only.
+
+function createLayoutResultBase({
+  minFits,
+  allowOverflow,
+  preferredFits,
+  maxFits,
+  width,
+  strategy,
+  modeLabel,
+  policy,
+  reason,
+  available,
+  contentLimits,
+  minContentWidth,
+  preferredContentWidth,
+  maxContentWidth,
+  minNeededWidth,
+  preferredNeededWidth,
+  maxNeededWidth,
+  contentWidth,
+  sideMarginLeft,
+  sideMarginRight,
+  positionedContent
+}) {
+  return {
+    fits: minFits,
+    renderable: minFits || allowOverflow,
+    minFits,
+    preferredFits,
+    maxFits,
+    width,
+    strategy,
+    modeLabel,
+    policy,
+    reason,
+    availableWidth: available,
+    contentLimits,
+    minContentWidth,
+    preferredContentWidth,
+    maxContentWidth,
+    minNeededWidth,
+    preferredNeededWidth,
+    maxNeededWidth,
+    contentWidth,
+    sideMarginLeft,
+    sideMarginRight,
+    positionedContent
+  };
+}
+
+
+function createHorizontalBounds(left, right) {
+  return { left, right, width: right - left };
+}
+
+return { createLayoutResultBase: createLayoutResultBase, createHorizontalBounds: createHorizontalBounds };
+
+})();
+
+// ---- src/plate/lab-renderer/change-plate.js ----
+const __m_src_plate_lab_renderer_change_plate_js = (() => {
+// Kennzeichen Physical Lab b289 / Wechselkennzeichen model attachment helpers
+// Keeps the confirmed b237 one-line renderer untouched. The Wechselkennzeichen
+// branch starts with that solved one-line model and attaches only the extra
+// physical Wechselteil model plus the W replacement marker.
+
+const { parsePlate, splitRecognition } = __m_src_plate_lab_renderer_text_utils_js;
+const { createChangePlateSupplementItems } = __m_src_plate_lab_renderer_change_plate_supplement_renderer_js;
+const { numberOrFallback: finiteNumber, positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+
+const DEFAULT_CHANGE_PLATE = Object.freeze({
+  enabled: false,
+  supplementWidth: 60,
+  supplementGap: 8,
+  wHeight: 20,
+  wWidth: 25,
+  // HU Plakette has the same physical size as on the main plate.
+  // The concrete diameter/center is resolved from the active plate rules, not
+  // scaled down for the Wechselteil.
+  supplementSealDiameter: null,
+  supplementSealCenterY: 26.5,
+  // Target visible glyph height 32-37 mm. GL Nummernschild uses the same
+  // calibration ratio as the normal one-line renderer: 125 SVG font-size
+  // produces about 75 mm visible height, so 34 mm visible target needs
+  // about 56.7 SVG font-size.
+  supplementVehicleFontSize: 56.7,
+  supplementVehicleTopY: 55,
+  supplementVehicleTargetHeight: 34,
+  supplementVehicleBaselineY: 88,
+  supplementDigitTargetWidth: 18.5,
+  supplementHeTargetWidth: 14,
+  supplementVehicleCharGap: 1.5,
+  supplementLabelFontSize: 6,
+  supplementLabelBaselineY: 100,
+  highSupplementHeight: 200,
+  highSupplementSealCenterY: 30,
+  highSupplementVehicleTopY: 145,
+  highSupplementVehicleBaselineY: 178,
+  highSupplementLabelBaselineY: 190,
+  commonText: "",
+  vehicleText: ""
+});
+
+function resolveChangePlateOptions(changePlate = {}) {
+  const enabled = changePlate?.enabled === true;
+  return {
+    ...DEFAULT_CHANGE_PLATE,
+    ...(changePlate || {}),
+    enabled,
+    supplementWidth: positiveNumber(changePlate?.supplementWidth, DEFAULT_CHANGE_PLATE.supplementWidth),
+    supplementGap: positiveNumber(changePlate?.supplementGap, DEFAULT_CHANGE_PLATE.supplementGap),
+    wHeight: positiveNumber(changePlate?.wHeight, DEFAULT_CHANGE_PLATE.wHeight),
+    wWidth: positiveNumber(changePlate?.wWidth, DEFAULT_CHANGE_PLATE.wWidth),
+    supplementVehicleFontSize: positiveNumber(changePlate?.supplementVehicleFontSize, DEFAULT_CHANGE_PLATE.supplementVehicleFontSize),
+    supplementVehicleTopY: positiveNumber(changePlate?.supplementVehicleTopY, DEFAULT_CHANGE_PLATE.supplementVehicleTopY),
+    supplementVehicleTargetHeight: positiveNumber(changePlate?.supplementVehicleTargetHeight, DEFAULT_CHANGE_PLATE.supplementVehicleTargetHeight),
+    supplementVehicleBaselineY: positiveNumber(changePlate?.supplementVehicleBaselineY, DEFAULT_CHANGE_PLATE.supplementVehicleBaselineY),
+    supplementDigitTargetWidth: positiveNumber(changePlate?.supplementDigitTargetWidth, DEFAULT_CHANGE_PLATE.supplementDigitTargetWidth),
+    supplementHeTargetWidth: positiveNumber(changePlate?.supplementHeTargetWidth, DEFAULT_CHANGE_PLATE.supplementHeTargetWidth),
+    supplementVehicleCharGap: positiveNumber(changePlate?.supplementVehicleCharGap, DEFAULT_CHANGE_PLATE.supplementVehicleCharGap),
+    supplementLabelFontSize: positiveNumber(changePlate?.supplementLabelFontSize, DEFAULT_CHANGE_PLATE.supplementLabelFontSize),
+    supplementLabelBaselineY: positiveNumber(changePlate?.supplementLabelBaselineY, DEFAULT_CHANGE_PLATE.supplementLabelBaselineY),
+    highSupplementHeight: positiveNumber(changePlate?.highSupplementHeight, DEFAULT_CHANGE_PLATE.highSupplementHeight),
+    highSupplementSealCenterY: positiveNumber(changePlate?.highSupplementSealCenterY, DEFAULT_CHANGE_PLATE.highSupplementSealCenterY),
+    highSupplementVehicleTopY: positiveNumber(changePlate?.highSupplementVehicleTopY, DEFAULT_CHANGE_PLATE.highSupplementVehicleTopY),
+    highSupplementVehicleBaselineY: positiveNumber(changePlate?.highSupplementVehicleBaselineY, DEFAULT_CHANGE_PLATE.highSupplementVehicleBaselineY),
+    highSupplementLabelBaselineY: positiveNumber(changePlate?.highSupplementLabelBaselineY, DEFAULT_CHANGE_PLATE.highSupplementLabelBaselineY),
+    commonText: normalizeText(changePlate?.commonText || DEFAULT_CHANGE_PLATE.commonText),
+    vehicleText: normalizeVehicleText(changePlate?.vehicleText || DEFAULT_CHANGE_PLATE.vehicleText)
+  };
+}
+
+function attachChangePlateOneLineModel(model, { input, changePlate = resolveChangePlateOptions(), rules }) {
+  const split = splitChangePlateInput(input, changePlate);
+  const supplementX = model.metrics.width + changePlate.supplementGap;
+  const supplementWidth = changePlate.supplementWidth;
+  const totalWidth = model.metrics.width + changePlate.supplementGap + supplementWidth;
+  const changeContent = model.content.map((item) => item.type === "seals" ? { ...item, changePlateW: true, wHeight: changePlate.wHeight, wWidth: changePlate.wWidth } : item);
+  const supplement = createChangePlateSupplementItems({
+    x: supplementX,
+    width: supplementWidth,
+    height: rules.outerHeight,
+    split,
+    changePlate,
+    rules
+  });
+
+  return {
+    ...model,
+    content: [...changeContent, ...supplement],
+    metrics: {
+      ...model.metrics,
+      width: totalWidth,
+      changePlateEnabled: true,
+      changePlateCommonText: split.commonLabel,
+      changePlateVehicleText: split.vehicleText,
+      changePlateMainPlateWidth: model.metrics.width,
+      changePlateSupplementX: supplementX,
+      changePlateSupplementWidth: supplementWidth,
+      changePlateSupplementGap: changePlate.supplementGap,
+      changePlateWHeight: changePlate.wHeight,
+      changePlateWWidth: changePlate.wWidth,
+      plateFormatLabel: `${model.metrics.plateFormatLabel} · Wechselkennzeichen-Labmodell`,
+      layoutMode: `${model.metrics.layoutMode} · Wechselkennzeichen branch`,
+      layoutPolicy: `${model.metrics.layoutPolicy}; Wechselkennzeichen branch keeps the b237 one-line solver and attaches the vehicle-specific Wechselteil separately`,
+      modelNote: `${model.metrics.modelNote} Wechselkennzeichen: b237 one-line model is used as base; W replaces the HU marker in the main seal column; vehicle-specific part is rendered from the separate Lab input in a separate frame.`
+    }
+  };
+}
+
+
+function attachChangePlateHighFormatModel(model, { input, changePlate = resolveChangePlateOptions(), rules }) {
+  const split = splitChangePlateInput(input, changePlate);
+  const supplementX = model.metrics.width + changePlate.supplementGap;
+  const supplementWidth = changePlate.supplementWidth;
+  const supplementHeight = positiveNumber(changePlate.highSupplementHeight, rules.outerHeight);
+  const totalWidth = model.metrics.width + changePlate.supplementGap + supplementWidth;
+  const totalHeight = Math.max(model.metrics.height, supplementHeight);
+  const isMotorcycle = rules.formatKey === "motorcycle";
+  const changeContent = model.content.map((item) => item.type === "seals" ? { ...item, changePlateW: true, changePlateSwapWAndAuthority: isMotorcycle, wHeight: changePlate.wHeight, wWidth: changePlate.wWidth } : item);
+  const supplement = createChangePlateSupplementItems({
+    x: supplementX,
+    width: supplementWidth,
+    height: supplementHeight,
+    split,
+    changePlate: {
+      ...changePlate,
+      supplementSealCenterY: changePlate.highSupplementSealCenterY,
+      supplementVehicleTopY: changePlate.highSupplementVehicleTopY,
+      supplementVehicleBaselineY: changePlate.highSupplementVehicleBaselineY,
+      supplementLabelBaselineY: changePlate.highSupplementLabelBaselineY
+    },
+    rules
+  });
+
+  return {
+    ...model,
+    content: [...changeContent, ...supplement],
+    metrics: {
+      ...model.metrics,
+      width: totalWidth,
+      height: totalHeight,
+      changePlateEnabled: true,
+      changePlateVariant: "high-format",
+      changePlateCommonText: split.commonLabel,
+      changePlateVehicleText: split.vehicleText,
+      changePlateMainPlateWidth: model.metrics.width,
+      changePlateSupplementX: supplementX,
+      changePlateSupplementWidth: supplementWidth,
+      changePlateSupplementHeight: supplementHeight,
+      changePlateSupplementGap: changePlate.supplementGap,
+      changePlateWHeight: changePlate.wHeight,
+      changePlateWWidth: changePlate.wWidth,
+      plateFormatLabel: `${model.metrics.plateFormatLabel} · Wechselkennzeichen-Labmodell`,
+      layoutMode: `${model.metrics.layoutMode} · Wechselkennzeichen high-format branch`,
+      layoutPolicy: `${model.metrics.layoutPolicy}; Wechselkennzeichen high-format branch keeps the confirmed two-line/motorcycle solver and attaches the 60 x 200 mm vehicle-specific Wechselteil separately`,
+      modelNote: `${model.metrics.modelNote} Wechselkennzeichen: confirmed two-line/motorcycle model is used as base; W replaces the HU marker in the main seal position; vehicle-specific part is rendered from the separate Lab input in a separate 60 x 200 mm frame.`
+    }
+  };
+}
+
+function splitChangePlateInput(input, changePlate = {}) {
+  const explicitCommon = normalizeText(changePlate.commonText);
+  const explicitVehicle = normalizeVehicleText(changePlate.vehicleText);
+  if (explicitCommon || explicitVehicle) {
+    const commonInput = explicitCommon || input;
+    const parsed = parsePlate(commonInput);
+    const vehicleText = explicitVehicle || "1";
+    return {
+      parsed,
+      commonRecognition: parsed.recognition || "",
+      vehicleText,
+      commonLabel: parsed.normalized || normalizeText(commonInput) || "—"
+    };
+  }
+
+  // Backward-compatible fallback for existing smoke tests and direct API calls:
+  // if no split Lab fields are supplied, derive the vehicle-specific part from
+  // the tail of the one-line input. The Lab UI no longer relies on this path.
+  const parsed = parsePlate(input);
+  const recognition = parsed.recognition || "";
+  const match = recognition.match(/^(.*?)([0-9](?:[HE])?)$/);
+  const commonRecognition = match ? match[1] : recognition.slice(0, -1);
+  const vehicleText = match ? match[2] : recognition.slice(-1) || "1";
+  const commonLabel = [parsed.district, formatRecognitionForLabel(commonRecognition)].filter(Boolean).join(" ").trim();
+  return {
+    parsed,
+    commonRecognition,
+    vehicleText,
+    commonLabel: commonLabel || parsed.normalized || "—"
+  };
+}
+
+function formatRecognitionForLabel(recognition) {
+  return splitRecognition(recognition).map((part) => part.value).join(" ");
+}
+
+
+function normalizeText(value) {
+  return String(value || "").trim().replace(/\s+/g, " ").toUpperCase();
+}
+
+function normalizeVehicleText(value) {
+  return String(value || "").trim().replace(/\s+/g, "").toUpperCase();
+}
+
+return { resolveChangePlateOptions: resolveChangePlateOptions, attachChangePlateOneLineModel: attachChangePlateOneLineModel, attachChangePlateHighFormatModel: attachChangePlateHighFormatModel, splitChangePlateInput: splitChangePlateInput };
+
+})();
+
+// ---- src/plate/lab-renderer/chain-solver.js ----
+const __m_src_plate_lab_renderer_chain_solver_js = (() => {
+// Kennzeichen Physical Lab b281 / generic row-chain solver primitives.
+//
+// This module contains format-neutral helpers for CAD-like horizontal row
+// chains. Format-specific modules still provide their legal item ranges and
+// template rules; these helpers only count fixed widths, initialise/grow
+// variable surfaces and assemble common solution diagnostics.
+
+const { countItemsOfType, getItemsOfType, sumItemWidthsWhere, sumResolvedOrRangeMinWidths, sumVariableRangeMinWidths } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+
+function createGenericChainSolver({ getVariableRangeForItem, average, defaultGaps = {} }) {
+  if (!getVariableRangeForItem || !average) {
+    throw new Error("createGenericChainSolver requires getVariableRangeForItem and average");
+  }
+
+  function getChainStats(sequence, options = {}) {
+    const fixedTypes = options.fixedTypes || ["char", "seals", "season-field"];
+    const gapTypes = options.gapTypes || ["char-gap", "group-gap", "seal-gap", "season-gap"];
+    const minContentWidthKey = options.minContentWidthKey || "minContentWidth";
+    const fixedWidth = sumItemWidthsWhere(sequence, (item) => fixedTypes.includes(item.type));
+    const variableItems = sequence.filter((item) => Boolean(getVariableRangeForItem(item)));
+    const counts = Object.fromEntries(gapTypes.map((type) => [toCountKey(type), countItemsOfType(sequence, type)]));
+    const minGapWidth = sumVariableRangeMinWidths(variableItems, getVariableRangeForItem);
+    return {
+      fixedWidth,
+      variableItems,
+      ...counts,
+      minGapWidth,
+      [minContentWidthKey]: fixedWidth + minGapWidth
+    };
+  }
+
+  function makeChainSolution({
+    fits,
+    availableWidth,
+    minNeededWidth,
+    fixedWidth,
+    minContentWidth,
+    stats,
+    variableItems,
+    itemWidths,
+    sideMarginLeft,
+    sideMarginRight,
+    sideMargin = null,
+    extra = {}
+  }) {
+    const contentWidth = fixedWidth + sumResolvedOrRangeMinWidths(variableItems, itemWidths, getVariableRangeForItem);
+    const typedGapAverage = (type, fallback) => {
+      const values = getItemsOfType(variableItems, type).map((item) => itemWidths.get(item.key));
+      return average(values) ?? fallback;
+    };
+
+    return {
+      fits,
+      availableWidth,
+      minNeededWidth,
+      contentWidth,
+      fixedWidth,
+      minContentWidth,
+      charGapCount: stats.charGapCount || 0,
+      groupGapCount: stats.groupGapCount || 0,
+      sealGapCount: stats.sealGapCount || 0,
+      seasonGapCount: stats.seasonGapCount || 0,
+      charGap: typedGapAverage("char-gap", defaultGaps.charGap ?? null),
+      groupGap: typedGapAverage("group-gap", defaultGaps.groupGap ?? null),
+      sealGap: typedGapAverage("seal-gap", defaultGaps.sealGap ?? null),
+      seasonGap: typedGapAverage("season-gap", defaultGaps.seasonGap ?? null),
+      itemWidths,
+      sideMargin,
+      sideMarginLeft,
+      sideMarginRight,
+      ...extra
+    };
+  }
+
+  function growFiniteVariables(itemWidths, items, remaining) {
+    let nextRemaining = remaining;
+    if (!items.length || nextRemaining <= 0.0001) return nextRemaining;
+    const finiteItems = items.filter((item) => Number.isFinite(getVariableRangeForItem(item)?.max));
+    const capacity = finiteItems.reduce((sum, item) => {
+      const range = getVariableRangeForItem(item);
+      return sum + Math.max(0, range.max - (itemWidths.get(item.key) ?? range.min));
+    }, 0);
+    const add = Math.min(nextRemaining, capacity);
+    if (add > 0.0001 && capacity > 0.0001) {
+      let left = add;
+      for (const item of finiteItems) {
+        const range = getVariableRangeForItem(item);
+        const current = itemWidths.get(item.key) ?? range.min;
+        const share = capacity > 0 ? add * Math.max(0, range.max - current) / capacity : 0;
+        const applied = Math.min(Math.max(0, range.max - current), share);
+        itemWidths.set(item.key, current + applied);
+        left -= applied;
+      }
+      nextRemaining -= add - Math.max(0, left);
+    }
+    return nextRemaining;
+  }
+
+  function growVariablesTowardPreferred(itemWidths, items, remaining) {
+    let left = remaining;
+    for (const item of items) {
+      if (left <= 0.0001) break;
+      const range = getVariableRangeForItem(item);
+      if (!range) continue;
+      const current = itemWidths.get(item.key) ?? range.min;
+      const target = Number.isFinite(range.preferred) ? Math.min(range.preferred, range.max ?? range.preferred) : current;
+      const add = Math.min(Math.max(0, target - current), left);
+      if (add > 0.0001) {
+        itemWidths.set(item.key, current + add);
+        left -= add;
+      }
+    }
+    return left;
+  }
+
+  return {
+    getChainStats,
+    makeChainSolution,
+    growFiniteVariables,
+    growVariablesTowardPreferred
+  };
+}
+
+function distributeRemainingToUnboundedItems({ itemWidths, items, getVariableRangeForItem, remaining, outsideSurfaceCount }) {
+  const unboundedItems = items.filter((item) => !Number.isFinite(getVariableRangeForItem(item)?.max));
+  const unboundedSurfaceCount = outsideSurfaceCount + unboundedItems.length;
+  const unboundedAdd = remaining > 0.0001 ? remaining / unboundedSurfaceCount : 0;
+  for (const item of unboundedItems) {
+    const range = getVariableRangeForItem(item);
+    itemWidths.set(item.key, (itemWidths.get(item.key) ?? range.min) + unboundedAdd);
+  }
+  return remaining > 0.0001 ? remaining - unboundedAdd * unboundedItems.length : remaining;
+}
+
+function toCountKey(type) {
+  return `${type.replace(/-([a-z])/g, (_, char) => char.toUpperCase())}Count`;
+}
+
+return { createGenericChainSolver: createGenericChainSolver, distributeRemainingToUnboundedItems: distributeRemainingToUnboundedItems };
+
+})();
+
+// ---- src/plate/lab-renderer/reduced-row-chain-solver.js ----
+const __m_src_plate_lab_renderer_reduced_row_chain_solver_js = (() => {
+// Kennzeichen Physical Lab b309 / reduced two-line row-chain solver
+// Pure mm row-chain solver for the Reduced/verkürztes zweizeiliges template.
+// The renderer owns the legal constants and row item construction; this module
+// only supplies Reduced-specific ranges/templates and delegates generic chain
+// mechanics to chain-solver.js.
+
+const { createGenericChainSolver, distributeRemainingToUnboundedItems } = __m_src_plate_lab_renderer_chain_solver_js;
+const { countItemsOfType, createRangeMinWidthMap, getFirstItemOfType, getItemsOfType, sumItemWidthsWhere, sumResolvedOrRangeMinWidths, sumVariableRangeMinWidths } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+
+function createReducedRowChainSolver({
+  spacingRules,
+  getOutsideMarginMinLeft,
+  getOutsideMarginMinRight,
+  average,
+  positionSequence
+}) {
+  if (!spacingRules || !getOutsideMarginMinLeft || !getOutsideMarginMinRight || !average || !positionSequence) {
+    throw new Error("createReducedRowChainSolver requires spacing rules, margin helpers, average and positionSequence");
+  }
+
+  function getVariableRangeForItem(item) {
+    if (item.type === "char-gap") return spacingRules.charGap;
+    if (item.type === "group-gap") return spacingRules.reducedRecognitionGroupGap;
+    if (item.type === "seal-gap" || item.type === "season-gap") {
+      return {
+        min: item.minWidth ?? spacingRules.reducedTopSealGap.min,
+        preferred: item.preferredWidth ?? spacingRules.reducedTopSealGap.preferred,
+        max: item.maxWidth ?? spacingRules.reducedTopSealGap.max
+      };
+    }
+    return null;
+  }
+
+  const {
+    getChainStats: getRowChainStats,
+    makeChainSolution: makeRowSolution,
+    growFiniteVariables,
+    growVariablesTowardPreferred
+  } = createGenericChainSolver({
+    getVariableRangeForItem,
+    average,
+    defaultGaps: {
+      charGap: spacingRules.charGap.min,
+      groupGap: spacingRules.reducedRecognitionGroupGap.min,
+      sealGap: spacingRules.reducedTopSealGap.min,
+      seasonGap: null
+    }
+  });
+
+  function growVariableItemsByTypeOrder(itemWidths, variableItems, types, grow, remaining) {
+    let nextRemaining = remaining;
+    for (const type of types) {
+      nextRemaining = grow(itemWidths, getItemsOfType(variableItems, type), nextRemaining);
+    }
+    return nextRemaining;
+  }
+
+  function distributeRemainingToSideMargins(sideMinLeft, sideMinRight, remaining) {
+    const extraMargin = Math.max(0, remaining) / 2;
+    return {
+      sideMarginLeft: sideMinLeft + extraMargin,
+      sideMarginRight: sideMinRight + extraMargin
+    };
+  }
+
+  function solveRowChain(sequence, contentLimits, rules) {
+    const sideMinLeft = getOutsideMarginMinLeft(rules, contentLimits);
+    const sideMinRight = getOutsideMarginMinRight(rules, contentLimits);
+    const stats = getRowChainStats(sequence);
+    const minNeededWidth = stats.minContentWidth + sideMinLeft + sideMinRight;
+    const availableWidth = contentLimits.width;
+    const fits = availableWidth + 0.0001 >= minNeededWidth;
+    let remaining = Math.max(0, availableWidth - minNeededWidth);
+    const variableItems = stats.variableItems || [];
+    const itemWidths = createRangeMinWidthMap(variableItems, getVariableRangeForItem);
+
+    remaining = growVariableItemsByTypeOrder(itemWidths, variableItems, ["char-gap", "group-gap", "seal-gap"], growFiniteVariables, remaining);
+
+    remaining = distributeRemainingToUnboundedItems({
+      itemWidths,
+      items: variableItems,
+      getVariableRangeForItem,
+      remaining,
+      outsideSurfaceCount: 2
+    });
+
+    const { sideMarginLeft, sideMarginRight } = distributeRemainingToSideMargins(sideMinLeft, sideMinRight, remaining);
+
+    return makeRowSolution({
+      fits,
+      availableWidth,
+      minNeededWidth,
+      fixedWidth: stats.fixedWidth,
+      minContentWidth: stats.minContentWidth,
+      stats,
+      variableItems,
+      itemWidths,
+      sideMarginLeft,
+      sideMarginRight,
+      sideMargin: (sideMarginLeft + sideMarginRight) / 2
+    });
+  }
+
+  function solveRowChainPreferredInternalSpacing(sequence, contentLimits, rules) {
+    const sideMinLeft = getOutsideMarginMinLeft(rules, contentLimits);
+    const sideMinRight = getOutsideMarginMinRight(rules, contentLimits);
+    const stats = getRowChainStats(sequence);
+    const minNeededWidth = stats.minContentWidth + sideMinLeft + sideMinRight;
+    const availableWidth = contentLimits.width;
+    const fits = availableWidth + 0.0001 >= minNeededWidth;
+    let remaining = Math.max(0, availableWidth - minNeededWidth);
+    const variableItems = stats.variableItems || [];
+    const itemWidths = createRangeMinWidthMap(variableItems, getVariableRangeForItem);
+
+    remaining = growVariableItemsByTypeOrder(itemWidths, variableItems, ["char-gap", "group-gap", "seal-gap", "season-gap"], growVariablesTowardPreferred, remaining);
+
+    const { sideMarginLeft, sideMarginRight } = distributeRemainingToSideMargins(sideMinLeft, sideMinRight, remaining);
+
+    return makeRowSolution({
+      fits,
+      availableWidth,
+      minNeededWidth,
+      fixedWidth: stats.fixedWidth,
+      minContentWidth: stats.minContentWidth,
+      stats,
+      variableItems,
+      itemWidths,
+      sideMarginLeft,
+      sideMarginRight,
+      sideMargin: (sideMarginLeft + sideMarginRight) / 2,
+      extra: { preferredInternalSpacing: true }
+    });
+  }
+
+  function getPreSealStats(sequence) {
+    const sealIndex = sequence.findIndex((item) => item.type === "seals");
+    const prefix = sealIndex >= 0 ? sequence.slice(0, sealIndex) : sequence;
+    const seal = sealIndex >= 0 ? sequence[sealIndex] : null;
+    const fixedWidth = sumItemWidthsWhere(prefix, (item) => item.type === "char" || item.type === "season-field");
+    const variableItems = prefix.filter((item) => Boolean(getVariableRangeForItem(item)));
+    const charGapCount = countItemsOfType(prefix, "char-gap");
+    const groupGapCount = countItemsOfType(prefix, "group-gap");
+    const sealGapCount = countItemsOfType(prefix, "seal-gap");
+    const seasonGapCount = countItemsOfType(prefix, "season-gap");
+    const minGapWidth = sumVariableRangeMinWidths(variableItems, getVariableRangeForItem);
+    return {
+      prefix,
+      seal,
+      fixedWidth,
+      variableItems,
+      charGapCount,
+      groupGapCount,
+      sealGapCount,
+      seasonGapCount,
+      minGapWidth,
+      minPrefixWidth: fixedWidth + minGapWidth,
+      sealWidth: Number(seal?.width) || 0
+    };
+  }
+
+  function getMinimumSealX(sequence, contentLimits, rules) {
+    const sideMinLeft = getOutsideMarginMinLeft(rules, contentLimits);
+    const stats = getPreSealStats(sequence);
+    return contentLimits.left + sideMinLeft + stats.minPrefixWidth;
+  }
+
+  function getFixedSealMaxX(sequence, contentLimits, rules) {
+    const sideMinRight = getOutsideMarginMinRight(rules, contentLimits);
+    const stats = getPreSealStats(sequence);
+    return contentLimits.right - sideMinRight - stats.sealWidth;
+  }
+
+  function solveRowChainBeforeFixedSeal(sequence, contentLimits, rules, fixedSealX, options = {}) {
+    const sideMinLeft = getOutsideMarginMinLeft(rules, contentLimits);
+    const sideMinRight = getOutsideMarginMinRight(rules, contentLimits);
+    const stats = getPreSealStats(sequence);
+    const availableBeforeSeal = fixedSealX - contentLimits.left;
+    const rightMargin = contentLimits.right - fixedSealX - stats.sealWidth;
+    let remaining = Math.max(0, availableBeforeSeal - sideMinLeft - stats.minPrefixWidth);
+    const variableItems = stats.variableItems || [];
+    const itemWidths = createRangeMinWidthMap(variableItems, getVariableRangeForItem);
+
+    if (options.spacingMode === "preferred-internal") {
+      remaining = growVariableItemsByTypeOrder(itemWidths, variableItems, ["char-gap", "group-gap", "seal-gap", "season-gap"], growVariablesTowardPreferred, remaining);
+    } else {
+      remaining = growVariableItemsByTypeOrder(itemWidths, variableItems, ["char-gap", "group-gap", "seal-gap"], growFiniteVariables, remaining);
+
+      remaining = distributeRemainingToUnboundedItems({
+        itemWidths,
+        items: variableItems,
+        getVariableRangeForItem,
+        remaining,
+        outsideSurfaceCount: 1
+      });
+    }
+
+    const prefixWidth = stats.fixedWidth + sumResolvedOrRangeMinWidths(variableItems, itemWidths, getVariableRangeForItem);
+    const sideMarginLeft = fixedSealX - contentLimits.left - prefixWidth;
+    const sideMarginRight = rightMargin;
+    const fits = sideMarginLeft + 0.0001 >= sideMinLeft && sideMarginRight + 0.0001 >= sideMinRight;
+
+    return makeRowSolution({
+      fits,
+      availableWidth: contentLimits.width,
+      minNeededWidth: stats.minPrefixWidth + stats.sealWidth + sideMinLeft + sideMinRight,
+      fixedWidth: stats.fixedWidth + stats.sealWidth,
+      minContentWidth: stats.minPrefixWidth + stats.sealWidth,
+      stats,
+      variableItems,
+      itemWidths,
+      sideMarginLeft,
+      sideMarginRight,
+      extra: {
+        availableBeforeSeal,
+        fixedSealX,
+        preferredInternalSpacing: options.spacingMode === "preferred-internal"
+      }
+    });
+  }
+
+  function solveVerticalSharedSealRows({ rules, topSequence, bottomSequence, topLimits, bottomLimits }) {
+    const bottomInitial = solveRowChainPreferredInternalSpacing(bottomSequence, bottomLimits, rules);
+    const bottomInitialItems = positionSequence(
+      bottomSequence,
+      bottomLimits.left + bottomInitial.sideMarginLeft,
+      "bottom",
+      rules,
+      bottomLimits,
+      null,
+      { charGap: bottomInitial.charGap, groupGap: bottomInitial.groupGap, sealGap: bottomInitial.sealGap, seasonGap: bottomInitial.seasonGap, itemWidths: bottomInitial.itemWidths }
+    );
+    const bottomInitialSeal = getFirstItemOfType(bottomInitialItems, "seals");
+    const topMinSealX = getMinimumSealX(topSequence, topLimits, rules);
+    const bottomMinSealX = getMinimumSealX(bottomSequence, bottomLimits, rules);
+    const maxSealX = Math.min(
+      getFixedSealMaxX(topSequence, topLimits, rules),
+      getFixedSealMaxX(bottomSequence, bottomLimits, rules)
+    );
+    const preferredSealX = Number(bottomInitialSeal?.x);
+    const sharedSealX = Math.max(
+      Number.isFinite(preferredSealX) ? preferredSealX : bottomMinSealX,
+      topMinSealX,
+      bottomMinSealX
+    );
+    const fixedSealX = Math.min(sharedSealX, maxSealX);
+    const top = solveRowChainBeforeFixedSeal(topSequence, topLimits, rules, fixedSealX, { spacingMode: "preferred-internal" });
+    const bottom = solveRowChainBeforeFixedSeal(bottomSequence, bottomLimits, rules, fixedSealX, { spacingMode: "preferred-internal" });
+    return {
+      top,
+      bottom,
+      fixedSealX,
+      maxSealX,
+      topMinSealX,
+      bottomMinSealX,
+      fits: top.fits && bottom.fits,
+      preferredInternalSpacing: true
+    };
+  }
+
+  function getCriticalRowMinWidth(sequence, rules, contentLimits = null) {
+    const sideMinLeft = getOutsideMarginMinLeft(rules, contentLimits);
+    const sideMinRight = getOutsideMarginMinRight(rules, contentLimits);
+    const stats = getRowChainStats(sequence);
+    return stats.minContentWidth + sideMinLeft + sideMinRight;
+  }
+
+  return {
+    getReducedRowChainStats: getRowChainStats,
+    solveReducedRowChain: solveRowChain,
+    solveReducedRowChainPreferredInternalSpacing: solveRowChainPreferredInternalSpacing,
+    getReducedMinimumSealX: getMinimumSealX,
+    getReducedFixedSealMaxX: getFixedSealMaxX,
+    solveReducedRowChainBeforeFixedSeal: solveRowChainBeforeFixedSeal,
+    solveReducedVerticalSharedSealRows: solveVerticalSharedSealRows,
+    solveReducedTextChain: solveRowChain,
+    getReducedCriticalRowMinWidth: getCriticalRowMinWidth
+  };
+}
+
+return { createReducedRowChainSolver: createReducedRowChainSolver };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-layout-model.js ----
+const __m_src_plate_lab_renderer_plate_layout_model_js = (() => {
+// Kennzeichen Physical Lab b225 / solved plate layout model helpers
+// Centralises the model shape consumed by rendering, debug and metrics layers.
+// This helper must not solve or mutate geometry; it only groups already-solved mm data.
+
+function createPlateModel({ parsed, rules, font, content, metrics, layout = null, season = null }) {
+  const rows = buildSolvedRows(layout, content);
+  const groupedContent = groupContentByType(content);
+  return {
+    parsed,
+    rules,
+    font,
+    content,
+    metrics,
+    layout,
+    season,
+    rows,
+    groupedContent,
+    seals: groupedContent.seals,
+    seasonField: groupedContent.seasonFields[0] || layout?.seasonField || null,
+    debug: {
+      rowDiagnostics: metrics?.rowDiagnostics || layout?.rowDiagnostics || [],
+      spacingItems: groupedContent.spacing,
+      margins: {
+        left: metrics?.remainingLeft ?? null,
+        right: metrics?.remainingRight ?? null,
+        top: metrics?.topRowMargins || null,
+        bottom: metrics?.bottomRowMargins || null
+      }
+    }
+  };
+}
+
+function buildSolvedRows(layout, content) {
+  if (layout?.top || layout?.bottom) {
+    return {
+      top: createSolvedRow("top", layout.top, content),
+      bottom: createSolvedRow("bottom", layout.bottom, content)
+    };
+  }
+  return {
+    main: createSolvedRow("main", layout, content)
+  };
+}
+
+function createSolvedRow(key, rowLayout, allContent) {
+  const positionedContent = rowLayout?.positionedContent || allContent.filter((item) => !item.row || item.row === key);
+  return {
+    key,
+    fits: rowLayout?.fits ?? null,
+    renderable: rowLayout?.renderable ?? null,
+    contentLimits: rowLayout?.contentLimits || null,
+    contentWidth: rowLayout?.contentWidth ?? null,
+    sideMarginLeft: rowLayout?.sideMarginLeft ?? null,
+    sideMarginRight: rowLayout?.sideMarginRight ?? null,
+    actualCharGap: rowLayout?.actualCharGap ?? null,
+    actualGroupGap: rowLayout?.actualGroupGap ?? null,
+    actualSeasonGap: rowLayout?.actualSeasonGap ?? null,
+    actualTopSealGap: rowLayout?.actualTopSealGap ?? null,
+    actualUpperSealPairGap: rowLayout?.actualUpperSealPairGap ?? null,
+    positionedContent
+  };
+}
+
+function groupContentByType(content = []) {
+  return content.reduce((groups, item) => {
+    if (item?.type === "char") groups.chars.push(item);
+    else if (item?.type === "seals") groups.seals.push(item);
+    else if (item?.type === "season-field") groups.seasonFields.push(item);
+    else if (isSpacingItem(item)) groups.spacing.push(item);
+    else groups.other.push(item);
+    return groups;
+  }, { chars: [], seals: [], seasonFields: [], spacing: [], other: [] });
+}
+
+function isSpacingItem(item) {
+  return item?.type === "char-gap"
+    || item?.type === "group-gap"
+    || item?.type === "seal-gap"
+    || item?.type === "season-gap"
+    || item?.type === "variable-gap";
+}
+
+return { createPlateModel: createPlateModel };
+
+})();
+
+// ---- src/plate/lab-renderer/row-layout-adapter.js ----
+const __m_src_plate_lab_renderer_row_layout_adapter_js = (() => {
+// Kennzeichen Physical Lab b234 / common row layout adapter.
+//
+// This module keeps the small, repeatable bridge between solver row items and
+// renderable positioned row items in one place. Solvers decide widths and
+// format-specific modules provide legal ranges; this adapter only applies a
+// solved width map, advances the x cursor and attaches row metadata.
+
+function resolveSolvedItemWidth(item, widths = {}) {
+  if (widths?.itemWidths?.has?.(item.key)) return widths.itemWidths.get(item.key);
+  if (item.type === "char-gap" && widths.charGap != null) return widths.charGap;
+  if (item.type === "group-gap" && widths.groupGap != null) return widths.groupGap;
+  if (item.type === "seal-gap" && widths.sealGap != null) return widths.sealGap;
+  if (item.type === "season-gap" && widths.seasonGap != null) return widths.seasonGap;
+  return item.width;
+}
+
+function positionRowItems(sequence, { startX, widths = {}, rowKey = null, band = null, contentLimits = null } = {}) {
+  let cursor = Number(startX) || 0;
+  return sequence.map((item) => {
+    const width = resolveSolvedItemWidth(item, widths);
+    const positioned = {
+      ...item,
+      width,
+      x: cursor
+    };
+    cursor += width;
+    return attachRowMetadataToItem(positioned, { rowKey, band, contentLimits });
+  });
+}
+
+function attachRowMetadata(items, { rowKey, band, contentLimits } = {}) {
+  return items.map((item) => attachRowMetadataToItem(item, { rowKey, band, contentLimits }));
+}
+
+function attachRowMetadataToItem(item, { rowKey, band, contentLimits } = {}) {
+  const hasRowMetadata = rowKey != null || band != null || contentLimits != null;
+  if (!hasRowMetadata) return item;
+  const explicitBandY = Number(item?.bandY);
+  const explicitBandHeight = Number(item?.bandHeight);
+  return {
+    ...item,
+    rowKey: rowKey ?? item.rowKey ?? null,
+    bandY: Number.isFinite(explicitBandY) ? explicitBandY : band?.y ?? item.bandY ?? null,
+    bandHeight: Number.isFinite(explicitBandHeight) ? explicitBandHeight : band?.height ?? item.bandHeight ?? null,
+    baselineY: item.type === "char" ? band?.baselineY ?? item.baselineY ?? null : null,
+    contentLimits: contentLimits ?? item.contentLimits ?? null
+  };
+}
+
+return { resolveSolvedItemWidth: resolveSolvedItemWidth, positionRowItems: positionRowItems, attachRowMetadata: attachRowMetadata };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-format-strategy.js ----
+const __m_src_plate_lab_renderer_plate_format_strategy_js = (() => {
+// Kennzeichen Physical Lab b228 / plate format strategy helpers
+// Pure helper module for common renderer branch flags. It does not define
+// dimensions and must not calculate physical positions.
+
+function createPlateFormatStrategy(rules = {}) {
+  const formatKey = rules.formatKey || (rules.layoutType === "two-line" ? "twoLine" : "oneLine");
+  const layoutType = rules.layoutType || "one-line";
+  const isTwoLineLike = layoutType === "two-line";
+  const isOneLine = !isTwoLineLike;
+  const isReducedTwoLine = formatKey === "reducedTwoLine";
+  const isMotorcycle = formatKey === "motorcycle";
+  const isTwoLineStandard = isTwoLineLike && !isReducedTwoLine && !isMotorcycle;
+
+  return Object.freeze({
+    formatKey,
+    layoutType,
+    isOneLine,
+    isTwoLineLike,
+    isTwoLineStandard,
+    isReducedTwoLine,
+    isMotorcycle,
+    modelPlateFormat: isOneLine ? "oneLine" : formatKey
+  });
+}
+
+function isTwoLineLayout(rules = {}) {
+  return createPlateFormatStrategy(rules).isTwoLineLike;
+}
+
+function isReducedTwoLineFormat(rules = {}) {
+  return createPlateFormatStrategy(rules).isReducedTwoLine;
+}
+
+function isMotorcycleFormat(rules = {}) {
+  return createPlateFormatStrategy(rules).isMotorcycle;
+}
+
+function getModelPlateFormat(rules = {}) {
+  return createPlateFormatStrategy(rules).modelPlateFormat;
+}
+
+return { createPlateFormatStrategy: createPlateFormatStrategy, isTwoLineLayout: isTwoLineLayout, isReducedTwoLineFormat: isReducedTwoLineFormat, isMotorcycleFormat: isMotorcycleFormat, getModelPlateFormat: getModelPlateFormat };
+
+})();
+
+// ---- src/plate/lab-renderer/row-sequence-builder.js ----
+const __m_src_plate_lab_renderer_row_sequence_builder_js = (() => {
+// Kennzeichen Physical Lab b226 row/sequence builders.
+// This module centralises reusable row-chain sequence construction. It must not
+// solve geometry; solvers/renderers consume the sequences built here.
+
+const { hasHistoricalOrElectricSuffix, makeCells, splitRecognition } = __m_src_plate_lab_renderer_text_utils_js;
+const { REDUCED_TWO_LINE_RULES_MM, SPACING_RULES_MM, TWO_LINE_RULES_MM } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+
+function variableItem(type, key, range) {
+  return {
+    type,
+    key,
+    variable: true,
+    minWidth: range.min,
+    preferredWidth: range.preferred,
+    maxWidth: range.max,
+    width: range.preferred,
+    ruleLabel: range.ruleLabel || null
+  };
+}
+
+function appendCells(sequence, cells) {
+  cells.forEach((cell, index) => {
+    if (index > 0) sequence.push(variableItem("char-gap", `${cell.role}-gap-${index}`, SPACING_RULES_MM.charGap));
+    sequence.push(cell);
+  });
+}
+
+function makeReducedCellSequence(cells, rowKey, charGapRule = SPACING_RULES_MM.charGap) {
+  const sequence = [];
+  cells.forEach((cell, index) => {
+    if (index > 0) {
+      sequence.push({
+        type: "char-gap",
+        key: `reduced-${rowKey}-char-gap-${index}`,
+        variable: true,
+        minWidth: charGapRule.min,
+        preferredWidth: charGapRule.preferred,
+        maxWidth: charGapRule.max,
+        ruleLabel: "Reduced character gap **: 8-10 mm"
+      });
+    }
+    sequence.push(cell);
+  });
+  return sequence;
+}
+
+function buildReducedTopSequence(parsed, font) {
+  return makeReducedCellSequence(makeCells(parsed?.district || "", font, "district"), "top");
+}
+
+function buildReducedRecognitionSequence(parsed, font, season = { enabled: false }, rules = REDUCED_TWO_LINE_RULES_MM, limits = null) {
+  const bottomGroups = splitRecognition(parsed?.recognition || "");
+  const sequence = [];
+  bottomGroups.forEach((group, index) => {
+    if (index > 0) sequence.push(variableItem("group-gap", `reduced-bottom-recognition-group-gap-${index}`, getReducedRecognitionGroupGapRange(parsed)));
+    appendCells(sequence, makeCells(group.value, font, group.type));
+  });
+  if (season?.enabled) {
+    sequence.push(makeReducedSeasonGapItem("reduced-bottom-season-gap", "bottom", limits));
+    sequence.push(makeReducedSeasonFieldItem(rules, season, "bottom", limits));
+  }
+  return sequence;
+}
+
+function withReducedSeal(sequence, rules, rowKey, limits, arrangement = null, visibleCircleGap = null, context = {}) {
+  if (arrangement === "reduced-standard-upper-row") {
+    return [
+      ...sequence,
+      makeReducedSealGapItem(
+        "reduced-top-text-to-authority-gap",
+        rowKey,
+        limits,
+        getReducedTopSealGapRange(context.parsed, context.season)
+      ),
+      makeReducedSealItem(rules, 0, rules.content.seal.authorityDiameter, rowKey, limits, arrangement, visibleCircleGap, "authority"),
+      makeReducedSealGapItem(
+        "reduced-top-authority-to-hu-gap",
+        rowKey,
+        limits,
+        getReducedUpperSealPairGapRange(context.parsed, context.season)
+      ),
+      makeReducedSealItem(rules, 0, rules.content.seal.huDiameter, rowKey, limits, arrangement, visibleCircleGap, "hu")
+    ];
+  }
+  return [
+    ...sequence,
+    makeReducedSealGapItem(
+      `reduced-${rowKey}-seal-gap`,
+      rowKey,
+      limits,
+      rowKey === "bottom" ? SPACING_RULES_MM.reducedBottomSealGap : SPACING_RULES_MM.reducedTopSealGap
+    ),
+    makeReducedSealItem(rules, 0, rules.content.seal.columnWidth, rowKey, limits, arrangement, visibleCircleGap)
+  ];
+}
+
+function buildTwoLineTopSequence(parsed, rules, font, season = { enabled: false }) {
+  const sequence = [];
+  const districtCells = makeCells(parsed.district, font, "district");
+  appendCells(sequence, districtCells);
+  if (rules.formatKey !== "motorcycle") {
+    if (districtCells.length) {
+      sequence.push(variableItem("seal-gap", "top-seal-gap", rules.formatKey === "reducedTwoLine" ? SPACING_RULES_MM.reducedTopSealGap : SPACING_RULES_MM.twoLineTopSealGap));
+    }
+    sequence.push(variableItem("seals", "top-seal-zone", {
+      min: rules.content.seal.columnMinWidth,
+      preferred: rules.content.seal.columnWidth,
+      max: rules.content.seal.columnMaxWidth,
+      ruleLabel: rules.content.seal.ruleLabel
+    }));
+  }
+  if (season.enabled && rules.formatKey !== "motorcycle" && rules.formatKey !== "reducedTwoLine") {
+    sequence.push(variableItem("season-gap", "top-season-gap", SPACING_RULES_MM.twoLineSeasonGap));
+    sequence.push({
+      type: "season-field",
+      key: "season-validity-field",
+      width: rules.content.season.fieldWidth,
+      season
+    });
+  }
+  return sequence;
+}
+
+function buildTwoLineBottomSequence(parsed, rules, font) {
+  const sequence = [];
+  const recognitionGroups = splitRecognition(parsed.recognition);
+  recognitionGroups.forEach((group, groupIndex) => {
+    if (groupIndex > 0) {
+      sequence.push(variableItem("group-gap", `bottom-recognition-group-gap-${groupIndex}`, getTwoLineBottomGroupGapRange(parsed, rules)));
+    }
+    appendCells(sequence, makeCells(group.value, font, group.type));
+  });
+  return sequence;
+}
+
+function isReducedUpperSealMandatory(parsed, season = { enabled: false }) {
+  return Boolean(season?.enabled) || hasHistoricalOrElectricSuffix(parsed);
+}
+
+function canReducedStandardUseUpperSealFallback(lowerVisibleCharCount) {
+  return Number(lowerVisibleCharCount) >= 5;
+}
+
+function getReducedVisibleSlotCount(parsed, season = null) {
+  const districtCount = String(parsed?.district || "").replace(/\s+/g, "").length;
+  const recognitionCount = String(parsed?.recognition || "").replace(/\s+/g, "").length;
+  const seasonBlockCount = season?.enabled ? 1 : 0;
+  return districtCount + recognitionCount + seasonBlockCount;
+}
+
+function isReducedNineSlotSeasonTightCase(parsed, season = null) {
+  return Boolean(season?.enabled) && getReducedVisibleSlotCount(parsed, season) >= 9;
+}
+
+function hasReducedLetterI(parsed) {
+  return /I/.test(`${parsed?.district || ""}${parsed?.recognition || ""}`.toUpperCase());
+}
+
+function hasReducedFullWidthThreeLetterDistrict(parsed) {
+  const district = String(parsed?.district || "").replace(/\s+/g, "").toUpperCase();
+  return district.length >= 3 && !district.includes("I");
+}
+
+function isReducedEightSlotUpperSealCase(parsed, season = null) {
+  return isReducedUpperSealMandatory(parsed, season)
+    && hasReducedFullWidthThreeLetterDistrict(parsed)
+    && getReducedVisibleSlotCount(parsed, season) >= 8;
+}
+
+function isReducedNoITightUpperSealCase(parsed, season = null) {
+  return isReducedEightSlotUpperSealCase(parsed, season);
+}
+
+function getReducedTopSealGapRange(parsed, season) {
+  if (isReducedNineSlotSeasonTightCase(parsed, season)) {
+    return {
+      ...SPACING_RULES_MM.reducedTopSealGap,
+      preferred: 5,
+      ruleLabel: "Reduced two-line b209 9-slot season tight top row: text→authority may use the 5-mm minimum in the legal *** corridor"
+    };
+  }
+  if (isReducedEightSlotUpperSealCase(parsed, season)) {
+    return {
+      ...SPACING_RULES_MM.reducedTopSealGap,
+      min: 3,
+      preferred: 3,
+      ruleLabel: "Reduced two-line b209 8-slot H/E/Saison top row: E/H suffix and season count as visible slots; text→authority may fall to 3 mm so the HU field can keep the required 8-mm right edge"
+    };
+  }
+  return SPACING_RULES_MM.reducedTopSealGap;
+}
+
+function getReducedUpperSealPairGapRange(parsed, season) {
+  if (isReducedNineSlotSeasonTightCase(parsed, season)) {
+    return {
+      min: 4,
+      preferred: 4,
+      max: 20,
+      ruleLabel: "Reduced two-line b209 9-slot season tight top row: authority→HU may fall to 4 mm so the template chain becomes 8/8/8/5/4/6; I-width cases relax automatically"
+    };
+  }
+  if (isReducedEightSlotUpperSealCase(parsed, season)) {
+    return {
+      min: 4,
+      preferred: 4,
+      max: 20,
+      ruleLabel: "Reduced two-line b209 8-slot H/E/Saison top row: authority→HU may use 4 mm while the right side remains at least 8 mm; I in the lower row is still counted as a visible slot"
+    };
+  }
+  return SPACING_RULES_MM.reducedUpperSealPairGap;
+}
+
+function getReducedRecognitionGroupGapRange(parsed) {
+  if (hasHistoricalOrElectricSuffix(parsed)) {
+    return {
+      ...SPACING_RULES_MM.reducedRecognitionGroupGap,
+      ruleLabel: "Reduced two-line b209 H/E bottom row: group gap from digit to H/E suffix remains 15-18 mm; no reduced narrow script is calculated"
+    };
+  }
+  return SPACING_RULES_MM.reducedRecognitionGroupGap;
+}
+
+function getTwoLineBottomGroupGapRange(parsed, rules = TWO_LINE_RULES_MM) {
+  if (rules.formatKey === "motorcycle") {
+    if (hasHistoricalOrElectricSuffix(parsed)) {
+      return {
+        ...SPACING_RULES_MM.motorcycleRecognitionGroupGapHistoricalOrElectric,
+        ruleLabel: "Kraftradkennzeichen bottom row with final H/E suffix: recognition group gap 14-18 mm"
+      };
+    }
+    return {
+      ...SPACING_RULES_MM.motorcycleRecognitionGroupGap,
+      ruleLabel: "Kraftradkennzeichen bottom row normal: recognition group gap 15-18 mm"
+    };
+  }
+  if (rules.formatKey === "reducedTwoLine") {
+    return {
+      ...SPACING_RULES_MM.reducedRecognitionGroupGap,
+      ruleLabel: "Reduced two-line b209 standard bottom row: recognition group gap 15-18 mm, expanded inside range before equal outside margins grow"
+    };
+  }
+  if (hasHistoricalOrElectricSuffix(parsed)) {
+    return {
+      ...SPACING_RULES_MM.twoLineBottomGroupGapHistoricalOrElectric,
+      ruleLabel: "Two-line bottom row with final H/E suffix: group gaps 20-30 mm across the complete row"
+    };
+  }
+  return {
+    ...SPACING_RULES_MM.twoLineBottomGroupGap,
+    ruleLabel: "Two-line bottom row normal: group gaps 24-30 mm"
+  };
+}
+
+function makeReducedSeasonGapItem(key, rowKey, limits) {
+  return {
+    type: "season-gap",
+    key,
+    variable: true,
+    minWidth: SPACING_RULES_MM.reducedSeasonGap.min,
+    preferredWidth: SPACING_RULES_MM.reducedSeasonGap.preferred,
+    maxWidth: SPACING_RULES_MM.reducedSeasonGap.max,
+    width: SPACING_RULES_MM.reducedSeasonGap.min,
+    x: 0,
+    rowKey,
+    bandY: null,
+    bandHeight: null,
+    baselineY: null,
+    contentLimits: limits,
+    ruleLabel: SPACING_RULES_MM.reducedSeasonGap.ruleLabel
+  };
+}
+
+function makeReducedSeasonFieldItem(rules, season, rowKey, limits) {
+  return {
+    type: "season-field",
+    key: "reduced-season-validity-field",
+    rowKey,
+    x: 0,
+    width: rules.content.season.fieldWidth,
+    season,
+    bandY: rules.content.bottomRow.y,
+    bandHeight: rules.content.bottomRow.characterHeight,
+    baselineY: null,
+    contentLimits: limits,
+    ruleLabel: rules.content.season.ruleLabel
+  };
+}
+
+function makeReducedSealGapItem(key, rowKey, limits, rule = SPACING_RULES_MM.reducedTopSealGap) {
+  return {
+    type: "seal-gap",
+    key,
+    variable: true,
+    minWidth: rule.min,
+    preferredWidth: rule.preferred,
+    maxWidth: rule.max,
+    width: rule.min,
+    x: 0,
+    rowKey,
+    bandY: null,
+    bandHeight: null,
+    baselineY: null,
+    contentLimits: limits,
+    ruleLabel: `${rule.ruleLabel}; b209 keeps this as a real row-chain gap so text and seals cannot overlap.`
+  };
+}
+
+function makeReducedSealItem(rules, x, width, rowKey, limits, arrangement = null, visibleCircleGap = null, sealKind = null) {
+  const row = rowKey === "bottom" ? rules.content.bottomRow : rules.content.topRow;
+  const activeArrangement = arrangement || rules.content.seal.arrangement;
+  const keySuffix = sealKind ? `-${sealKind}` : "";
+  return {
+    type: "seals",
+    key: activeArrangement === "reduced-standard-upper-row" ? `reduced-${rowKey}-upper-seal-row${keySuffix}` : `reduced-${rowKey}-seal-zone`,
+    rowKey,
+    x,
+    width,
+    arrangement: activeArrangement,
+    sealKind,
+    visibleCircleGap: visibleCircleGap ?? rules.content.seal.visibleCircleGap,
+    bandY: row.y,
+    bandHeight: row.characterHeight,
+    baselineY: null,
+    contentLimits: limits,
+    ruleLabel: activeArrangement === "reduced-standard-upper-row"
+      ? "Reduced two-line b209 upper-side-by-side seal row: authority seal 45 mm and HU seal 35 mm are separate row-chain fields; the seal-to-seal gap is solved dynamically with the text-to-seal gap and equal outside margins. H/E and season use upper side-by-side seals are mandatory; b209 counts E/H and season in 8-slot edge guards."
+      : rules.content.seal.ruleLabel
+  };
+}
+
+return { variableItem: variableItem, appendCells: appendCells, makeReducedCellSequence: makeReducedCellSequence, buildReducedTopSequence: buildReducedTopSequence, buildReducedRecognitionSequence: buildReducedRecognitionSequence, withReducedSeal: withReducedSeal, buildTwoLineTopSequence: buildTwoLineTopSequence, buildTwoLineBottomSequence: buildTwoLineBottomSequence, isReducedUpperSealMandatory: isReducedUpperSealMandatory, canReducedStandardUseUpperSealFallback: canReducedStandardUseUpperSealFallback, getReducedVisibleSlotCount: getReducedVisibleSlotCount, isReducedNineSlotSeasonTightCase: isReducedNineSlotSeasonTightCase, hasReducedLetterI: hasReducedLetterI, hasReducedFullWidthThreeLetterDistrict: hasReducedFullWidthThreeLetterDistrict, isReducedEightSlotUpperSealCase: isReducedEightSlotUpperSealCase, isReducedNoITightUpperSealCase: isReducedNoITightUpperSealCase, getReducedTopSealGapRange: getReducedTopSealGapRange, getReducedUpperSealPairGapRange: getReducedUpperSealPairGapRange, getReducedRecognitionGroupGapRange: getReducedRecognitionGroupGapRange, getTwoLineBottomGroupGapRange: getTwoLineBottomGroupGapRange };
+
+})();
+
+// ---- src/plate/lab-renderer/plate-svg-renderer.js ----
+const __m_src_plate_lab_renderer_plate_svg_renderer_js = (() => {
+// Kennzeichen Physical Lab b309 / renderer implementation/orchestrator
+// CAD-like model layer: every coordinate, size and distance in this file is millimetres.
+// No CSS pixels, devicePixelRatio, browser zoom or monitor calibration are used here.
+// Shared CAD-like plate model used by the Physical Lab. b236 keeps the
+// confirmed geometry unchanged and uses a common row layout adapter for positioning.
+// Reduced middle script only: 49-mm height, 31-mm letters, 29-mm digits.
+
+
+const { getCharacterBand, hasHistoricalOrElectricSuffix, makeCells, parsePlate, splitRecognition, withSpecialIWidth } = __m_src_plate_lab_renderer_text_utils_js;
+const { getCharacterBand: __reexport_getCharacterBand, parsePlate: __reexport_parsePlate } = __m_src_plate_lab_renderer_text_utils_js;
+const { resolveEuroFieldComponentGeometry } = __m_src_plate_lab_renderer_euro_field_js;
+const { getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
+const { getSeasonFieldLayout, normalizeSeasonMonth } = __m_src_plate_lab_renderer_season_field_js;
+const { resolveSeasonForVisualStyle, resolveVisualStyle } = __m_src_plate_lab_renderer_plate_visual_style_js;
+const { resolveRulesForSeason, resolveSeasonOptions } = __m_src_plate_lab_renderer_plate_season_options_js;
+const { createFontResolutionResult, createOneLineRenderFont, createTwoLineRenderFont, resolveChangePlateBaseInput, resolveSpecialIWidth } = __m_src_plate_lab_renderer_plate_render_context_js;
+const { getTwoLineWidthBandsForFont, resolveTwoLineWidthCapMm, resolveTwoLineWidthRule, resolveWidthCapMm, resolveWidthStrategy } = __m_src_plate_lab_renderer_plate_width_strategy_js;
+const { clampNumber, formatNumber, numberOrFallback, positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
+const { average, applySharedTypeWidth, countItemsOfType, getFirstItemOfType, getItemMaxWidth, getItemMinWidth, getItemPreferredWidth, getFixedTypeOrItemFiniteMaxWidth, getFixedTypeOrItemMaxWidth, getFixedTypeOrItemMinWidth, getFixedTypeOrItemPreferredWidth, createItemWidthMap, getItemsOfType, getItemWidthsByType, getVariableRangeLabel, growVariablesToFit, minVariableWidth, shrinkVariablesToFit, sumItemWidths, sumItemWidthsExcept, sumItemWidthsWhere, sumResolvedItemWidths, sumSequenceWidth, sumValues } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+const { createSpacingSurfaces, spacingSurfaceResult, waterFillSpacingSurfaces } = __m_src_plate_lab_renderer_plate_spacing_surface_utils_js;
+const { createHorizontalBounds, createLayoutResultBase } = __m_src_plate_lab_renderer_plate_layout_result_utils_js;
+const { attachChangePlateHighFormatModel, attachChangePlateOneLineModel, resolveChangePlateOptions, splitChangePlateInput } = __m_src_plate_lab_renderer_change_plate_js;
+const { createReducedRowChainSolver } = __m_src_plate_lab_renderer_reduced_row_chain_solver_js;
+const { getCanvasMm, renderPlateSvgDocument } = __m_src_plate_lab_renderer_plate_render_shell_js;
+const { getCanvasMm: __reexport_getCanvasMm } = __m_src_plate_lab_renderer_plate_render_shell_js;
+const { createPlateModel } = __m_src_plate_lab_renderer_plate_layout_model_js;
+const { positionRowItems, attachRowMetadata } = __m_src_plate_lab_renderer_row_layout_adapter_js;
+const { getModelPlateFormat, isMotorcycleFormat, isReducedTwoLineFormat, isTwoLineLayout } = __m_src_plate_lab_renderer_plate_format_strategy_js;
+const { appendCells, buildReducedRecognitionSequence, buildReducedTopSequence, buildTwoLineBottomSequence, buildTwoLineTopSequence, canReducedStandardUseUpperSealFallback, getReducedUpperSealPairGapRange, getReducedVisibleSlotCount, isReducedEightSlotUpperSealCase, isReducedNineSlotSeasonTightCase, isReducedNoITightUpperSealCase, isReducedUpperSealMandatory, variableItem, withReducedSeal } = __m_src_plate_lab_renderer_row_sequence_builder_js;
+
+const { PLATE_TEXT_COLORS_MM, WIDTH_BANDS, TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES, SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM, ONE_LINE_RULES_MM, TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM, resolvePlateRules } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+const { PLATE_TEXT_COLORS_MM: __reexport_PLATE_TEXT_COLORS_MM, WIDTH_BANDS: __reexport_WIDTH_BANDS, TWO_LINE_WIDTH_BANDS: __reexport_TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES: __reexport_TWO_LINE_WIDTH_RULES, SPACING_RULES_MM: __reexport_SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: __reexport_FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: __reexport_DXF_REFERENCE_MM, ONE_LINE_RULES_MM: __reexport_ONE_LINE_RULES_MM, TWO_LINE_RULES_MM: __reexport_TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM: __reexport_MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM: __reexport_REDUCED_TWO_LINE_RULES_MM, resolvePlateRules: __reexport_resolvePlateRules } = __m_src_plate_lab_renderer_plate_variant_rules_js;
+
+
+const {
+  solveReducedRowChain,
+  solveReducedRowChainPreferredInternalSpacing,
+  solveReducedVerticalSharedSealRows,
+  solveReducedTextChain,
+  getReducedCriticalRowMinWidth
+} = createReducedRowChainSolver({
+  spacingRules: SPACING_RULES_MM,
+  getOutsideMarginMinLeft,
+  getOutsideMarginMinRight,
+  average,
+  positionSequence: positionReducedSequence
+});
+
 function resolvePlateFontMode(input, options = {}) {
   const rules = resolvePlateRules(options.plateFormat);
-  if (rules.layoutType === "two-line") {
+  if (isTwoLineLayout(rules)) {
     return resolveTwoLinePlateFontMode(input, options, rules);
   }
   const requestedFontMode = options.fontMode === "auto" ? "auto" : options.fontMode === "narrow" ? "narrow" : "middle";
-  const specialIWidth = positiveNumber(options.specialIWidth, rules.cells.middle.specialWidths?.I || rules.cells.middle.letterWidth);
+  const specialIWidth = resolveSpecialIWidth(rules.cells.middle, options);
   const middleFont = withSpecialIWidth(rules.cells.middle, specialIWidth);
   const narrowFont = withSpecialIWidth(rules.cells.narrow, specialIWidth);
   const season = resolveSeasonOptions(options.season, rules);
@@ -2280,44 +5205,36 @@ function resolvePlateFontMode(input, options = {}) {
 
   if (requestedFontMode !== "auto") {
     const chosenLayout = requestedFontMode === "narrow" ? narrowLayout : middleLayout;
-    return {
+    return createFontResolutionResult({
       requestedFontMode,
       fontMode: requestedFontMode,
       reason: requestedFontMode === "narrow" ? "Narrow script manuell gewählt." : "Middle script manuell gewählt.",
       policy: "manual",
       widthCapMm,
-      middleRawContentWidth: middleLayout.preferredContentWidth,
-      narrowRawContentWidth: narrowLayout.preferredContentWidth,
-      middleNeededWidth: middleLayout.preferredNeededWidth,
-      narrowNeededWidth: narrowLayout.preferredNeededWidth,
-      middleFitsWidthCap: middleLayout.fits,
-      narrowFitsWidthCap: narrowLayout.fits,
       middleLayout,
       narrowLayout,
-      chosenLayout
-    };
+      chosenLayout,
+      middleFitsWidthCap: middleLayout.fits,
+      narrowFitsWidthCap: narrowLayout.fits
+    });
   }
 
   if (middleLayout.fits) {
-    return {
+    return createFontResolutionResult({
       requestedFontMode,
       fontMode: "middle",
       reason: "Auto: Middle script passt mit den zulässigen Abständen und gleichen Außenrändern; Narrow script wird nicht verwendet.",
       policy: "middle-first; narrow only if middle cannot satisfy the layout solver",
       widthCapMm,
-      middleRawContentWidth: middleLayout.preferredContentWidth,
-      narrowRawContentWidth: narrowLayout.preferredContentWidth,
-      middleNeededWidth: middleLayout.preferredNeededWidth,
-      narrowNeededWidth: narrowLayout.preferredNeededWidth,
-      middleFitsWidthCap: true,
-      narrowFitsWidthCap: narrowLayout.fits,
       middleLayout,
       narrowLayout,
-      chosenLayout: middleLayout
-    };
+      chosenLayout: middleLayout,
+      middleFitsWidthCap: true,
+      narrowFitsWidthCap: narrowLayout.fits
+    });
   }
 
-  return {
+  return createFontResolutionResult({
     requestedFontMode,
     fontMode: "narrow",
     reason: narrowLayout.fits
@@ -2325,23 +5242,30 @@ function resolvePlateFontMode(input, options = {}) {
       : "Auto: Middle script passt nicht mit den zulässigen Abständen; Narrow script wird gewählt, passt aber ebenfalls nicht vollständig in die aktuelle Breitenbegrenzung.",
     policy: "middle-first; narrow only if middle cannot satisfy the layout solver",
     widthCapMm,
-    middleRawContentWidth: middleLayout.preferredContentWidth,
-    narrowRawContentWidth: narrowLayout.preferredContentWidth,
-    middleNeededWidth: middleLayout.preferredNeededWidth,
-    narrowNeededWidth: narrowLayout.preferredNeededWidth,
-    middleFitsWidthCap: false,
-    narrowFitsWidthCap: narrowLayout.fits,
     middleLayout,
     narrowLayout,
-    chosenLayout: narrowLayout
-  };
+    chosenLayout: narrowLayout,
+    middleFitsWidthCap: false,
+    narrowFitsWidthCap: narrowLayout.fits
+  });
 }
 
 function buildPlateModelMm(input, options = {}) {
   const rules = resolvePlateRules(options.plateFormat);
-  if (rules.layoutType === "two-line") {
+  const changePlate = resolveChangePlateOptions(options.changePlate);
+  if (isTwoLineLayout(rules)) {
+    if (changePlate.enabled && rules.formatKey !== "reducedTwoLine") {
+      return buildChangePlateHighFormatModelMm(input, options, rules);
+    }
     return buildTwoLinePlateModelMm(input, options, rules);
   }
+  if (changePlate.enabled) {
+    return buildChangePlateOneLineModelMm(input, options, rules);
+  }
+  return buildStandardOneLinePlateModelMm(input, options, rules);
+}
+
+function buildStandardOneLinePlateModelMm(input, options = {}, rules = ONE_LINE_RULES_MM) {
   const visualStyle = resolveVisualStyle(options.visualStyle);
   const season = resolveSeasonOptions(resolveSeasonForVisualStyle(options.season, visualStyle), rules);
   const effectiveRules = resolveRulesForSeason(rules, season);
@@ -2353,23 +5277,16 @@ function buildPlateModelMm(input, options = {}) {
   });
   const fontMode = fontResolution.fontMode;
   const baseFont = effectiveRules.cells[fontMode];
-  const specialIWidth = positiveNumber(options.specialIWidth, baseFont.specialWidths?.I || baseFont.letterWidth);
-  const font = {
-    ...baseFont,
-    specialWidths: {
-      ...(baseFont.specialWidths || {}),
-      I: specialIWidth
-    },
-    fontSize: positiveNumber(options.fontSize, baseFont.fontSize),
-    baselineY: positiveNumber(options.baselineY, baseFont.baselineY),
-    fit: options.fontFit || null
-  };
+  const font = createOneLineRenderFont(baseFont, options);
   const parsed = parsePlate(input);
   const layout = findPlateLayoutForFont(input, effectiveRules, font, fontMode, options.widthMode, season);
   const positioned = layout.positionedContent;
   const width = layout.width;
   const rawContentWidth = layout.contentWidth;
   const sealGeometry = getSealGeometryForContent(effectiveRules, positioned);
+  const euroComponents = resolveEuroFieldComponentGeometry(effectiveRules.euro);
+  const euroStarGeometry = euroComponents.starWreath;
+  const euroCountryGeometry = euroComponents.countryMark;
   const metrics = {
     input,
     normalized: parsed.normalized,
@@ -2378,6 +5295,7 @@ function buildPlateModelMm(input, options = {}) {
     plateColorMode: visualStyle.key,
     plateColorLabel: visualStyle.label,
     textColor: visualStyle.color,
+    frameColor: visualStyle.frameColor || (visualStyle.key === "green" ? visualStyle.color : "#111"),
     textColorNote: visualStyle.note,
     requestedFontMode: fontResolution.requestedFontMode,
     fontMode,
@@ -2412,7 +5330,7 @@ function buildPlateModelMm(input, options = {}) {
     maxNeededWidth: layout.maxNeededWidth,
     preferredFits: layout.preferredFits,
     maxFits: layout.maxFits,
-    outsideMarginMin: SPACING_RULES_MM.outsideMargin.min,
+    outsideMarginMin: getOutsideMarginMin(rules),
     width,
     height: effectiveRules.outerHeight,
     rawContentWidth,
@@ -2431,8 +5349,12 @@ function buildPlateModelMm(input, options = {}) {
     euroCountryBoxHeight: effectiveRules.euro.countryBoxHeight ?? null,
     euroInnerBottomClearance: effectiveRules.euro.innerBottomClearance ?? null,
     euroStarsCenterY: effectiveRules.euro.starsCenterY ?? null,
+    euroStarDiameterThroughCenters: euroStarGeometry.diameterThroughCenters,
+    euroStarSize: euroStarGeometry.starSize,
     euroCountryBaselineY: effectiveRules.euro.countryBaselineY ?? null,
     euroCountryCenterY: effectiveRules.euro.countryCenterY ?? null,
+    euroCountryHeight: euroCountryGeometry.height,
+    euroCountryFontSize: euroCountryGeometry.fontSize,
     characterBandY: getCharacterBand(effectiveRules).y,
     characterBandHeight: getCharacterBand(effectiveRules).height,
     characterFontSize: font.fontSize,
@@ -2447,7 +5369,7 @@ function buildPlateModelMm(input, options = {}) {
     seasonGap: layout.actualSeasonGap ?? null,
     seasonGapRange: season.enabled ? `>=${formatNumber(SPACING_RULES_MM.oneLineSeasonGap.min)}` : null,
     seasonFieldWidth: season.enabled ? effectiveRules.content.season.fieldWidth : null,
-    seasonFieldX: season.enabled ? positioned.find((item) => item.type === "season-field")?.x ?? null : null,
+    seasonFieldX: season.enabled ? getFirstItemOfType(positioned, "season-field")?.x ?? null : null,
     seasonFieldY: season.enabled ? getCharacterBand(effectiveRules).y : null,
     seasonFieldHeight: season.enabled ? getCharacterBand(effectiveRules).height : null,
     seasonUpperFieldY: season.enabled ? getCharacterBand(effectiveRules).y : null,
@@ -2471,7 +5393,7 @@ function buildPlateModelMm(input, options = {}) {
     huCenterY: effectiveRules.content.seal.huCenterY,
     authorityDiameter: effectiveRules.content.seal.authorityDiameter,
     authorityCenterY: effectiveRules.content.seal.authorityCenterY,
-    sealVisibleCircleGap: effectiveRules.content.seal.visibleCircleGap,
+    sealVisibleCircleGap: sealGeometry?.visibleCircleGap ?? effectiveRules.content.seal.visibleCircleGap,
     sealAdjacentGapPolicy: "none - solved seal column is the complete measured area between adjacent character cells",
     sealCenterX: sealGeometry?.cx ?? null,
     remainingLeft: layout.sideMarginLeft,
@@ -2480,60 +5402,103 @@ function buildPlateModelMm(input, options = {}) {
     modelNote: "Pure mm model. The viewer may scale the complete SVG, but the model never sees pixels."
   };
 
-  return { parsed, rules: effectiveRules, font, content: positioned, metrics };
+  return createPlateModel({ parsed, rules: effectiveRules, font, content: positioned, metrics, layout, season });
 }
 
 
+function buildChangePlateOneLineModelMm(input, options = {}, rules = ONE_LINE_RULES_MM) {
+  const changePlate = resolveChangePlateOptions(options.changePlate);
+  const split = splitChangePlateInput(input, changePlate);
+  const baseInput = resolveChangePlateBaseInput(input, changePlate, split);
+  const baseModel = buildStandardOneLinePlateModelMm(baseInput, {
+    ...options,
+    season: { ...(options.season || {}), enabled: false }
+  }, rules);
+  return attachChangePlateOneLineModel(baseModel, {
+    input,
+    changePlate,
+    rules
+  });
+}
+
+
+
+function buildChangePlateHighFormatModelMm(input, options = {}, rules = TWO_LINE_RULES_MM) {
+  const changePlate = resolveChangePlateOptions(options.changePlate);
+  const split = splitChangePlateInput(input, changePlate);
+  const baseInput = resolveChangePlateBaseInput(input, changePlate, split);
+  const baseModel = buildTwoLinePlateModelMm(baseInput, {
+    ...options,
+    season: { ...(options.season || {}), enabled: false }
+  }, rules);
+  return attachChangePlateHighFormatModel(baseModel, {
+    input,
+    changePlate,
+    rules
+  });
+}
+
 function resolveTwoLinePlateFontMode(input, options = {}, rules = TWO_LINE_RULES_MM) {
-  const requestedFontMode = options.fontMode === "auto" ? "auto" : options.fontMode === "narrow" ? "narrow" : "middle";
-  const specialIWidth = positiveNumber(options.specialIWidth, rules.cells.middle.specialWidths?.I || rules.cells.middle.letterWidth);
+  const isMotorcycle = rules.formatKey === "motorcycle";
+  const isReducedTwoLine = rules.formatKey === "reducedTwoLine";
+  const requestedFontMode = isMotorcycle || isReducedTwoLine ? "middle" : options.fontMode === "auto" ? "auto" : options.fontMode === "narrow" ? "narrow" : "middle";
+  const specialIWidth = resolveSpecialIWidth(rules.cells.middle, options);
   const middleFont = withSpecialIWidth(rules.cells.middle, specialIWidth);
+  const season = resolveSeasonOptions(options.season, rules);
+  const widthRule = resolveTwoLineWidthRule(options.twoLineWidthRule || rules.widthRuleDefault);
+  const middleLayout = findTwoLinePlateLayoutForFont(input, rules, middleFont, "middle", options.widthMode, season, widthRule);
+  const widthCapMm = resolveTwoLineWidthCapMm(options.widthMode, widthRule);
+
+  if (isMotorcycle || isReducedTwoLine) {
+    return createFontResolutionResult({
+      requestedFontMode,
+      fontMode: "middle",
+      reason: isMotorcycle ? "Kraftradkennzeichen: verkleinerte Mittelschrift 49 mm; keine Engschrift-Automatik." : "Verkleinertes zweizeiliges Kennzeichen b209: Standard-Template mit vollständiger Text-/Siegelketten-Auto-Breite und fest verkleinerter Mittelschrift 49 mm; H/E und Saison erzwingen die obere Nebeneinander-Siegelreihe; Engschrift bleibt deaktiviert.",
+      policy: isMotorcycle ? "motorcycle: reduced middle script only; no narrow fallback" : "reduced two-line b209: standard case only; fixed reduced middle script only; no reduced narrow layout is calculated",
+      widthCapMm,
+      middleLayout,
+      narrowLayout: middleLayout,
+      chosenLayout: middleLayout,
+      middleFitsWidthCap: middleLayout.fits,
+      narrowFitsWidthCap: middleLayout.fits
+    });
+  }
+
   const narrowFont = withSpecialIWidth(rules.cells.narrow, specialIWidth);
-  const season = resolveSeasonOptions(options.season);
-  const middleLayout = findTwoLinePlateLayoutForFont(input, rules, middleFont, "middle", options.widthMode, season);
-  const narrowLayout = findTwoLinePlateLayoutForFont(input, rules, narrowFont, "narrow", options.widthMode, season);
-  const widthCapMm = resolveWidthCapMm(options.widthMode, rules.maxWidth);
+  const narrowLayout = findTwoLinePlateLayoutForFont(input, rules, narrowFont, "narrow", options.widthMode, season, widthRule);
 
   if (requestedFontMode !== "auto") {
     const chosenLayout = requestedFontMode === "narrow" ? narrowLayout : middleLayout;
-    return {
+    return createFontResolutionResult({
       requestedFontMode,
       fontMode: requestedFontMode,
       reason: requestedFontMode === "narrow" ? "Narrow script manuell gewählt." : "Middle script manuell gewählt.",
       policy: "manual",
       widthCapMm,
-      middleRawContentWidth: middleLayout.preferredContentWidth,
-      narrowRawContentWidth: narrowLayout.preferredContentWidth,
-      middleNeededWidth: middleLayout.preferredNeededWidth,
-      narrowNeededWidth: narrowLayout.preferredNeededWidth,
-      middleFitsWidthCap: middleLayout.fits,
-      narrowFitsWidthCap: narrowLayout.fits,
       middleLayout,
       narrowLayout,
-      chosenLayout
-    };
+      chosenLayout,
+      middleFitsWidthCap: middleLayout.fits,
+      narrowFitsWidthCap: narrowLayout.fits
+    });
   }
 
   if (middleLayout.fits) {
-    return {
+    return createFontResolutionResult({
       requestedFontMode,
       fontMode: "middle",
       reason: "Auto: Zweizeilig Middle script passt in obere und untere Zeile; Narrow script wird nicht verwendet.",
       policy: "two-line middle-first; narrow only if one of the rows cannot satisfy the layout solver",
       widthCapMm,
-      middleRawContentWidth: middleLayout.preferredContentWidth,
-      narrowRawContentWidth: narrowLayout.preferredContentWidth,
-      middleNeededWidth: middleLayout.preferredNeededWidth,
-      narrowNeededWidth: narrowLayout.preferredNeededWidth,
-      middleFitsWidthCap: true,
-      narrowFitsWidthCap: narrowLayout.fits,
       middleLayout,
       narrowLayout,
-      chosenLayout: middleLayout
-    };
+      chosenLayout: middleLayout,
+      middleFitsWidthCap: true,
+      narrowFitsWidthCap: narrowLayout.fits
+    });
   }
 
-  return {
+  return createFontResolutionResult({
     requestedFontMode,
     fontMode: "narrow",
     reason: narrowLayout.fits
@@ -2541,46 +5506,44 @@ function resolveTwoLinePlateFontMode(input, options = {}, rules = TWO_LINE_RULES
       : "Auto: Zweizeilig Middle script passt nicht; Narrow script wird gewählt, passt aber ebenfalls nicht vollständig in die aktuelle Breitenbegrenzung.",
     policy: "two-line middle-first; narrow only if one of the rows cannot satisfy the layout solver",
     widthCapMm,
-    middleRawContentWidth: middleLayout.preferredContentWidth,
-    narrowRawContentWidth: narrowLayout.preferredContentWidth,
-    middleNeededWidth: middleLayout.preferredNeededWidth,
-    narrowNeededWidth: narrowLayout.preferredNeededWidth,
-    middleFitsWidthCap: false,
-    narrowFitsWidthCap: narrowLayout.fits,
     middleLayout,
     narrowLayout,
-    chosenLayout: narrowLayout
-  };
+    chosenLayout: narrowLayout,
+    middleFitsWidthCap: false,
+    narrowFitsWidthCap: narrowLayout.fits
+  });
 }
 
 function buildTwoLinePlateModelMm(input, options = {}, rules = TWO_LINE_RULES_MM) {
   const fontResolution = resolvePlateFontMode(input, {
-    plateFormat: "twoLine",
+    plateFormat: getModelPlateFormat(rules),
     fontMode: options.fontMode,
     widthMode: options.widthMode,
     specialIWidth: options.specialIWidth,
-    season: options.season
+    season: options.season,
+    twoLineWidthRule: options.twoLineWidthRule
   });
   const fontMode = fontResolution.fontMode;
   const baseFont = rules.cells[fontMode];
-  const specialIWidth = positiveNumber(options.specialIWidth, baseFont.specialWidths?.I || baseFont.letterWidth);
-  const font = {
-    ...baseFont,
-    specialWidths: {
-      ...(baseFont.specialWidths || {}),
-      I: specialIWidth
-    },
-    fontSize: positiveNumber(options.fontSize, baseFont.fontSize),
-    baselineY: positiveNumber(options.baselineY, baseFont.baselineY),
-    fit: options.fontFit || null
-  };
+  const isMotorcycle = rules.formatKey === "motorcycle";
+  const isReducedTwoLine = rules.formatKey === "reducedTwoLine";
+  const font = createTwoLineRenderFont(baseFont, {
+    ...options,
+    fixedReducedFont: isMotorcycle || isReducedTwoLine
+  });
   const parsed = parsePlate(input);
   const visualStyle = resolveVisualStyle(options.visualStyle);
-  const season = resolveSeasonOptions(resolveSeasonForVisualStyle(options.season, visualStyle));
+  const season = resolveSeasonOptions(resolveSeasonForVisualStyle(options.season, visualStyle), rules);
   rules = resolveRulesForSeason(rules, season);
-  const layout = findTwoLinePlateLayoutForFont(input, rules, font, fontMode, options.widthMode, season);
+  const widthRule = resolveTwoLineWidthRule(options.twoLineWidthRule || rules.widthRuleDefault);
+  const layout = findTwoLinePlateLayoutForFont(input, rules, font, fontMode, options.widthMode, season, widthRule);
   const positioned = layout.positionedContent;
+  const seasonFieldItem = layout.seasonField || getFirstItemOfType(positioned, "season-field") || null;
+  const seasonLayout = season.enabled ? getSeasonFieldLayout(rules, seasonFieldItem) : null;
   const sealGeometry = getSealGeometryForContent(rules, positioned);
+  const euroComponents = resolveEuroFieldComponentGeometry(rules.euro);
+  const euroStarGeometry = euroComponents.starWreath;
+  const euroCountryGeometry = euroComponents.countryMark;
   const topBand = getTwoLineCharacterBand(rules, "top", font.baselineY);
   const bottomBand = getTwoLineCharacterBand(rules, "bottom", font.baselineY);
   const metrics = {
@@ -2594,13 +5557,19 @@ function buildTwoLinePlateModelMm(input, options = {}, rules = TWO_LINE_RULES_MM
     plateColorMode: visualStyle.key,
     plateColorLabel: visualStyle.label,
     textColor: visualStyle.color,
+    frameColor: visualStyle.frameColor || (visualStyle.key === "green" ? visualStyle.color : "#111"),
     textColorNote: visualStyle.note,
     requestedFontMode: fontResolution.requestedFontMode,
     fontMode,
     fontLabel: font.label,
     fontFamily: font.fontFamily,
-    plateFormat: "twoLine",
+    plateFormat: getModelPlateFormat(rules),
     plateFormatLabel: rules.name,
+    twoLineWidthRuleKey: widthRule.key,
+    twoLineWidthRuleLabel: widthRule.label,
+    twoLineWidthRuleText: widthRule.ruleLabel,
+    twoLineWidthMaxMm: widthRule.maxWidth,
+    twoLineWidthBands: getTwoLineWidthBandsForFont(fontMode, widthRule).join(", "),
     autoFontModeReason: fontResolution.reason,
     autoFontModePolicy: fontResolution.policy,
     autoWidthCapMm: fontResolution.widthCapMm,
@@ -2628,7 +5597,13 @@ function buildTwoLinePlateModelMm(input, options = {}, rules = TWO_LINE_RULES_MM
     maxNeededWidth: layout.maxNeededWidth,
     preferredFits: layout.preferredFits,
     maxFits: layout.maxFits,
-    outsideMarginMin: SPACING_RULES_MM.outsideMargin.min,
+    outsideMarginMin: getOutsideMarginMin(rules),
+    outsideMarginMinLeft: Math.min(layout.top.sideMarginLeft ?? getOutsideMarginMin(rules), layout.bottom.sideMarginLeft ?? getOutsideMarginMin(rules), getOutsideMarginMin(rules)),
+    outsideMarginMinRight: isReducedNineSlotSeasonTightCase(parsed, season) ? 6 : getOutsideMarginMin(rules),
+    reducedNineSlotSeasonTightCase: isReducedTwoLineFormat(rules) ? isReducedNineSlotSeasonTightCase(parsed, season) : false,
+    reducedNoITightUpperSealCase: isReducedTwoLineFormat(rules) ? isReducedNoITightUpperSealCase(parsed, season) : false,
+    reducedEightSlotUpperSealCase: isReducedTwoLineFormat(rules) ? isReducedEightSlotUpperSealCase(parsed, season) : false,
+    reducedVisibleSlotCount: isReducedTwoLineFormat(rules) ? getReducedVisibleSlotCount(parsed, season) : null,
     width: layout.width,
     height: rules.outerHeight,
     rawContentWidth: layout.contentWidth,
@@ -2652,8 +5627,12 @@ function buildTwoLinePlateModelMm(input, options = {}, rules = TWO_LINE_RULES_MM
     euroCountryBoxHeight: rules.euro.countryBoxHeight ?? null,
     euroInnerBottomClearance: rules.euro.innerBottomClearance ?? null,
     euroStarsCenterY: rules.euro.starsCenterY ?? null,
+    euroStarDiameterThroughCenters: euroStarGeometry.diameterThroughCenters,
+    euroStarSize: euroStarGeometry.starSize,
     euroCountryBaselineY: rules.euro.countryBaselineY ?? null,
     euroCountryCenterY: rules.euro.countryCenterY ?? null,
+    euroCountryHeight: euroCountryGeometry.height,
+    euroCountryFontSize: euroCountryGeometry.fontSize,
     characterBandY: topBand.y,
     characterBandHeight: topBand.height,
     topCharacterBandY: topBand.y,
@@ -2677,29 +5656,35 @@ function buildTwoLinePlateModelMm(input, options = {}, rules = TWO_LINE_RULES_MM
     huCenterY: rules.content.seal.huCenterY,
     authorityDiameter: rules.content.seal.authorityDiameter,
     authorityCenterY: rules.content.seal.authorityCenterY,
-    sealVisibleCircleGap: rules.content.seal.visibleCircleGap,
-    sealAdjacentGapPolicy: "top row: balanced *, **, 8-25 mm seal gap and season star gap where present; bottom row uses recognition group gaps",
+    sealVisibleCircleGap: sealGeometry?.visibleCircleGap ?? rules.content.seal.visibleCircleGap,
+    sealArrangement: sealGeometry?.arrangement ?? rules.content.seal.arrangement,
+    reducedUpperSealRow: Boolean(layout.reducedUpperSealRow),
+    reducedUpperSealRequired: rules.formatKey === "reducedTwoLine" ? isReducedUpperSealMandatory(parsed, season) : false,
+    reducedLowerVisibleCharCount: layout.reducedLowerVisibleCharCount ?? null,
+    sealAdjacentGapPolicy: rules.formatKey === "motorcycle" ? "motorcycle: no top-row season gap; * = at least 8 mm, ** = 8-10 mm; explicit 14-18 mm bottom ranges are handled separately" : "top row: balanced *, **, 8-25 mm seal gap and season star gap where present; bottom row uses recognition group gaps",
     topSealGap: layout.actualTopSealGap,
+    upperSealPairGap: layout.actualUpperSealPairGap ?? null,
+    upperSealPairGapRange: layout.actualUpperSealPairGap != null ? `${formatNumber(SPACING_RULES_MM.reducedUpperSealPairGap.min)}-${formatNumber(SPACING_RULES_MM.reducedUpperSealPairGap.max)}` : null,
     seasonGap: layout.actualSeasonGap,
-    seasonGapRange: season.enabled ? `>=${formatNumber(SPACING_RULES_MM.twoLineSeasonGap.min)}` : null,
+    seasonGapRange: season.enabled && !isMotorcycleFormat(rules) ? `>=${formatNumber(SPACING_RULES_MM.twoLineSeasonGap.min)}` : null,
     seasonFieldWidth: season.enabled ? rules.content.season.fieldWidth : null,
-    seasonFieldX: layout.seasonField?.x ?? null,
-    seasonFieldY: season.enabled ? topBand.y : null,
-    seasonFieldHeight: season.enabled ? topBand.height : null,
-    seasonUpperFieldY: season.enabled ? topBand.y : null,
-    seasonLowerFieldY: season.enabled ? topBand.y + topBand.height - rules.content.season.monthBoxHeight : null,
+    seasonFieldX: seasonFieldItem?.x ?? null,
+    seasonFieldY: seasonLayout?.upperFieldY ?? null,
+    seasonFieldHeight: seasonLayout?.band?.height ?? null,
+    seasonUpperFieldY: seasonLayout?.upperFieldY ?? null,
+    seasonLowerFieldY: seasonLayout?.lowerFieldY ?? null,
     seasonMonthBoxHeight: season.enabled ? rules.content.season.monthBoxHeight : null,
     seasonTargetDigitHeight: season.enabled ? rules.content.season.targetDigitHeight : null,
     seasonFontFamily: season.enabled ? rules.content.season.fontFamily : null,
     seasonFontSize: season.enabled ? rules.content.season.fontSize : null,
-    seasonUpperBaselineY: season.enabled ? rules.content.season.upperBaselineY : null,
+    seasonUpperBaselineY: seasonLayout?.upperBaselineY ?? null,
     seasonWidthScale: season.enabled ? rules.content.season.widthScale : null,
     seasonDigitGap: season.enabled ? rules.content.season.digitGap : null,
-    seasonLowerBaselineY: season.enabled ? rules.content.season.upperBaselineY + (topBand.height - rules.content.season.monthBoxHeight) : null,
+    seasonLowerBaselineY: seasonLayout?.lowerBaselineY ?? null,
     seasonContentHeight: season.enabled ? rules.content.season.contentHeight : null,
     seasonSeparatorHeight: season.enabled ? rules.content.season.separatorHeight : null,
     seasonRule: season.enabled ? rules.content.season.ruleLabel : "No seasonal field",
-    topSealGapRange: `${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.max)}`,
+    topSealGapRange: isReducedTwoLineFormat(rules) ? `${formatNumber(SPACING_RULES_MM.reducedTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.reducedTopSealGap.max)}` : `${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.max)}`,
     sealCenterX: sealGeometry?.cx ?? null,
     remainingLeft: layout.bottom.sideMarginLeft,
     remainingRight: layout.bottom.sideMarginRight,
@@ -2707,7 +5692,7 @@ function buildTwoLinePlateModelMm(input, options = {}, rules = TWO_LINE_RULES_MM
     modelNote: "Pure mm model. The viewer may scale the complete SVG, but the model never sees pixels."
   };
 
-  return { parsed, rules, font, content: positioned, metrics };
+  return createPlateModel({ parsed, rules, font, content: positioned, metrics, layout, season });
 }
 
 function getTwoLineCharacterBand(rules, rowKey = "top", topBaselineY = null) {
@@ -2721,19 +5706,32 @@ function getTwoLineCharacterBand(rules, rowKey = "top", topBaselineY = null) {
   };
 }
 
-function findTwoLinePlateLayoutForFont(input, rules, font, fontMode, widthMode, season = resolveSeasonOptions()) {
+function findTwoLinePlateLayoutForFont(input, rules, font, fontMode, widthMode, season = resolveSeasonOptions(), widthRule = resolveTwoLineWidthRule()) {
   const parsed = parsePlate(input);
   const topSequence = buildTwoLineTopSequence(parsed, rules, font, season);
   const bottomSequence = buildTwoLineBottomSequence(parsed, rules, font);
   const strategy = resolveWidthStrategy(widthMode);
-  const bands = TWO_LINE_WIDTH_BANDS[fontMode] || TWO_LINE_WIDTH_BANDS.middle;
+  const bands = getTwoLineWidthBandsForFont(fontMode, widthRule);
   const fixedWidth = Number(widthMode);
-  const candidateWidths = strategy === "fixed" && Number.isFinite(fixedWidth) && fixedWidth > 0 ? [fixedWidth] : bands;
+  const fixedCandidate = Number.isFinite(fixedWidth) && fixedWidth > 0 ? Math.min(fixedWidth, widthRule.maxWidth) : null;
+  const candidateWidths = strategy === "fixed" && fixedCandidate
+    ? [fixedCandidate]
+    : isMotorcycleFormat(rules) && season?.enabled
+      ? [widthRule.maxWidth]
+      : isReducedTwoLineFormat(rules)
+        ? getReducedTwoLineAutoWidthCandidates(widthRule)
+        : bands;
+
+  if (isReducedTwoLineFormat(rules) && strategy !== "fixed") {
+    const selectedWidth = selectReducedTwoLineAutoWidth({ rules, parsed, font, widthRule, season });
+    return solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width: selectedWidth, strategy, font, parsed, season, widthRule });
+  }
+
   const fallbackFits = [];
   let compactEdgeFit = null;
 
   for (const width of candidateWidths) {
-    const solved = solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, strategy, font, parsed, season });
+    const solved = solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, strategy, font, parsed, season, widthRule });
     if (!solved.fits) continue;
     if (strategy === "balanced") {
       if (solved.preferredFits) return solved;
@@ -2762,22 +5760,384 @@ function findTwoLinePlateLayoutForFont(input, rules, font, fontMode, widthMode, 
   }
 
   const maxWidth = candidateWidths[candidateWidths.length - 1] || rules.maxWidth;
-  return solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width: maxWidth, strategy, allowOverflow: true, font, parsed, season });
+  return solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width: maxWidth, strategy, allowOverflow: true, font, parsed, season, widthRule });
 }
 
-function solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, strategy, allowOverflow = false, font = null, parsed = null, season = resolveSeasonOptions() }) {
-  const topLimits = getTwoLineTopContentLimits(rules, width);
+
+function getReducedTwoLineAutoWidthCandidates(widthRule = resolveTwoLineWidthRule()) {
+  const middleBands = widthRule.widthBands?.middle || [200, 220, 240, 255];
+  return middleBands.filter((candidate) => candidate <= widthRule.maxWidth);
+}
+
+function getReducedTextChainStats(sequence) {
+  const fixedWidth = sumItemWidthsWhere(sequence, (item) => item.type === "char");
+  const charGapCount = countItemsOfType(sequence, "char-gap");
+  const groupGapCount = countItemsOfType(sequence, "group-gap");
+  const minGapWidth = charGapCount * SPACING_RULES_MM.charGap.min + groupGapCount * SPACING_RULES_MM.reducedRecognitionGroupGap.min;
+  return {
+    fixedWidth,
+    charGapCount,
+    groupGapCount,
+    minGapWidth,
+    minTextWidth: fixedWidth + minGapWidth
+  };
+}
+
+function getReducedCriticalTextMinWidth(sequence, rules) {
+  const sideMin = getOutsideMarginMin(rules);
+  const stats = getReducedTextChainStats(sequence);
+  return stats.minTextWidth + sideMin * 2;
+}
+
+function applyReducedTightRightMargin(contentLimits, parsed, season) {
+  if (!isReducedNineSlotSeasonTightCase(parsed, season)) return contentLimits;
+  return {
+    ...contentLimits,
+    outsideMarginMinLeft: getOutsideMarginMinLeft(REDUCED_TWO_LINE_RULES_MM, contentLimits),
+    outsideMarginMinRight: 6,
+    reducedTightNineSlotRightMargin: true
+  };
+}
+
+function solveReducedTemplateCandidate({ rules, parsed, font, width, widthRule = resolveTwoLineWidthRule(), allowUpperSealRow = false, allowOverflow = false, season = resolveSeasonOptions({ enabled: false }, rules) }) {
+  const topLimits = applyReducedTightRightMargin(getTwoLineTopContentLimits(rules, width, { enabled: false }), parsed, season);
+  const bottomLimits = applyReducedTightRightMargin(getTwoLineBottomContentLimits(rules, width), parsed, season);
+  const topTextSequence = buildReducedTopSequence(parsed, font);
+  const bottomTextSequence = buildReducedRecognitionSequence(parsed, font, season, rules, bottomLimits);
+  const lowerVisibleCharCount = countItemsOfType(bottomTextSequence, "char");
+  const normalTopSequence = withReducedSeal(topTextSequence, rules, "top", topLimits, null, null, { parsed, season });
+  const normalBottomSequence = withReducedSeal(bottomTextSequence, rules, "bottom", bottomLimits, null, null, { parsed, season });
+  const forceUpperSealRow = isReducedUpperSealMandatory(parsed, season);
+  const mayUseUpperSealRow = forceUpperSealRow || (allowUpperSealRow && canReducedStandardUseUpperSealFallback(lowerVisibleCharCount));
+  const normalShared = forceUpperSealRow
+    ? { fits: false, top: null, bottom: null, fixedSealX: null }
+    : solveReducedVerticalSharedSealRows({ rules, topSequence: normalTopSequence, bottomSequence: normalBottomSequence, topLimits, bottomLimits });
+  const normalFits = !forceUpperSealRow && normalShared.fits;
+
+  if (normalFits || !mayUseUpperSealRow) {
+    return {
+      fits: normalFits,
+      template: "reduced-standard-vertical",
+      width,
+      topLimits,
+      bottomLimits,
+      topSequence: normalTopSequence,
+      bottomSequence: normalBottomSequence,
+      topSolution: normalShared.top,
+      bottomSolution: normalShared.bottom,
+      lowerVisibleCharCount,
+      reducedUpperSealRow: false,
+      topSealWidth: rules.content.seal.columnWidth,
+      fixedVerticalSealX: normalShared.fixedSealX,
+      verticalSealSharedX: true,
+      verticalSealDiagnostics: normalShared,
+      renderable: normalFits || allowOverflow
+    };
+  }
+
+  const upperSealVisualCircleGap = getReducedUpperSealPairGapRange(parsed, season).preferred;
+  const upperTopSequence = withReducedSeal(topTextSequence, rules, "top", topLimits, "reduced-standard-upper-row", upperSealVisualCircleGap, { parsed, season });
+  const upperBottomSequence = bottomTextSequence;
+  const upperTop = solveReducedRowChain(upperTopSequence, topLimits, rules);
+  const upperBottom = solveReducedRowChain(upperBottomSequence, bottomLimits, rules);
+  const upperFits = upperTop.fits && upperBottom.fits;
+
+  return {
+    fits: upperFits,
+    template: "reduced-standard-upper-row",
+    width,
+    topLimits,
+    bottomLimits,
+    topSequence: upperTopSequence,
+    bottomSequence: upperBottomSequence,
+    topSolution: upperTop,
+    bottomSolution: upperBottom,
+    lowerVisibleCharCount,
+    reducedUpperSealRow: true,
+    topSealWidth: rules.content.seal.authorityDiameter + rules.content.seal.huDiameter,
+    normalRejected: true,
+    normalTop: normalShared.top,
+    normalBottom: normalShared.bottom,
+    normalVerticalSealDiagnostics: normalShared,
+    renderable: upperFits || allowOverflow
+  };
+}
+
+function selectReducedTwoLineAutoWidth({ rules, parsed, font, widthRule = resolveTwoLineWidthRule(), season = resolveSeasonOptions({ enabled: false }, rules) }) {
+  const candidates = getReducedTwoLineAutoWidthCandidates(widthRule);
+  const maxCandidate = candidates[candidates.length - 1] || widthRule.maxWidth;
+  for (const candidate of candidates) {
+    // b209: 180 mm is a real reduced auto-width candidate. H/E or season
+    // variants require the upper side-by-side seal row on every candidate,
+    // including 180 mm. Standard plates without H/E/season may use the upper
+    // side-by-side seal fallback from 200 mm upward only when the lower row has
+    // at least five visible characters; four-character lower rows such as
+    // W QU11 must remain in the vertical-seal template and step up in width.
+    const forceUpperSealRow = isReducedUpperSealMandatory(parsed, season);
+    const allowUpperSealOnCandidate = forceUpperSealRow || candidate >= 200;
+    const result = solveReducedTemplateCandidate({ rules, parsed, font, width: candidate, widthRule, allowUpperSealRow: allowUpperSealOnCandidate, season });
+    if (result.fits) return candidate;
+  }
+  return maxCandidate;
+}
+
+function solveReducedTwoLineStandardLayout({ rules, width, strategy, allowOverflow = false, font = null, parsed = null, widthRule = resolveTwoLineWidthRule(), season = resolveSeasonOptions({ enabled: false }, rules) }) {
+  const sideMin = getOutsideMarginMin(rules);
+  const autoMode = strategy !== "fixed";
+  const maxAutoWidth = widthRule.maxWidth;
+  const allowUpperSealRow = true;
+  const candidate = solveReducedTemplateCandidate({ rules, parsed, font, width, widthRule, allowUpperSealRow, allowOverflow, season });
+  const chosen = candidate;
+  let topItems = positionReducedSequence(
+    chosen.topSequence,
+    chosen.topLimits.left + chosen.topSolution.sideMarginLeft,
+    "top",
+    rules,
+    chosen.topLimits,
+    font,
+    { charGap: chosen.topSolution.charGap, groupGap: chosen.topSolution.groupGap, sealGap: chosen.topSolution.sealGap, seasonGap: chosen.topSolution.seasonGap, itemWidths: chosen.topSolution.itemWidths }
+  );
+  const bottomItems = positionReducedSequence(
+    chosen.bottomSequence,
+    chosen.bottomLimits.left + chosen.bottomSolution.sideMarginLeft,
+    "bottom",
+    rules,
+    chosen.bottomLimits,
+    font,
+    { charGap: chosen.bottomSolution.charGap, groupGap: chosen.bottomSolution.groupGap, sealGap: chosen.bottomSolution.sealGap, seasonGap: chosen.bottomSolution.seasonGap, itemWidths: chosen.bottomSolution.itemWidths }
+  );
+  let topSolutionForMetrics = chosen.topSolution;
+  const centeredTop = centerReducedShortTopDistrictInCorridor(topItems, rules, chosen.topLimits, font);
+  topItems = centeredTop.items;
+  if (centeredTop.solutionPatch) topSolutionForMetrics = { ...chosen.topSolution, ...centeredTop.solutionPatch };
+  const topTextToSealGap = topItems.find((item) => item.key === "reduced-top-text-to-authority-gap" || item.key === "reduced-top-seal-gap-upper-row" || item.key === "reduced-top-seal-gap");
+  const upperSealPairGap = topItems.find((item) => item.key === "reduced-top-authority-to-hu-gap");
+  const bottomSeasonGap = getFirstItemOfType(bottomItems, "season-gap");
+  const reducedSeasonField = getFirstItemOfType(bottomItems, "season-field");
+  const topFits = topSolutionForMetrics.fits;
+  const bottomFits = chosen.bottomSolution.fits;
+  const fits = chosen.fits;
+  const modeLabel = strategy === "balanced" ? "Reduced two-line standard row-chain balanced" : strategy === "compact" ? "Reduced two-line standard row-chain compact" : "Reduced two-line standard fixed width";
+  const reducedTextMinWidth = getReducedCriticalTextMinWidth(buildReducedRecognitionSequence(parsed, font, season, rules, chosen.bottomLimits), rules);
+  const reducedCriticalMinWidth = Math.max(
+    getReducedCriticalRowMinWidth(chosen.topSequence, rules, chosen.topLimits),
+    getReducedCriticalRowMinWidth(chosen.bottomSequence, rules, chosen.bottomLimits)
+  );
+  const reason = `${modeLabel}: b209 selects the smallest reduced width candidate whose complete physical row chains fit. Normal mode checks upper text + HU field and lower recognition + authority seal field with one shared vertical seal X-axis; when that cannot fit, the upper two-seal fallback is tested on the same width candidate instead of being held back to the maximum width. ** gaps stay ${SPACING_RULES_MM.charGap.min}-${SPACING_RULES_MM.charGap.max} mm, lower *** stays ${SPACING_RULES_MM.reducedRecognitionGroupGap.min}-${SPACING_RULES_MM.reducedRecognitionGroupGap.max} mm, text→seal and seal→seal gaps stay inside their legal dynamic corridors. Upper side-by-side seals are separate row-chain fields, so the corridor between top text and right margin is shared dynamically; Reduced Engschrift is not calculated.`;
+  const contentWidth = Math.max(topSolutionForMetrics.contentWidth, chosen.bottomSolution.contentWidth);
+
+  return {
+    fits,
+    renderable: fits || allowOverflow,
+    minFits: fits,
+    preferredFits: fits,
+    maxFits: fits,
+    width,
+    strategy,
+    widthRuleKey: widthRule.key,
+    widthRuleLabel: widthRule.label,
+    widthRuleMaxMm: widthRule.maxWidth,
+    widthRuleText: widthRule.ruleLabel,
+    modeLabel,
+    policy: "reduced two-line b209 standard template: complete row-chain width selection, fixed reduced middle script only, 180/200/220/240/255 × 130 mm candidates, H/E/season use mandatory upper side-by-side seals; 9-slot season cases may use the b209 tight >=6 mm right edge",
+    reason,
+    availableWidth: Math.min(chosen.topLimits.width, chosen.bottomLimits.width),
+    minContentWidth: Math.max(topSolutionForMetrics.minContentWidth, chosen.bottomSolution.minContentWidth),
+    preferredContentWidth: contentWidth,
+    maxContentWidth: contentWidth,
+    minNeededWidth: reducedCriticalMinWidth,
+    preferredNeededWidth: width,
+    maxNeededWidth: width,
+    contentWidth,
+    positionedContent: [...topItems, ...bottomItems],
+    actualCharGap: chosen.bottomSolution.charGap,
+    actualGroupGap: chosen.bottomSolution.groupGap,
+    groupGapRangeLabel: getVariableRangeLabel(SPACING_RULES_MM.reducedRecognitionGroupGap, SPACING_RULES_MM.reducedRecognitionGroupGap),
+    groupGapRule: getFirstItemOfType(bottomItems, "group-gap")?.ruleLabel || SPACING_RULES_MM.reducedRecognitionGroupGap.ruleLabel,
+    reducedCriticalMinWidth,
+    reducedTextMinWidth,
+    top: {
+      fits: topFits,
+      renderable: topFits || allowOverflow,
+      minFits: topFits,
+      preferredFits: topFits,
+      maxFits: topFits,
+      width,
+      strategy,
+      modeLabel,
+      policy: "Reduced top row chain: in vertical mode the HU field shares the bottom authority seal X-axis; in upper-seal mode text plus side-by-side seal fields are solved as one physical row, so glyphs cannot overlap seals",
+      reason,
+      availableWidth: chosen.topLimits.width,
+      contentLimits: chosen.topLimits,
+      minContentWidth: topSolutionForMetrics.minContentWidth,
+      preferredContentWidth: topSolutionForMetrics.contentWidth,
+      maxContentWidth: topSolutionForMetrics.contentWidth,
+      minNeededWidth: chosen.topSolution.minNeededWidth,
+      preferredNeededWidth: width,
+      maxNeededWidth: width,
+      contentWidth: topSolutionForMetrics.contentWidth,
+      sideMarginLeft: topSolutionForMetrics.sideMarginLeft,
+      sideMarginRight: topSolutionForMetrics.sideMarginRight,
+      positionedContent: topItems,
+      actualCharGap: topSolutionForMetrics.charGap,
+      actualGroupGap: null,
+      actualSealColumnWidth: chosen.topSealWidth,
+      actualSealColumnMinWidth: chosen.topSealWidth,
+      actualSealColumnRangeLabel: `${formatNumber(chosen.topSealWidth)}-${formatNumber(chosen.topSealWidth)}`,
+      sealColumnRule: rules.content.seal.ruleLabel,
+      actualTopSealGap: topTextToSealGap?.width ?? topSolutionForMetrics.sealGap,
+      actualUpperSealPairGap: upperSealPairGap?.width ?? null,
+      actualSeasonGap: null
+    },
+    bottom: {
+      fits: bottomFits,
+      renderable: bottomFits || allowOverflow,
+      minFits: bottomFits,
+      preferredFits: bottomFits,
+      maxFits: bottomFits,
+      width,
+      strategy,
+      modeLabel,
+      policy: chosen.reducedUpperSealRow ? "Reduced bottom row text-only chain because the authority seal moved to the upper row" : "Reduced bottom row chain: recognition text plus authority seal field is solved as one physical row",
+      reason,
+      availableWidth: chosen.bottomLimits.width,
+      contentLimits: chosen.bottomLimits,
+      minContentWidth: chosen.bottomSolution.minContentWidth,
+      preferredContentWidth: chosen.bottomSolution.contentWidth,
+      maxContentWidth: chosen.bottomSolution.contentWidth,
+      minNeededWidth: chosen.bottomSolution.minNeededWidth,
+      preferredNeededWidth: width,
+      maxNeededWidth: width,
+      contentWidth: chosen.bottomSolution.contentWidth,
+      sideMarginLeft: chosen.bottomSolution.sideMarginLeft,
+      sideMarginRight: chosen.bottomSolution.sideMarginRight,
+      positionedContent: bottomItems,
+      actualCharGap: chosen.bottomSolution.charGap,
+      actualGroupGap: chosen.bottomSolution.groupGap,
+      actualGroupGapMinWidth: SPACING_RULES_MM.reducedRecognitionGroupGap.min,
+      groupGapRangeLabel: getVariableRangeLabel(SPACING_RULES_MM.reducedRecognitionGroupGap, SPACING_RULES_MM.reducedRecognitionGroupGap),
+      groupGapRule: getFirstItemOfType(bottomItems, "group-gap")?.ruleLabel || SPACING_RULES_MM.reducedRecognitionGroupGap.ruleLabel,
+      actualSeasonGap: bottomSeasonGap?.width ?? null
+    },
+    actualSealColumnWidth: chosen.topSealWidth,
+    reducedUpperSealRow: Boolean(chosen.reducedUpperSealRow),
+    reducedLowerVisibleCharCount: chosen.lowerVisibleCharCount,
+    actualTopSealGap: topTextToSealGap?.width ?? topSolutionForMetrics.sealGap,
+    actualUpperSealPairGap: upperSealPairGap?.width ?? null,
+    actualSeasonGap: bottomSeasonGap?.width ?? null,
+    seasonField: reducedSeasonField || null,
+    topSealGapRange: `${formatNumber(SPACING_RULES_MM.reducedTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.reducedTopSealGap.max)}`,
+    rowDiagnostics: [
+      { key: "top", label: rules.content.topRow.label, left: chosen.topLimits.left, right: chosen.topLimits.right, marginLeft: topSolutionForMetrics.sideMarginLeft, marginRight: topSolutionForMetrics.sideMarginRight, contentWidth: topSolutionForMetrics.contentWidth, criticalMinWidth: getReducedCriticalRowMinWidth(chosen.topSequence, rules, chosen.topLimits), template: chosen.template },
+      { key: "bottom", label: rules.content.bottomRow.label, left: chosen.bottomLimits.left, right: chosen.bottomLimits.right, marginLeft: chosen.bottomSolution.sideMarginLeft, marginRight: chosen.bottomSolution.sideMarginRight, contentWidth: chosen.bottomSolution.contentWidth, criticalMinWidth: getReducedCriticalRowMinWidth(chosen.bottomSequence, rules, chosen.bottomLimits), textOnlyCriticalMinWidth: reducedTextMinWidth, template: chosen.template }
+    ]
+  };
+}
+
+
+function centerReducedShortTopDistrictInCorridor(items, rules, limits, font) {
+  const firstSealIndex = items.findIndex((item) => item.type === "seals" && item.rowKey === "top");
+  if (firstSealIndex < 0) return { items, solutionPatch: null };
+  const sealGapIndex = items.findIndex((item, index) => index < firstSealIndex && item.type === "seal-gap");
+  if (sealGapIndex < 0) return { items, solutionPatch: null };
+  const prefix = items.slice(0, sealGapIndex);
+  const charCount = countItemsOfType(prefix, "char");
+  if (charCount <= 0 || charCount >= 3) return { items, solutionPatch: null };
+
+  const textStart = Number(prefix.find((item) => item.type === "char")?.x);
+  const textEnd = prefix.reduce((right, item) => Math.max(right, Number(item.x) + (Number(item.width) || 0)), Number.NEGATIVE_INFINITY);
+  const textWidth = textEnd - textStart;
+  const firstSeal = items[firstSealIndex];
+  const firstSealX = Number(firstSeal.x);
+  const lastTopSeal = [...items].reverse().find((item) => item.type === "seals" && item.rowKey === "top");
+  const lastSealRight = Number(lastTopSeal?.x) + (Number(lastTopSeal?.width) || 0);
+  if (!Number.isFinite(textStart) || !Number.isFinite(textEnd) || !Number.isFinite(textWidth) || !Number.isFinite(firstSealX) || textWidth <= 0) {
+    return { items, solutionPatch: null };
+  }
+
+  const sideMin = getOutsideMarginMin(rules);
+  const zoneLeft = limits.left + sideMin;
+  const minTextToSealGap = SPACING_RULES_MM.reducedTopSealGap.min;
+  const zoneRight = firstSealX - minTextToSealGap;
+  const desiredStart = zoneLeft + (zoneRight - zoneLeft - textWidth) / 2;
+  const minStart = zoneLeft;
+  const maxStart = zoneRight - textWidth;
+  const centeredStart = Math.max(minStart, Math.min(desiredStart, maxStart));
+  if (!Number.isFinite(centeredStart) || centeredStart + textWidth > zoneRight + 0.001) {
+    return { items, solutionPatch: null };
+  }
+
+  const shift = centeredStart - textStart;
+  if (Math.abs(shift) < 0.001) return { items, solutionPatch: null };
+
+  let textRunRight = null;
+  const centeredItems = items.map((item, index) => {
+    if (index < sealGapIndex) {
+      const moved = { ...item, x: Number(item.x) + shift };
+      textRunRight = Math.max(textRunRight ?? Number.NEGATIVE_INFINITY, Number(moved.x) + (Number(moved.width) || 0));
+      return moved;
+    }
+    if (index === sealGapIndex && item.type === "seal-gap") {
+      const x = textRunRight ?? centeredStart + textWidth;
+      const width = Math.max(0, firstSealX - x);
+      return {
+        ...item,
+        x,
+        width,
+        ruleLabel: `${item.ruleLabel || "Reduced top text-to-seal corridor"}; b209 centers one-/two-letter upper district text inside the usable corridor between Euro field and the first seal field. The remaining slack becomes the text→seal corridor; fit calculations still use the complete physical row chain.`
+      };
+    }
+    return item;
+  });
+
+  const sideMarginLeft = centeredStart - limits.left;
+  const sideMarginRight = Number.isFinite(lastSealRight) ? limits.right - lastSealRight : null;
+  const contentWidth = Number.isFinite(lastSealRight) ? lastSealRight - centeredStart : null;
+  const topSealGap = centeredItems[sealGapIndex]?.width ?? null;
+  return {
+    items: centeredItems,
+    solutionPatch: {
+      sideMarginLeft,
+      sideMarginRight,
+      contentWidth: contentWidth ?? undefined,
+      sealGap: topSealGap,
+      shortDistrictCentered: true
+    }
+  };
+}
+
+function positionReducedCells(cells, startX, rowKey, rules, limits, font, charGap) {
+  const sequence = [];
+  cells.forEach((cell, index) => {
+    if (index > 0) sequence.push({ type: "char-gap", key: `reduced-${rowKey}-char-gap-${index}`, width: charGap });
+    sequence.push(cell);
+  });
+  return positionReducedSequence(sequence, startX, rowKey, rules, limits, font, { charGap, groupGap: SPACING_RULES_MM.reducedRecognitionGroupGap.preferred });
+}
+
+function positionReducedSequence(sequence, startX, rowKey, rules, limits, font, widths) {
+  const band = getTwoLineCharacterBand(rules, rowKey, font?.baselineY);
+  return positionRowItems(sequence, { startX, widths, rowKey, band, contentLimits: limits });
+}
+
+function solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, strategy, allowOverflow = false, font = null, parsed = null, season = resolveSeasonOptions(), widthRule = resolveTwoLineWidthRule() }) {
+  if (rules.formatKey === "reducedTwoLine") {
+    return solveReducedTwoLineStandardLayout({ rules, width, strategy, allowOverflow, font, parsed, widthRule, season });
+  }
+  const motorcycleSeasonField = rules.formatKey === "motorcycle" && season?.enabled ? makeMotorcycleSeasonItem(rules, width, season) : null;
+  const topLimits = getTwoLineTopContentLimits(rules, width, season);
   const bottomLimits = getTwoLineBottomContentLimits(rules, width);
   const top = solveTwoLineTopContentLayout({ sequence: topSequence, rules, width, strategy, allowOverflow, contentLimits: topLimits });
   const bottom = solveTwoLineBottomContentLayout({ sequence: bottomSequence, rules, width, strategy, allowOverflow, contentLimits: bottomLimits, parsed, season });
   const topPositioned = applyTwoLineRowMetadata(top.positionedContent, "top", rules, topLimits, font);
   const bottomPositioned = applyTwoLineRowMetadata(bottom.positionedContent, "bottom", rules, bottomLimits, font);
-  const actualCharGaps = [...topPositioned, ...bottomPositioned].filter((item) => item.type === "char-gap").map((item) => item.width);
-  const actualGroupGaps = bottomPositioned.filter((item) => item.type === "group-gap").map((item) => item.width);
-  const topSeal = topPositioned.find((item) => item.type === "seals");
-  const topSealGap = topPositioned.find((item) => item.type === "seal-gap");
-  const seasonGap = topPositioned.find((item) => item.type === "season-gap");
-  const seasonField = topPositioned.find((item) => item.type === "season-field");
+  const seasonField = motorcycleSeasonField || getFirstItemOfType(topPositioned, "season-field");
+  const motorcycleSeals = rules.formatKey === "motorcycle" ? [makeMotorcycleSealItem(rules, width, seasonField, parsed)] : [];
+  const actualCharGaps = getItemWidthsByType([...topPositioned, ...bottomPositioned], "char-gap");
+  const actualGroupGaps = getItemWidthsByType(bottomPositioned, "group-gap");
+  const topSeal = getFirstItemOfType([...topPositioned, ...motorcycleSeals], "seals");
+  const topSealGap = getFirstItemOfType(topPositioned, "seal-gap");
+  const seasonGap = getFirstItemOfType(topPositioned, "season-gap");
   const modeLabel = strategy === "balanced" ? "Two-line auto balanced" : strategy === "compact" ? "Two-line auto compact" : "Two-line fixed width";
   const preferredFits = top.preferredFits && bottom.preferredFits;
   const maxFits = top.maxFits && bottom.maxFits;
@@ -2788,7 +6148,8 @@ function solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, 
   const bottomPolicy = hasHistoricalOrElectricSuffix(parsed)
     ? (season?.enabled ? "bottom row uses balanced seasonal H/E spacing surfaces (*, ** and ***)." : "bottom row uses balanced H/E spacing surfaces (*, ** and ***) without a season field.")
     : "bottom row keeps its Anlage-4 group and character gaps with equal outside margins.";
-  const reason = `${modeLabel}: top row uses balanced spacing surfaces (*, **, 8-25 mm and season star gap where present); ${bottomPolicy}`;
+  const widthPolicy = widthRule.key === "standard" ? "standard two-line width bands up to 340 mm" : widthRule.key === "motorcycle" ? "motorcycle plate width range 180-220 mm; seasonal Kraftrad uses the 220-mm reference canvas; fixed motorcycle text raster; no 260/280/320/340-mm fallback" : widthRule.key === "reducedTwoLine" ? "reduced two-line b209: complete row-chain 180/200/220/240/255 mm width candidates up to 255 × 130 mm; reduced middle script only; H/E/season use mandatory upper side-by-side seals; 9-slot season cases may use the b209 tight >=6 mm right edge" : "two-/three-wheel two-line width limit: no 320/340-mm fallback";
+  const reason = `${modeLabel}: ${widthPolicy}; top row uses balanced spacing surfaces (* and **; motorcycle season does not clip the first row; non-motorcycle also uses 8-25 mm and season star gap where present); ${bottomPolicy}`;
 
   return {
     fits,
@@ -2798,8 +6159,12 @@ function solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, 
     maxFits,
     width,
     strategy,
+    widthRuleKey: widthRule.key,
+    widthRuleLabel: widthRule.label,
+    widthRuleMaxMm: widthRule.maxWidth,
+    widthRuleText: widthRule.ruleLabel,
     modeLabel,
-    policy: "two-line physical solver: top row is district plus seal field after Euro; bottom row is recognition across the full plate width; variable gaps stay in Anlage-4 ranges",
+    policy: rules.formatKey === "motorcycle" ? "motorcycle physical solver: top row district after Euro across the first-row inner edge, separate middle-zone seasonal column when enabled, horizontal seal band, bottom row recognition with Kraftrad-specific 49 mm reduced middle-script raster" : rules.formatKey === "reducedTwoLine" ? "reduced two-line b209 physical template: standard case only, fixed reduced middle script, complete row-chain width candidates up to 255 × 130 mm" : "two-line physical solver: top row is district plus seal field after Euro; bottom row is recognition across the full plate width; variable gaps stay in Anlage-4 ranges",
     reason,
     availableWidth: Math.min(top.availableWidth, bottom.availableWidth),
     minContentWidth: Math.max(top.minContentWidth, bottom.minContentWidth),
@@ -2809,18 +6174,18 @@ function solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, 
     preferredNeededWidth,
     maxNeededWidth,
     contentWidth: Math.max(top.contentWidth, bottom.contentWidth),
-    positionedContent: [...topPositioned, ...bottomPositioned],
+    positionedContent: [...topPositioned, ...motorcycleSeals, ...(motorcycleSeasonField ? [motorcycleSeasonField] : []), ...bottomPositioned],
     actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
     actualGroupGap: average(actualGroupGaps) ?? null,
-    groupGapRangeLabel: getVariableRangeLabel(bottomPositioned.find((item) => item.type === "group-gap"), SPACING_RULES_MM.groupGap),
-    groupGapRule: bottomPositioned.find((item) => item.type === "group-gap")?.ruleLabel || null,
+    groupGapRangeLabel: getVariableRangeLabel(getFirstItemOfType(bottomPositioned, "group-gap"), SPACING_RULES_MM.groupGap),
+    groupGapRule: getFirstItemOfType(bottomPositioned, "group-gap")?.ruleLabel || null,
     top,
     bottom,
     actualSealColumnWidth: topSeal?.width ?? rules.content.seal.columnWidth,
     actualTopSealGap: topSealGap?.width ?? null,
     actualSeasonGap: seasonGap?.width ?? null,
     seasonField: seasonField || null,
-    topSealGapRange: `${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.max)}`,
+    topSealGapRange: isReducedTwoLineFormat(rules) ? `${formatNumber(SPACING_RULES_MM.reducedTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.reducedTopSealGap.max)}` : `${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.min)}-${formatNumber(SPACING_RULES_MM.twoLineTopSealGap.max)}`,
     rowDiagnostics: [
       { key: "top", label: rules.content.topRow.label, left: topLimits.left, right: topLimits.right, marginLeft: top.sideMarginLeft, marginRight: top.sideMarginRight, contentWidth: top.contentWidth },
       { key: "bottom", label: rules.content.bottomRow.label, left: bottomLimits.left, right: bottomLimits.right, marginLeft: bottom.sideMarginLeft, marginRight: bottom.sideMarginRight, contentWidth: bottom.contentWidth }
@@ -2828,83 +6193,103 @@ function solveTwoLineContentLayout({ topSequence, bottomSequence, rules, width, 
   };
 }
 
-function buildTwoLineTopSequence(parsed, rules, font, season = resolveSeasonOptions()) {
-  const sequence = [];
-  const districtCells = makeCells(parsed.district, font, "district");
-  appendCells(sequence, districtCells);
-  if (districtCells.length) {
-    sequence.push(variableItem("seal-gap", "top-seal-gap", SPACING_RULES_MM.twoLineTopSealGap));
-  }
-  sequence.push(variableItem("seals", "top-seal-zone", {
-    min: rules.content.seal.columnMinWidth,
-    preferred: rules.content.seal.columnWidth,
-    max: rules.content.seal.columnMaxWidth,
-    ruleLabel: rules.content.seal.ruleLabel
-  }));
-  if (season.enabled) {
-    sequence.push(variableItem("season-gap", "top-season-gap", SPACING_RULES_MM.twoLineSeasonGap));
-    sequence.push({
-      type: "season-field",
-      key: "season-validity-field",
-      width: rules.content.season.fieldWidth,
-      season
-    });
-  }
-  return sequence;
+function makeMotorcycleSeasonItem(rules, width, season) {
+  const fieldWidth = rules.content.season.fieldWidth;
+  const rightStarGap = SPACING_RULES_MM.outsideMargin.min;
+  const x = width - rules.innerInset - rightStarGap - fieldWidth;
+  return {
+    type: "season-field",
+    key: "motorcycle-season-validity-field",
+    rowKey: "middle",
+    x,
+    width: fieldWidth,
+    season,
+    bandY: positiveNumber(rules.content.season.fieldY, 73.375),
+    bandHeight: positiveNumber(rules.content.season.contentHeight, 53.25),
+    baselineY: null,
+    contentLimits: createHorizontalBounds(x, x + fieldWidth),
+    ruleLabel: rules.content.season.ruleLabel
+  };
 }
 
-function buildTwoLineBottomSequence(parsed, rules, font) {
-  const sequence = [];
-  const recognitionGroups = splitRecognition(parsed.recognition);
-  recognitionGroups.forEach((group, groupIndex) => {
-    if (groupIndex > 0) {
-      sequence.push(variableItem("group-gap", `bottom-recognition-group-gap-${groupIndex}`, getTwoLineBottomGroupGapRange(parsed)));
-    }
-    appendCells(sequence, makeCells(group.value, font, group.type));
-  });
-  return sequence;
+function makeMotorcycleSealItem(rules, width, seasonField = null, parsed = null) {
+  const seal = rules.content.seal;
+  const hasSeasonField = seasonField?.x != null;
+  const pairGap = hasSeasonField
+    ? positiveNumber(seal.visibleCircleGap, 10)
+    : positiveNumber(seal.nonSeasonVisibleCircleGap, 20);
+  const pairWidth = seal.huDiameter + pairGap + seal.authorityDiameter;
+  const contentLeft = rules.euro.x + rules.euro.width;
+  const seasonReservedGap = positiveNumber(seal.seasonReservedGap, SPACING_RULES_MM.outsideMargin.min);
+  const rawContentRight = hasSeasonField ? seasonField.x - seasonReservedGap : width - rules.innerInset;
+  const contentRight = Math.max(contentLeft + pairWidth, rawContentRight);
+  const contentCenter = contentLeft + (contentRight - contentLeft) / 2;
+  const seasonalSealOffset = hasSeasonField ? numberOrFallback(seal.seasonSealXOffset, 0) : 0;
+  const heSealOffset = !hasSeasonField && hasHistoricalOrElectricSuffix(parsed) ? numberOrFallback(seal.historicalOrElectricSealXOffset, 0) : 0;
+  const left = contentCenter - pairWidth / 2 + seasonalSealOffset + heSealOffset;
+  return {
+    type: "seals",
+    key: "motorcycle-horizontal-seals",
+    rowKey: "middle",
+    x: left,
+    width: pairWidth,
+    arrangement: seal.arrangement,
+    visibleCircleGap: pairGap,
+    bandY: 77.5,
+    bandHeight: 45,
+    baselineY: null,
+    contentLimits: createHorizontalBounds(contentLeft, contentRight)
+  };
 }
 
 function applyTwoLineRowMetadata(items, rowKey, rules, contentLimits, font = null) {
   const band = getTwoLineCharacterBand(rules, rowKey, font?.baselineY);
-  return items.map((item) => ({
-    ...item,
-    rowKey,
-    bandY: band.y,
-    bandHeight: band.height,
-    baselineY: item.type === "char" ? band.baselineY : null,
-    contentLimits
-  }));
+  return attachRowMetadata(items, { rowKey, band, contentLimits });
 }
 
-function getTwoLineTopContentLimits(rules, width) {
+function getTwoLineTopContentLimits(rules, width, season = resolveSeasonOptions()) {
   const left = rules.euro.x + rules.euro.width;
   const right = width - rules.innerInset;
-  return { left, right, width: right - left };
+  // Motorcycle seasonal validity is a middle-zone column. It must not shorten,
+  // measure, or visually own the first row. The first row keeps the normal
+  // motorcycle top-row right margin to the inner plate edge.
+  return createHorizontalBounds(left, right);
 }
 
 function getTwoLineBottomContentLimits(rules, width) {
   const left = rules.innerInset;
   const right = width - rules.innerInset;
-  return { left, right, width: right - left };
+  return createHorizontalBounds(left, right);
 }
 
 
+function getOutsideMarginMin(rules) {
+  return positiveNumber(rules?.content?.sideClearance, SPACING_RULES_MM.outsideMargin.min);
+}
+
+function getOutsideMarginMinLeft(rules, contentLimits = null) {
+  return positiveNumber(contentLimits?.outsideMarginMinLeft, getOutsideMarginMin(rules));
+}
+
+function getOutsideMarginMinRight(rules, contentLimits = null) {
+  return positiveNumber(contentLimits?.outsideMarginMinRight, getOutsideMarginMin(rules));
+}
+
 function solveTwoLineTopContentLayout({ sequence, rules, width, strategy, allowOverflow = false, contentLimits }) {
   const available = contentLimits.width;
-  const sideMin = SPACING_RULES_MM.outsideMargin.min;
+  const sideMin = getOutsideMarginMin(rules);
   const modeLabel = strategy === "balanced" ? "Two-line top auto balanced" : strategy === "compact" ? "Two-line top auto compact" : "Two-line top fixed width";
-  const fixedWidth = sequence.reduce((sum, item) => sum + (isTopRowSpacingItem(item) || item.type === "seals" ? 0 : item.width), 0);
-  const sealItems = sequence.filter((item) => item.type === "seals");
+  const fixedWidth = sumItemWidthsExcept(sequence, (item) => isTopRowSpacingItem(item) || item.type === "seals");
+  const sealItems = getItemsOfType(sequence, "seals");
   const spacingItems = sequence.filter((item) => isTopRowSpacingItem(item));
-  const minSealWidth = sealItems.reduce((sum, item) => sum + getItemMinWidth(item), 0);
-  const preferredSealWidth = sealItems.reduce((sum, item) => sum + getItemPreferredWidth(item), 0);
-  const minSpacingWidth = spacingItems.reduce((sum, item) => sum + getTopRowSpacingMinWidth(item), 0) + sideMin * 2;
-  const preferredSpacingWidth = spacingItems.reduce((sum, item) => sum + getTopRowSpacingPreferredWidth(item), 0) + sideMin * 2;
-  const cappedMaxSpacingWidth = spacingItems.reduce((sum, item) => sum + getTopRowSpacingFiniteMaxWidth(item), 0) + sideMin * 2;
-  const minContentWidth = fixedWidth + minSealWidth + spacingItems.reduce((sum, item) => sum + getTopRowSpacingMinWidth(item), 0);
-  const preferredContentWidth = fixedWidth + preferredSealWidth + spacingItems.reduce((sum, item) => sum + getTopRowSpacingPreferredWidth(item), 0);
-  const maxContentWidth = fixedWidth + preferredSealWidth + spacingItems.reduce((sum, item) => sum + getTopRowSpacingFiniteMaxWidth(item), 0);
+  const minSealWidth = sumItemWidths(sealItems, getItemMinWidth);
+  const preferredSealWidth = sumItemWidths(sealItems, getItemPreferredWidth);
+  const minSpacingWidth = sumItemWidths(spacingItems, getTopRowSpacingMinWidth) + sideMin * 2;
+  const preferredSpacingWidth = sumItemWidths(spacingItems, getTopRowSpacingPreferredWidth) + sideMin * 2;
+  const cappedMaxSpacingWidth = sumItemWidths(spacingItems, getTopRowSpacingFiniteMaxWidth) + sideMin * 2;
+  const minContentWidth = fixedWidth + minSealWidth + sumItemWidths(spacingItems, getTopRowSpacingMinWidth);
+  const preferredContentWidth = fixedWidth + preferredSealWidth + sumItemWidths(spacingItems, getTopRowSpacingPreferredWidth);
+  const maxContentWidth = fixedWidth + preferredSealWidth + sumItemWidths(spacingItems, getTopRowSpacingFiniteMaxWidth);
   const minFits = fixedWidth + minSealWidth + minSpacingWidth <= available + 0.0001;
   const preferredFits = fixedWidth + preferredSealWidth + preferredSpacingWidth <= available + 0.0001;
   const maxFits = fixedWidth + preferredSealWidth + cappedMaxSpacingWidth <= available + 0.0001;
@@ -2916,7 +6301,7 @@ function solveTwoLineTopContentLayout({ sequence, rules, width, strategy, allowO
 
   let sideMarginLeft = sideMin;
   let sideMarginRight = sideMin;
-  let spacingWidths = new Map(spacingItems.map((item) => [item.key, getTopRowSpacingPreferredWidth(item)]));
+  let spacingWidths = createItemWidthMap(spacingItems, getTopRowSpacingPreferredWidth);
   let reason = `${modeLabel}: top row spacing uses preferred values.`;
 
   if (minFits) {
@@ -2927,47 +6312,49 @@ function solveTwoLineTopContentLayout({ sequence, rules, width, strategy, allowO
     spacingWidths = starBalanced.widths;
     reason = starBalanced.reason;
   } else {
-    spacingWidths = new Map(spacingItems.map((item) => [item.key, getTopRowSpacingMinWidth(item)]));
+    spacingWidths = createItemWidthMap(spacingItems, getTopRowSpacingMinWidth);
     sealWidth = minSealWidth;
     reason = `${modeLabel}: minimum top-row spacing does not fit this width.`;
   }
 
   const solvedSequence = sequence.map((item) => {
-    if (item.type === "seals") return { ...item, width: sealWidth / Math.max(1, sealItems.length) };
+    const sealItem = applySharedTypeWidth(item, "seals", sealWidth, sealItems.length);
+    if (sealItem !== item) return sealItem;
     if (isTopRowSpacingItem(item)) return { ...item, width: spacingWidths.get(item.key) ?? getTopRowSpacingMinWidth(item) };
     return { ...item, width: item.width };
   });
-  const contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+  const contentWidth = sumResolvedItemWidths(solvedSequence);
   const xStart = contentLimits.left + sideMarginLeft;
   const positionedContent = positionContent(solvedSequence, xStart);
-  const actualCharGaps = solvedSequence.filter((item) => item.type === "char-gap").map((item) => item.width);
-  const actualSeal = solvedSequence.find((item) => item.type === "seals");
-  const actualSealGap = solvedSequence.find((item) => item.type === "seal-gap");
-  const actualSeasonGap = solvedSequence.find((item) => item.type === "season-gap");
+  const actualCharGaps = getItemWidthsByType(solvedSequence, "char-gap");
+  const actualSeal = getFirstItemOfType(solvedSequence, "seals");
+  const actualSealGap = getFirstItemOfType(solvedSequence, "seal-gap");
+  const actualSeasonGap = getFirstItemOfType(solvedSequence, "season-gap");
 
   return {
-    fits: minFits,
-    renderable: minFits || allowOverflow,
-    minFits,
-    preferredFits,
-    maxFits,
-    width,
-    strategy,
-    modeLabel,
-    policy: "two-line top-row solver: star gaps, double-star gaps and the 8-25 mm seal gap are balanced within their Anlage-4 ranges; season star gap participates when a season field is present",
-    reason,
-    availableWidth: available,
-    contentLimits,
-    minContentWidth,
-    preferredContentWidth,
-    maxContentWidth,
-    minNeededWidth: neededWidthForContentWithLimits(contentLimits, minContentWidth, rules),
-    preferredNeededWidth: neededWidthForContentWithLimits(contentLimits, preferredContentWidth, rules),
-    maxNeededWidth: neededWidthForContentWithLimits(contentLimits, maxContentWidth, rules),
-    contentWidth,
-    sideMarginLeft,
-    sideMarginRight,
-    positionedContent,
+    ...createLayoutResultBase({
+      minFits,
+      allowOverflow,
+      preferredFits,
+      maxFits,
+      width,
+      strategy,
+      modeLabel,
+      policy: "two-line top-row solver: star gaps, double-star gaps and the 8-25 mm seal gap are balanced within their Anlage-4 ranges; season star gap participates when a season field is present",
+      reason,
+      available,
+      contentLimits,
+      minContentWidth,
+      preferredContentWidth,
+      maxContentWidth,
+      minNeededWidth: neededWidthForContentWithLimits(contentLimits, minContentWidth, rules),
+      preferredNeededWidth: neededWidthForContentWithLimits(contentLimits, preferredContentWidth, rules),
+      maxNeededWidth: neededWidthForContentWithLimits(contentLimits, maxContentWidth, rules),
+      contentWidth,
+      sideMarginLeft,
+      sideMarginRight,
+      positionedContent
+    }),
     actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
     actualGroupGap: null,
     actualGroupGapMinWidth: null,
@@ -2982,167 +6369,49 @@ function solveTwoLineTopContentLayout({ sequence, rules, width, strategy, allowO
   };
 }
 
+
 function isTopRowSpacingItem(item) {
   return item.type === "char-gap" || item.type === "seal-gap" || item.type === "season-gap";
 }
 
 function getTopRowSpacingMinWidth(item) {
-  if (item.type === "season-gap") return SPACING_RULES_MM.outsideMargin.min;
-  return getItemMinWidth(item);
+  return getFixedTypeOrItemMinWidth(item, "season-gap", SPACING_RULES_MM.outsideMargin.min);
 }
 
 function getTopRowSpacingPreferredWidth(item) {
-  if (item.type === "season-gap") return SPACING_RULES_MM.outsideMargin.min;
-  return getItemPreferredWidth(item);
+  return getFixedTypeOrItemPreferredWidth(item, "season-gap", SPACING_RULES_MM.outsideMargin.min);
 }
 
 function getTopRowSpacingFiniteMaxWidth(item) {
-  if (item.type === "season-gap") return SPACING_RULES_MM.outsideMargin.min;
-  return getItemMaxWidth(item);
+  return getFixedTypeOrItemFiniteMaxWidth(item, "season-gap", SPACING_RULES_MM.outsideMargin.min);
 }
 
 function getTopRowSpacingMaxWidth(item) {
-  if (item.type === "season-gap") return Number.POSITIVE_INFINITY;
-  return getItemMaxWidth(item);
+  return getFixedTypeOrItemMaxWidth(item, "season-gap", Number.POSITIVE_INFINITY);
 }
 
 function balanceTopRowSpacingSurfaces(spacingItems, targetWidth, sideMin, strategy) {
-  const surfaces = [
-    { key: "__left_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin },
-    ...spacingItems.map((item) => ({
-      key: item.key,
-      min: getTopRowSpacingMinWidth(item),
-      max: getTopRowSpacingMaxWidth(item),
-      width: getTopRowSpacingMinWidth(item),
-      type: item.type
-    })),
-    { key: "__right_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin }
-  ];
-  const minTotal = surfaces.reduce((sum, item) => sum + item.min, 0);
-  const surplus = Math.max(0, targetWidth - minTotal);
+  const surfaces = createSpacingSurfaces(spacingItems, sideMin, {
+    getMinWidth: getTopRowSpacingMinWidth,
+    getMaxWidth: getTopRowSpacingMaxWidth
+  });
+  const { surplus } = waterFillSpacingSurfaces(surfaces, targetWidth);
 
   if (!surplus) {
-    return topRowSurfaceResult(surfaces, `${strategy === "balanced" ? "Two-line top auto balanced" : "Two-line top fixed width"}: minimum star/seal/character spacing used.`);
-  }
-
-  let remaining = surplus;
-  while (remaining > 0.0001) {
-    const active = surfaces.filter((item) => item.width < item.max - 0.0001);
-    if (!active.length) break;
-    const equalStep = remaining / active.length;
-    let consumed = 0;
-    for (const item of active) {
-      const cap = item.max - item.width;
-      const applied = Math.min(equalStep, cap);
-      item.width += applied;
-      consumed += applied;
-    }
-    if (consumed <= 0.0001) break;
-    remaining -= consumed;
+    return spacingSurfaceResult(surfaces, sideMin, `${strategy === "balanced" ? "Two-line top auto balanced" : "Two-line top fixed width"}: minimum star/seal/character spacing used.`);
   }
 
   const reason = `${strategy === "balanced" ? "Two-line top auto balanced" : "Two-line top fixed width"}: top-row free space was water-filled across Anlage-4 spacing surfaces: * gaps, ** gaps and 8-25 mm seal gap; capped gaps stop at their maxima and remaining width stays in uncapped * gaps.`;
-  return topRowSurfaceResult(surfaces, reason);
-}
-
-function topRowSurfaceResult(surfaces, reason) {
-  const widths = new Map();
-  for (const surface of surfaces) {
-    if (surface.key !== "__left_margin" && surface.key !== "__right_margin") widths.set(surface.key, surface.width);
-  }
-  return {
-    leftMargin: surfaces.find((item) => item.key === "__left_margin")?.width ?? SPACING_RULES_MM.outsideMargin.min,
-    rightMargin: surfaces.find((item) => item.key === "__right_margin")?.width ?? SPACING_RULES_MM.outsideMargin.min,
-    widths,
-    reason
-  };
+  return spacingSurfaceResult(surfaces, sideMin, reason);
 }
 
 function neededWidthForContentWithLimits(limits, contentWidth, rules) {
-  return limits.left + contentWidth + SPACING_RULES_MM.outsideMargin.min * 2 + (rules.outerHeight ? rules.innerInset : 0);
+  return limits.left + contentWidth + getOutsideMarginMin(rules) * 2 + (rules.outerHeight ? rules.innerInset : 0);
 }
 
 function renderPlateSvgMm(input, options = {}) {
   const model = buildPlateModelMm(input, options);
-  const { rules, metrics } = model;
-  const stage = options.stage || "complete";
-  const showDimensions = options.showDimensions !== false;
-  const showDxfReferenceGuides = options.showDxfReferenceGuides !== false;
-  const showGrid = options.showGrid !== false;
-  const showSeals = options.showSeals !== false;
-  const showText = options.showText !== false;
-  const layers = [];
-
-  layers.push(renderBody(model));
-
-  if (showDxfReferenceGuides && ["dxf", "grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderDxfReferenceGuides(model));
-  }
-  if (showGrid && ["grid", "seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderGrid(model));
-  }
-  if (showSeals && ["seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderSeals(model, options));
-    layers.push(renderSeasonField(model));
-  }
-  if (showText && ["text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderText(model));
-  }
-  if (stage === "horizontal") {
-    layers.push(renderHorizontalDiagnostics(model));
-  }
-  if (showDimensions) {
-    layers.push(renderDimensions(model));
-  }
-
-  const canvas = getCanvasMm(model, showDimensions);
-  const extraDefs = String(options.extraDefs || "").trim();
-  const svg = `
-<svg class="physical-plate-svg" data-model-unit="mm" data-plate-width-mm="${metrics.width}" data-plate-height-mm="${rules.outerHeight}" viewBox="${canvas.x} ${canvas.y} ${canvas.width} ${canvas.height}" role="img" aria-label="Kennzeichen ${escapeAttr(metrics.normalized)}" preserveAspectRatio="xMidYMid meet">
-  <defs>
-    ${extraDefs}
-    <filter id="plateShadow" x="-5%" y="-20%" width="110%" height="140%">
-      <feDropShadow dx="0" dy="0.8" stdDeviation="0.8" flood-color="black" flood-opacity="0.28"/>
-    </filter>
-  </defs>
-  ${layers.join("\n  ")}
-</svg>`.trim();
-
-  return { svg, model, canvas };
-}
-
-function getCanvasMm(model, showDimensions = true) {
-  const { rules, metrics } = model;
-  if (!showDimensions) {
-    return { x: 0, y: 0, width: metrics.width, height: rules.outerHeight };
-  }
-  return {
-    x: 0,
-    y: 0,
-    width: metrics.width + rules.dimensions.enabledMarginRight,
-    height: rules.outerHeight + rules.dimensions.enabledMarginBottom
-  };
-}
-
-function resolveWidthCapMm(widthMode, fallback) {
-  const number = Number(widthMode);
-  return Number.isFinite(number) && number > 0 ? number : fallback;
-}
-
-function resolveWidthStrategy(widthMode) {
-  if (widthMode === "balanced") return "balanced";
-  if (widthMode === "auto" || !widthMode) return "compact";
-  return "fixed";
-}
-
-function withSpecialIWidth(font, specialIWidth) {
-  return {
-    ...font,
-    specialWidths: {
-      ...(font.specialWidths || {}),
-      I: specialIWidth
-    }
-  };
+  return renderPlateSvgDocument(model, options);
 }
 
 function findPlateLayoutForFont(input, rules, font, fontMode, widthMode, season = resolveSeasonOptions(null, rules)) {
@@ -3212,23 +6481,89 @@ function buildUnpositionedContent(parsed, rules, font, season = resolveSeasonOpt
 
 
 function solveTwoLineBottomContentLayout({ sequence, rules, width, strategy, allowOverflow = false, contentLimits, parsed = null, season = resolveSeasonOptions() }) {
+  if (rules.formatKey === "motorcycle" || rules.formatKey === "reducedTwoLine") {
+    return solveMotorcycleBottomContentLayout({ sequence, rules, width, strategy, allowOverflow, contentLimits, parsed, season });
+  }
   if (hasHistoricalOrElectricSuffix(parsed)) {
     return solveTwoLineHistoricalOrElectricBottomLayout({ sequence, rules, width, strategy, allowOverflow, contentLimits, season });
   }
   return solveContentLayout({ sequence, rules, width, strategy, allowOverflow, contentLimits });
 }
 
+function solveMotorcycleBottomContentLayout({ sequence, rules, width, strategy, allowOverflow = false, contentLimits, parsed = null, season = resolveSeasonOptions() }) {
+  const available = contentLimits.width;
+  const sideMin = getOutsideMarginMin(rules);
+  const spacingItems = sequence.filter((item) => isBottomRowSpacingItem(item));
+  const fixedWidth = sumItemWidthsExcept(sequence, isBottomRowSpacingItem);
+  const preferredSpacingWidthOnly = sumItemWidths(spacingItems, getItemPreferredWidth);
+  const minSpacingWidthOnly = sumItemWidths(spacingItems, getItemMinWidth);
+  const preferredFits = fixedWidth + preferredSpacingWidthOnly + sideMin * 2 <= available + 0.0001;
+  const minFits = fixedWidth + minSpacingWidthOnly + sideMin * 2 <= available + 0.0001;
+  const modeLabel = strategy === "balanced" ? (season?.enabled ? "Motorcycle seasonal bottom template balanced" : "Motorcycle bottom template balanced") : strategy === "compact" ? (season?.enabled ? "Motorcycle seasonal bottom template compact" : "Motorcycle bottom template compact") : (season?.enabled ? "Motorcycle seasonal bottom fixed width" : "Motorcycle bottom fixed width");
+  const spacingWidths = new Map(spacingItems.map((item) => [item.key, preferredFits ? getItemPreferredWidth(item) : getItemMinWidth(item)]));
+  const spacingTotal = sumValues([...spacingWidths.values()]);
+  const freeForMargins = available - fixedWidth - spacingTotal;
+  const sideMarginLeft = Math.max(sideMin, freeForMargins / 2);
+  const sideMarginRight = Math.max(sideMin, freeForMargins - sideMarginLeft);
+  const solvedSequence = sequence.map((item) => {
+    if (isBottomRowSpacingItem(item)) return { ...item, width: spacingWidths.get(item.key) ?? getItemMinWidth(item) };
+    return { ...item, width: item.width };
+  });
+  const contentWidth = sumResolvedItemWidths(solvedSequence);
+  const xStart = contentLimits.left + sideMarginLeft;
+  const positionedContent = positionContent(solvedSequence, xStart);
+  const actualCharGaps = getItemWidthsByType(solvedSequence, "char-gap");
+  const actualGroupGaps = getItemWidthsByType(solvedSequence, "group-gap");
+  const minContentWidth = fixedWidth + minSpacingWidthOnly;
+  const preferredContentWidth = fixedWidth + preferredSpacingWidthOnly;
+  const maxContentWidth = fixedWidth + sumItemWidths(spacingItems, getItemMaxWidth);
+  return {
+    ...createLayoutResultBase({
+      minFits,
+      allowOverflow,
+      preferredFits,
+      maxFits: fixedWidth + sumItemWidths(spacingItems, getItemMaxWidth) + sideMin * 2 <= available + 0.0001,
+      width,
+      strategy,
+      modeLabel,
+      policy: "motorcycle bottom-row template solver: character ** gaps use their preferred 8-10 mm value, Kraftrad group ranges keep their template-preferred value, remaining width goes to equal outside * margins instead of waterfilling gaps to their maxima",
+      reason: `${modeLabel}: Kraftrad bottom template values used; remaining free width stays in equal outside margins.`,
+      available,
+      contentLimits,
+      minContentWidth,
+      preferredContentWidth,
+      maxContentWidth,
+      minNeededWidth: neededWidthForContentWithLimits(contentLimits, minContentWidth, rules),
+      preferredNeededWidth: neededWidthForContentWithLimits(contentLimits, preferredContentWidth, rules),
+      maxNeededWidth: neededWidthForContentWithLimits(contentLimits, maxContentWidth, rules),
+      contentWidth,
+      sideMarginLeft,
+      sideMarginRight,
+      positionedContent
+    }),
+    actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
+    actualGroupGap: average(actualGroupGaps) ?? null,
+    actualGroupGapMinWidth: minVariableWidth(getItemsOfType(solvedSequence, "group-gap")),
+    groupGapRangeLabel: getVariableRangeLabel(getFirstItemOfType(solvedSequence, "group-gap"), hasHistoricalOrElectricSuffix(parsed) ? SPACING_RULES_MM.motorcycleRecognitionGroupGapHistoricalOrElectric : SPACING_RULES_MM.motorcycleRecognitionGroupGap),
+    groupGapRule: getFirstItemOfType(solvedSequence, "group-gap")?.ruleLabel || null,
+    actualSealColumnWidth: rules.content.seal.columnWidth,
+    actualSealColumnMinWidth: rules.content.seal.columnMinWidth,
+    actualSealColumnRangeLabel: `${rules.content.seal.columnMinWidth}-${rules.content.seal.columnMaxWidth}`,
+    sealColumnRule: rules.content.seal.ruleLabel
+  };
+}
+
 function solveTwoLineHistoricalOrElectricBottomLayout({ sequence, rules, width, strategy, allowOverflow = false, contentLimits, season = resolveSeasonOptions() }) {
   const available = contentLimits.width;
-  const sideMin = SPACING_RULES_MM.outsideMargin.min;
-  const fixedWidth = sequence.reduce((sum, item) => sum + (isBottomRowSpacingItem(item) ? 0 : item.width), 0);
+  const sideMin = getOutsideMarginMin(rules);
+  const fixedWidth = sumItemWidthsExcept(sequence, isBottomRowSpacingItem);
   const spacingItems = sequence.filter((item) => isBottomRowSpacingItem(item));
-  const minSpacingWidth = spacingItems.reduce((sum, item) => sum + getItemMinWidth(item), 0) + sideMin * 2;
-  const preferredSpacingWidth = spacingItems.reduce((sum, item) => sum + getItemPreferredWidth(item), 0) + sideMin * 2;
-  const cappedMaxSpacingWidth = spacingItems.reduce((sum, item) => sum + getItemMaxWidth(item), 0) + sideMin * 2;
-  const minContentWidth = fixedWidth + spacingItems.reduce((sum, item) => sum + getItemMinWidth(item), 0);
-  const preferredContentWidth = fixedWidth + spacingItems.reduce((sum, item) => sum + getItemPreferredWidth(item), 0);
-  const maxContentWidth = fixedWidth + spacingItems.reduce((sum, item) => sum + getItemMaxWidth(item), 0);
+  const minSpacingWidth = sumItemWidths(spacingItems, getItemMinWidth) + sideMin * 2;
+  const preferredSpacingWidth = sumItemWidths(spacingItems, getItemPreferredWidth) + sideMin * 2;
+  const cappedMaxSpacingWidth = sumItemWidths(spacingItems, getItemMaxWidth) + sideMin * 2;
+  const minContentWidth = fixedWidth + sumItemWidths(spacingItems, getItemMinWidth);
+  const preferredContentWidth = fixedWidth + sumItemWidths(spacingItems, getItemPreferredWidth);
+  const maxContentWidth = fixedWidth + sumItemWidths(spacingItems, getItemMaxWidth);
   const minFits = fixedWidth + minSpacingWidth <= available + 0.0001;
   const preferredFits = fixedWidth + preferredSpacingWidth <= available + 0.0001;
   const maxFits = fixedWidth + cappedMaxSpacingWidth <= available + 0.0001;
@@ -3236,7 +6571,7 @@ function solveTwoLineHistoricalOrElectricBottomLayout({ sequence, rules, width, 
 
   let sideMarginLeft = sideMin;
   let sideMarginRight = sideMin;
-  let spacingWidths = new Map(spacingItems.map((item) => [item.key, getItemMinWidth(item)]));
+  let spacingWidths = createItemWidthMap(spacingItems, getItemMinWidth);
   let reason = `${modeLabel}: minimum H/E bottom-row spacing used.`;
 
   if (minFits) {
@@ -3254,40 +6589,41 @@ function solveTwoLineHistoricalOrElectricBottomLayout({ sequence, rules, width, 
     if (isBottomRowSpacingItem(item)) return { ...item, width: spacingWidths.get(item.key) ?? getItemMinWidth(item) };
     return { ...item, width: item.width };
   });
-  const contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+  const contentWidth = sumResolvedItemWidths(solvedSequence);
   const xStart = contentLimits.left + sideMarginLeft;
   const positionedContent = positionContent(solvedSequence, xStart);
-  const actualCharGaps = solvedSequence.filter((item) => item.type === "char-gap").map((item) => item.width);
-  const actualGroupGaps = solvedSequence.filter((item) => item.type === "group-gap").map((item) => item.width);
+  const actualCharGaps = getItemWidthsByType(solvedSequence, "char-gap");
+  const actualGroupGaps = getItemWidthsByType(solvedSequence, "group-gap");
 
   return {
-    fits: minFits,
-    renderable: minFits || allowOverflow,
-    minFits,
-    preferredFits,
-    maxFits,
-    width,
-    strategy,
-    modeLabel,
-    policy: "two-line H/E bottom-row solver: outside * gaps, character ** gaps and H/E group *** gaps are water-filled within their Anlage-4 ranges; applies with and without a season field",
-    reason,
-    availableWidth: available,
-    contentLimits,
-    minContentWidth,
-    preferredContentWidth,
-    maxContentWidth,
-    minNeededWidth: neededWidthForContentWithLimits(contentLimits, minContentWidth, rules),
-    preferredNeededWidth: neededWidthForContentWithLimits(contentLimits, preferredContentWidth, rules),
-    maxNeededWidth: neededWidthForContentWithLimits(contentLimits, maxContentWidth, rules),
-    contentWidth,
-    sideMarginLeft,
-    sideMarginRight,
-    positionedContent,
+    ...createLayoutResultBase({
+      minFits,
+      allowOverflow,
+      preferredFits,
+      maxFits,
+      width,
+      strategy,
+      modeLabel,
+      policy: "two-line H/E bottom-row solver: outside * gaps, character ** gaps and H/E group *** gaps are water-filled within their Anlage-4 ranges; applies with and without a season field",
+      reason,
+      available,
+      contentLimits,
+      minContentWidth,
+      preferredContentWidth,
+      maxContentWidth,
+      minNeededWidth: neededWidthForContentWithLimits(contentLimits, minContentWidth, rules),
+      preferredNeededWidth: neededWidthForContentWithLimits(contentLimits, preferredContentWidth, rules),
+      maxNeededWidth: neededWidthForContentWithLimits(contentLimits, maxContentWidth, rules),
+      contentWidth,
+      sideMarginLeft,
+      sideMarginRight,
+      positionedContent
+    }),
     actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
     actualGroupGap: average(actualGroupGaps) ?? null,
-    actualGroupGapMinWidth: minVariableWidth(solvedSequence.filter((item) => item.type === "group-gap")),
-    groupGapRangeLabel: getVariableRangeLabel(solvedSequence.find((item) => item.type === "group-gap"), SPACING_RULES_MM.twoLineBottomGroupGapHistoricalOrElectric),
-    groupGapRule: solvedSequence.find((item) => item.type === "group-gap")?.ruleLabel || "Two-line H/E bottom row: group gaps 20-30 mm",
+    actualGroupGapMinWidth: minVariableWidth(getItemsOfType(solvedSequence, "group-gap")),
+    groupGapRangeLabel: getVariableRangeLabel(getFirstItemOfType(solvedSequence, "group-gap"), SPACING_RULES_MM.twoLineBottomGroupGapHistoricalOrElectric),
+    groupGapRule: getFirstItemOfType(solvedSequence, "group-gap")?.ruleLabel || "Two-line H/E bottom row: group gaps 20-30 mm",
     actualSealColumnWidth: rules.content.seal.columnWidth,
     actualSealColumnMinWidth: rules.content.seal.columnMinWidth,
     actualSealColumnRangeLabel: `${rules.content.seal.columnMinWidth}-${rules.content.seal.columnMaxWidth}`,
@@ -3300,47 +6636,17 @@ function isBottomRowSpacingItem(item) {
 }
 
 function balanceBottomRowSpacingSurfaces(spacingItems, targetWidth, sideMin, strategy) {
-  const surfaces = [
-    { key: "__left_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin },
-    ...spacingItems.map((item) => ({
-      key: item.key,
-      min: getItemMinWidth(item),
-      max: getItemMaxWidth(item),
-      width: getItemMinWidth(item),
-      type: item.type
-    })),
-    { key: "__right_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin }
-  ];
-  const minTotal = surfaces.reduce((sum, item) => sum + item.min, 0);
-  const surplus = Math.max(0, targetWidth - minTotal);
+  const surfaces = createSpacingSurfaces(spacingItems, sideMin, {
+    getMinWidth: getItemMinWidth,
+    getMaxWidth: getItemMaxWidth
+  });
+  waterFillSpacingSurfaces(surfaces, targetWidth);
 
-  let remaining = surplus;
-  while (remaining > 0.0001) {
-    const active = surfaces.filter((item) => item.width < item.max - 0.0001);
-    if (!active.length) break;
-    const equalStep = remaining / active.length;
-    let consumed = 0;
-    for (const item of active) {
-      const cap = item.max - item.width;
-      const applied = Math.min(equalStep, cap);
-      item.width += applied;
-      consumed += applied;
-    }
-    if (consumed <= 0.0001) break;
-    remaining -= consumed;
-  }
-
-  const widths = new Map();
-  for (const surface of surfaces) {
-    if (surface.key !== "__left_margin" && surface.key !== "__right_margin") widths.set(surface.key, surface.width);
-  }
-
-  return {
-    leftMargin: surfaces.find((item) => item.key === "__left_margin")?.width ?? sideMin,
-    rightMargin: surfaces.find((item) => item.key === "__right_margin")?.width ?? sideMin,
-    widths,
-    reason: `${strategy === "balanced" ? "Two-line H/E bottom auto balanced" : "Two-line H/E bottom fixed width"}: bottom-row free space was water-filled across Anlage-4 spacing surfaces: outside * gaps, character ** gaps and H/E group *** gaps; capped gaps stop at their maxima and remaining width stays in uncapped outside * gaps.`
-  };
+  return spacingSurfaceResult(
+    surfaces,
+    sideMin,
+    `${strategy === "balanced" ? "Two-line H/E bottom auto balanced" : "Two-line H/E bottom fixed width"}: bottom-row free space was water-filled across Anlage-4 spacing surfaces: outside * gaps, character ** gaps and H/E group *** gaps; capped gaps stop at their maxima and remaining width stays in uncapped outside * gaps.`
+  );
 }
 
 
@@ -3355,17 +6661,17 @@ function solveOneLineSeasonContentLayout({ sequence, rules, width, strategy, all
   const contentLimits = getContentLimits(rules, width);
   const available = contentLimits.width;
   const sideMin = SPACING_RULES_MM.outsideMargin.min;
-  const fixedWidth = sequence.reduce((sum, item) => sum + (isOneLineSeasonSpacingItem(item) || item.type === "seals" ? 0 : item.width), 0);
-  const sealItems = sequence.filter((item) => item.type === "seals");
+  const fixedWidth = sumItemWidthsExcept(sequence, (item) => isOneLineSeasonSpacingItem(item) || item.type === "seals");
+  const sealItems = getItemsOfType(sequence, "seals");
   const spacingItems = sequence.filter((item) => isOneLineSeasonSpacingItem(item));
-  const minSealWidth = sealItems.reduce((sum, item) => sum + getItemMinWidth(item), 0);
-  const preferredSealWidth = sealItems.reduce((sum, item) => sum + getItemPreferredWidth(item), 0);
-  const minSpacingWidth = spacingItems.reduce((sum, item) => sum + getOneLineSeasonSpacingMinWidth(item), 0) + sideMin * 2;
-  const preferredSpacingWidth = spacingItems.reduce((sum, item) => sum + getOneLineSeasonSpacingPreferredWidth(item), 0) + sideMin * 2;
-  const cappedMaxSpacingWidth = spacingItems.reduce((sum, item) => sum + getOneLineSeasonSpacingFiniteMaxWidth(item), 0) + sideMin * 2;
-  const minContentWidth = fixedWidth + minSealWidth + spacingItems.reduce((sum, item) => sum + getOneLineSeasonSpacingMinWidth(item), 0);
-  const preferredContentWidth = fixedWidth + preferredSealWidth + spacingItems.reduce((sum, item) => sum + getOneLineSeasonSpacingPreferredWidth(item), 0);
-  const maxContentWidth = fixedWidth + preferredSealWidth + spacingItems.reduce((sum, item) => sum + getOneLineSeasonSpacingFiniteMaxWidth(item), 0);
+  const minSealWidth = sumItemWidths(sealItems, getItemMinWidth);
+  const preferredSealWidth = sumItemWidths(sealItems, getItemPreferredWidth);
+  const minSpacingWidth = sumItemWidths(spacingItems, getOneLineSeasonSpacingMinWidth) + sideMin * 2;
+  const preferredSpacingWidth = sumItemWidths(spacingItems, getOneLineSeasonSpacingPreferredWidth) + sideMin * 2;
+  const cappedMaxSpacingWidth = sumItemWidths(spacingItems, getOneLineSeasonSpacingFiniteMaxWidth) + sideMin * 2;
+  const minContentWidth = fixedWidth + minSealWidth + sumItemWidths(spacingItems, getOneLineSeasonSpacingMinWidth);
+  const preferredContentWidth = fixedWidth + preferredSealWidth + sumItemWidths(spacingItems, getOneLineSeasonSpacingPreferredWidth);
+  const maxContentWidth = fixedWidth + preferredSealWidth + sumItemWidths(spacingItems, getOneLineSeasonSpacingFiniteMaxWidth);
   const minFits = fixedWidth + minSealWidth + minSpacingWidth <= available + 0.0001;
   const preferredFits = fixedWidth + preferredSealWidth + preferredSpacingWidth <= available + 0.0001;
   const maxFits = fixedWidth + preferredSealWidth + cappedMaxSpacingWidth <= available + 0.0001;
@@ -3378,7 +6684,7 @@ function solveOneLineSeasonContentLayout({ sequence, rules, width, strategy, all
 
   let sideMarginLeft = sideMin;
   let sideMarginRight = sideMin;
-  let spacingWidths = new Map(spacingItems.map((item) => [item.key, getOneLineSeasonSpacingPreferredWidth(item)]));
+  let spacingWidths = createItemWidthMap(spacingItems, getOneLineSeasonSpacingPreferredWidth);
   let reason = `${modeLabel}: one-line seasonal spacing uses preferred values.`;
 
   if (minFits) {
@@ -3389,52 +6695,54 @@ function solveOneLineSeasonContentLayout({ sequence, rules, width, strategy, all
     spacingWidths = balanced.widths;
     reason = balanced.reason;
   } else {
-    spacingWidths = new Map(spacingItems.map((item) => [item.key, getOneLineSeasonSpacingMinWidth(item)]));
+    spacingWidths = createItemWidthMap(spacingItems, getOneLineSeasonSpacingMinWidth);
     sealWidth = minSealWidth;
     reason = `${modeLabel}: minimum one-line seasonal spacing does not fit this width.`;
   }
 
   const solvedSequence = sequence.map((item) => {
-    if (item.type === "seals") return { ...item, width: sealWidth / Math.max(1, sealItems.length) };
+    const sealItem = applySharedTypeWidth(item, "seals", sealWidth, sealItems.length);
+    if (sealItem !== item) return sealItem;
     if (isOneLineSeasonSpacingItem(item)) return { ...item, width: spacingWidths.get(item.key) ?? getOneLineSeasonSpacingMinWidth(item) };
     return { ...item, width: item.width };
   });
-  const contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+  const contentWidth = sumResolvedItemWidths(solvedSequence);
   const xStart = contentLimits.left + sideMarginLeft;
   const positionedContent = positionContent(solvedSequence, xStart);
-  const actualCharGaps = solvedSequence.filter((item) => item.type === "char-gap").map((item) => item.width);
-  const actualGroupGaps = solvedSequence.filter((item) => item.type === "group-gap").map((item) => item.width);
-  const actualSeal = solvedSequence.find((item) => item.type === "seals");
-  const actualSeasonGap = solvedSequence.find((item) => item.type === "season-gap");
+  const actualCharGaps = getItemWidthsByType(solvedSequence, "char-gap");
+  const actualGroupGaps = getItemWidthsByType(solvedSequence, "group-gap");
+  const actualSeal = getFirstItemOfType(solvedSequence, "seals");
+  const actualSeasonGap = getFirstItemOfType(solvedSequence, "season-gap");
 
   return {
-    fits: minFits,
-    renderable: minFits || allowOverflow,
-    minFits,
-    preferredFits,
-    maxFits,
-    width,
-    strategy,
-    modeLabel,
-    policy: "one-line seasonal solver: outside * gaps, character gaps, recognition group gaps, seal column and the season star gap are balanced within their Anlage-4 ranges; the 30 x 75 mm season field remains fixed",
-    reason,
-    availableWidth: available,
-    contentLimits,
-    minContentWidth,
-    preferredContentWidth,
-    maxContentWidth,
-    minNeededWidth: neededWidthForContent(rules, minContentWidth),
-    preferredNeededWidth: neededWidthForContent(rules, preferredContentWidth),
-    maxNeededWidth: neededWidthForContent(rules, maxContentWidth),
-    contentWidth,
-    sideMarginLeft,
-    sideMarginRight,
-    positionedContent,
+    ...createLayoutResultBase({
+      minFits,
+      allowOverflow,
+      preferredFits,
+      maxFits,
+      width,
+      strategy,
+      modeLabel,
+      policy: "one-line seasonal solver: outside * gaps, character gaps, recognition group gaps, seal column and the season star gap are balanced within their Anlage-4 ranges; the 30 x 75 mm season field remains fixed",
+      reason,
+      available,
+      contentLimits,
+      minContentWidth,
+      preferredContentWidth,
+      maxContentWidth,
+      minNeededWidth: neededWidthForContent(rules, minContentWidth),
+      preferredNeededWidth: neededWidthForContent(rules, preferredContentWidth),
+      maxNeededWidth: neededWidthForContent(rules, maxContentWidth),
+      contentWidth,
+      sideMarginLeft,
+      sideMarginRight,
+      positionedContent
+    }),
     actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
     actualGroupGap: average(actualGroupGaps) ?? null,
-    actualGroupGapMinWidth: minVariableWidth(solvedSequence.filter((item) => item.type === "group-gap")),
-    groupGapRangeLabel: getVariableRangeLabel(solvedSequence.find((item) => item.type === "group-gap"), SPACING_RULES_MM.groupGap),
-    groupGapRule: solvedSequence.find((item) => item.type === "group-gap")?.ruleLabel || null,
+    actualGroupGapMinWidth: minVariableWidth(getItemsOfType(solvedSequence, "group-gap")),
+    groupGapRangeLabel: getVariableRangeLabel(getFirstItemOfType(solvedSequence, "group-gap"), SPACING_RULES_MM.groupGap),
+    groupGapRule: getFirstItemOfType(solvedSequence, "group-gap")?.ruleLabel || null,
     actualSealColumnWidth: actualSeal?.width ?? rules.content.seal.columnWidth,
     actualSealColumnMinWidth: actualSeal?.minWidth ?? SPACING_RULES_MM.sealColumn.min,
     actualSealColumnRangeLabel: actualSeal ? `${formatNumber(actualSeal.minWidth)}-${formatNumber(actualSeal.maxWidth)}` : `${SPACING_RULES_MM.sealColumn.min}-${SPACING_RULES_MM.sealColumn.max}`,
@@ -3448,66 +6756,33 @@ function isOneLineSeasonSpacingItem(item) {
 }
 
 function getOneLineSeasonSpacingMinWidth(item) {
-  if (item.type === "season-gap") return SPACING_RULES_MM.outsideMargin.min;
-  return getItemMinWidth(item);
+  return getFixedTypeOrItemMinWidth(item, "season-gap", SPACING_RULES_MM.outsideMargin.min);
 }
 
 function getOneLineSeasonSpacingPreferredWidth(item) {
-  if (item.type === "season-gap") return SPACING_RULES_MM.outsideMargin.min;
-  return getItemPreferredWidth(item);
+  return getFixedTypeOrItemPreferredWidth(item, "season-gap", SPACING_RULES_MM.outsideMargin.min);
 }
 
 function getOneLineSeasonSpacingFiniteMaxWidth(item) {
-  if (item.type === "season-gap") return SPACING_RULES_MM.outsideMargin.min;
-  return getItemMaxWidth(item);
+  return getFixedTypeOrItemFiniteMaxWidth(item, "season-gap", SPACING_RULES_MM.outsideMargin.min);
 }
 
 function getOneLineSeasonSpacingMaxWidth(item) {
-  if (item.type === "season-gap") return Number.POSITIVE_INFINITY;
-  return getItemMaxWidth(item);
+  return getFixedTypeOrItemMaxWidth(item, "season-gap", Number.POSITIVE_INFINITY);
 }
 
 function balanceOneLineSeasonSpacingSurfaces(spacingItems, targetWidth, sideMin, strategy) {
-  const surfaces = [
-    { key: "__left_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin },
-    ...spacingItems.map((item) => ({
-      key: item.key,
-      min: getOneLineSeasonSpacingMinWidth(item),
-      max: getOneLineSeasonSpacingMaxWidth(item),
-      width: getOneLineSeasonSpacingMinWidth(item),
-      type: item.type
-    })),
-    { key: "__right_margin", min: sideMin, max: Number.POSITIVE_INFINITY, width: sideMin }
-  ];
-  const minTotal = surfaces.reduce((sum, item) => sum + item.min, 0);
-  let remaining = Math.max(0, targetWidth - minTotal);
+  const surfaces = createSpacingSurfaces(spacingItems, sideMin, {
+    getMinWidth: getOneLineSeasonSpacingMinWidth,
+    getMaxWidth: getOneLineSeasonSpacingMaxWidth
+  });
+  waterFillSpacingSurfaces(surfaces, targetWidth);
 
-  while (remaining > 0.0001) {
-    const active = surfaces.filter((item) => item.width < item.max - 0.0001);
-    if (!active.length) break;
-    const equalStep = remaining / active.length;
-    let consumed = 0;
-    for (const item of active) {
-      const cap = item.max - item.width;
-      const applied = Math.min(equalStep, cap);
-      item.width += applied;
-      consumed += applied;
-    }
-    if (consumed <= 0.0001) break;
-    remaining -= consumed;
-  }
-
-  const widths = new Map();
-  for (const surface of surfaces) {
-    if (surface.key !== "__left_margin" && surface.key !== "__right_margin") widths.set(surface.key, surface.width);
-  }
-
-  return {
-    leftMargin: surfaces.find((item) => item.key === "__left_margin")?.width ?? sideMin,
-    rightMargin: surfaces.find((item) => item.key === "__right_margin")?.width ?? sideMin,
-    widths,
-    reason: `${strategy === "balanced" ? "One-line seasonal auto balanced" : "One-line seasonal fixed width"}: free space was water-filled across Anlage-4 spacing surfaces: outside * gaps, character gaps, group gaps and the season star gap; capped gaps stop at their maxima and remaining width stays in uncapped * gaps.`
-  };
+  return spacingSurfaceResult(
+    surfaces,
+    sideMin,
+    `${strategy === "balanced" ? "One-line seasonal auto balanced" : "One-line seasonal fixed width"}: free space was water-filled across Anlage-4 spacing surfaces: outside * gaps, character gaps, group gaps and the season star gap; capped gaps stop at their maxima and remaining width stays in uncapped * gaps.`
+  );
 }
 
 function solveContentLayout({ sequence, rules, width, strategy, allowOverflow = false, contentLimits: providedContentLimits = null }) {
@@ -3532,55 +6807,56 @@ function solveContentLayout({ sequence, rules, width, strategy, allowOverflow = 
   if (preferredFits) {
     const targetContentWidth = Math.min(maxContentWidth, available - sideMin * 2);
     solvedSequence = growVariablesToFit(sequence, targetContentWidth);
-    contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+    contentWidth = sumResolvedItemWidths(solvedSequence);
     reason = contentWidth > preferredContentWidth + 0.01
       ? `${modeLabel}: preferred spacing fits; free width was first distributed into variable gaps up to allowed maxima, remainder stays as equal outside margins.`
       : `${modeLabel}: preferred spacing used; outside margins distributed equally.`;
   } else if (!preferredFits && minFits) {
     solvedSequence = shrinkVariablesToFit(sequence, available - sideMin * 2);
-    contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+    contentWidth = sumResolvedItemWidths(solvedSequence);
     reason = `${modeLabel}: preferred spacing does not fit; variable gaps reduced to allowed minima, outside margins remain equal.`;
   } else if (!minFits) {
     solvedSequence = sequence.map((item) => ({ ...item, width: getItemMinWidth(item) }));
-    contentWidth = solvedSequence.reduce((sum, item) => sum + item.width, 0);
+    contentWidth = sumResolvedItemWidths(solvedSequence);
     reason = `${modeLabel}: minimum spacing does not fit this width.`;
   }
 
   const sideMargin = (available - contentWidth) / 2;
   const xStart = contentLimits.left + sideMargin;
   const positionedContent = positionContent(solvedSequence, xStart);
-  const actualCharGaps = solvedSequence.filter((item) => item.type === "char-gap").map((item) => item.width);
-  const actualGroupGaps = solvedSequence.filter((item) => item.type === "group-gap").map((item) => item.width);
-  const actualSeal = solvedSequence.find((item) => item.type === "seals");
+  const actualCharGaps = getItemWidthsByType(solvedSequence, "char-gap");
+  const actualGroupGaps = getItemWidthsByType(solvedSequence, "group-gap");
+  const actualSeal = getFirstItemOfType(solvedSequence, "seals");
 
   return {
-    fits: minFits,
-    renderable: minFits || allowOverflow,
-    minFits,
-    preferredFits,
-    maxFits,
-    width,
-    strategy,
-    modeLabel,
-    policy: "physical solver: variable gaps in min/preferred/max ranges; outside margins are equal and at least 8 mm when the layout fits",
-    reason,
-    availableWidth: available,
-    contentLimits,
-    minContentWidth,
-    preferredContentWidth,
-    maxContentWidth,
-    minNeededWidth,
-    preferredNeededWidth,
-    maxNeededWidth,
-    contentWidth,
-    sideMarginLeft: sideMargin,
-    sideMarginRight: sideMargin,
-    positionedContent,
+    ...createLayoutResultBase({
+      minFits,
+      allowOverflow,
+      preferredFits,
+      maxFits,
+      width,
+      strategy,
+      modeLabel,
+      policy: "physical solver: variable gaps in min/preferred/max ranges; outside margins are equal and at least 8 mm when the layout fits",
+      reason,
+      available,
+      contentLimits,
+      minContentWidth,
+      preferredContentWidth,
+      maxContentWidth,
+      minNeededWidth,
+      preferredNeededWidth,
+      maxNeededWidth,
+      contentWidth,
+      sideMarginLeft: sideMargin,
+      sideMarginRight: sideMargin,
+      positionedContent
+    }),
     actualCharGap: average(actualCharGaps) ?? SPACING_RULES_MM.charGap.preferred,
     actualGroupGap: average(actualGroupGaps) ?? null,
-    actualGroupGapMinWidth: minVariableWidth(solvedSequence.filter((item) => item.type === "group-gap")),
-    groupGapRangeLabel: getVariableRangeLabel(solvedSequence.find((item) => item.type === "group-gap"), SPACING_RULES_MM.groupGap),
-    groupGapRule: solvedSequence.find((item) => item.type === "group-gap")?.ruleLabel || null,
+    actualGroupGapMinWidth: minVariableWidth(getItemsOfType(solvedSequence, "group-gap")),
+    groupGapRangeLabel: getVariableRangeLabel(getFirstItemOfType(solvedSequence, "group-gap"), SPACING_RULES_MM.groupGap),
+    groupGapRule: getFirstItemOfType(solvedSequence, "group-gap")?.ruleLabel || null,
     actualSealColumnWidth: actualSeal?.width ?? rules.content.seal.columnWidth,
     actualSealColumnMinWidth: actualSeal?.minWidth ?? SPACING_RULES_MM.sealColumn.min,
     actualSealColumnRangeLabel: actualSeal ? `${formatNumber(actualSeal.minWidth)}-${formatNumber(actualSeal.maxWidth)}` : `${SPACING_RULES_MM.sealColumn.min}-${SPACING_RULES_MM.sealColumn.max}`,
@@ -3588,97 +6864,9 @@ function solveContentLayout({ sequence, rules, width, strategy, allowOverflow = 
   };
 }
 
-function shrinkVariablesToFit(sequence, targetContentWidth) {
-  const preferredTotal = sumSequenceWidth(sequence, "preferred");
-  const deficit = Math.max(0, preferredTotal - targetContentWidth);
-  const variableItems = sequence.filter((item) => isVariableItem(item));
-  const totalShrinkCapacity = variableItems.reduce((sum, item) => sum + Math.max(0, getItemPreferredWidth(item) - getItemMinWidth(item)), 0);
-  if (!deficit || !totalShrinkCapacity) return sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
-  const ratio = Math.min(1, deficit / totalShrinkCapacity);
-  return sequence.map((item) => {
-    const preferred = getItemPreferredWidth(item);
-    if (!isVariableItem(item)) return { ...item, width: preferred };
-    const min = getItemMinWidth(item);
-    return { ...item, width: preferred - (preferred - min) * ratio };
-  });
-}
-
-function growVariablesToFit(sequence, targetContentWidth) {
-  const preferredTotal = sumSequenceWidth(sequence, "preferred");
-  const surplus = Math.max(0, targetContentWidth - preferredTotal);
-  const variableItems = sequence.filter((item) => isVariableItem(item));
-  const totalGrowCapacity = variableItems.reduce((sum, item) => sum + Math.max(0, getItemMaxWidth(item) - getItemPreferredWidth(item)), 0);
-  if (!surplus || !totalGrowCapacity) return sequence.map((item) => ({ ...item, width: getItemPreferredWidth(item) }));
-  const ratio = Math.min(1, surplus / totalGrowCapacity);
-  return sequence.map((item) => {
-    const preferred = getItemPreferredWidth(item);
-    if (!isVariableItem(item)) return { ...item, width: preferred };
-    const max = getItemMaxWidth(item);
-    return { ...item, width: preferred + (max - preferred) * ratio };
-  });
-}
-
-function sumSequenceWidth(sequence, mode) {
-  return sequence.reduce((sum, item) => {
-    if (mode === "min") return sum + getItemMinWidth(item);
-    if (mode === "max") return sum + getItemMaxWidth(item);
-    return sum + getItemPreferredWidth(item);
-  }, 0);
-}
-
-function variableItem(type, key, range) {
-  return {
-    type,
-    key,
-    variable: true,
-    minWidth: range.min,
-    preferredWidth: range.preferred,
-    maxWidth: range.max,
-    width: range.preferred,
-    ruleLabel: range.ruleLabel || null
-  };
-}
-
-function isVariableItem(item) {
-  return item.variable === true;
-}
-
-function getItemMinWidth(item) {
-  return isVariableItem(item) ? item.minWidth : item.width;
-}
-
-function getItemPreferredWidth(item) {
-  return isVariableItem(item) ? item.preferredWidth : item.width;
-}
-
-function getItemMaxWidth(item) {
-  return isVariableItem(item) ? item.maxWidth : item.width;
-}
-
-function average(values) {
-  if (!values.length) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
 function neededWidthForContent(rules, contentWidth) {
   const geometry = getFixedHorizontalGeometry(rules);
   return geometry.contentLeft + contentWidth + SPACING_RULES_MM.outsideMargin.min * 2 + rules.innerInset;
-}
-
-function makeCells(text, font, role) {
-  return [...String(text || "")].map((char, index) => ({
-    type: "char",
-    role,
-    key: `${role}-${index}-${char}`,
-    char,
-    width: getCellWidth(char, font),
-    font
-  }));
-}
-
-function hasHistoricalOrElectricSuffix(parsed) {
-  const recognition = String(parsed?.recognition || "").toUpperCase();
-  return /\d[HE]$/.test(recognition);
 }
 
 function getSealColumnRange(parsed) {
@@ -3692,95 +6880,6 @@ function getSealColumnRange(parsed) {
     ...SPACING_RULES_MM.sealColumn,
     ruleLabel: "Normal: seal column 63.5-67.5 mm"
   };
-}
-
-function getTwoLineBottomGroupGapRange(parsed) {
-  if (hasHistoricalOrElectricSuffix(parsed)) {
-    return {
-      ...SPACING_RULES_MM.twoLineBottomGroupGapHistoricalOrElectric,
-      ruleLabel: "Two-line bottom row with final H/E suffix: group gaps 20-30 mm across the complete row"
-    };
-  }
-  return {
-    ...SPACING_RULES_MM.twoLineBottomGroupGap,
-    ruleLabel: "Two-line bottom row normal: group gaps 24-30 mm"
-  };
-}
-
-
-
-
-function resolveSeasonForVisualStyle(season, visualStyle) {
-  if (visualStyle?.key !== "green") return season;
-  return {
-    ...(season || {}),
-    enabled: false
-  };
-}
-
-function resolveVisualStyle(visualStyle = {}) {
-  const key = visualStyle?.plateColorMode === "green" || visualStyle?.textColorMode === "green" ? "green" : "black";
-  return PLATE_TEXT_COLORS_MM[key] || PLATE_TEXT_COLORS_MM.black;
-}
-
-function resolveRulesForSeason(rules, season) {
-  if (!season?.enabled) return rules;
-  return {
-    ...rules,
-    content: {
-      ...rules.content,
-      season: {
-        ...rules.content.season,
-        targetDigitHeight: season.targetDigitHeight,
-        fontSize: season.fontSize,
-        widthScale: season.widthScale,
-        digitGap: season.digitGap,
-        upperBaselineY: season.upperBaselineY,
-      }
-    }
-  };
-}
-
-function resolveSeasonOptions(season = {}, rules = TWO_LINE_RULES_MM) {
-  const defaults = rules?.content?.season || TWO_LINE_RULES_MM.content.season;
-  const enabled = season?.enabled === true;
-  return {
-    enabled,
-    from: normalizeSeasonMonth(season?.from, "04"),
-    to: normalizeSeasonMonth(season?.to, "10"),
-    targetDigitHeight: positiveNumber(season?.targetDigitHeight, defaults.targetDigitHeight),
-    fontSize: positiveNumber(season?.fontSize, defaults.fontSize),
-    widthScale: clampNumber(positiveNumber(season?.widthScale, defaults.widthScale), 0.6, 1.2),
-    digitGap: clampNumber(numberOrFallback(season?.digitGap, defaults.digitGap), -5, 10),
-    upperBaselineY: positiveNumber(season?.baselineY, defaults.upperBaselineY)
-  };
-}
-
-function normalizeSeasonMonth(value, fallback) {
-  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 2);
-  const number = Number(digits);
-  if (!Number.isFinite(number) || number < 1 || number > 12) return fallback;
-  return String(number).padStart(2, "0");
-}
-
-function getVariableRangeLabel(item, fallbackRange) {
-  const range = item || fallbackRange;
-  if (!range) return null;
-  return `${formatNumber(range.minWidth ?? range.min)}-${formatNumber(range.maxWidth ?? range.max)}`;
-}
-
-function minVariableWidth(items) {
-  const values = items.map((item) => item.minWidth).filter((value) => Number.isFinite(value));
-  return values.length ? Math.min(...values) : null;
-}
-
-function splitRecognition(value) {
-  const normalized = String(value || "");
-  const matches = normalized.match(/[A-ZÄÖÜ]+|\d+/g) || [];
-  return matches.map((part) => ({
-    value: part,
-    type: /^\d+$/.test(part) ? "digits" : "letters"
-  }));
 }
 
 function buildContentSequence({ districtCells, recognitionCells, parsed, season = resolveSeasonOptions(), rules = ONE_LINE_RULES_MM }) {
@@ -3811,20 +6910,8 @@ function buildContentSequence({ districtCells, recognitionCells, parsed, season 
   return sequence;
 }
 
-function appendCells(sequence, cells) {
-  cells.forEach((cell, index) => {
-    if (index > 0) sequence.push(variableItem("char-gap", `${cell.role}-gap-${index}`, SPACING_RULES_MM.charGap));
-    sequence.push(cell);
-  });
-}
-
 function positionContent(sequence, startX) {
-  let cursor = startX;
-  return sequence.map((item) => {
-    const positioned = { ...item, x: cursor };
-    cursor += item.width;
-    return positioned;
-  });
+  return positionRowItems(sequence, { startX });
 }
 
 function getFixedHorizontalGeometry(rules) {
@@ -3841,494 +6928,37 @@ function getContentLimits(rules, width) {
   const geometry = getFixedHorizontalGeometry(rules);
   const left = geometry.contentLeft;
   const right = width - geometry.innerRightInset;
-  return { left, right, width: right - left };
-}
-
-function getCharacterBand(rules, rowKey = "top") {
-  if (rules.layoutType === "two-line") {
-    const row = rowKey === "bottom" ? rules.content.bottomRow : rules.content.topRow;
-    return {
-      y: row.y,
-      height: row.characterHeight,
-      baselineY: row.baselineY
-    };
-  }
-  return {
-    y: rules.innerInset + rules.content.topClearance,
-    height: rules.content.characterHeight,
-    baselineY: rules.cells?.middle?.baselineY || FONT_CALIBRATION_PROFILES_MM.middleManualB108.baselineY
-  };
+  return createHorizontalBounds(left, right);
 }
 
 function getSealGeometryForContent(rules, content) {
-  const seal = content.find((item) => item.type === "seals");
+  const seal = getFirstItemOfType(content, "seals");
   return seal ? getSealGeometry(rules, seal) : null;
 }
 
-function getSealGeometry(rules, sealItem) {
-  const charBand = getCharacterBand(rules);
-  const sealRules = rules.content.seal;
-  const innerWidth = Number(sealItem.width) || sealRules.columnWidth;
-  const outerWidth = Math.max(innerWidth, Math.min(sealRules.columnMaxWidth, innerWidth + (sealRules.columnMaxWidth - sealRules.columnMinWidth)));
-  const outerX = sealItem.x - (outerWidth - innerWidth) / 2;
-  const cx = sealItem.x + innerWidth / 2;
-  const huRadius = sealRules.huDiameter / 2;
-  const authorityRadius = sealRules.authorityDiameter / 2;
-  return {
-    cx,
-    innerColumnLeft: sealItem.x,
-    innerColumnRight: sealItem.x + innerWidth,
-    innerColumnWidth: innerWidth,
-    outerColumnLeft: outerX,
-    outerColumnRight: outerX + outerWidth,
-    outerColumnWidth: outerWidth,
-    hu: {
-      cy: sealRules.huCenterY,
-      diameter: sealRules.huDiameter,
-      radius: huRadius
-    },
-    authority: {
-      cy: sealRules.authorityCenterY,
-      diameter: sealRules.authorityDiameter,
-      radius: authorityRadius
-    },
-    visibleCircleGap: sealRules.visibleCircleGap,
-    charBand
-  };
-}
-
-function renderBody({ rules, metrics }) {
-  const w = metrics.width;
-  const h = rules.outerHeight;
-  const inset = rules.innerInset;
-  const euro = rules.euro;
-  return `
-<g class="layer layer-body" filter="url(#plateShadow)">
-  <rect x="0" y="0" width="${w}" height="${h}" rx="${rules.outerCornerRadius}" fill="#111"/>
-  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>
-  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" fill="#0046ad"/>
-  ${renderEuStars(euro.starsCenterX, euro.starsCenterY, euro.starsRadius)}
-  <text x="${euro.countryCenterX}" y="${euro.countryCenterY ?? euro.countryBaselineY}" text-anchor="middle" dominant-baseline="${euro.countryDominantBaseline || "auto"}" font-family="DIN1451Alt, AlteDIN1451Mittelschrift, AlteDIN1451Middle script, Arial, sans-serif" font-size="${euro.countryFontSize || 30}" font-weight="${euro.countryFontWeight || 400}" fill="#fff">${escapeText(euro.country)}</text>
-</g>`.trim();
-}
-
-function renderDxfReferenceGuides({ rules, metrics }) {
-  const w = metrics.width;
-  const inset = rules.innerInset;
-  const euro = rules.euro;
-  const charBand = getCharacterBand(rules);
-  return `
-<g class="layer layer-dxf-guides" fill="none" stroke-linecap="square">
-  <rect x="0" y="0" width="${w}" height="${rules.outerHeight}" rx="${rules.outerCornerRadius}" stroke="rgba(255,255,255,.28)" stroke-width="0.45"/>
-  <rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${rules.innerHeight}" rx="${rules.innerCornerRadius}" stroke="rgba(255,255,255,.42)" stroke-width="0.45"/>
-  <rect x="${euro.x}" y="${euro.y}" width="${euro.width}" height="${euro.height}" stroke="rgba(70,170,255,.8)" stroke-width="0.55"/>
-  <line x1="0" y1="${charBand.y}" x2="${w}" y2="${charBand.y}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
-  <line x1="0" y1="${charBand.y + charBand.height}" x2="${w}" y2="${charBand.y + charBand.height}" stroke="rgba(255,255,255,.22)" stroke-width="0.35"/>
-</g>`.trim();
-}
-
-function getBandForItem(rules, item) {
-  if (Number.isFinite(Number(item?.bandY)) && Number.isFinite(Number(item?.bandHeight))) {
-    return { y: Number(item.bandY), height: Number(item.bandHeight), baselineY: Number(item.baselineY) || null };
-  }
-  return getCharacterBand(rules, item?.rowKey);
-}
-
-function renderGrid({ content, rules, metrics }) {
-  const parts = content.map((item) => {
-    const charBand = getBandForItem(rules, item);
-    if (item.type === "char") {
-      return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(30,165,255,.08)" stroke="rgba(30,165,255,.55)" stroke-width="0.6"/>`;
-    }
-    if (item.type === "season-field") {
-      const rowHeight = rules.content.season.monthBoxHeight;
-      const lowerY = charBand.y + charBand.height - rowHeight;
-      return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${rowHeight}" fill="rgba(30,165,255,.08)" stroke="rgba(30,165,255,.55)" stroke-width="0.6" data-season-box="from"/><rect x="${item.x}" y="${lowerY}" width="${item.width}" height="${rowHeight}" fill="rgba(30,165,255,.08)" stroke="rgba(30,165,255,.55)" stroke-width="0.6" data-season-box="to"/>`;
-    }
-    if (item.type === "season-gap") {
-      return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,179,107,.04)" stroke="rgba(255,179,107,.6)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`;
-    }
-    if (item.type === "seals") {
-      const sealGeometry = getSealGeometry(rules, item);
-      return `
-        <rect x="${sealGeometry.outerColumnLeft}" y="${charBand.y}" width="${sealGeometry.outerColumnWidth}" height="${charBand.height}" fill="rgba(255,211,107,.05)" stroke="rgba(255,211,107,.5)" stroke-width="0.6" stroke-dasharray="2 1.5"/>
-        <rect x="${sealGeometry.innerColumnLeft}" y="${charBand.y}" width="${sealGeometry.innerColumnWidth}" height="${charBand.height}" fill="rgba(255,211,107,.09)" stroke="rgba(255,211,107,.75)" stroke-width="0.8"/>
-        <line x1="${sealGeometry.cx}" y1="${charBand.y - 8}" x2="${sealGeometry.cx}" y2="${charBand.y + charBand.height + 8}" stroke="rgba(255,211,107,.45)" stroke-width="0.5"/>
-        <circle cx="${sealGeometry.cx}" cy="${sealGeometry.hu.cy}" r="${sealGeometry.hu.radius}" fill="none" stroke="rgba(255,211,107,.8)" stroke-width="0.65" stroke-dasharray="2 1.5"/>
-        <circle cx="${sealGeometry.cx}" cy="${sealGeometry.authority.cy}" r="${sealGeometry.authority.radius}" fill="none" stroke="rgba(255,211,107,.8)" stroke-width="0.65" stroke-dasharray="2 1.5"/>`;
-    }
-    return `<rect x="${item.x}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,99,99,.07)" stroke="rgba(255,99,99,.4)" stroke-width="0.4"/>`;
-  });
-  const centerLine = `<line x1="0" y1="${rules.outerHeight / 2}" x2="${metrics.width}" y2="${rules.outerHeight / 2}" stroke="rgba(255,255,255,.35)" stroke-width="0.5" stroke-dasharray="4 3"/>`;
-  return `<g class="layer layer-grid">${centerLine}${parts.join("")}</g>`;
-}
-
-function renderSeals({ content, rules }) {
-  const seal = content.find((item) => item.type === "seals");
-  if (!seal) return "";
-  const geometry = getSealGeometry(rules, seal);
-  return `
-<g class="layer layer-seals">
-  <g class="seal-slot seal-slot-hu">
-    <circle cx="${geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius}" fill="#1ea5ff" stroke="#111" stroke-width="1.25"/>
-    <circle cx="${geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius * 0.68}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.8" stroke-dasharray="1.4 1.8"/>
-    <text x="${geometry.cx}" y="${geometry.hu.cy + 3.3}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#111">HU</text>
-  </g>
-  <g class="seal-slot seal-slot-authority">
-    <circle cx="${geometry.cx}" cy="${geometry.authority.cy}" r="${geometry.authority.radius}" fill="#d7d7d2" stroke="#999" stroke-width="1"/>
-    <circle cx="${geometry.cx}" cy="${geometry.authority.cy}" r="${geometry.authority.radius * 0.55}" fill="none" stroke="rgba(120,120,115,.65)" stroke-width="1"/>
-  </g>
-</g>`.trim();
-}
 
 
-function renderSeasonField({ content, rules, metrics }) {
-  const item = content.find((candidate) => candidate.type === "season-field");
-  if (!item) return "";
-  const band = getBandForItem(rules, item);
-  const seasonRules = rules.content.season;
-  const rowHeight = seasonRules.monthBoxHeight;
-  const separatorHeight = seasonRules.separatorHeight;
-  const upperFieldY = band.y;
-  const lowerFieldY = band.y + band.height - rowHeight;
-  const separatorY = band.y + band.height / 2 - separatorHeight / 2;
-  const xCenter = item.x + item.width / 2;
-  const widthScale = clampNumber(Number(seasonRules.widthScale) || 1, 0.6, 1.2);
-  const digitGap = clampNumber(Number(seasonRules.digitGap) || 0, -5, 10);
-  const baseDigitWidth = positiveNumber(seasonRules.digitSlotWidth, 12.5);
-  const baseFontSize = positiveNumber(seasonRules.digitSlotFontSize, 28);
-  const activeFontSize = positiveNumber(seasonRules.fontSize, baseFontSize);
-  const fontSizeScale = activeFontSize / baseFontSize;
-  const digitWidth = baseDigitWidth * widthScale * fontSizeScale;
-  const totalMonthWidth = digitWidth * 2 + digitGap;
-  const monthLeft = xCenter - totalMonthWidth / 2;
-  const firstDigitX = monthLeft;
-  const secondDigitX = monthLeft + digitWidth + digitGap;
-  const lineX1 = item.x + seasonRules.separatorInset;
-  const lineWidth = item.width - seasonRules.separatorInset * 2;
-  const upperBaselineY = seasonRules.upperBaselineY;
-  const lowerBaselineY = seasonRules.upperBaselineY + (lowerFieldY - upperFieldY);
-  const from = normalizeSeasonMonth(item.season?.from || "04", "04");
-  const to = normalizeSeasonMonth(item.season?.to || "10", "10");
-  const textColor = metrics?.textColor || PLATE_TEXT_COLORS_MM.black.color;
-  const textStyle = `font-family="${seasonRules.fontFamily}" font-size="${seasonRules.fontSize}" font-weight="${seasonRules.fontWeight}" fill="${textColor}"`;
+return { getCharacterBand: __reexport_getCharacterBand, parsePlate: __reexport_parsePlate, getCanvasMm: __reexport_getCanvasMm, PLATE_TEXT_COLORS_MM: __reexport_PLATE_TEXT_COLORS_MM, WIDTH_BANDS: __reexport_WIDTH_BANDS, TWO_LINE_WIDTH_BANDS: __reexport_TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES: __reexport_TWO_LINE_WIDTH_RULES, SPACING_RULES_MM: __reexport_SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: __reexport_FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: __reexport_DXF_REFERENCE_MM, ONE_LINE_RULES_MM: __reexport_ONE_LINE_RULES_MM, TWO_LINE_RULES_MM: __reexport_TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM: __reexport_MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM: __reexport_REDUCED_TWO_LINE_RULES_MM, resolvePlateRules: __reexport_resolvePlateRules, resolvePlateFontMode: resolvePlateFontMode, buildPlateModelMm: buildPlateModelMm, renderPlateSvgMm: renderPlateSvgMm };
 
-  const renderMonth = (value, key, baselineY) => {
-    const digitLength = Number(digitWidth).toFixed(4).replace(/\.?0+$/, "");
-    return `
-  <g data-season-row="${key}" data-season-width-scale="${widthScale}" data-season-digit-gap="${digitGap}" data-season-digit-width="${digitWidth}" data-season-total-width="${totalMonthWidth}" data-season-layout="deterministic-font-size-scaled" data-season-font-size-scale="${fontSizeScale}">
-    <text class="season-digit season-digit-first" data-season-row-key="${key}" data-season-digit="first" data-season-digit-text="first" x="${firstDigitX}" y="${baselineY}" text-anchor="start" textLength="${digitLength}" lengthAdjust="spacingAndGlyphs" ${textStyle}>${escapeText(value[0])}</text>
-    <text class="season-digit season-digit-second" data-season-row-key="${key}" data-season-digit="second" data-season-digit-text="second" x="${secondDigitX}" y="${baselineY}" text-anchor="start" textLength="${digitLength}" lengthAdjust="spacingAndGlyphs" ${textStyle}>${escapeText(value[1])}</text>
-  </g>`;
-  };
+})();
 
-  return `
-<g class="layer layer-season-field">
-  <rect x="${lineX1}" y="${separatorY}" width="${lineWidth}" height="${separatorHeight}" fill="${textColor}" data-season-separator="true"/>
-${renderMonth(from, "from", upperBaselineY)}
-${renderMonth(to, "to", lowerBaselineY)}
-</g>`.trim();
-}
+// ---- src/plate/lab-renderer/plate-public-api.js ----
+const __m_src_plate_lab_renderer_plate_public_api_js = (() => {
+// Kennzeichen Physical Lab b234 / stable public Lab API
+//
+// This module is the single public entry boundary for the standalone Physical Lab.
+// It keeps external imports away from the large SVG renderer and exposes only the
+// stable model/render/rule helpers required by app.js, scripts and later Card syncs.
 
-function renderText({ content, font, metrics }) {
-  const glyphGuide = font.fit?.measured ? `
-    <rect x="0" y="${font.fit.measured.topY}" width="100%" height="${font.fit.measured.visibleHeight}" fill="rgba(92, 214, 255, .035)" stroke="rgba(92, 214, 255, .35)" stroke-width="0.35" stroke-dasharray="2 1.5"/>` : "";
-  const textColor = metrics?.textColor || PLATE_TEXT_COLORS_MM.black.color;
-  const chars = content.filter((item) => item.type === "char").map((cell) => `
-    <text x="${cell.x + cell.width / 2}" y="${cell.baselineY || font.baselineY}" text-anchor="middle" font-family="'${font.fontFamily}', Arial Narrow, sans-serif" font-size="${cell.fontSize || font.fontSize}" font-weight="400" fill="${textColor}">${escapeText(cell.char)}</text>`).join("");
-  return `<g class="layer layer-text">${glyphGuide}${chars}</g>`;
-}
+const { PLATE_TEXT_COLORS_MM, WIDTH_BANDS, TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES, SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM, ONE_LINE_RULES_MM, TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM, resolvePlateRules } = __m_src_plate_lab_renderer_plate_rules_js;
 
-function renderHorizontalDiagnostics({ content, rules }) {
-  const parts = [];
+const { parsePlate, getCharacterBand } = __m_src_plate_lab_renderer_text_utils_js;
 
-  for (const item of content) {
-    const charBand = getBandForItem(rules, item);
-    const yTop = Math.max(0, charBand.y - 6);
-    const yBottom = Math.min(rules.outerHeight, charBand.y + charBand.height + 6);
-    const labelY = Math.max(6, charBand.y - 2.5);
-    const x1 = item.x;
-    const x2 = item.x + item.width;
-    const cx = x1 + item.width / 2;
+const { getCanvasMm } = __m_src_plate_lab_renderer_plate_render_shell_js;
 
-    if (item.type === "char") {
-      parts.push(`<line x1="${x1}" y1="${yTop}" x2="${x1}" y2="${yBottom}" stroke="rgba(30,165,255,.9)" stroke-width="0.45"/>`);
-      parts.push(`<line x1="${x2}" y1="${yTop}" x2="${x2}" y2="${yBottom}" stroke="rgba(30,165,255,.9)" stroke-width="0.45"/>`);
-      parts.push(`<line x1="${cx}" y1="${yTop - 2}" x2="${cx}" y2="${yBottom + 2}" stroke="rgba(255,255,255,.7)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
-      parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.3" fill="#1ea5ff">${escapeText(item.char)} · ${formatMm(item.width)}</text>`);
-      continue;
-    }
+const { resolvePlateFontMode, buildPlateModelMm, renderPlateSvgMm, renderPlateSvgMm: renderPlateSvg } = __m_src_plate_lab_renderer_plate_svg_renderer_js;
 
-    if (item.type === "seals") {
-      const geometry = getSealGeometry(rules, item);
-      parts.push(`<line x1="${geometry.innerColumnLeft}" y1="${yTop}" x2="${geometry.innerColumnLeft}" y2="${yBottom}" stroke="rgba(255,211,107,.95)" stroke-width="0.55"/>`);
-      parts.push(`<line x1="${geometry.innerColumnRight}" y1="${yTop}" x2="${geometry.innerColumnRight}" y2="${yBottom}" stroke="rgba(255,211,107,.95)" stroke-width="0.55"/>`);
-      parts.push(`<line x1="${geometry.cx}" y1="${yTop - 3}" x2="${geometry.cx}" y2="${yBottom + 3}" stroke="rgba(255,211,107,.8)" stroke-width="0.4" stroke-dasharray="1.5 1"/>`);
-      parts.push(`<text x="${geometry.cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="4.3" fill="#ffd36b">Seal · ${formatMm(geometry.innerColumnWidth)}</text>`);
-      continue;
-    }
-
-    if (item.type === "seal-gap") {
-      parts.push(`<rect x="${x1}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,179,107,.05)" stroke="rgba(255,179,107,.75)" stroke-width="0.4" stroke-dasharray="1.5 1"/>`);
-      parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.5" fill="#ffb36b">Seal gap · ${formatMm(item.width)}</text>`);
-      continue;
-    }
-
-    if (item.type === "season-gap") {
-      parts.push(`<rect x="${x1}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,179,107,.04)" stroke="rgba(255,179,107,.75)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
-      parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.4" fill="#ffb36b">Season gap · ${formatMm(item.width)}</text>`);
-      continue;
-    }
-
-    if (item.type === "season-field") {
-      const rowHeight = rules.content.season.monthBoxHeight;
-      const lowerY = charBand.y + charBand.height - rowHeight;
-      parts.push(`<rect x="${x1}" y="${charBand.y}" width="${item.width}" height="${rowHeight}" fill="rgba(30,165,255,.07)" stroke="rgba(30,165,255,.85)" stroke-width="0.4"/>`);
-      parts.push(`<rect x="${x1}" y="${lowerY}" width="${item.width}" height="${rowHeight}" fill="rgba(30,165,255,.07)" stroke="rgba(30,165,255,.85)" stroke-width="0.4"/>`);
-      parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.5" fill="#1ea5ff">Season fields · ${formatMm(item.width)} × ${formatMm(rowHeight)}</text>`);
-      continue;
-    }
-
-    parts.push(`<rect x="${x1}" y="${charBand.y}" width="${item.width}" height="${charBand.height}" fill="rgba(255,99,99,.03)" stroke="rgba(255,99,99,.55)" stroke-width="0.35" stroke-dasharray="1.5 1"/>`);
-    parts.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="3.6" fill="#ff7777">${formatMm(item.width)}</text>`);
-  }
-
-  return `<g class="layer layer-horizontal-diagnostics">${parts.join("")}</g>`;
-}
-
-function renderDimensions(model) {
-  const { metrics, rules, content } = model;
-  const h = rules.outerHeight;
-  const w = metrics.width;
-  const y = h + rules.dimensions.baselineOffset;
-  const localDimensions = renderSolvedSpacingDimensions(model);
-  return `
-<g class="layer layer-dimensions" font-family="Arial, sans-serif" font-size="5" fill="#333" stroke="#333" stroke-width="0.45">
-  <line x1="0" y1="${y}" x2="${w}" y2="${y}"/>
-  <line x1="0" y1="${y - 3}" x2="0" y2="${y + 3}"/>
-  <line x1="${w}" y1="${y - 3}" x2="${w}" y2="${y + 3}"/>
-  <text x="${w / 2}" y="${y + 8}" text-anchor="middle">${w} mm</text>
-  <line x1="${w + 14}" y1="0" x2="${w + 14}" y2="${h}"/>
-  <line x1="${w + 11}" y1="0" x2="${w + 17}" y2="0"/>
-  <line x1="${w + 11}" y1="${h}" x2="${w + 17}" y2="${h}"/>
-  <text x="${w + 23}" y="${h / 2}" dominant-baseline="middle">${h} mm</text>
-  ${localDimensions}
-  ${renderEuroInternalDimensions(model)}
-</g>`.trim();
-}
-
-function renderSolvedSpacingDimensions({ content, rules, metrics }) {
-  if (rules.layoutType === "two-line") {
-    return renderSolvedSpacingDimensionsByRows({ content, rules, metrics });
-  }
-
-  const charBand = getCharacterBand(rules);
-  const contentLimits = getContentLimits(rules, metrics.width);
-  const first = content[0];
-  const last = content[content.length - 1];
-  const lines = [];
-  const add = createDimensionLineAdder(lines);
-
-  if (first && last) {
-    const leftMargin = first.x - contentLimits.left;
-    const rightMargin = contentLimits.right - (last.x + last.width);
-    add(contentLimits.left, first.x, charBand.y + charBand.height + 9, `Margin ${formatMm(leftMargin)}`, "#6de28d", { kind: "outside-margin", labelOffset: 5.4, fontSize: 3.7 });
-    add(last.x + last.width, contentLimits.right, charBand.y + charBand.height + 9, `Margin ${formatMm(rightMargin)}`, "#6de28d", { kind: "outside-margin", labelOffset: 5.4, fontSize: 3.7 });
-  }
-
-  for (const item of content) {
-    const x1 = item.x;
-    const x2 = item.x + item.width;
-    if (item.type === "seals") {
-      add(x1, x2, charBand.y - 7.5, `Seal ${formatMm(item.width)}`, "#ffd36b", { kind: "seal-column", labelOffset: -1.8, fontSize: 4.0 });
-      continue;
-    }
-    if (item.type === "group-gap") {
-      add(x1, x2, charBand.y - 13.5, `Group ${formatMm(item.width)}`, "#ff7777", { kind: "group-gap", labelOffset: -1.8, fontSize: 3.8 });
-      continue;
-    }
-    if (item.type === "season-gap") {
-      add(x1, x2, charBand.y - 13.5, `Season gap ${formatMm(item.width)}`, "#ffb36b", { kind: "season-gap", labelOffset: -1.8, fontSize: 3.5 });
-      continue;
-    }
-    if (item.type === "season-field") {
-      add(x1, x2, charBand.y - 7.5, `Season ${formatMm(item.width)}`, "#ffffff", { kind: "season-field", labelOffset: -1.8, fontSize: 3.7 });
-      continue;
-    }
-    if (item.type === "char-gap") {
-      add(x1, x2, charBand.y + charBand.height + 4.2, formatMm(item.width), "#7fd3ff", { kind: "char-gap", labelOffset: 5.1, fontSize: 3.3, opacity: 0.75, tick: 1.8 });
-    }
-  }
-
-  return `<g class="layer layer-solved-dimensions">${lines.join("")}
-  </g>`;
-}
-
-function renderEuroInternalDimensions(model) {
-  const { rules } = model;
-  const euro = rules.euro;
-  if (!Number.isFinite(Number(euro.innerTopClearance))) return "";
-
-  const x = euro.x + euro.width + 5;
-  const tickLeft = x - 2.5;
-  const tickRight = x + 2.5;
-  const starsTop = euro.y + euro.innerTopClearance;
-  const starsBottom = starsTop + euro.starsBoxHeight;
-  const countryTop = starsBottom + euro.starsToCountryGap;
-  const countryBottom = countryTop + euro.countryBoxHeight;
-  const segments = [
-    [euro.y, starsTop, formatNumber(euro.innerTopClearance)],
-    [starsTop, starsBottom, formatNumber(euro.starsBoxHeight)],
-    [starsBottom, countryTop, formatNumber(euro.starsToCountryGap)],
-    [countryTop, countryBottom, formatNumber(euro.countryBoxHeight)],
-    [countryBottom, euro.y + euro.height, formatNumber(euro.innerBottomClearance)]
-  ];
-  const boundaries = [
-    euro.y,
-    starsTop,
-    starsBottom,
-    countryTop,
-    countryBottom,
-    euro.y + euro.height
-  ];
-  const segmentLines = segments.map(([y1, y2, label]) => `
-    <line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="#7fd3ff" stroke-width="0.35"/>
-    <line x1="${tickLeft}" y1="${y1}" x2="${tickRight}" y2="${y1}" stroke="#7fd3ff" stroke-width="0.35"/>
-    <line x1="${tickLeft}" y1="${y2}" x2="${tickRight}" y2="${y2}" stroke="#7fd3ff" stroke-width="0.35"/>
-    <text x="${x + 4}" y="${(y1 + y2) / 2 + 1.7}" font-family="Arial, sans-serif" font-size="3.6" fill="#7fd3ff" stroke="none">${label}</text>`).join("");
-  const boundaryGuides = boundaries.map((y) => `<line x1="${euro.x}" y1="${y}" x2="${euro.x + euro.width}" y2="${y}" stroke="#7fd3ff" stroke-width="0.25" stroke-dasharray="1.2 1.2" opacity="0.45"/>`).join("");
-  const countryBox = `<rect x="${euro.x}" y="${countryTop}" width="${euro.width}" height="${euro.countryBoxHeight}" fill="none" stroke="#7fd3ff" stroke-width="0.35" opacity="0.7"/>`;
-  return `<g class="dimension dimension-euro-internal" opacity="0.9">${boundaryGuides}${countryBox}${segmentLines}
-  </g>`;
-}
-
-function renderSolvedSpacingDimensionsByRows({ content, rules }) {
-  const lines = [];
-  const add = createDimensionLineAdder(lines);
-  const rows = ["top", "bottom"];
-
-  for (const rowKey of rows) {
-    const rowItems = content.filter((item) => item.rowKey === rowKey);
-    if (!rowItems.length) continue;
-    const charBand = getCharacterBand(rules, rowKey);
-    const limits = rowItems[0].contentLimits || (rowKey === "top" ? getTwoLineTopContentLimits(rules, rowItems[0].x) : getTwoLineBottomContentLimits(rules, rowItems[0].x));
-    const first = rowItems[0];
-    const last = rowItems[rowItems.length - 1];
-    const marginY = rowKey === "top" ? charBand.y - 8.5 : charBand.y + charBand.height + 8.5;
-    const marginLabelOffset = rowKey === "top" ? -1.8 : 5.4;
-    const leftMargin = first.x - limits.left;
-    const rightMargin = limits.right - (last.x + last.width);
-    add(limits.left, first.x, marginY, `${rowKey === "top" ? "Top" : "Bottom"} margin ${formatMm(leftMargin)}`, "#6de28d", { kind: `outside-margin-${rowKey}`, labelOffset: marginLabelOffset, fontSize: 3.5 });
-    add(last.x + last.width, limits.right, marginY, `${rowKey === "top" ? "Top" : "Bottom"} margin ${formatMm(rightMargin)}`, "#6de28d", { kind: `outside-margin-${rowKey}`, labelOffset: marginLabelOffset, fontSize: 3.5 });
-
-    for (const item of rowItems) {
-      const x1 = item.x;
-      const x2 = item.x + item.width;
-      if (item.type === "seals") {
-        add(x1, x2, charBand.y - 14, `Seal ${formatMm(item.width)}`, "#ffd36b", { kind: "seal-column", labelOffset: -1.8, fontSize: 3.8 });
-        continue;
-      }
-      if (item.type === "group-gap") {
-        add(x1, x2, charBand.y - 10, `Group ${formatMm(item.width)}`, "#ff7777", { kind: "group-gap", labelOffset: -1.8, fontSize: 3.6 });
-        continue;
-      }
-      if (item.type === "seal-gap") {
-        add(x1, x2, charBand.y - 10, `Seal gap ${formatMm(item.width)}`, "#ffb36b", { kind: "seal-gap", labelOffset: -1.8, fontSize: 3.4 });
-        continue;
-      }
-      if (item.type === "season-gap") {
-        add(x1, x2, charBand.y - 7, `Season gap ${formatMm(item.width)}`, "#ffb36b", { kind: "season-gap", labelOffset: -1.8, fontSize: 3.2 });
-        continue;
-      }
-      if (item.type === "season-field") {
-        add(x1, x2, charBand.y - 14, `Season ${formatMm(item.width)}`, "#ffffff", { kind: "season-field", labelOffset: -1.8, fontSize: 3.4 });
-        continue;
-      }
-      if (item.type === "char-gap") {
-        const y = rowKey === "top" ? charBand.y + charBand.height + 3.8 : charBand.y + charBand.height + 4.2;
-        add(x1, x2, y, formatMm(item.width), "#7fd3ff", { kind: "char-gap", labelOffset: 5.1, fontSize: 3.1, opacity: 0.75, tick: 1.8 });
-      }
-    }
-  }
-
-  return `<g class="layer layer-solved-dimensions">${lines.join("")}
-  </g>`;
-}
-
-function createDimensionLineAdder(lines) {
-  return (x1, x2, y, label, color, options = {}) => {
-    if (!Number.isFinite(x1) || !Number.isFinite(x2) || Math.abs(x2 - x1) < 0.25) return;
-    const left = Math.min(x1, x2);
-    const right = Math.max(x1, x2);
-    const tick = options.tick ?? 2.4;
-    const labelOffset = options.labelOffset ?? -1.2;
-    const textY = y + labelOffset;
-    const opacity = options.opacity ?? 0.95;
-    lines.push(`
-      <g class="dimension dimension-${escapeAttr(options.kind || "spacing")}" opacity="${opacity}">
-        <line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="${color}" stroke-width="0.55"/>
-        <line x1="${left}" y1="${y - tick}" x2="${left}" y2="${y + tick}" stroke="${color}" stroke-width="0.55"/>
-        <line x1="${right}" y1="${y - tick}" x2="${right}" y2="${y + tick}" stroke="${color}" stroke-width="0.55"/>
-        <text x="${(left + right) / 2}" y="${textY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${options.fontSize || 3.9}" fill="${color}" stroke="none">${escapeText(label)}</text>
-      </g>`);
-  };
-}
-
-function renderEuStars(cx, cy, r) {
-  const stars = [];
-  for (let i = 0; i < 12; i += 1) {
-    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / 12;
-    const x = cx + Math.cos(angle) * r;
-    const y = cy + Math.sin(angle) * r;
-    stars.push(`<text x="${x.toFixed(2)}" y="${(y + 1.6).toFixed(2)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#ffd200">●</text>`);
-  }
-  return `<g class="eu-stars">${stars.join("")}</g>`;
-}
-
-function formatNumber(value) {
-  return Number(value).toLocaleString("de-DE", { maximumFractionDigits: 1 });
-}
-
-function formatMm(value) {
-  return `${formatNumber(value)} mm`;
-}
-
-function getCellWidth(char, font) {
-  const normalized = String(char || "").toUpperCase();
-  const specialWidth = font.specialWidths?.[normalized];
-  if (Number.isFinite(Number(specialWidth)) && Number(specialWidth) > 0) return Number(specialWidth);
-  return isDigit(normalized) ? font.digitWidth : font.letterWidth;
-}
-
-function isDigit(char) {
-  return /\d/.test(char);
-}
-
-function positiveNumber(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 ? number : fallback;
-}
-
-function clampNumber(value, min, max) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return min;
-  return Math.min(max, Math.max(min, number));
-}
-
-function numberOrFallback(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
-}
-
-function escapeText(value) {
-  return String(value).replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
-}
-
-function escapeAttr(value) {
-  return escapeText(value).replace(/"/g, "&quot;");
-}
-
-return { PLATE_TEXT_COLORS_MM: PLATE_TEXT_COLORS_MM, WIDTH_BANDS: WIDTH_BANDS, TWO_LINE_WIDTH_BANDS: TWO_LINE_WIDTH_BANDS, SPACING_RULES_MM: SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: DXF_REFERENCE_MM, ONE_LINE_RULES_MM: ONE_LINE_RULES_MM, TWO_LINE_RULES_MM: TWO_LINE_RULES_MM, resolvePlateRules: resolvePlateRules, parsePlate: parsePlate, resolvePlateFontMode: resolvePlateFontMode, buildPlateModelMm: buildPlateModelMm, renderPlateSvgMm: renderPlateSvgMm, getCanvasMm: getCanvasMm, getCharacterBand: getCharacterBand };
+return { PLATE_TEXT_COLORS_MM: PLATE_TEXT_COLORS_MM, WIDTH_BANDS: WIDTH_BANDS, TWO_LINE_WIDTH_BANDS: TWO_LINE_WIDTH_BANDS, TWO_LINE_WIDTH_RULES: TWO_LINE_WIDTH_RULES, SPACING_RULES_MM: SPACING_RULES_MM, FONT_CALIBRATION_PROFILES_MM: FONT_CALIBRATION_PROFILES_MM, DXF_REFERENCE_MM: DXF_REFERENCE_MM, ONE_LINE_RULES_MM: ONE_LINE_RULES_MM, TWO_LINE_RULES_MM: TWO_LINE_RULES_MM, MOTORCYCLE_RULES_MM: MOTORCYCLE_RULES_MM, REDUCED_TWO_LINE_RULES_MM: REDUCED_TWO_LINE_RULES_MM, resolvePlateRules: resolvePlateRules, parsePlate: parsePlate, getCharacterBand: getCharacterBand, getCanvasMm: getCanvasMm, resolvePlateFontMode: resolvePlateFontMode, buildPlateModelMm: buildPlateModelMm, renderPlateSvgMm: renderPlateSvgMm, renderPlateSvg: renderPlateSvg };
 
 })();
 
@@ -4623,16 +7253,21 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 })();
 
-// ---- src/plate/renderer.js ----
-const __m_src_plate_renderer_js = (() => {
-const { buildPlateModelMm, ONE_LINE_RULES_MM, renderPlateSvgMm } = __m_src_plate_mm_model_js;
+// ---- src/plate/lab-renderer-adapter.js ----
+const __m_src_plate_lab_renderer_adapter_js = (() => {
+// TÜV Reminder Card b325 / direct Card plate renderer integration adapter
+//
+// This module is imported by the active Card renderer boundary in renderer.js.
+// No legacy toggle or fallback is planned; rollback remains the previous ZIP.
+
+const { ONE_LINE_RULES_MM: LAB_ONE_LINE_RULES_MM, buildPlateModelMm: buildLabPlateModelMm, renderPlateSvgMm: renderLabPlateSvgMm } = __m_src_plate_lab_renderer_plate_public_api_js;
 const { checkPlateFontAvailable, ensurePlateFont, getPlateFontFaceCss, getPlateFontStatus, injectPlateFont, isPlateFontLoaded } = __m_src_plate_font_js;
 
 
 
-let plateFontRequested = false;
+let labPlateFontRequested = false;
 
-function normalizePlate(plate) {
+function normalizeLabRendererPlate(plate) {
     return String(plate || "")
         .trim()
         .replace(/[-–—]+/g, " ")
@@ -4640,73 +7275,19 @@ function normalizePlate(plate) {
         .toUpperCase();
 }
 
-function renderLicensePlate(plate, options = {}) {
-    if (!plateFontRequested) {
-        plateFontRequested = true;
-        if (typeof document !== "undefined") {
-            injectPlateFont();
-        }
-    }
-
-    const analysis = getLicensePlateMetrics(plate, options);
-
-    if (!analysis.normalizedPlate) {
-        return "";
-    }
-
-    const requestedScale = Number(options.scale || 0);
-    const maxWidth = Number(options.maxWidth || 0);
-    const scaleBasisWidth = analysis.scaleBasisWidth || analysis.width || ONE_LINE_RULES_MM.maxWidth;
-    const fallbackScale = Number.isFinite(maxWidth) && maxWidth > 0
-        ? maxWidth / scaleBasisWidth
-        : 1;
-    const scale = Number.isFinite(requestedScale) && requestedScale > 0
-        ? Math.min(1, requestedScale)
-        : Math.min(1, fallbackScale);
-    const displayWidth = Math.max(1, Math.round(analysis.width * scale));
-    const displayHeight = Math.max(1, Math.round(analysis.height * scale));
-
-    const result = renderPlateSvgMm(analysis.normalizedPlate, {
-        fontMode: options.fontMode || "auto",
-        widthMode: options.widthMode || "balanced",
-        specialIWidth: options.specialIWidth || 35.5,
-        stage: "complete",
-        showDimensions: false,
-        showDxfReferenceGuides: options.debug === true,
-        showGrid: options.debug === true,
-        showSeals: true,
-        showText: true,
-        huYear: options.huYear,
-        huMonth: options.huMonth,
-        huRotation: options.huRotation,
-        extraDefs: renderEmbeddedFontDefs()
-    });
-
-    return addCardSvgAttributes(result.svg, {
-        displayWidth,
-        displayHeight,
-        normalizedPlate: analysis.normalizedPlate,
-        model: analysis.model
-    });
-}
-
-function getLicensePlateMetrics(plate, options = {}) {
-    const normalizedPlate = normalizePlate(plate);
+function getLabRendererLicensePlateMetrics(plate, options = {}) {
+    const normalizedPlate = normalizeLabRendererPlate(plate);
 
     if (!normalizedPlate) {
         return {
             width: 0,
             height: 0,
-            scaleBasisWidth: ONE_LINE_RULES_MM.maxWidth,
+            scaleBasisWidth: LAB_ONE_LINE_RULES_MM.maxWidth,
             normalizedPlate: ""
         };
     }
 
-    const model = buildPlateModelMm(normalizedPlate, {
-        fontMode: options.fontMode || "auto",
-        widthMode: options.widthMode || "balanced",
-        specialIWidth: options.specialIWidth || 35.5
-    });
+    const model = buildLabPlateModelMm(normalizedPlate, createLabRendererOptions(options));
 
     return {
         width: model.metrics.width,
@@ -4723,7 +7304,74 @@ function getLicensePlateMetrics(plate, options = {}) {
         sealColumnRule: model.metrics.sealColumnRule,
         sideMarginLeft: model.metrics.remainingLeft,
         sideMarginRight: model.metrics.remainingRight,
-        overflow: !model.metrics.width || model.metrics.remainingLeft < ONE_LINE_RULES_MM.content.sideClearance - 0.01
+        overflow: !model.metrics.width || model.metrics.remainingLeft < LAB_ONE_LINE_RULES_MM.content.sideClearance - 0.01
+    };
+}
+
+function renderLicensePlateWithLabRenderer(plate, options = {}) {
+    if (!labPlateFontRequested) {
+        labPlateFontRequested = true;
+        if (typeof document !== "undefined") {
+            injectPlateFont();
+        }
+    }
+
+    const analysis = getLabRendererLicensePlateMetrics(plate, options);
+
+    if (!analysis.normalizedPlate) {
+        return "";
+    }
+
+    const requestedScale = Number(options.scale || 0);
+    const maxWidth = Number(options.maxWidth || 0);
+    const scaleBasisWidth = analysis.scaleBasisWidth || analysis.width || LAB_ONE_LINE_RULES_MM.maxWidth;
+    const fallbackScale = Number.isFinite(maxWidth) && maxWidth > 0
+        ? maxWidth / scaleBasisWidth
+        : 1;
+    const scale = Number.isFinite(requestedScale) && requestedScale > 0
+        ? Math.min(1, requestedScale)
+        : Math.min(1, fallbackScale);
+    const displayWidth = Math.max(1, Math.round(analysis.width * scale));
+    const displayHeight = Math.max(1, Math.round(analysis.height * scale));
+
+    const result = renderLabPlateSvgMm(analysis.normalizedPlate, {
+        ...createLabRendererOptions(options),
+        extraDefs: renderEmbeddedFontDefs()
+    });
+
+    return addLabRendererCardSvgAttributes(result.svg, {
+        displayWidth,
+        displayHeight,
+        model: analysis.model
+    });
+}
+
+function normalizePlate(plate) {
+    return normalizeLabRendererPlate(plate);
+}
+
+function getLicensePlateMetrics(plate, options = {}) {
+    return getLabRendererLicensePlateMetrics(plate, options);
+}
+
+function renderLicensePlate(plate, options = {}) {
+    return renderLicensePlateWithLabRenderer(plate, options);
+}
+
+function createLabRendererOptions(options = {}) {
+    return {
+        fontMode: options.fontMode || "auto",
+        widthMode: options.widthMode || "balanced",
+        specialIWidth: options.specialIWidth || 35.5,
+        stage: "complete",
+        showDimensions: false,
+        showDxfReferenceGuides: options.debug === true,
+        showGrid: options.debug === true,
+        showSeals: true,
+        showText: true,
+        huYear: options.huYear,
+        huMonth: options.huMonth,
+        huRotation: options.huRotation
     };
 }
 
@@ -4737,7 +7385,7 @@ function renderEmbeddedFontDefs() {
     return `<style>${css}</style>`;
 }
 
-function addCardSvgAttributes(svg, { displayWidth, displayHeight, normalizedPlate, model }) {
+function addLabRendererCardSvgAttributes(svg, { displayWidth, displayHeight, model }) {
     return svg.replace(
         /<svg\s+class="physical-plate-svg"/,
         `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
@@ -4752,7 +7400,21 @@ function escapeAttr(value) {
         .replaceAll(">", "&gt;");
 }
 
-return { normalizePlate: normalizePlate, renderLicensePlate: renderLicensePlate, getLicensePlateMetrics: getLicensePlateMetrics, checkPlateFontAvailable: checkPlateFontAvailable, ensurePlateFont: ensurePlateFont, getPlateFontStatus: getPlateFontStatus, isPlateFontLoaded: isPlateFontLoaded };
+return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLicensePlateMetrics: getLabRendererLicensePlateMetrics, renderLicensePlateWithLabRenderer: renderLicensePlateWithLabRenderer, normalizePlate: normalizePlate, getLicensePlateMetrics: getLicensePlateMetrics, renderLicensePlate: renderLicensePlate, checkPlateFontAvailable: checkPlateFontAvailable, ensurePlateFont: ensurePlateFont, getPlateFontStatus: getPlateFontStatus, isPlateFontLoaded: isPlateFontLoaded };
+
+})();
+
+// ---- src/plate/renderer.js ----
+const __m_src_plate_renderer_js = (() => {
+// TÜV Reminder Card b325 / direct Card plate renderer integration
+//
+// The active Card plate renderer now delegates directly to the staged Physical
+// Lab renderer adapter. There is intentionally no legacy renderer toggle and no
+// parallel fallback path in this module; rollback is the previous ZIP.
+
+const { checkPlateFontAvailable, ensurePlateFont, getPlateFontStatus, isPlateFontLoaded, normalizePlate, getLicensePlateMetrics, renderLicensePlate } = __m_src_plate_lab_renderer_adapter_js;
+
+return { checkPlateFontAvailable: checkPlateFontAvailable, ensurePlateFont: ensurePlateFont, getPlateFontStatus: getPlateFontStatus, isPlateFontLoaded: isPlateFontLoaded, normalizePlate: normalizePlate, getLicensePlateMetrics: getLicensePlateMetrics, renderLicensePlate: renderLicensePlate };
 
 })();
 
@@ -7890,7 +10552,6 @@ class TuevCard extends HTMLElement {
 
     isGraphicalPlateAvailable() {
         return (
-            this.config?.plate_style === "plate" &&
             this._plateFontAvailable === true &&
             this._plateFontLoaded === true
         );
