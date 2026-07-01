@@ -1,11 +1,11 @@
 {
   "name": "tuev-card",
-  "version": "0.1.1-b343",
+  "version": "0.1.1-b344",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-bundle.mjs",
-    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy && npm run check:card-renderer-adapter-scaffold && npm run check:card-renderer-adapter-smoke && npm run check:card-renderer-direct-integration && npm run check:hu-badge-smoke && npm run check:renderer-legacy-audit && npm run check:card-lab-renderer-boundary && npm run check:card-lab-adapter-options-audit && npm run check:plate-renderer-public-entry && npm run check:lab-public-api-boundary && npm run check:card-editor-preview-final && npm run check:plate-final-smoke-matrix && npm run check:post-plate-card-open-tasks && npm run check:card-editor-options-fix && npm run check:card-editor-sort-rollback-b337 && npm run check:card-editor-text-preview-stability && npm run check:plate-color-source-unification && npm run check:card-security-timer-cleanup",
+    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy && npm run check:card-renderer-adapter-scaffold && npm run check:card-renderer-adapter-smoke && npm run check:card-renderer-direct-integration && npm run check:hu-badge-smoke && npm run check:renderer-legacy-audit && npm run check:card-lab-renderer-boundary && npm run check:card-lab-adapter-options-audit && npm run check:plate-renderer-public-entry && npm run check:lab-public-api-boundary && npm run check:card-editor-preview-final && npm run check:plate-final-smoke-matrix && npm run check:post-plate-card-open-tasks && npm run check:card-editor-options-fix && npm run check:card-editor-sort-rollback-b337 && npm run check:card-editor-text-preview-stability && npm run check:plate-color-source-unification && npm run check:card-security-timer-cleanup && npm run check:card-final-release-audit",
     "check:js": "node scripts/check-js.mjs",
     "check:release": "node scripts/check-release-assets.mjs",
     "check:production-boundary": "node tools/plate-physical-lab/scripts/check-production-import-boundary.mjs",
@@ -29,6 +29,7 @@
     "check:card-editor-sort-rollback-b337": "node scripts/check-card-editor-sort-rollback-b337.mjs",
     "check:card-editor-text-preview-stability": "node scripts/check-card-editor-text-preview-stability.mjs",
     "check:plate-color-source-unification": "node scripts/check-plate-color-source-unification.mjs",
-    "check:card-security-timer-cleanup": "node scripts/check-card-security-timer-cleanup.mjs"
+    "check:card-security-timer-cleanup": "node scripts/check-card-security-timer-cleanup.mjs",
+    "check:card-final-release-audit": "node scripts/check-card-final-release-audit.mjs"
   }
 }

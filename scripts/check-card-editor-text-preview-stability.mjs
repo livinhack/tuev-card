@@ -29,8 +29,8 @@ if (!renderParts.includes('min-height: ${compact ? "18px" : "20px"};')) {
   fail('text plate min-height stabilizer is missing');
 }
 
-if (!pkg.version.endsWith('-b343')) {
-  fail('package version is not b343');
+if (!pkg.version.endsWith('-b344')) {
+  fail('package version is not b344');
 }
 
 console.log('[check:card-editor-text-preview-stability] OK');
