@@ -1,20 +1,18 @@
-# Übergabe Lab b321 – Card Transfer Staged Copy Preview
+# Übergabe Lab b322 – Card Renderer Adapter Scaffold
 
-## b321 – Card Transfer Staged Copy Preview
+b322 baut auf **b321 – Card Transfer Staged Copy Preview** auf.
 
-b321 baut auf **b320 – Card Transfer Manifest Preview** auf.
+## Änderung in b322
 
-## Änderung in b321
-
-- sichtbare Lab-Version/Titel auf b321 aktualisiert
-- Transfer-Dokumentation ergänzt
-- `scripts/card-transfer-dry-run.config.mjs` auf b321 aktualisiert
+- sichtbare Lab-Version/Titel auf b322 aktualisiert
+- `scripts/card-transfer-dry-run.config.mjs` auf b322 aktualisiert
+- neue Doku `docs/B322_CARD_RENDERER_ADAPTER_SCAFFOLD.md`
 - keine aktive Card-Integration im Lab
 - keine Renderer-/Geometrieänderung
 
 ## Wichtig
 
-Die inaktive Card-Zielkopie wird im Full-ZIP unter `src/plate/lab-renderer/` bereitgestellt. Das separate Lab-ZIP bleibt weiterhin autoritative Quelle für den Renderer.
+Die inaktive Card-Zielkopie und der Adapter liegen im Full-ZIP. Das separate Lab-ZIP bleibt weiterhin autoritative Quelle für den Renderer.
 
 ## Checks
 
@@ -22,14 +20,14 @@ Die inaktive Card-Zielkopie wird im Full-ZIP unter `src/plate/lab-renderer/` ber
 - Production Import Boundary Guard: bestanden
 - Card Transfer Dry Run Scaffold: bestanden
 - Card Transfer Manifest Preview: bestanden
-- b320 → b321 Modell-Hashes: 41/41 identisch
-- b320 → b321 SVG-Hashes: 41/41 identisch
+- b321 → b322 Modell-Hashes: 41/41 identisch
+- b321 → b322 SVG-Hashes: 41/41 identisch
 
 ## ZIPs
 
-- `plate-physical-lab-b321-card-transfer-staged-copy-preview.zip`
-- `tuev-card-full-b321-card-transfer-staged-copy-preview-handover.zip`
+- `plate-physical-lab-b322-card-renderer-adapter-scaffold.zip`
+- `tuev-card-full-b322-card-renderer-adapter-scaffold-handover.zip`
 
 ## Nächster sinnvoller Schritt
 
-Weiter ab **b321**. Sinnvoll wäre danach `b322 – Card Renderer Adapter Scaffold`, weiterhin ohne Standard-Umschaltung.
+Weiter ab **b322**. Sinnvoller nächster Schritt: `b323 – Card Renderer Adapter Smoke Checkpoint` oder danach ein erster kontrollierter Adapter-Vergleich, weiterhin ohne Default-Umschaltung.
