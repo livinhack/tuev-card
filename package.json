@@ -1,11 +1,11 @@
 {
   "name": "tuev-card",
-  "version": "0.1.1-b339",
+  "version": "0.1.1-b340",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-bundle.mjs",
-    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy && npm run check:card-renderer-adapter-scaffold && npm run check:card-renderer-adapter-smoke && npm run check:card-renderer-direct-integration && npm run check:hu-badge-smoke && npm run check:renderer-legacy-audit && npm run check:card-lab-renderer-boundary && npm run check:card-lab-adapter-options-audit && npm run check:plate-renderer-public-entry && npm run check:lab-public-api-boundary && npm run check:card-editor-preview-final && npm run check:plate-final-smoke-matrix && npm run check:post-plate-card-open-tasks && npm run check:card-editor-options-fix && npm run check:card-editor-sort-font-frame-fix",
+    "check": "node scripts/check-js.mjs && node scripts/check-release-assets.mjs && npm run check:production-boundary && npm run check:card-transfer-dry-run && npm run check:card-transfer-manifest && npm run check:card-transfer-staged-copy && npm run check:card-renderer-adapter-scaffold && npm run check:card-renderer-adapter-smoke && npm run check:card-renderer-direct-integration && npm run check:hu-badge-smoke && npm run check:renderer-legacy-audit && npm run check:card-lab-renderer-boundary && npm run check:card-lab-adapter-options-audit && npm run check:plate-renderer-public-entry && npm run check:lab-public-api-boundary && npm run check:card-editor-preview-final && npm run check:plate-final-smoke-matrix && npm run check:post-plate-card-open-tasks && npm run check:card-editor-options-fix && npm run check:card-editor-sort-rollback-b337",
     "check:js": "node scripts/check-js.mjs",
     "check:release": "node scripts/check-release-assets.mjs",
     "check:production-boundary": "node tools/plate-physical-lab/scripts/check-production-import-boundary.mjs",
@@ -25,6 +25,7 @@
     "check:plate-final-smoke-matrix": "node scripts/check-plate-final-smoke-matrix.mjs",
     "check:post-plate-card-open-tasks": "node scripts/check-post-plate-card-open-tasks.mjs",
     "check:card-editor-options-fix": "node scripts/check-card-editor-options-fix.mjs",
-    "check:card-editor-sort-font-frame-fix": "node scripts/check-card-editor-sort-font-frame-fix.mjs"
+    "check:card-editor-sort-font-frame-fix": "node scripts/check-card-editor-sort-font-frame-fix.mjs",
+    "check:card-editor-sort-rollback-b337": "node scripts/check-card-editor-sort-rollback-b337.mjs"
   }
 }

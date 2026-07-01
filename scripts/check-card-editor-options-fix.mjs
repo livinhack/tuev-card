@@ -19,24 +19,24 @@ const renderer = read("src/plate/renderer.js");
 const readme = read("README.md");
 const handover = read("HANDOVER.md");
 
-assert(card.includes('from "./plate/renderer.js?v=b339"'), "Card must use the b339 renderer cache marker.");
-assert(editor.includes('from "../plate/renderer.js?v=b339"'), "Editor must use the b339 renderer cache marker.");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b339"'), "Public renderer must use the b339 adapter cache marker.");
+assert(card.includes('from "./plate/renderer.js?v=b340"'), "Card must use the b340 renderer cache marker.");
+assert(editor.includes('from "../plate/renderer.js?v=b340"'), "Editor must use the b340 renderer cache marker.");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b340"'), "Public renderer must use the b340 adapter cache marker.");
 
 assert(card.includes('const graphicalPlateEnabled = this.config?.plate_style === "plate";'), "Card must gate graphical plate layout by plate_style.");
 assert(card.includes('isGraphicalPlateAvailable: graphicalPlateEnabled,'), "Card must obey the user plate_style option without asynchronous font availability gating.");
 
-assert(editor.includes('getSortedUngroupedDraftEntityIds'), "Editor must sort ungrouped draft entities for the visible chip order.");
-assert(editor.includes('this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);'), "Editor sort chips must update the saved ungrouped order.");
+assert(!editor.includes('getSortedUngroupedDraftEntityIds'), "Editor must keep b337 ungrouped sort behavior and not sort visible draft chip order.");
+assert(editor.includes('this.fireConfigChanged();') && editor.includes('sort: nextSort'), "Ungrouped sort chips must use the b337 config-only flow.");
 assert(editor.includes('this.releaseUngroupedEntities();'), "Release ungrouped button must call its handler.");
 assert(editor.includes('color: group.color || getGroupAccentColor(group, groupIndex)'), "Group moves must materialize fallback colors before reordering.");
-assert(editor.includes('getGroupAccentColor') && editor.includes('../card/groups.js?v=b339'), "Editor must import the group color helper through the b339 groups boundary.");
-assert(groups.includes('./entities.js?v=b339'), "Groups helper must use the b339 entities cache marker.");
+assert(editor.includes('getGroupAccentColor') && editor.includes('../card/groups.js?v=b340'), "Editor must import the group color helper through the b340 groups boundary.");
+assert(groups.includes('./entities.js?v=b340'), "Groups helper must use the b340 entities cache marker.");
 
-assert(readme.includes("b339") && /Kennzeichen grafisch darstellen/i.test(readme), "README must document the b339 editor option fix.");
-assert(handover.includes("b339") && /Sortier/i.test(handover) && /Farben/i.test(handover), "HANDOVER must document b339 sort and color fixes.");
+assert(readme.includes("b340") && /Kennzeichen grafisch darstellen/i.test(readme), "README must document the b340 editor option fix.");
+assert(handover.includes("b340") && /Sortier/i.test(handover) && /Farben/i.test(handover), "HANDOVER must document b340 sort and color fixes.");
 
 if (!process.exitCode) {
-  console.log("Card/editor options fix OK: plate_style gates rendering, sort controls update order, and group colors travel with moved groups.");
+  console.log("Card/editor options fix OK: plate_style gates rendering, sort controls use b337 config flow, and group colors travel with moved groups.");
 }
 if (process.exitCode) process.exit(process.exitCode);

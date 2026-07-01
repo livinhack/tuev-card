@@ -1,8 +1,12 @@
-# Handover – b339 Card Editor Sort / Font / Frame Fix
+# b340 – Sortierlogik-Rollback auf b337
 
-Current stand: **b339**.
+Status: baut auf b339 auf. Die in b338/b339 geänderten Sortierfunktionen für ungruppiert/Gruppen wurden auf den bewährten b337-Fluss zurückgesetzt, weil die gemeldete Fehlbeobachtung durch Testen im falschen Bereich entstand. Beibehalten aus b339: integrierte GL-Fonts ohne asynchronen Editor-Fontcheck, stabile Text/Grafik-Umschaltung, Gruppenfarben-Mitnahme beim Verschieben und Eurofeld/Rahmen-Overlay-Fix.
 
-b339 fixes the issues reported after testing b338 in Home Assistant:
+# Handover – b340 Card Editor Sort / Font / Frame Fix
+
+Current stand: **b340**.
+
+b340 fixes the issues reported after testing b338 in Home Assistant:
 
 1. Sorting still not working
    - Group sorting no longer waits behind the manual-sort confirmation popover.
@@ -30,7 +34,7 @@ Changed files of interest:
 - `src/plate/lab-renderer/plate-body.js`
 - `tools/plate-physical-lab/src/plate/plate-body.js`
 - `scripts/check-card-editor-sort-font-frame-fix.mjs`
-- updated b339 cache/version markers and existing check expectations
+- updated b340 cache/version markers and existing check expectations
 
 Checks run:
 
@@ -55,4 +59,4 @@ Next suggested test in HA:
 
 No plate geometry changed. Later Reminder integration remains separate.
 
-Sortier- und Farben-Verhalten aus b338 bleibt erhalten; b339 korrigiert die noch blockierte Sortierausführung.
+Sortier- und Farben-Verhalten aus b338 bleibt erhalten; b340 korrigiert die noch blockierte Sortierausführung.

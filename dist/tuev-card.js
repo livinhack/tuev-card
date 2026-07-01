@@ -1,4 +1,4 @@
-// TÜV Card bundled b339
+// TÜV Card bundled b340
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -10067,7 +10067,7 @@ class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        const selectedEntityIds = this.getSortedUngroupedDraftEntityIds();
+        const selectedEntityIds = this._draftEntityIds.filter(Boolean);
         const selectedAllEntityIds = this.getSelectedEntityIds();
         const availableTuevEntities = this.getAvailableTuevEntities();
         const unselectedEntities = this.getUnselectedEntities();
@@ -10610,44 +10610,30 @@ class TuevCardEditor extends HTMLElement {
         this.render();
     }
 
-    getSortedUngroupedDraftEntityIds(sort = this._config.sort, direction = this._config.sort_direction) {
-        const entityIds = this._draftEntityIds.filter(Boolean);
-        const nextSort = ["name", "plate", "due_date", "status"].includes(sort) ? sort : "name";
-        const nextDirection = direction === "desc" ? "desc" : "asc";
-        const sorted = sortEntityIds(entityIds, nextSort, this._hass);
-
-        return nextDirection === "desc"
-            ? sorted.reverse()
-            : sorted;
-    }
-
     setUngroupedSort(sort) {
         const allowed = ["name", "plate", "due_date", "status"];
         const nextSort = allowed.includes(sort) ? sort : "name";
-        const nextDirection = this._config.sort_direction === "desc" ? "desc" : "asc";
 
-        this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);
+        if (this._config.sort === nextSort) {
+            return;
+        }
+
         this._config = {
             ...this._config,
             sort: nextSort
         };
-        this.applyDraftConfig();
+        this.fireConfigChanged();
         this.render();
     }
 
     toggleUngroupedSortDirection() {
         const nextDirection = this._config.sort_direction === "desc" ? "asc" : "desc";
-        const nextSort = ["name", "plate", "due_date", "status"].includes(this._config.sort)
-            ? this._config.sort
-            : "name";
 
-        this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);
         this._config = {
             ...this._config,
-            sort: nextSort,
             sort_direction: nextDirection
         };
-        this.applyDraftConfig();
+        this.fireConfigChanged();
         this.render();
     }
 
@@ -10780,8 +10766,13 @@ class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        this._pendingGroupSort = null;
-        this._sortConfirmAnchor = null;
+        if (currentSort === "manual" && nextSort !== "manual") {
+            this._pendingGroupSort = { groupId, sort: nextSort };
+            this._sortConfirmAnchor = anchor;
+            this.render();
+            return;
+        }
+
         this.applyGroupSort(groupId, nextSort);
     }
 

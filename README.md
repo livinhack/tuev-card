@@ -1,8 +1,12 @@
-# TÜV Reminder Card b339
+# b340 – Sortierlogik-Rollback auf b337
 
-Full handover ZIP for **b339 Card Editor Sort / Font / Frame Fix**.
+Dieser Stand setzt die Sortierbedienung wieder auf den bewährten b337-Fluss zurück. Die b339-Korrekturen für integrierte Fonts, Preview-Stabilität und Eurofeld/Rahmen bleiben erhalten.
 
-b339 follows b338 and fixes the concrete findings from the HA test:
+# TÜV Reminder Card b340
+
+Full handover ZIP for **b340 Card Editor Sort / Font / Frame Fix**.
+
+b340 follows b338 and fixes the concrete findings from the HA test:
 
 - Sortierchips for name, plate, HU/due date, status, and asc/desc are treated as active editor/runtime options.
 - Group sorting now applies directly instead of getting stuck behind the manual-sort confirmation path.
@@ -20,7 +24,7 @@ No intended changes:
 
 Important Font/TTF note: ChatGPT ZIPs do not include font binaries. For the real GitHub/HACS release, the previously selected GL font binaries still need to be present in the release package under `fonts/` / `dist/fonts/`. The UI no longer treats the option as unavailable while probes settle, but the actual release still needs the font files.
 
-Use b339 as the current Card/editor fix checkpoint after b337/b338.
+Use b340 as the current Card/editor fix checkpoint after b337/b338.
 
 No plate geometry changed. Later Reminder integration remains separate.
 
