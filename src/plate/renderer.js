@@ -12,4 +12,4 @@ export {
     normalizePlate,
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./lab-renderer-adapter.js?v=b344";
+} from "./lab-renderer-adapter.js?v=b346";

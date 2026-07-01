@@ -2,7 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b344";
+import { escapeHtml } from "./utils/html-escape.js?v=b346";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b344";
-import { TuevCardEditor } from "./editor/editor.js?v=b344";
+} from "./plate/renderer.js?v=b346";
+import { TuevCardEditor } from "./editor/editor.js?v=b346";
 
 window.customCards = window.customCards || [];
 
@@ -239,6 +239,59 @@ class TuevCard extends HTMLElement {
         return false;
     }
 
+    isDashboardEditLayoutContext() {
+        const editClassNeedles = [
+            "edit-mode",
+            "editing",
+            "dashboard-edit",
+            "section-edit",
+            "card-edit"
+        ];
+        const editAttributes = [
+            "edit-mode",
+            "data-edit-mode",
+            "data-editing"
+        ];
+
+        const bodyClassName = String(document?.body?.className || "").toLowerCase();
+        if (editClassNeedles.some((needle) => bodyClassName.includes(needle))) {
+            return true;
+        }
+
+        let node = this;
+        let depth = 0;
+
+        while (node && depth < 32) {
+            const tagName = String(node.tagName || "").toUpperCase();
+            const rawClassName = node.className;
+            const className = typeof rawClassName === "string"
+                ? rawClassName.toLowerCase()
+                : String(rawClassName?.baseVal || "").toLowerCase();
+
+            if (editAttributes.some((attribute) => node.hasAttribute?.(attribute))) {
+                return true;
+            }
+
+            if (node.editMode === true || node.editing === true) {
+                return true;
+            }
+
+            if (className && editClassNeedles.some((needle) => className.includes(needle))) {
+                return true;
+            }
+
+            if (tagName.includes("EDIT") && tagName.includes("CARD")) {
+                return true;
+            }
+
+            const root = node.getRootNode?.();
+            node = node.parentElement || node.assignedSlot || root?.host || null;
+            depth += 1;
+        }
+
+        return false;
+    }
+
     getLayoutContext(isMulti) {
         const measuredWidth = this.getCardWidth();
         const requestedColumns = String(this.config?.columns || "auto");
@@ -255,22 +308,10 @@ class TuevCard extends HTMLElement {
             };
         }
 
-        if (this.config?.plate_style !== "plate") {
-            // Text plates have no fixed SVG box. In HA's editor preview the
-            // simulated multi-column wrapper can otherwise react to its own
-            // text-height changes and repeatedly remeasure/repaint. Keep the
-            // text preview at the native editor width; the real dashboard uses
-            // the same non-graphical plate branch without changing renderer
-            // geometry or sorting behavior.
-            return {
-                measuredWidth,
-                layoutWidth: measuredWidth,
-                requestedColumns,
-                previewContext,
-                previewScaled: false,
-                scale: 1
-            };
-        }
+        // The editor preview must keep the same column decision for graphical
+        // and textual plates. The user-facing "Kennzeichen grafisch darstellen"
+        // option changes only the vehicle content; it must not change the
+        // preview grid or make the displayed column limit jump between modes.
 
         const previewSimulation = this.getPreviewSimulation(requestedColumns, measuredWidth);
 
@@ -436,11 +477,15 @@ class TuevCard extends HTMLElement {
         const storedWidth = this._cardWidth > 0 ? Math.round(this._cardWidth) : 0;
         const previewContext = this.isEditorPreviewContext();
 
+        const dashboardEditContext = this.isDashboardEditLayoutContext();
+
         // In the real dashboard the custom element's own box is the only safe
         // source of truth. Parent containers can be wider than the card itself
         // in tile/section layouts; using them would make plate scaling think it
-        // has more horizontal room than the tile actually provides.
-        if (!previewContext) {
+        // has more horizontal room than the tile actually provides. During HA
+        // dashboard editing, section cards can temporarily report the narrower
+        // drag/overlay box; only that edit context may consult nearby parents.
+        if (!previewContext && !dashboardEditContext) {
             return ownWidth || cardWidth || storedWidth || 0;
         }
 
@@ -464,9 +509,9 @@ class TuevCard extends HTMLElement {
             return 0;
         }
 
-        // In HA's editor preview the custom element can initially report too
-        // small a width. There we still allow nearby preview/container widths,
-        // because the result is scaled visually and not used by the real card.
+        // In HA's editor preview and dashboard edit mode the custom element can
+        // initially report too small a width. Allow nearby preview/container
+        // widths there; normal dashboard rendering stays element-bound above.
         return Math.max(...candidates);
     }
 

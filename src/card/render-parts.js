@@ -1,5 +1,5 @@
 import { renderBadge } from "../badge/renderer.js?v=b136";
-import { escapeHtml } from "../utils/html-escape.js?v=b344";
+import { escapeHtml } from "../utils/html-escape.js?v=b346";
 
 export function renderMissingEntity(entityId, localize) {
     return `

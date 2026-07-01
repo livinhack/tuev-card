@@ -1,53 +1,38 @@
-# TÜV Reminder Card b344
+# TÜV Reminder Card b346
 
-Full/Card handover ZIP for **b344 Card Final Release Audit**.
+Full/Card handover ZIP for **b346 Windows Path Audit Fix**.
 
-## Inhalt
+This stand fixes a Windows-only audit-script path-normalization issue from b345. Runtime Card behavior is unchanged.
 
-b344 ist ein finaler Card-Release-/Doku-Audit nach b343. Es wurden keine neuen Features eingebaut, sondern der aktuelle Card-Stand für den nächsten Integrationsschritt vorbereitet.
+See `HANDOVER.md` and `docs/B346_WINDOWS_PATH_AUDIT_FIX.md`.
 
-- README/HANDOVER auf den aktuellen b344-Stand gebracht.
-- Neuer Release-Audit-Check ergänzt: `check:card-final-release-audit`.
-- Neue Doku ergänzt: `docs/B344_CARD_FINAL_RELEASE_AUDIT.md`.
-- Card-/Editor-/Renderer-Cachemarker auf b344 aktualisiert.
-- Security-/Timer-Cleanup aus b343 bleibt geschützt.
-- Font-/HACS-Hinweise bleiben sichtbar dokumentiert.
-- Reminder-Integration bleibt ausdrücklich ein späterer End-to-End-Schritt mit aktuellem Reminder-ZIP.
+## Font-/HACS-Hinweis
 
-## Nicht geändert
-
-- keine Kennzeichen-Geometrie
-- keine HU-/TÜV-Plakettenlogik
-- keine Wechselkennzeichen-Geometrie
-- keine Sortierlogik
-- keine Reminder-Integration
-- keine neuen Card-Features
-- kein Buildsystem-/Lit-/Vite-/Rollup-Refactor
-- kein Legacy-/Umschalter
-
-## Aktueller Status
-
-Der Nummernschildrenderer ist Card-seitig vorbereitet/eingefroren. b344 ist der aktuelle Card-Final-Release-Audit-Stand, bevor später das aktuelle Reminder-ZIP analysiert und die echten End-to-End-Datenpfade ergänzt/getestet werden.
-
-## Checks
-
-- `npm run check`
-- `npm run build`
-
-## Hinweis Fonts
-
-Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein und beim Build nach `dist/fonts/` gespiegelt werden:
+Die ChatGPT-Übergabe-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein, insbesondere:
 
 - `fonts/GL-Nummernschild-Mtl.ttf`
 - `fonts/GL-Nummernschild-Eng.ttf`
 
-Die in diesem ZIP enthaltenen README-/Lizenz-/Platzhalterdateien ersetzen die Font-Binaries nicht.
+Beim lokalen Release-Build kopiert `scripts/build-bundle.mjs` vorhandene Fontdateien nach `dist/fonts/`.
 
-## Beibehaltene Card-Fixes
+## Scope
 
-- Option **Kennzeichen grafisch darstellen** bleibt wirksam.
-- Sortierlogik bleibt auf dem zurückgesetzten b337-Fluss.
-- Gruppen-Farben bleiben beim Verschieben materialisiert und wandern mit.
-- Eurofeld/Rahmen-Fix bleibt erhalten.
-- Plattenfarbe für Rahmen/Text/W/Zusatzschild bleibt vereinheitlicht.
-- b343-Sicherheitsfixes bleiben aktiv: HTML-Escaping, toter Font-Timer entfernt, Confirm-Timeouts verwaltet.
+No plate geometry changed in b346. Reminder integration remains a later phase.
+
+## Übernommene Card-/Editor-Fixes
+
+Die früheren Fixes bleiben in b346 erhalten: Die Option **Kennzeichen grafisch darstellen** steuert weiterhin grafische Kennzeichen vs. Textanzeige; Sortierfunktionen bleiben auf dem b337-Config-Fluss; Gruppen-Farben bleiben beim Verschieben erhalten.
+
+## b346 Final Release Audit Status
+
+b346 keeps the Final Release Audit boundary from the previous release-audit stand and only adds the Windows path audit fix.
+
+ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die lokalen GL-Fontdateien vorhanden sein.
+
+Nicht-Ziele in b346:
+
+- keine Kennzeichen-Geometrie
+- keine Reminder-Integration
+- keine HU-Logik
+- keine Sortierlogik
+- keine neuen Features

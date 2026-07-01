@@ -37,7 +37,7 @@ function listJsFiles(relativeDir) {
       const abs = join(absDir, entry.name);
       if (entry.isDirectory()) walk(abs);
       else if (entry.isFile() && extname(entry.name) === ".js") {
-        result.push(normalize(abs.slice(root.length + 1)).replaceAll("\\\\", "/"));
+        result.push(normalize(abs.slice(root.length + 1)).replaceAll("\\", "/"));
       }
     }
   }
@@ -53,7 +53,7 @@ function importTargets(file) {
   while ((match = importRe.exec(text))) {
     const clean = match[1].split("?")[0];
     if (!clean.startsWith(".")) continue;
-    let target = normalize(join(dirname(file), clean)).replaceAll("\\\\", "/");
+    let target = normalize(join(dirname(file), clean)).replaceAll("\\", "/");
     if (!extname(target)) target += ".js";
     targets.push(target);
   }
@@ -71,7 +71,7 @@ const nonCommentLines = renderer
 
 assert(nonCommentLines.length >= 2, "renderer.js must contain only comments plus its public export block.");
 assert(nonCommentLines[0] === "export {", "renderer.js must start its executable content with a single public export block.");
-assert(nonCommentLines.at(-1) === '} from "./lab-renderer-adapter.js?v=b344";', "renderer.js must delegate only to the b344 Card/Lab adapter cache boundary.");
+assert(nonCommentLines.at(-1) === '} from "./lab-renderer-adapter.js?v=b346";', "renderer.js must delegate only to the b346 Card/Lab adapter cache boundary.");
 assert(importTargets(rendererPath).length === 1 && importTargets(rendererPath)[0] === adapterPath, "renderer.js must import/re-export only lab-renderer-adapter.js.");
 
 for (const name of expectedExports) {
@@ -107,8 +107,8 @@ for (const forbidden of [
 
 const cardEntry = read("src/tuev-card-entry.js");
 const editor = read("src/editor/editor.js");
-assert(cardEntry.includes('from "./plate/renderer.js?v=b344"'), "Card entry must consume the b344 public renderer cache boundary.");
-assert(editor.includes('from "../plate/renderer.js?v=b344"'), "Editor must consume the b344 public renderer cache boundary.");
+assert(cardEntry.includes('from "./plate/renderer.js?v=b346"'), "Card entry must consume the b346 public renderer cache boundary.");
+assert(editor.includes('from "../plate/renderer.js?v=b346"'), "Editor must consume the b346 public renderer cache boundary.");
 
 const files = listJsFiles("src");
 const badConsumers = [];
@@ -123,7 +123,7 @@ for (const file of files) {
 assert(badConsumers.length === 0, `Card-facing source must use renderer.js, not adapter/Lab internals: ${badConsumers.join("; ")}`);
 
 if (!process.exitCode) {
-  console.log("Plate renderer public entry cleanup OK: renderer.js is a thin b344 public boundary with the established Card API only.");
+  console.log("Plate renderer public entry cleanup OK: renderer.js is a thin b346 public boundary with the established Card API only.");
 }
 
 if (process.exitCode) process.exit(process.exitCode);

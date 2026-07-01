@@ -1,79 +1,51 @@
-# Handover – b344 Card Final Release Audit
+# Handover – b346 Windows Path Audit Fix
 
-Current stand: **b344**.
+Current stand: **b346**.
 
-## Basis
+b346 builds on **b345 Card Editor Preview Columns / Popup Stability Fix** and fixes a Windows-only release-check problem reported from the local `.bat` build.
 
-b344 baut auf **b343 Card Security / Timer Cleanup** auf.
+## Change in b346
 
-## Ziel
+- Fixed path normalization in audit scripts that compared imported/source file paths against allowlists.
+- Replaced the incorrect double-backslash normalization with single-backslash normalization in the affected scripts.
+- This makes `check:renderer-legacy-audit` recognize the allowed blue placeholder fallback files on Windows too.
 
-b344 ist kein Funktionsschritt, sondern ein finaler Card-Release-/Doku-Audit vor der späteren Reminder-Integration.
+## Important
 
-Die Card soll jetzt als weitgehend fertig vorbereiteter Stand behandelt werden. Der nächste große Block ist nicht mehr Card-Renderer-Refactoring, sondern später:
+The old blue HU/debug placeholder is still only allowed in the documented fallback/debug files. Productive Full-HU rendering remains unchanged.
 
-1. aktuelles Reminder-ZIP analysieren
-2. fehlende Reminder-Daten/Optionen anbinden
-3. echte End-to-End-Tests durchführen
+## Not changed
 
-## Änderung in b344
+- no license plate geometry
+- no HU logic
+- no change-plate geometry
+- no sort logic
+- no popup behavior
+- no font logic
+- no Reminder integration
+- no new features
 
-- README/HANDOVER auf b344 aktualisiert.
-- Neue Doku: `docs/B344_CARD_FINAL_RELEASE_AUDIT.md`.
-- Neuer Check: `check:card-final-release-audit`.
-- Card-/Editor-/Renderer-Cachemarker auf b344 aktualisiert.
-- Release-/Font-/HACS-Hinweise klarer zusammengefasst.
-- Offene spätere Reminder-End-to-End-Punkte ausdrücklich getrennt von der Card-Finalisierung dokumentiert.
-- Security-/Timer-Cleanup aus b343 bleibt durch Checks geschützt.
+## Validation
 
-## Nicht geändert
+- Lab: `npm run check` passed
+- Full/Card: `npm run check` passed
+- Full/Card: `npm run build` passed
 
-- keine Kennzeichen-Geometrie
-- keine HU-Plakettenlogik
-- keine Wechselkennzeichen-Geometrie
-- keine Sortierlogik
-- keine Reminder-Integration
-- keine neuen Features
-- kein Legacy-/Umschalter
-- kein Vite-/Rollup-/Lit-Umbau
+## ZIPs
 
-## Neue/aktualisierte Checks
+- `plate-physical-lab-b346-windows-path-audit-fix.zip`
+- `tuev-card-full-b346-windows-path-audit-fix-handover.zip`
 
-- `check:card-final-release-audit`
-- bestehende b343/b342 Boundary-/Smoke-/Security-Checks bleiben aktiv.
+## Scope confirmation
 
-## Durchgeführte Checks
+No plate geometry changed in b346. Reminder integration remains a later phase.
 
-- Lab: `npm run check`
-- Full/Card: `npm run check`
-- Full/Card: `npm run build`
+## Übernommene Card-/Editor-Fixes
 
-## Artefakte
+Die früheren Sortier- und Farben-Fixes bleiben in b346 erhalten: Sortierfunktionen bleiben auf dem b337-Config-Fluss, und Gruppen-Farben werden beim Verschieben materialisiert/mitgenommen.
 
-- `plate-physical-lab-b344-card-final-release-audit.zip`
-- `tuev-card-full-b344-card-final-release-audit-handover.zip`
+## b346 Final Release Audit Status
 
-## Aktueller Arbeitsstand
+b346 keeps the Final Release Audit boundary and only fixes Windows path normalization in audit scripts.
 
-b344 ist der aktuelle Card-Final-Release-Audit-Stand.
-
-Der Nummernschildrenderer bleibt Card-seitig vorbereitet/eingefroren. Weitere Änderungen daran nur bei echten Bugs oder nach Reminder-End-to-End-Test.
-
-## Später mit Reminder-ZIP prüfen
-
-Einige Fälle sind Card-seitig vorbereitet, können aber erst mit dem aktuellen Reminder-ZIP realistisch end-to-end geprüft werden:
-
-- fahrzeugbezogene Wechselkennzeichen-Daten
-- grün/E/H/Saison als Reminder-/Fahrzeugdaten
-- HU-Jahr, HU-Monat, Status und Rotation über echte Integration
-- endgültige Service-/Confirm-Flüsse gegen aktuelle Reminder-API
-
-## Font-/HACS-Hinweis
-
-Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein und beim Build nach `dist/fonts/` gespiegelt werden.
-
-## Beibehaltene Editor-/Card-Fixes
-
-- Sortierlogik bleibt bewusst auf dem b337-Rollback-Fluss.
-- Gruppen-Farben bleiben beim Verschieben materialisiert und wandern mit der Gruppe.
-- Option **Kennzeichen grafisch darstellen** bleibt wirksam.
+Reminder-ZIP analysis and real End-to-End integration remain the next later phase.

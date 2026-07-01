@@ -31,7 +31,7 @@ function listJsFiles(relativeDir) {
       if (entry.isDirectory()) {
         walk(abs);
       } else if (entry.isFile() && extname(entry.name) === ".js") {
-        result.push(normalize(abs.slice(root.length + 1)).replaceAll("\\\\", "/"));
+        result.push(normalize(abs.slice(root.length + 1)).replaceAll("\\", "/"));
       }
     }
   }
@@ -42,7 +42,7 @@ function listJsFiles(relativeDir) {
 function resolveImport(fromFile, specifier) {
   const clean = String(specifier || "").split("?")[0];
   if (!clean.startsWith(".")) return null;
-  let target = normalize(join(dirname(fromFile), clean)).replaceAll("\\\\", "/");
+  let target = normalize(join(dirname(fromFile), clean)).replaceAll("\\", "/");
   if (!extname(target)) target += ".js";
   return target;
 }

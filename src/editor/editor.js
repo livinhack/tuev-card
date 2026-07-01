@@ -1,12 +1,12 @@
 import { localize } from "../translations/index.js?v=b136";
-import { escapeHtml } from "../utils/html-escape.js?v=b344";
+import { escapeHtml } from "../utils/html-escape.js?v=b346";
 import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b136";
 import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b136";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b344";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b346";
 // Fonts are bundled with the card release. Keep the public renderer boundary
 // imported for the editor/plate dependency boundary, but do not probe fonts or
 // re-toggle the graphical plate option from asynchronous font checks.
-import { normalizePlate as rendererBoundaryNormalizePlate } from "../plate/renderer.js?v=b344";
+import { normalizePlate as rendererBoundaryNormalizePlate } from "../plate/renderer.js?v=b346";
 import {
     getColumnLabel
 } from "./columns.js?v=b136";
@@ -57,12 +57,34 @@ export class TuevCardEditor extends HTMLElement {
             this._boundHandleDocumentClick = (event) => this.handleDocumentClick(event);
         }
 
+        if (!this._boundHandleDocumentPointerDown) {
+            this._boundHandleDocumentPointerDown = (event) => this.handleDocumentClick(event);
+        }
+
+        if (!this._boundHandleDocumentKeyDown) {
+            this._boundHandleDocumentKeyDown = (event) => {
+                if (event.key === "Escape" && this.hasOpenFloatingPanel()) {
+                    this.closeFloatingPanels();
+                }
+            };
+        }
+
+        document.addEventListener("pointerdown", this._boundHandleDocumentPointerDown, true);
         document.addEventListener("click", this._boundHandleDocumentClick, true);
+        document.addEventListener("keydown", this._boundHandleDocumentKeyDown, true);
     }
 
     disconnectedCallback() {
+        if (this._boundHandleDocumentPointerDown) {
+            document.removeEventListener("pointerdown", this._boundHandleDocumentPointerDown, true);
+        }
+
         if (this._boundHandleDocumentClick) {
             document.removeEventListener("click", this._boundHandleDocumentClick, true);
+        }
+
+        if (this._boundHandleDocumentKeyDown) {
+            document.removeEventListener("keydown", this._boundHandleDocumentKeyDown, true);
         }
     }
 
@@ -96,9 +118,7 @@ export class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        window.setTimeout(() => {
-            this.closeFloatingPanels();
-        }, 0);
+        this.closeFloatingPanels();
     }
 
     hasOpenFloatingPanel() {

@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b344 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b346 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
