@@ -1,4 +1,4 @@
-// TÜV Reminder Card b337 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b338 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.

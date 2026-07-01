@@ -1,4 +1,4 @@
-// TÜV Card bundled b337
+// TÜV Card bundled b338
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -7900,7 +7900,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b337 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b338 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -8062,7 +8062,7 @@ return { normalizeLabRendererPlate: normalizeLabRendererPlate, getLabRendererLic
 
 // ---- src/plate/renderer.js ----
 const __m_src_plate_renderer_js = (() => {
-// TÜV Reminder Card b337 / direct Card plate renderer integration
+// TÜV Reminder Card b338 / direct Card plate renderer integration
 //
 // The active Card plate renderer now delegates directly to the staged Physical
 // Lab renderer adapter. There is intentionally no legacy renderer toggle and no
@@ -9849,7 +9849,7 @@ const __m_src_editor_editor_js = (() => {
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig, removeLegacyCardConfigOptions } = __m_src_card_config_js;
 const { getAvailableTuevEntities, getEntityLabel, sortEntityIds } = __m_src_card_entities_js;
-const { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } = __m_src_card_groups_js;
+const { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } = __m_src_card_groups_js;
 const { checkPlateFontAvailable, ensurePlateFont } = __m_src_plate_renderer_js;
 const { getColumnLabel } = __m_src_editor_columns_js;
 const { renderEntitySection, renderGroupsSection } = __m_src_editor_render_parts_js;
@@ -10099,7 +10099,7 @@ class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        const selectedEntityIds = this._draftEntityIds.filter(Boolean);
+        const selectedEntityIds = this.getSortedUngroupedDraftEntityIds();
         const selectedAllEntityIds = this.getSelectedEntityIds();
         const availableTuevEntities = this.getAvailableTuevEntities();
         const unselectedEntities = this.getUnselectedEntities();
@@ -10642,30 +10642,44 @@ class TuevCardEditor extends HTMLElement {
         this.render();
     }
 
+    getSortedUngroupedDraftEntityIds(sort = this._config.sort, direction = this._config.sort_direction) {
+        const entityIds = this._draftEntityIds.filter(Boolean);
+        const nextSort = ["name", "plate", "due_date", "status"].includes(sort) ? sort : "name";
+        const nextDirection = direction === "desc" ? "desc" : "asc";
+        const sorted = sortEntityIds(entityIds, nextSort, this._hass);
+
+        return nextDirection === "desc"
+            ? sorted.reverse()
+            : sorted;
+    }
+
     setUngroupedSort(sort) {
         const allowed = ["name", "plate", "due_date", "status"];
         const nextSort = allowed.includes(sort) ? sort : "name";
+        const nextDirection = this._config.sort_direction === "desc" ? "desc" : "asc";
 
-        if (this._config.sort === nextSort) {
-            return;
-        }
-
+        this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);
         this._config = {
             ...this._config,
             sort: nextSort
         };
-        this.fireConfigChanged();
+        this.applyDraftConfig();
         this.render();
     }
 
     toggleUngroupedSortDirection() {
         const nextDirection = this._config.sort_direction === "desc" ? "asc" : "desc";
+        const nextSort = ["name", "plate", "due_date", "status"].includes(this._config.sort)
+            ? this._config.sort
+            : "name";
 
+        this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);
         this._config = {
             ...this._config,
+            sort: nextSort,
             sort_direction: nextDirection
         };
-        this.fireConfigChanged();
+        this.applyDraftConfig();
         this.render();
     }
 
@@ -10714,7 +10728,10 @@ class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        const nextGroups = [...this._draftGroups];
+        const nextGroups = this._draftGroups.map((group, groupIndex) => ({
+            ...group,
+            color: group.color || getGroupAccentColor(group, groupIndex)
+        }));
         const [group] = nextGroups.splice(index, 1);
         nextGroups.splice(targetIndex, 0, group);
 
@@ -11672,11 +11689,12 @@ class TuevCard extends HTMLElement {
                 effectiveColumns: layout.effectiveColumns,
                 tileWidth: layout.tileWidth
             });
+            const graphicalPlateEnabled = this.config?.plate_style === "plate";
             const sharedPlateLayout = getSharedPlateLayout({
                 entityIds,
                 hass,
                 tileWidth: layout.tileWidth,
-                isGraphicalPlateAvailable: this.isGraphicalPlateAvailable(),
+                isGraphicalPlateAvailable: graphicalPlateEnabled && this.isGraphicalPlateAvailable(),
                 getLicensePlateMetrics
             });
             const grid = `

@@ -1,11 +1,11 @@
 import { localize } from "../translations/index.js?v=b136";
 import { normalizeCardConfig, removeLegacyCardConfigOptions } from "../card/config.js?v=b136";
 import { getAvailableTuevEntities, getEntityLabel, sortEntityIds } from "../card/entities.js?v=b136";
-import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection } from "../card/groups.js?v=b136";
+import { createGroup, getNewGroupTitle, getUngroupedEntityIdsFromConfig, normalizeGroups, normalizeGroupSort, normalizeGroupSortDirection, getGroupAccentColor } from "../card/groups.js?v=b338";
 import {
     checkPlateFontAvailable,
     ensurePlateFont
-} from "../plate/renderer.js?v=b337";
+} from "../plate/renderer.js?v=b338";
 import {
     getColumnLabel
 } from "./columns.js?v=b136";
@@ -259,7 +259,7 @@ export class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        const selectedEntityIds = this._draftEntityIds.filter(Boolean);
+        const selectedEntityIds = this.getSortedUngroupedDraftEntityIds();
         const selectedAllEntityIds = this.getSelectedEntityIds();
         const availableTuevEntities = this.getAvailableTuevEntities();
         const unselectedEntities = this.getUnselectedEntities();
@@ -802,30 +802,44 @@ export class TuevCardEditor extends HTMLElement {
         this.render();
     }
 
+    getSortedUngroupedDraftEntityIds(sort = this._config.sort, direction = this._config.sort_direction) {
+        const entityIds = this._draftEntityIds.filter(Boolean);
+        const nextSort = ["name", "plate", "due_date", "status"].includes(sort) ? sort : "name";
+        const nextDirection = direction === "desc" ? "desc" : "asc";
+        const sorted = sortEntityIds(entityIds, nextSort, this._hass);
+
+        return nextDirection === "desc"
+            ? sorted.reverse()
+            : sorted;
+    }
+
     setUngroupedSort(sort) {
         const allowed = ["name", "plate", "due_date", "status"];
         const nextSort = allowed.includes(sort) ? sort : "name";
+        const nextDirection = this._config.sort_direction === "desc" ? "desc" : "asc";
 
-        if (this._config.sort === nextSort) {
-            return;
-        }
-
+        this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);
         this._config = {
             ...this._config,
             sort: nextSort
         };
-        this.fireConfigChanged();
+        this.applyDraftConfig();
         this.render();
     }
 
     toggleUngroupedSortDirection() {
         const nextDirection = this._config.sort_direction === "desc" ? "asc" : "desc";
+        const nextSort = ["name", "plate", "due_date", "status"].includes(this._config.sort)
+            ? this._config.sort
+            : "name";
 
+        this._draftEntityIds = this.getSortedUngroupedDraftEntityIds(nextSort, nextDirection);
         this._config = {
             ...this._config,
+            sort: nextSort,
             sort_direction: nextDirection
         };
-        this.fireConfigChanged();
+        this.applyDraftConfig();
         this.render();
     }
 
@@ -874,7 +888,10 @@ export class TuevCardEditor extends HTMLElement {
             return;
         }
 
-        const nextGroups = [...this._draftGroups];
+        const nextGroups = this._draftGroups.map((group, groupIndex) => ({
+            ...group,
+            color: group.color || getGroupAccentColor(group, groupIndex)
+        }));
         const [group] = nextGroups.splice(index, 1);
         nextGroups.splice(targetIndex, 0, group);
 

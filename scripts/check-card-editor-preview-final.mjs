@@ -36,9 +36,9 @@ const card = read(cardPath);
 const adapter = read(adapterPath);
 const renderer = read(rendererPath);
 
-assert(editor.includes('from "../plate/renderer.js?v=b337"'), "Editor must consume the b337 public renderer cache boundary.");
-assert(card.includes('from "./plate/renderer.js?v=b337"'), "Card entry must consume the b337 public renderer cache boundary.");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b337"'), "Public renderer entry must delegate to the b337 adapter cache boundary.");
+assert(editor.includes('from "../plate/renderer.js?v=b338"'), "Editor must consume the b338 public renderer cache boundary.");
+assert(card.includes('from "./plate/renderer.js?v=b338"'), "Card entry must consume the b338 public renderer cache boundary.");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b338"'), "Public renderer entry must delegate to the b338 adapter cache boundary.");
 
 assert(editor.includes("checkPlateFontAvailability(force = false)"), "Editor font availability check must accept a force flag.");
 assert(editor.includes("this._plateFontCheckInProgress"), "Editor must guard against overlapping font checks.");

@@ -50,7 +50,7 @@ const cardEntry = read(cardEntryPath);
 
 assert(activeRenderer.includes("./lab-renderer-adapter.js"), "renderer.js must directly delegate to lab-renderer-adapter.js.");
 assert(!activeRenderer.includes("./mm-model.js") && !activeRenderer.includes("renderPlateSvgMm"), "renderer.js must not keep the old direct mm-model renderer implementation.");
-assert(!cardEntry.includes('this.config?.plate_style === "plate"'), "Card graphical plate availability must not depend on a plate_style text/plate switch.");
+assert(cardEntry.includes('this.config?.plate_style === "plate"'), "Card graphical plate availability must respect the plate_style text/plate option.");
 
 for (const forbidden of forbiddenPatterns) {
   assert(!activeRenderer.includes(forbidden), `renderer.js must not contain forbidden debug/toggle/legacy pattern: ${forbidden}`);
@@ -91,5 +91,5 @@ assert(changePlateSvg.includes('data-change-plate="true"'), "Change-plate smoke 
 assert(changePlateSvg.includes('data-hu-badge-renderer="full"'), "Change-plate supplement must use the full HU badge renderer.");
 
 if (!process.exitCode) {
-  console.log("Card renderer direct integration OK: active renderer delegates to Lab adapter, no toggle/legacy path, Card no longer gates rendering on plate_style.");
+  console.log("Card renderer direct integration OK: active renderer delegates to Lab adapter, no toggle/legacy path, Card respects plate_style while keeping the renderer boundary direct.");
 }

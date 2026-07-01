@@ -22,8 +22,8 @@ import {
     getLicensePlateMetrics,
     isPlateFontLoaded,
     renderLicensePlate
-} from "./plate/renderer.js?v=b337";
-import { TuevCardEditor } from "./editor/editor.js?v=b136";
+} from "./plate/renderer.js?v=b338";
+import { TuevCardEditor } from "./editor/editor.js?v=b338";
 
 window.customCards = window.customCards || [];
 
@@ -639,11 +639,12 @@ class TuevCard extends HTMLElement {
                 effectiveColumns: layout.effectiveColumns,
                 tileWidth: layout.tileWidth
             });
+            const graphicalPlateEnabled = this.config?.plate_style === "plate";
             const sharedPlateLayout = getSharedPlateLayout({
                 entityIds,
                 hass,
                 tileWidth: layout.tileWidth,
-                isGraphicalPlateAvailable: this.isGraphicalPlateAvailable(),
+                isGraphicalPlateAvailable: graphicalPlateEnabled && this.isGraphicalPlateAvailable(),
                 getLicensePlateMetrics
             });
             const grid = `
