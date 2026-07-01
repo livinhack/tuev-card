@@ -1,7 +1,16 @@
-# TÜV Reminder Card b329
+# TÜV Reminder Card b330
 
-Full handover ZIP for b329.
+Full handover ZIP for b330.
 
-b329 is a conservative Card renderer legacy-path audit on top of b328. It keeps the full HU badge integration unchanged and adds an automated audit proving that the active Card boundary delegates through the Lab adapter, while old/unimported renderer paths remain documented instead of being merged or removed blindly.
+b330 is a small cleanup checkpoint on top of b329. It removes only the old, unimported Full/Card file `src/plate/mm-model.js` and updates the renderer legacy audit so the removal is checked automatically.
 
-No geometry changes, no file deletion, and no legacy renderer switch were introduced.
+No renderer geometry, HU badge behavior, editor behavior, or legacy switch logic was changed.
+
+## Checks
+
+- `npm run check` passed.
+- `npm run build` passed.
+
+## Font note
+
+This ChatGPT ZIP does not include GL TTF font binaries. For GitHub/HACS release builds, make sure the GL font files are present locally before building.

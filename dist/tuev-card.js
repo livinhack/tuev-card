@@ -1,4 +1,4 @@
-// TÜV Card bundled b329
+// TÜV Card bundled b330
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -3694,7 +3694,7 @@ return { tuevColorForYear: __reexport_tuevColorForYear, renderBadge: renderBadge
 
 // ---- src/plate/lab-renderer/hu-badge-marker.js ----
 const __m_src_plate_lab_renderer_hu_badge_marker_js = (() => {
-// Kennzeichen Physical Lab b329 / HU badge marker bridge
+// Kennzeichen Physical Lab b330 / HU badge marker bridge
 // Lab-only experiment: render the existing full TÜV badge SVG into the 35-mm HU seal slot.
 
 const { renderBadge } = __m_src_plate_lab_renderer_badge_renderer_js;
@@ -4084,7 +4084,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b329 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b330 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -4191,7 +4191,7 @@ return { renderChangePlateSupplement: renderChangePlateSupplement, createChangeP
 
 // ---- src/plate/lab-renderer/plate-render-shell.js ----
 const __m_src_plate_lab_renderer_plate_render_shell_js = (() => {
-// Kennzeichen Physical Lab b329 / SVG render shell component
+// Kennzeichen Physical Lab b330 / SVG render shell component
 // Owns final SVG layer composition, canvas expansion and purely visual text/reference layers.
 // It must not calculate physical layout positions; it only renders the solved model.
 
@@ -7900,7 +7900,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b329 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b330 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.

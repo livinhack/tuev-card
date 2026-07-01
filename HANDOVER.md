@@ -1,38 +1,47 @@
-# Handover – b329 Card Renderer Legacy Audit
+# Handover – b330 Remove Unused Legacy mm-model
 
-Current stand: b329.
+Current stand: b330.
 
-b329 keeps the b328 HU smoke checkpoint unchanged and adds a focused Card renderer legacy-path audit. It is intentionally conservative: no geometry changes, no legacy switch, and no file deletion yet.
+b330 is a deliberately small cleanup checkpoint after the b329 Card renderer legacy audit. It removes only the demonstrably unimported old Full/Card path `src/plate/mm-model.js`. No renderer geometry was changed and no legacy/alternate renderer switch was added.
 
 ## Changes
 
-- Added `check:renderer-legacy-audit` in the Lab and Full/Card packages.
-- The audit proves the active Card renderer chain:
-  - `src/tuev-card-entry.js` / editor
+- Removed obsolete Full/Card file:
+  - `src/plate/mm-model.js`
+- Kept the active Card renderer chain unchanged:
   - `src/plate/renderer.js`
   - `src/plate/lab-renderer-adapter.js`
   - `src/plate/lab-renderer/plate-public-api.js`
-- The audit confirms `src/plate/mm-model.js` in the Full/Card source tree has no incoming imports and is only a later removal candidate.
-- The audit confirms Lab-only/compatibility renderer files are not imported through the Card-facing boundary.
-- b328 HU checks remain active and unchanged.
+- Updated `check:renderer-legacy-audit` so it now proves the old Full/Card `src/plate/mm-model.js` path is absent and still not imported.
+- Left standalone Lab compatibility boundaries intact. The Lab still keeps its own `src/plate/mm-model.js` compatibility facade.
+- Updated visible b330 version markers/package versions.
 
-## Card state
+## Explicit non-changes
 
-- The Card adapter still sets `huBadgeRenderer: "full"`.
-- Reminder-fed `huYear`, `huMonth` and `huRotation` are still passed into the Lab renderer.
-- The Wechselkennzeichen supplement still receives the same resolved HU badge options through the render shell.
-- The old blue HU placeholder remains allowed only in Lab/debug/placeholder contexts; the active full HU path is still guarded by smoke checks.
+- No geometry changes.
+- No HU badge changes beyond b327/b328 behavior.
+- No Card/editor UX changes.
+- No additional renderer cleanup beyond the single unused file removal.
+- No merging of fachlich ähnliche, aber nicht identische Abläufe.
 
-## Validation
+## Checks
+
+Full/Card:
 
 - `npm run check` passed.
-- `npm run build` passed and rebuilt `dist/tuev-card.js` for b329.
+- `npm run build` passed and rebuilt `dist/tuev-card.js` for b330.
 
-## Files
+Standalone Lab:
 
-- Matching standalone Lab ZIP: `plate-physical-lab-b329-card-renderer-legacy-audit.zip`.
-- Full/Card handover ZIP: `tuev-card-full-b329-card-renderer-legacy-audit-handover.zip`.
+- `npm run check` passed.
 
-## Next suggested step
+Font note: the ChatGPT handover ZIP does not include GL TTF binaries. This remains expected here. For a real GitHub/HACS release, the GL font files must be present before building/releasing.
 
-After visual confirmation, do a small b330 removal checkpoint for the demonstrably unimported old `src/plate/mm-model.js` Full/Card path, or leave it until a later cleanup if you want one more test round first.
+## ZIPs
+
+- Matching standalone Lab ZIP: `plate-physical-lab-b330-remove-unused-legacy-mm-model.zip`.
+- Full/Card handover ZIP: `tuev-card-full-b330-remove-unused-legacy-mm-model-handover.zip`.
+
+## Suggested next step
+
+After visual confirmation, continue with another one-at-a-time legacy audit/removal step. Do not remove compatibility files just because they look similar; only remove files that a check proves are not used by the active Card/Lab paths.

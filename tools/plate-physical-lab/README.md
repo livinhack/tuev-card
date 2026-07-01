@@ -1,7 +1,11 @@
-# Kennzeichen Physical Lab b329
+# Kennzeichen Physical Lab b330
 
-Standalone physical renderer Lab for German licence plate geometry.
+Standalone Lab ZIP for b330.
 
-b329 is a Card renderer legacy-path audit checkpoint on top of b328. The full HU badge path remains unchanged, and an automated audit now proves which renderer boundary is active and which old/compatibility files are not part of the active Card path.
+b330 keeps the Lab renderer behavior from b329. It pairs with the Full/Card b330 cleanup, where only the old unimported Full/Card `src/plate/mm-model.js` file was removed.
 
-The Lab still keeps the HU placeholder switch for visual comparison; the productive Card path uses the full HU badge renderer.
+The Lab's own `src/plate/mm-model.js` remains intentionally present as a compatibility boundary.
+
+## Checks
+
+- `npm run check` passed.

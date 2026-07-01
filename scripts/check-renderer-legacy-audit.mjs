@@ -85,8 +85,9 @@ if (isFullCardRoot) {
   assert(cardImports.includes("src/plate/renderer.js"), "Card entry must consume only the public src/plate/renderer.js boundary.");
   assert(editorImports.includes("src/plate/renderer.js"), "Editor must consume only the public src/plate/renderer.js boundary.");
 
+  assert(!existsSync(resolve(root, "src/plate/mm-model.js")), "Old unimported src/plate/mm-model.js must stay removed after b330.");
   const oldMmIncoming = incoming.get("src/plate/mm-model.js") || new Set();
-  assert(oldMmIncoming.size === 0, "Old src/plate/mm-model.js must remain unimported until it is deliberately removed in a later cleanup.");
+  assert(oldMmIncoming.size === 0, "Removed old src/plate/mm-model.js must not be imported anywhere.");
 
   const forbiddenCardTargets = [
     "src/plate/lab-renderer/mm-model.js",
@@ -114,8 +115,7 @@ const bluePlaceholderFiles = files.filter((file) => read(file).includes("#1ea5ff
 const allowedBlueFragments = isFullCardRoot
   ? [
       "src/plate/lab-renderer/change-plate-supplement-renderer.js",
-      "src/plate/lab-renderer/seal-slot-marker.js",
-      "src/plate/mm-model.js"
+      "src/plate/lab-renderer/seal-slot-marker.js"
     ]
   : [
       "src/plate/change-plate-supplement-renderer.js",
@@ -129,7 +129,7 @@ for (const file of bluePlaceholderFiles) {
 if (!process.exitCode) {
   const mode = isFullCardRoot ? "Full/Card" : "Standalone Lab";
   const quarantine = isFullCardRoot
-    ? "old src/plate/mm-model.js is unimported and documented for a later deliberate removal"
+    ? "old src/plate/mm-model.js is removed and the active renderer remains Lab-based"
     : "compatibility boundaries remain present but outside the active render path";
   console.log(`${mode} renderer legacy audit OK: active boundary is Lab-based; ${quarantine}.`);
 }
