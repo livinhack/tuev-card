@@ -1,8 +1,9 @@
-// TÜV Reminder Card b322 / inactive Lab renderer adapter scaffold
+// TÜV Reminder Card b324 / direct replacement prep adapter scaffold
 //
 // This module is intentionally not imported by the active Card renderer yet.
-// It is a narrow future transfer boundary around the staged Lab renderer copy
-// in src/plate/lab-renderer/.
+// It is the future direct replacement boundary around the staged Lab renderer
+// copy in src/plate/lab-renderer/. No legacy toggle or fallback is planned;
+// rollback remains the previous ZIP.
 
 import {
     ONE_LINE_RULES_MM as LAB_ONE_LINE_RULES_MM,
@@ -104,6 +105,18 @@ export function renderLicensePlateWithLabRenderer(plate, options = {}) {
         displayHeight,
         model: analysis.model
     });
+}
+
+export function normalizePlate(plate) {
+    return normalizeLabRendererPlate(plate);
+}
+
+export function getLicensePlateMetrics(plate, options = {}) {
+    return getLabRendererLicensePlateMetrics(plate, options);
+}
+
+export function renderLicensePlate(plate, options = {}) {
+    return renderLicensePlateWithLabRenderer(plate, options);
 }
 
 function createLabRendererOptions(options = {}) {

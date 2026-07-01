@@ -1,37 +1,27 @@
-# Kennzeichen Physical Lab b322
+# Kennzeichen Physical Lab b324
 
-## b322 – Card Renderer Adapter Scaffold
+## b324 – Direct Card Renderer Replacement Prep
 
-b322 baut auf **b321 – Card Transfer Staged Copy Preview** auf.
+b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
 
-## Änderung in b322
+## Änderung in b324
 
-- Lab-Version/Titel auf b322 aktualisiert
-- Transfer-Dokumentation um den inaktiven Card-Adapter-Scaffold ergänzt
-- `scripts/card-transfer-dry-run.config.mjs` auf b322 aktualisiert
-- keine Renderer-, Geometrie-, Solver- oder UI-Control-Änderung
-- das separate Lab-ZIP bleibt die autoritative Renderer-Quelle
+- Lab-Version/Titel auf b324 aktualisiert
+- Lab-Version auf `0.1.1-b324` aktualisiert
+- Doku zur direkten Card-Renderer-Ersetzung ergänzt
+- keine Geometrieänderung
+- keine Rendererlogikänderung
 
-Die eigentliche inaktive Kopie und der Adapter liegen im Full-ZIP unter:
+## Full/Card-Kontext
 
-```text
-src/plate/lab-renderer/
-src/plate/lab-renderer-adapter.js
-```
-
-## Neue Doku
-
-- `docs/B322_CARD_RENDERER_ADAPTER_SCAFFOLD.md`
+Im Full-ZIP wird der inaktive Card-Adapter so vorbereitet, dass er später `src/plate/renderer.js` direkt ersetzen kann. Es wird kein Umschalter und kein Legacy-Fallback eingebaut.
 
 ## Checks
 
 - Lab Regression: 41/41 OK
-- Production Import Boundary Guard: bestanden
-- Card Transfer Dry Run Scaffold: bestanden
-- Card Transfer Manifest Preview: bestanden
-- b321 → b322 Modell-Hashes: 41/41 identisch
-- b321 → b322 SVG-Hashes: 41/41 identisch
+- b323 → b324 Modell-Hashes: 41/41 identisch
+- b323 → b324 SVG-Hashes: 41/41 identisch
 
 ## Artefakt
 
-`plate-physical-lab-b322-card-renderer-adapter-scaffold.zip`
+`plate-physical-lab-b324-direct-card-renderer-replacement-prep.zip`

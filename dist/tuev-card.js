@@ -1,4 +1,4 @@
-// TÜV Card bundled b322
+// TÜV Card bundled b294
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----

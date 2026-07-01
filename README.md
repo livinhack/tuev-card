@@ -1,31 +1,25 @@
-# TÜV Reminder Card b322
+# TÜV Reminder Card b324
 
-## b322 – Card Renderer Adapter Scaffold
+## b324 – Direct Card Renderer Replacement Prep
 
-b322 baut auf **b321 – Card Transfer Staged Copy Preview** auf.
+b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
 
-## Änderung in b322
+## Änderung in b324
 
-- Full-/Übergabe-Dokumentation auf b322 aktualisiert
-- Lab-Spiegel unter `tools/plate-physical-lab/` auf b322 synchronisiert
-- inaktive Staged-Copy bleibt unter `src/plate/lab-renderer/`
-- neuer inaktiver Adapter: `src/plate/lab-renderer-adapter.js`
-- neuer Full-Check: `scripts/check-card-renderer-adapter-scaffold.mjs`
-- neues npm-Script: `npm run check:card-renderer-adapter-scaffold`
-- Full-`npm run check` führt den Adapter-Scaffold-Check mit aus
+- Full-/Lab-Version auf `0.1.1-b324` aktualisiert
+- sichtbarer Lab-Titel/Version auf b324 aktualisiert
+- inaktiver Adapter `src/plate/lab-renderer-adapter.js` erhält eine `renderer.js`-kompatible API:
+  - `normalizePlate()`
+  - `getLicensePlateMetrics()`
+  - `renderLicensePlate()`
+- neuer Check: `scripts/check-card-renderer-direct-replacement-prep.mjs`
+- neues Script: `npm run check:card-renderer-direct-replacement-prep`
+- Full-`npm run check` führt den neuen Check mit aus
+- neue Doku: `docs/B324_DIRECT_CARD_RENDERER_REPLACEMENT_PREP.md`
 
 ## Wichtig
 
-Der aktive Card-Renderer ist unverändert. Es gibt keine Umschaltung auf den neuen Lab-Renderer. `src/plate/lab-renderer-adapter.js` ist nur ein vorbereiteter, inaktiver Adapter zur staged Lab-Renderer-Kopie.
-
-## Nicht geändert
-
-- kein aktiver Card-Code
-- keine Geometrie
-- keine Rendererlogik
-- keine Solver-Zusammenführung
-- keine Wechselkennzeichen-Fachlogik
-- keine sichtbare SVG-Änderung
+Der aktive Card-Renderer wurde noch nicht ersetzt. Es gibt keinen Umschalter und keinen Legacy-Fallback. Der Rückweg bleibt das vorherige ZIP.
 
 ## Checks
 
@@ -35,12 +29,14 @@ Der aktive Card-Renderer ist unverändert. Es gibt keine Umschaltung auf den neu
 - Card Transfer Manifest Preview: bestanden
 - Card Transfer Staged Copy: 35/35 OK
 - Card Renderer Adapter Scaffold: bestanden
-- b321 → b322 Modell-Hashes: 41/41 identisch
-- b321 → b322 SVG-Hashes: 41/41 identisch
+- Card Renderer Adapter Smoke: bestanden
+- Card Renderer Direct Replacement Prep: bestanden
+- b323 → b324 Modell-Hashes: 41/41 identisch
+- b323 → b324 SVG-Hashes: 41/41 identisch
 - Full/Card JS Check: bestanden
 - Release Asset Check: bestanden
 - ZIP-Test: beide ZIPs fehlerfrei
 
 ## Artefakt
 
-`tuev-card-full-b322-card-renderer-adapter-scaffold-handover.zip`
+`tuev-card-full-b324-direct-card-renderer-replacement-prep-handover.zip`

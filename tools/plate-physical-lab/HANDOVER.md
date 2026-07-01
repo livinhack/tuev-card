@@ -1,33 +1,27 @@
-# Übergabe Lab b322 – Card Renderer Adapter Scaffold
+# Übergabe Lab b324 – Direct Card Renderer Replacement Prep
 
-b322 baut auf **b321 – Card Transfer Staged Copy Preview** auf.
+b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
 
-## Änderung in b322
+## Änderung
 
-- sichtbare Lab-Version/Titel auf b322 aktualisiert
-- `scripts/card-transfer-dry-run.config.mjs` auf b322 aktualisiert
-- neue Doku `docs/B322_CARD_RENDERER_ADAPTER_SCAFFOLD.md`
-- keine aktive Card-Integration im Lab
-- keine Renderer-/Geometrieänderung
+- sichtbare Lab-Version/Titel auf b324 aktualisiert
+- Lab-Version auf `0.1.1-b324` aktualisiert
+- Doku `docs/B324_DIRECT_CARD_RENDERER_REPLACEMENT_PREP.md` ergänzt
 
-## Wichtig
+## Nicht geändert
 
-Die inaktive Card-Zielkopie und der Adapter liegen im Full-ZIP. Das separate Lab-ZIP bleibt weiterhin autoritative Quelle für den Renderer.
+- keine Geometrie
+- keine Rendererlogik
+- keine Solver-Zusammenführung
+- keine Wechselkennzeichen-Fachlogik
+- keine UI-Control-Änderung
 
 ## Checks
 
 - Lab Regression: 41/41 OK
-- Production Import Boundary Guard: bestanden
-- Card Transfer Dry Run Scaffold: bestanden
-- Card Transfer Manifest Preview: bestanden
-- b321 → b322 Modell-Hashes: 41/41 identisch
-- b321 → b322 SVG-Hashes: 41/41 identisch
-
-## ZIPs
-
-- `plate-physical-lab-b322-card-renderer-adapter-scaffold.zip`
-- `tuev-card-full-b322-card-renderer-adapter-scaffold-handover.zip`
+- b323 → b324 Modell-Hashes: 41/41 identisch
+- b323 → b324 SVG-Hashes: 41/41 identisch
 
 ## Nächster sinnvoller Schritt
 
-Weiter ab **b322**. Sinnvoller nächster Schritt: `b323 – Card Renderer Adapter Smoke Checkpoint` oder danach ein erster kontrollierter Adapter-Vergleich, weiterhin ohne Default-Umschaltung.
+Direkte Card-Renderer-Ersetzung in einem eigenen Stand durchführen, ohne Toggle und ohne Alt-Renderer-Fallback.

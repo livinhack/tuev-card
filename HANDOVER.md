@@ -1,36 +1,36 @@
-# Übergabe Full b322 – Card Renderer Adapter Scaffold
+# Übergabe Full b324 – Direct Card Renderer Replacement Prep
 
-b322 baut auf **b321 – Card Transfer Staged Copy Preview** auf.
+b324 baut auf **b323 – Card Renderer Adapter Smoke Checkpoint** auf.
 
-## Änderung in b322
+## Entscheidung
 
-- Full-/Übergabe-Dokumentation auf b322 aktualisiert
-- Lab-Spiegel unter `tools/plate-physical-lab/` auf b322 synchronisiert
-- inaktive staged Renderer-Kopie bleibt unter `src/plate/lab-renderer/`
-- neuer inaktiver Card-Adapter:
-  - `src/plate/lab-renderer-adapter.js`
+Keine Toggle-/Legacy-Integration. Wenn der alte Renderer benötigt wird, dient das vorherige ZIP als Rücksetzpunkt.
+
+## Änderung
+
+- Full-/Lab-Version auf `0.1.1-b324` aktualisiert
+- `src/plate/lab-renderer-adapter.js` vorbereitet als direkte spätere `renderer.js`-Ersatzgrenze
+- Adapter exportiert nun zusätzlich Card-kompatible Namen:
+  - `normalizePlate()`
+  - `getLicensePlateMetrics()`
+  - `renderLicensePlate()`
 - neuer Check:
-  - `scripts/check-card-renderer-adapter-scaffold.mjs`
-- neues npm-Script:
-  - `npm run check:card-renderer-adapter-scaffold`
-- Full-`npm run check` prüft den Adapter-Scaffold mit
+  - `scripts/check-card-renderer-direct-replacement-prep.mjs`
+- neues Script:
+  - `npm run check:card-renderer-direct-replacement-prep`
+- Full-`npm run check` führt den neuen Check mit aus
+- neue Doku:
+  - `docs/B324_DIRECT_CARD_RENDERER_REPLACEMENT_PREP.md`
 
-## Adapter-Status
+## Synchronisation
 
-- aktiver Card-Renderer bleibt `src/plate/renderer.js`
-- aktiver Card-Code importiert `lab-renderer-adapter.js` nicht
-- Adapter nutzt als staged Renderer-Einstieg nur `src/plate/lab-renderer/plate-public-api.js`
-- Adapter nutzt Card-Font-Anbindung über `src/plate/font.js`
-- Adapter importiert keine Debug-/Lab-only-Module
-
-## Full-Lab-Spiegel
-
-`tools/plate-physical-lab/` ist in diesem Full-ZIP bewusst mit dem separaten Lab-ZIP b322 synchronisiert. Autoritativ bleibt weiterhin das separate Lab-ZIP.
+`tools/plate-physical-lab/` ist in diesem Full-ZIP bewusst mit dem separaten Lab-ZIP b324 synchronisiert. Autoritativ bleibt weiterhin das separate Lab-ZIP.
 
 ## Nicht geändert
 
-- kein aktiver Card-Code
-- keine Renderer-Umschaltung
+- aktiver Card-Renderer `src/plate/renderer.js` bleibt unverändert
+- kein Umschalter
+- kein Legacy-Fallback
 - keine Geometrie
 - keine Rendererlogik
 - keine Solver-Zusammenführung
@@ -45,17 +45,19 @@ b322 baut auf **b321 – Card Transfer Staged Copy Preview** auf.
 - Card Transfer Manifest Preview: bestanden
 - Card Transfer Staged Copy: 35/35 OK
 - Card Renderer Adapter Scaffold: bestanden
-- b321 → b322 Modell-Hashes: 41/41 identisch
-- b321 → b322 SVG-Hashes: 41/41 identisch
+- Card Renderer Adapter Smoke: bestanden
+- Card Renderer Direct Replacement Prep: bestanden
+- b323 → b324 Modell-Hashes: 41/41 identisch
+- b323 → b324 SVG-Hashes: 41/41 identisch
 - Full/Card JS Check: bestanden
 - Release Asset Check: bestanden
 - ZIP-Test: beide ZIPs fehlerfrei
 
-## ZIPs
+## Artefakte
 
-- `plate-physical-lab-b322-card-renderer-adapter-scaffold.zip`
-- `tuev-card-full-b322-card-renderer-adapter-scaffold-handover.zip`
+- `plate-physical-lab-b324-direct-card-renderer-replacement-prep.zip`
+- `tuev-card-full-b324-direct-card-renderer-replacement-prep-handover.zip`
 
-## Nächster sinnvoller Schritt
+## Nächster Schritt
 
-Weiter ab **b322**. Sinnvoller nächster Schritt: `b323 – Card Renderer Adapter Smoke Checkpoint` oder danach ein kontrollierter Adapter-Vergleich, weiterhin ohne Default-Umschaltung.
+Direkte Card-Renderer-Ersetzung in b325 durchführen: `src/plate/renderer.js` ersetzen/umbauen auf die vorbereitete Lab-Renderer-Grenze, ohne Toggle und ohne Alt-Renderer-Codepfad.
