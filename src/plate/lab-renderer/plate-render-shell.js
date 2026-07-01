@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b312 / SVG render shell component
+// Kennzeichen Physical Lab b327 / SVG render shell component
 // Owns final SVG layer composition, canvas expansion and purely visual text/reference layers.
 // It must not calculate physical layout positions; it only renders the solved model.
 
@@ -9,6 +9,7 @@ import { renderSeasonField } from "./season-field.js";
 import { renderChangePlateSupplement } from "./change-plate-supplement-renderer.js";
 import { escapeSvgAttr as escapeAttr, escapeSvgText as escapeText } from "./svg-escape-utils.js";
 import { getItemsOfType } from "./plate-sequence-width-utils.js";
+import { resolveHuBadgeOptions } from "./hu-badge-marker.js";
 
 const DEFAULT_TEXT_COLOR = "#080808";
 
@@ -22,6 +23,7 @@ export function renderPlateSvgDocument(model, options = {}) {
   const showText = options.showText !== false;
   const layers = [];
   const debugRenderers = options.debugRenderers || {};
+  const huBadge = resolveHuBadgeOptions(options);
 
   layers.push(renderPlateBody(model));
 
@@ -32,8 +34,8 @@ export function renderPlateSvgDocument(model, options = {}) {
     layers.push(renderOptionalLayer(debugRenderers.renderGrid, model));
   }
   if (showSeals && ["seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderSeals(model, options));
-    const changePlateSupplement = renderChangePlateSupplement(model);
+    layers.push(renderSeals(model, { ...options, huBadge }));
+    const changePlateSupplement = renderChangePlateSupplement(model, { ...options, huBadge });
     if (changePlateSupplement) layers.push(changePlateSupplement);
   }
   if (["seals", "text", "horizontal", "complete"].includes(stage)) {

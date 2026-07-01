@@ -109,6 +109,9 @@ const controls = {
   seasonFitReadout: $("#seasonFitReadout"),
   fontStatus: $("#fontStatus"),
   showDimensions: $("#showDimensions"),
+  huBadgeYear: $("#huBadgeYear"),
+  huBadgeRotation: $("#huBadgeRotation"),
+  huBadgeFullRenderer: $("#huBadgeFullRenderer"),
   plateStringPresets: $("#plateStringPresets"),
   regressionMatrix: $("#regressionMatrix"),
   runRegression: $("#runRegression")
@@ -169,7 +172,10 @@ async function render() {
     changePlate: getChangePlateOptions(plateFormat),
     fontFit,
     showDimensions: controls.showDimensions.checked,
-    debugRenderers: labDebugRenderers
+    debugRenderers: labDebugRenderers,
+    huBadgeRenderer: controls.huBadgeFullRenderer.checked ? "full" : "placeholder",
+    huYear: numberValue(controls.huBadgeYear, new Date().getFullYear()),
+    huRotation: numberValue(controls.huBadgeRotation, 0)
   });
   const { model, canvas } = result;
   const viewport = getPreviewViewport();

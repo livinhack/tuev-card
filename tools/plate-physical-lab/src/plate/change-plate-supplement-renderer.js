@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b305 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b327 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -7,6 +7,7 @@
 import { positiveNumber } from "./plate-number-utils.js";
 import { getFirstItemOfType, getItemsOfType, sumValues } from "./plate-sequence-width-utils.js";
 import { escapeSvgTextOrEmpty as escapeText } from "./svg-escape-utils.js";
+import { renderFullHuBadgeMarker } from "./hu-badge-marker.js";
 
 
 const DEFAULT_CHANGE_PLATE = Object.freeze({
@@ -21,7 +22,7 @@ const DEFAULT_CHANGE_PLATE = Object.freeze({
   supplementLabelBaselineY: 100
 });
 
-export function renderChangePlateSupplement({ content, metrics, rules }) {
+export function renderChangePlateSupplement({ content, metrics, rules }, options = {}) {
   if (!metrics?.changePlateEnabled) return "";
   const items = content.filter((item) => String(item.type || "").startsWith("change-plate-"));
   if (!items.length) return "";
@@ -33,10 +34,21 @@ export function renderChangePlateSupplement({ content, metrics, rules }) {
 <g class="layer layer-change-plate" data-change-plate="true">
   ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="#111"/>
   <rect x="${frame.x + rules.innerInset}" y="${frame.y + rules.innerInset}" width="${frame.width - rules.innerInset * 2}" height="${frame.height - rules.innerInset * 2}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>` : ""}
-  ${seal ? `<g class="change-plate-supplement-hu"><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter / 2}" fill="#1ea5ff" stroke="#111" stroke-width="1.1"/><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter * 0.34}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.7" stroke-dasharray="1.2 1.6"/><text x="${seal.cx}" y="${seal.cy + 2.8}" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.8" font-weight="700" fill="#111">HU</text></g>` : ""}
+  ${seal ? renderChangePlateHuMarker(seal, options.huBadge) : ""}
   ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${metrics.textColor || '#080808'}">${escapeText(char.text)}</text>`).join("\n  ")}
   ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="#111">${escapeText(label.text)}</text>` : ""}
 </g>`.trim();
+}
+
+function renderChangePlateHuMarker(seal, huBadge = null) {
+  if (huBadge?.renderer === "full") {
+    return renderFullHuBadgeMarker({
+      geometry: { cx: seal.cx, cy: seal.cy, diameter: seal.diameter },
+      badge: huBadge
+    });
+  }
+
+  return `<g class="change-plate-supplement-hu"><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter / 2}" fill="#1ea5ff" stroke="#111" stroke-width="1.1"/><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter * 0.34}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.7" stroke-dasharray="1.2 1.6"/><text x="${seal.cx}" y="${seal.cy + 2.8}" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.8" font-weight="700" fill="#111">HU</text></g>`;
 }
 
 export function createChangePlateSupplementItems({ x, width, height, split, changePlate, rules }) {

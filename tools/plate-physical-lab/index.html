@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kennzeichen Physical Lab b325</title>
+  <title>Kennzeichen Physical Lab b327</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="hero">
     <div>
       <p class="eyebrow">TÜV Card · Exact-Helper-Cleanup</p>
-      <h1>Kennzeichen Physical Lab b325</h1>
-      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b325 begleitet die Direct Card Plate Renderer Integration in der Full/Card: der Lab-Renderer bleibt autoritativ, die Lab-Geometrie bleibt unverändert und die Card nutzt den vorbereiteten Lab-Renderer-Adapter direkt ohne Toggle oder Legacy-Pfad. Das Modell arbeitet intern ausschließlich in Millimetern; Pixel/DPR sind nur Anzeige.</p>
+      <h1>Kennzeichen Physical Lab b327</h1>
+      <p>CAD-artige Messumgebung für Anlage-4-FZV-Geometrie. b327 testet den vorhandenen vollständigen Plakettenrenderer in der 35-mm-HU-Fläche und jetzt auch im fahrzeugbezogenen Wechselkennzeichen-Teil. Der Full-Badge-Pfad bleibt im Lab opt-in; das Modell arbeitet intern ausschließlich in Millimetern, Pixel/DPR sind nur Anzeige.</p>
     </div>
-    <div class="version">b325</div>
+    <div class="version">b327</div>
   </header>
 
   <main>
@@ -89,6 +89,21 @@
               <input id="showDimensions" type="checkbox" checked />
               Maßlinien anzeigen
             </label>
+            <div class="grid three">
+              <label>
+                HU-Jahr
+                <input id="huBadgeYear" type="number" min="2020" max="2040" step="1" value="2027" />
+              </label>
+              <label>
+                HU-Rotation
+                <input id="huBadgeRotation" type="number" min="-360" max="360" step="1" value="0" />
+              </label>
+              <label class="checkbox">
+                <input id="huBadgeFullRenderer" type="checkbox" checked />
+                vollständige HU-Plakette im 35-mm-Slot
+              </label>
+            </div>
+            <div class="hint-box">b327 Lab-Test: Der vorhandene Plakettenrenderer wird optional in die HU-Fläche skaliert und auch im Wechselkennzeichen-Fahrzeugteil genutzt. Die passende Full-ZIP aktiviert den Full-Badge-Pfad in der Card.</div>
           </div>
         </details>
 

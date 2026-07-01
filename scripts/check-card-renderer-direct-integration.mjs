@@ -79,7 +79,16 @@ const svg = rendererModule.renderLicensePlate("B VM 146");
 assert(typeof svg === "string" && svg.startsWith("<svg"), "Direct renderer renderLicensePlate must return SVG.");
 assert(svg.includes('data-card-renderer="physical-lab"'), "Direct renderer SVG must be marked as active physical Lab renderer output.");
 assert(svg.includes('class="tuev-plate tuev-plate-physical physical-plate-svg"'), "Direct renderer SVG must keep Card-facing SVG class marker.");
+assert(svg.includes('data-hu-badge-renderer="full"'), "Card renderer SVG must use the full HU badge renderer by default.");
+assert(!svg.includes('fill="#1ea5ff"'), "Card renderer SVG must not emit the old blue HU placeholder by default.");
 assert(!svg.includes("debug-dimensions"), "Direct renderer SVG output must not include debug module markers.");
+
+
+const changePlateSvg = rendererModule.renderLicensePlate("W B VM 146", {
+  changePlate: { enabled: true, commonText: "B VM", vehicleText: "146" }
+});
+assert(changePlateSvg.includes('data-change-plate="true"'), "Change-plate smoke SVG must include the supplement layer.");
+assert(changePlateSvg.includes('data-hu-badge-renderer="full"'), "Change-plate supplement must use the full HU badge renderer.");
 
 if (!process.exitCode) {
   console.log("Card renderer direct integration OK: active renderer delegates to Lab adapter, no toggle/legacy path, Card no longer gates rendering on plate_style.");

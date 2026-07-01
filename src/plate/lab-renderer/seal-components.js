@@ -9,14 +9,14 @@ import { getItemsOfType } from "./plate-sequence-width-utils.js";
 
 export { getEffectiveSealGeometry, getSealGeometry };
 
-export function renderSeals({ content, rules }) {
+export function renderSeals({ content, rules }, options = {}) {
   const sealItems = getItemsOfType(content, "seals");
   if (!sealItems.length) return "";
-  const parts = sealItems.map((seal) => renderSealItem(rules, seal)).filter(Boolean).join("\n");
+  const parts = sealItems.map((seal) => renderSealItem(rules, seal, options)).filter(Boolean).join("\n");
   return `<g class="layer layer-seals">${parts}</g>`;
 }
 
-function renderSealItem(rules, seal) {
+function renderSealItem(rules, seal, options = {}) {
   const geometry = getEffectiveSealGeometry(rules, seal);
   const markerPlan = createSealMarkerPlan({ rules, seal, geometry });
   const parts = [];
@@ -24,7 +24,7 @@ function renderSealItem(rules, seal) {
     parts.push(renderChangePlateWMarker({ seal, geometry }));
   }
   if (markerPlan.renderHu) {
-    parts.push(renderHuSealMarker({ seal, geometry }));
+    parts.push(renderHuSealMarker({ seal, geometry, huBadge: options.huBadge }));
   }
   if (markerPlan.renderAuthority) {
     parts.push(renderAuthoritySealMarker({ seal, geometry }));

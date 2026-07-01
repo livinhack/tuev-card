@@ -3,6 +3,7 @@
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
 import { escapeSvgAttrOrEmpty as escapeText } from "./svg-escape-utils.js";
+import { renderFullHuBadgeMarker } from "./hu-badge-marker.js";
 
 export function renderChangePlateWMarker({ seal, geometry }) {
   const wGeometry = geometry.hu;
@@ -14,7 +15,11 @@ export function renderChangePlateWMarker({ seal, geometry }) {
   </g>`;
 }
 
-export function renderHuSealMarker({ seal, geometry }) {
+export function renderHuSealMarker({ seal, geometry, huBadge = null }) {
+  if (huBadge?.renderer === "full") {
+    return renderFullHuBadgeMarker({ geometry, badge: huBadge });
+  }
+
   return `
   <g class="seal-slot seal-slot-hu" data-seal-row="${escapeText(seal.rowKey || "top")}">
     <circle cx="${geometry.hu.cx ?? geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius}" fill="#1ea5ff" stroke="#111" stroke-width="1.25"/>

@@ -1,53 +1,30 @@
-# Übergabe Full b325 – Direct Card Plate Renderer Integration
+# Handover – b327 HU Badge Card Activation and Change Supplement
 
-b325 baut auf **b324 – Direct Card Renderer Replacement Prep** auf.
+Current stand: b327.
 
-## Kurzstatus
+b327 turns the successful b326 HU-badge Lab test into the active Card path and closes the Wechselkennzeichen supplement gap.
 
-Die Card nutzt ab b325 den vorbereiteten Physical-Lab-Renderer-Adapter direkt als aktiven Kennzeichenrenderer.
-Es gibt keinen Umschalter, keinen Legacy-Fallback und keinen parallelen Alt-/Neu-Pfad. Rollback erfolgt über das vorherige ZIP.
+Main changes:
 
-## Änderungen
+- `src/plate/lab-renderer-adapter.js` now sets `huBadgeRenderer: "full"` for the active Card renderer.
+- Existing Card data from `src/tuev-card-entry.js` (`huYear`, `huMonth`, `huRotation`) is still used; b327 only activates the full renderer path.
+- The staged Lab renderer resolves one `huBadge` object and passes it to both normal seals and the Wechselkennzeichen vehicle-specific supplement.
+- `change-plate-supplement-renderer.js` now uses the same `renderFullHuBadgeMarker()` bridge for the supplement HU slot.
+- `changePlate` options are forwarded through the Card adapter so the supplement path can be smoke-tested through the active Card renderer boundary.
 
-- `src/plate/renderer.js` ersetzt durch direkte Delegation auf `src/plate/lab-renderer-adapter.js`
-- der alte direkte `mm-model.js`-Rendererpfad ist nicht mehr in `renderer.js` enthalten
-- `isGraphicalPlateAvailable()` hängt nicht mehr an `config.plate_style === "plate"`
-- neuer Check `scripts/check-card-renderer-direct-integration.mjs`
-- `package.json` Script `check:card-renderer-direct-integration` ergänzt
-- Full-/Lab-Version auf `0.1.1-b325` aktualisiert
-- Doku `docs/B325_DIRECT_CARD_PLATE_RENDERER_INTEGRATION.md` ergänzt
+Intentionally unchanged:
 
-## Projekttrennung
+- No legacy/old-renderer toggle was added.
+- No plate geometry was changed. The existing 35 mm HU slot/supplement positions are reused.
+- The blue placeholder remains available only in standalone Lab comparison mode when the full renderer is not requested. The Card requests the full renderer by default.
 
-`tools/plate-physical-lab/` ist in diesem Full-ZIP bewusst mit dem separaten Lab-ZIP b325 synchronisiert. Autoritativ bleibt weiterhin das separate Lab-ZIP.
+Checks run:
 
-## Nicht geändert
+- `npm run check` passed.
+- `npm run build` passed and rebuilt `dist/tuev-card.js` for b327.
 
-- keine Lab-Geometrie
-- keine Lab-Solverlogik
-- keine Wechselkennzeichen-Fachlogik
-- keine Debug-/Lab-only-Abhängigkeit im produktiven Renderer
-- kein Toggle/Legacy-Fallback
+Known release note:
 
-## Checks
+- The ZIP intentionally contains only font readmes/placeholders, not local `.ttf` font binaries. The release asset check reports this as expected for ChatGPT handover ZIPs; GitHub/HACS release builds still need the GL font binaries present locally.
 
-- Lab Regression: 41/41 OK
-- Production Import Boundary Guard: bestanden
-- Card Transfer Dry Run Scaffold: bestanden
-- Card Transfer Manifest Preview: bestanden
-- Card Transfer Staged Copy: 35/35 OK
-- Card Renderer Adapter Scaffold: bestanden
-- Card Renderer Adapter Smoke: bestanden
-- Card Renderer Direct Integration: bestanden
-- Full/Card JS Check: bestanden
-- Release Asset Check: bestanden
-- ZIP-Test: beide ZIPs fehlerfrei
-
-## Artefakte
-
-- `plate-physical-lab-b325-direct-card-plate-renderer-integration.zip`
-- `tuev-card-full-b325-direct-card-plate-renderer-integration-handover.zip`
-
-## Nächster sinnvoller Schritt
-
-Nach Installation/Sichttest in Home Assistant: prüfen, ob die Kennzeichen in der Card wieder grafisch erscheinen und ob Font-/Größenskalierung passt. Danach ggf. gezielte Card-Anpassungen statt weiterer Transfer-Gerüste.
+Rollback: previous ZIP b326.

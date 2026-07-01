@@ -1,4 +1,4 @@
-// TÜV Card bundled b325
+// TÜV Card bundled b327
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -3108,6 +3108,632 @@ return { createSealMarkerPlan: createSealMarkerPlan };
 
 })();
 
+// ---- src/plate/lab-renderer/badge/digits.js ----
+const __m_src_plate_lab_renderer_badge_digits_js = (() => {
+// Badge digit SVG path data.
+// These paths are used for the badge year number and month ring numbers in the TÜV badge renderer.
+// They are filled glyph outlines, not stroke digits. Use fill-rule="evenodd" for counters/holes.
+//
+// Licensing/attribution note:
+// This digit artwork/data may be derived from Wikimedia Commons file "Bahnschrift.svg".
+// See NOTICE.md and LICENSES/CC-BY-SA-4.0.txt for attribution and license details.
+
+const BADGE_DIGIT_PATHS = {
+    "0": {
+        d: `m 91.623729,139.15571
+q -3.82779,0 -5.81673,-2.04525 -1.97019,-2.04523 -1.97019,-5.70414
+v -12.40276
+q 0,-3.67769 1.98895,-5.70416 1.98895,-2.04523 5.79797,-2.04523 3.82778,0 5.79796,2.02648 1.98895,2.02647 1.98895,5.72291
+v 12.40276
+q 0,3.67766 -1.98895,5.72291 -1.98894,2.02648 -5.79796,2.02648
+z
+
+m 0,-3.64015
+q 2.02647,0 2.98342,-1.05076 0.97571,-1.06953 0.97571,-3.05848
+v -12.40276
+q 0,-1.98896 -0.95695,-3.03971 -0.95694,-1.06953 -3.00218,-1.06953 -2.04524,0 -3.00219,1.06953 -0.95694,1.05075 -0.95694,3.03971
+v 12.40276
+q 0,1.98895 0.95694,3.05848 0.97572,1.05076 3.00219,1.05076
+z`,
+        box: { minX: 83.836809, minY: 111.254170, width: 15.573830, height: 27.901540 }
+    },
+    "1": {
+        d: `m 99.061842,235.22571
+h -2.124996
+v -12.83332
+l -2.156247,1.32292
+v -2.19791
+l 2.156247,-1.4375
+h 2.124996
+z`,
+        box: { minX: 94.780599, minY: 220.079900, width: 4.281243, height: 15.145810 }
+    },
+    "2": {
+        d: `m 102.25975,233.38196 5.28125,-7.04165
+q 0.45833,-0.60417 0.70833,-1.25 0.26041,-0.65625 0.26041,-1.21875
+v -0.0208
+q 0,-0.90625 -0.53125,-1.40625 -0.53124,-0.5 -1.51041,-0.5 -0.92708,0 -1.5,0.55208 -0.57291,0.54167 -0.69791,1.54167
+v 0.0104
+h -2.19792
+v -0.0104
+q 0.1875,-1.30209 0.76042,-2.21875 0.58333,-0.92708 1.5,-1.40625 0.91666,-0.48958 2.11458,-0.48958 1.35416,0 2.31249,0.46875 0.95833,0.45833 1.45833,1.34375 0.5,0.88541 0.5,2.13541
+v 0.0104
+q 0,0.80208 -0.33333,1.67708 -0.33333,0.875 -0.92708,1.68749
+l -4.38541,5.95833
+h 5.72916
+v 2.02083
+h -8.54166
+z`,
+        box: { minX: 102.072250, minY: 219.923680, width: 8.729160, height: 15.302040 }
+    },
+    "3": {
+        d: `m 117.44723,235.38196
+q -1.27083,0 -2.23958,-0.45833 -0.96875,-0.46875 -1.5625,-1.34375 -0.58333,-0.88542 -0.73958,-2.125
+v 0
+h 2.16666
+v 0
+q 0.0937,0.64583 0.40625,1.0625 0.3125,0.41666 0.80208,0.625 0.5,0.19791 1.16667,0.19791 1.05208,0 1.63541,-0.56249 0.58334,-0.5625 0.58334,-1.58334
+v -0.45833
+q 0,-1.13541 -0.55209,-1.75 -0.55208,-0.62499 -1.56249,-0.62499
+h -1.07292
+v -2.02083
+h 1.07292
+q 0.88541,0 1.37499,-0.53125 0.48959,-0.53125 0.48959,-1.5
+v -0.46875
+q 0,-0.89583 -0.52084,-1.38542 -0.51041,-0.48958 -1.45833,-0.48958 -0.54166,0 -0.96875,0.20834 -0.42708,0.19791 -0.72916,0.62499 -0.29167,0.41667 -0.42708,1.05209
+v 0
+h -2.15625
+v 0
+q 0.20833,-1.23959 0.78125,-2.125 0.58333,-0.88542 1.46875,-1.34375 0.88541,-0.45833 2.03124,-0.45833 1.95833,0 3.03125,1.03125 1.07291,1.03125 1.07291,2.90624
+v 0.25
+q 0,1.13542 -0.61458,1.97917 -0.61458,0.84374 -1.73958,1.22916 1.23958,0.27083 1.91666,1.21875 0.6875,0.94791 0.6875,2.41666
+v 0.25
+q 0,1.32292 -0.51041,2.26041 -0.51042,0.9375 -1.48958,1.42709 -0.96875,0.48958 -2.34375,0.48958
+z`,
+        box: { minX: 112.905570, minY: 219.923650, width: 8.885400, height: 15.458310 }
+    },
+    "4": {
+        d: `m 124.61388,231.05905 5.08333,-10.96873
+h 2.1875
+l -4.95833,10.84373
+h 7.42707
+v 1.96875
+h -9.73957
+z
+
+m 6.53124,-4.73958
+h 2.07292
+v 8.91665
+h -2.07292
+z`,
+        box: { minX: 124.613880, minY: 220.090320, width: 9.739570, height: 15.145800 },
+        fillRule: "nonzero"
+    },
+    "5": {
+        d: `m 141.17636,235.38196
+q -1.14583,0 -2.04167,-0.44792 -0.88541,-0.44791 -1.44791,-1.30208 -0.55208,-0.85416 -0.73958,-2.05208
+v -0.0104
+h 2.12499
+v 0.0104
+q 0.11459,0.83333 0.66667,1.30208 0.55208,0.45833 1.4375,0.45833 1.02083,0 1.57291,-0.67708 0.5625,-0.6875 0.5625,-1.92708
+v -1.27083
+q 0,-1.22916 -0.5625,-1.90625 -0.55208,-0.6875 -1.57291,-0.6875 -0.55208,0 -1.0625,0.3125 -0.51042,0.3125 -0.89583,0.875
+h -1.9375
+v -7.97915
+h 7.71874
+v 2.02083
+h -5.59374
+v 3.40624
+q 0.39583,-0.32291 0.88541,-0.5 0.48959,-0.17708 1,-0.17708 1.3125,0 2.23958,0.54167 0.9375,0.54166 1.41667,1.58333 0.48958,1.04166 0.48958,2.51041
+v 1.27083
+q 0,1.46875 -0.5,2.51041 -0.5,1.04167 -1.45833,1.59375 -0.95833,0.54167 -2.30208,0.54167
+z`,
+        box: { minX: 136.947200, minY: 220.079900, width: 8.489570, height: 15.302060 }
+    },
+    "6": {
+        d: `m 152.47842,235.38196
+q -1.33333,0 -2.28124,-0.53125 -0.94792,-0.54167 -1.44792,-1.5625 -0.48958,-1.03125 -0.48958,-2.47916
+v -0.0104
+q 0,-0.84375 0.19792,-1.77083 0.19791,-0.92708 0.57291,-1.82291 0.0625,-0.15625 0.13542,-0.30209 0.0729,-0.15625 0.14583,-0.30208
+l 3.29166,-6.52082
+h 2.29167
+l -3.86458,7.55207 0.0104,-0.375
+q 0.26041,-0.48958 0.76041,-0.76041 0.5,-0.27084 1.16667,-0.27084 1.17708,0 2.02083,0.53125 0.84374,0.53125 1.28124,1.55208 0.4375,1.01042 0.4375,2.4375
+v 0.0104
+q 0,1.45833 -0.5,2.49999 -0.48958,1.04167 -1.44791,1.58333 -0.94792,0.54167 -2.28125,0.54167
+z
+
+m 0,-2.04167
+q 1.01042,0 1.55208,-0.62499 0.55209,-0.625 0.55209,-1.78125
+v -0.0104
+q 0,-1.27083 -0.57292,-1.95833 -0.57292,-0.69791 -1.63541,-0.69791 -0.94792,0 -1.46875,0.69791 -0.52083,0.69792 -0.52083,1.96875
+v 0.0104
+q 0,1.15625 0.54166,1.78125 0.55208,0.61458 1.55208,0.61458
+z`,
+        box: { minX: 148.259680, minY: 220.079920, width: 8.447880, height: 15.302040 }
+    },
+    "7": {
+        d: `m 167.3534,221.97573 -3.91666,13.24998
+h -2.26041
+l 3.91666,-13.12498
+h -3.85416
+v 2.17708
+h -2.125
+v -4.19791
+h 8.23957
+z`,
+        box: { minX: 159.113830, minY: 220.079900, width: 8.239570, height: 15.145810 }
+    },
+    "8": {
+        d: `m 174.71797,235.38196
+q -1.375,0 -2.41666,-0.52083 -1.04167,-0.52084 -1.61458,-1.46875 -0.5625,-0.95833 -0.5625,-2.21875
+v -0.25
+q 0,-1.13541 0.5625,-2.13541 0.57291,-1 1.52083,-1.51042 -0.80208,-0.4375 -1.29167,-1.26041 -0.47916,-0.83333 -0.47916,-1.75
+v -0.36458
+q 0,-1.1875 0.53125,-2.08333 0.53125,-0.90625 1.49999,-1.39583 0.96875,-0.5 2.25,-0.5 1.28125,0 2.25,0.5 0.96874,0.48958 1.49999,1.39583 0.53125,0.89583 0.53125,2.08333
+v 0.36458
+q 0,0.9375 -0.5,1.76042 -0.48958,0.82291 -1.30208,1.24999 0.95833,0.52084 1.53125,1.52083 0.58333,0.98959 0.58333,2.125
+v 0.25
+q 0,1.26042 -0.57291,2.21875 -0.5625,0.94791 -1.60417,1.46875 -1.04166,0.52083 -2.41666,0.52083
+z
+
+m 0,-2.04167
+q 0.73958,0 1.30208,-0.29166 0.5625,-0.29167 0.86458,-0.8125 0.3125,-0.53125 0.3125,-1.21875
+v -0.14583
+q 0,-0.69792 -0.3125,-1.21875 -0.30208,-0.53125 -0.86458,-0.82292 -0.5625,-0.29166 -1.30208,-0.29166 -0.73958,0 -1.30208,0.29166 -0.5625,0.29167 -0.875,0.82292 -0.30208,0.53125 -0.30208,1.22916
+v 0.15625
+q 0,0.6875 0.30208,1.20834 0.3125,0.52083 0.875,0.81249 0.5625,0.28125 1.30208,0.28125
+z
+
+m 0,-6.84373
+q 0.63542,0 1.125,-0.27084 0.48958,-0.28125 0.76041,-0.79166 0.27084,-0.51042 0.27084,-1.17708
+v -0.14584
+q 0,-0.63541 -0.27084,-1.125 -0.27083,-0.48958 -0.76041,-0.74999 -0.48958,-0.27084 -1.125,-0.27084 -0.63542,0 -1.125,0.27084 -0.48958,0.26041 -0.76041,0.74999 -0.27084,0.48959 -0.27084,1.13542
+v 0.15625
+q 0,0.65625 0.27084,1.16666 0.27083,0.5 0.76041,0.78125 0.48958,0.27084 1.125,0.27084
+z`,
+        box: { minX: 170.124230, minY: 219.923650, width: 9.187480, height: 15.458310 }
+    },
+    "9": {
+        d: `m 187.64504,227.70489 -0.0104,0.375
+q -0.26042,0.47916 -0.79167,0.70833 -0.52083,0.21875 -1.23958,0.21875 -1.08333,0 -1.90624,-0.55208 -0.82292,-0.55209 -1.28125,-1.55209 -0.44792,-1.01041 -0.44792,-2.33333
+v -0.0104
+q 0,-1.46875 0.48958,-2.51041 0.5,-1.04167 1.44792,-1.58334 0.95833,-0.54166 2.29166,-0.54166 1.33333,0 2.28125,0.55208 0.94791,0.55208 1.4375,1.60417 0.5,1.05208 0.5,2.53124
+v 0.0104
+q 0,0.8125 -0.20834,1.73958 -0.20833,0.91666 -0.59375,1.82291 -0.0625,0.13542 -0.125,0.28125 -0.0625,0.13542 -0.13541,0.27083
+l -3.22916,6.48958
+h -2.29167
+z
+
+m -1.44792,-0.63542
+q 1,0 1.54167,-0.67708 0.55208,-0.67708 0.55208,-1.90625
+v -0.0104
+q 0,-1.19791 -0.55208,-1.85416 -0.54167,-0.65625 -1.54167,-0.65625 -1.01041,0 -1.5625,0.65625 -0.54166,0.65625 -0.54166,1.86458
+v 0.0104
+q 0,1.22916 0.54166,1.90625 0.55209,0.66666 1.5625,0.66666
+z`,
+        box: { minX: 181.967980, minY: 219.923660, width: 8.447910, height: 15.302040 }
+    },
+};
+
+const DEFAULT_YEAR_DIGIT_HEIGHT = 42;
+const DEFAULT_YEAR_DIGIT_GAP = 3.5;
+const DEFAULT_MONTH_DIGIT_HEIGHT = 42;
+const DEFAULT_MONTH_DIGIT_GAP = 2.4;
+
+function digitsForValue(value, padLength = 0) {
+    const text = String(value);
+
+    return (padLength > 0 ? text.padStart(padLength, "0") : text).split("");
+}
+
+function metricForDigit(digit, targetHeight) {
+    const digitData = BADGE_DIGIT_PATHS[digit] ?? BADGE_DIGIT_PATHS["0"];
+    const scale = targetHeight / digitData.box.height;
+
+    return {
+        data: digitData,
+        scale,
+        width: digitData.box.width * scale,
+        height: targetHeight
+    };
+}
+
+function getBadgeDigitsWidth(value, options = {}) {
+    const targetHeight = options.height ?? DEFAULT_YEAR_DIGIT_HEIGHT;
+    const gap = options.gap ?? DEFAULT_YEAR_DIGIT_GAP;
+    const padLength = options.padLength ?? 0;
+    const digits = digitsForValue(value, padLength);
+    const widths = digits.map((digit) => metricForDigit(digit, targetHeight).width);
+
+    return widths.reduce((sum, width) => sum + width, 0) + Math.max(0, digits.length - 1) * gap;
+}
+
+function renderBadgeDigits(value, options = {}) {
+    const cx = options.cx ?? 150;
+    const cy = options.cy ?? 150;
+    const targetHeight = options.height ?? DEFAULT_YEAR_DIGIT_HEIGHT;
+    const gap = options.gap ?? DEFAULT_YEAR_DIGIT_GAP;
+    const xOffset = options.xOffset ?? 0;
+    const yOffset = options.yOffset ?? 0;
+    const fill = options.fill ?? "black";
+    const padLength = options.padLength ?? 0;
+    const rotation = options.rotation ?? 0;
+    const rotateOriginX = options.rotateOriginX ?? cx;
+    const rotateOriginY = options.rotateOriginY ?? cy;
+    const digits = digitsForValue(value, padLength);
+    const metrics = digits.map((digit) => metricForDigit(digit, targetHeight));
+    const totalWidth = metrics.reduce((sum, metric) => sum + metric.width, 0) + Math.max(0, digits.length - 1) * gap;
+
+    let cursorX = -totalWidth / 2;
+    const y = -targetHeight / 2;
+
+    const paths = digits.map((digit, index) => {
+        const metric = metrics[index];
+        const { data, scale } = metric;
+        const path = `
+            <path
+                d="${data.d}"
+                fill-rule="${data.fillRule ?? "evenodd"}"
+                transform="translate(${cursorX} ${y}) scale(${scale}) translate(${-data.box.minX} ${-data.box.minY})"
+            />
+        `;
+
+        cursorX += metric.width + gap;
+        return path;
+    }).join("");
+
+    const translatedDigits = `
+        <g transform="translate(${cx + xOffset} ${cy + yOffset})">
+            ${paths}
+        </g>
+    `;
+
+    return rotation
+        ? `
+            <g transform="rotate(${rotation} ${rotateOriginX} ${rotateOriginY})" fill="${fill}">
+                ${translatedDigits}
+            </g>
+        `
+        : `
+            <g fill="${fill}">
+                ${translatedDigits}
+            </g>
+        `;
+}
+
+function getYearDigitsWidth(value, options = {}) {
+    return getBadgeDigitsWidth(value, {
+        ...options,
+        padLength: 2
+    });
+}
+
+function renderYearDigits(value, options = {}) {
+    return renderBadgeDigits(value, {
+        ...options,
+        padLength: 2
+    });
+}
+
+return { BADGE_DIGIT_PATHS: BADGE_DIGIT_PATHS, DEFAULT_YEAR_DIGIT_HEIGHT: DEFAULT_YEAR_DIGIT_HEIGHT, DEFAULT_YEAR_DIGIT_GAP: DEFAULT_YEAR_DIGIT_GAP, DEFAULT_MONTH_DIGIT_HEIGHT: DEFAULT_MONTH_DIGIT_HEIGHT, DEFAULT_MONTH_DIGIT_GAP: DEFAULT_MONTH_DIGIT_GAP, getBadgeDigitsWidth: getBadgeDigitsWidth, renderBadgeDigits: renderBadgeDigits, getYearDigitsWidth: getYearDigitsWidth, renderYearDigits: renderYearDigits };
+
+})();
+
+// ---- src/plate/lab-renderer/badge/geometry.js ----
+const __m_src_plate_lab_renderer_badge_geometry_js = (() => {
+function polar(center, deg, radius) {
+    const rad = (deg - 90) * Math.PI / 180;
+
+    return {
+        x: center.x + Math.cos(rad) * radius,
+        y: center.y + Math.sin(rad) * radius
+    };
+}
+
+function splitMarkerVertical(center, startDeg, endDeg, innerRadius, outerRadius, gapWidth) {
+    const halfGap = gapWidth / 2;
+
+    const pStartOuter = polar(center, startDeg, outerRadius);
+    const pStartInner = polar(center, startDeg, innerRadius);
+    const pEndOuter = polar(center, endDeg, outerRadius);
+    const pEndInner = polar(center, endDeg, innerRadius);
+
+    const outerCutLeft = {
+        x: center.x - halfGap,
+        y: center.y - Math.sqrt(Math.max(0, outerRadius * outerRadius - halfGap * halfGap))
+    };
+
+    const outerCutRight = {
+        x: center.x + halfGap,
+        y: center.y - Math.sqrt(Math.max(0, outerRadius * outerRadius - halfGap * halfGap))
+    };
+
+    const innerCutLeft = {
+        x: center.x - halfGap,
+        y: center.y - Math.sqrt(Math.max(0, innerRadius * innerRadius - halfGap * halfGap))
+    };
+
+    const innerCutRight = {
+        x: center.x + halfGap,
+        y: center.y - Math.sqrt(Math.max(0, innerRadius * innerRadius - halfGap * halfGap))
+    };
+
+    const leftPath = `
+            M ${pStartOuter.x} ${pStartOuter.y}
+            A ${outerRadius} ${outerRadius} 0 0 1 ${outerCutLeft.x} ${outerCutLeft.y}
+            L ${innerCutLeft.x} ${innerCutLeft.y}
+            A ${innerRadius} ${innerRadius} 0 0 0 ${pStartInner.x} ${pStartInner.y}
+            Z
+        `;
+
+    const rightPath = `
+            M ${outerCutRight.x} ${outerCutRight.y}
+            A ${outerRadius} ${outerRadius} 0 0 1 ${pEndOuter.x} ${pEndOuter.y}
+            L ${pEndInner.x} ${pEndInner.y}
+            A ${innerRadius} ${innerRadius} 0 0 0 ${innerCutRight.x} ${innerCutRight.y}
+            Z
+        `;
+
+    return { leftPath, rightPath };
+}
+
+return { polar: polar, splitMarkerVertical: splitMarkerVertical };
+
+})();
+
+// ---- src/plate/lab-renderer/badge/profile.js ----
+const __m_src_plate_lab_renderer_badge_profile_js = (() => {
+const BADGE_CENTER = Object.freeze({
+    x: 150,
+    y: 150
+});
+
+const BADGE_COLORS = Object.freeze([
+    "#da6e00",
+    "#007cb0",
+    "#ddaf27",
+    "#8d4931",
+    "#d8a0a6",
+    "#61993b"
+]);
+
+const BADGE_PROFILE = Object.freeze({
+    outerRadius: 144,
+    lineOuterRadius: 142,
+    blackRingRadius: 42,
+    centerRadius: 36,
+    monthNumberRadius: 91,
+    gapInnerRadius: 63.6,
+    gapOuterRadius: 117.8,
+    monthDigitHeight: 39,
+    monthDigitGap: 2.0,
+    yearDigitHeight: 42,
+    yearDigitGap: 3.5,
+    strokeWidth: 5
+});
+
+const BADGE_MARKER_PROFILE = Object.freeze({
+    outer: Object.freeze({
+        startDeg: -31.1,
+        endDeg: 31.1,
+        innerRadius: 117.1
+    }),
+    inner: Object.freeze({
+        startDeg: -32.1,
+        endDeg: 32.1,
+        outerRadius: 66.5,
+        innerRadius: 40
+    })
+});
+
+const BADGE_MONTH_LABEL_ORDER = Object.freeze([12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+
+function tuevColorForYear(year) {
+    const index = ((year - 2025) % BADGE_COLORS.length + BADGE_COLORS.length) % BADGE_COLORS.length;
+    return BADGE_COLORS[index];
+}
+
+return { BADGE_CENTER: BADGE_CENTER, BADGE_COLORS: BADGE_COLORS, BADGE_PROFILE: BADGE_PROFILE, BADGE_MARKER_PROFILE: BADGE_MARKER_PROFILE, BADGE_MONTH_LABEL_ORDER: BADGE_MONTH_LABEL_ORDER, tuevColorForYear: tuevColorForYear };
+
+})();
+
+// ---- src/plate/lab-renderer/badge/parts.js ----
+const __m_src_plate_lab_renderer_badge_parts_js = (() => {
+const { renderBadgeDigits } = __m_src_plate_lab_renderer_badge_digits_js;
+const { polar, splitMarkerVertical } = __m_src_plate_lab_renderer_badge_geometry_js;
+const { BADGE_CENTER, BADGE_MARKER_PROFILE, BADGE_MONTH_LABEL_ORDER, BADGE_PROFILE } = __m_src_plate_lab_renderer_badge_profile_js;
+
+function renderMarkerPaths() {
+    const markerGapWidth = BADGE_PROFILE.strokeWidth;
+
+    const outerMarker = splitMarkerVertical(
+        BADGE_CENTER,
+        BADGE_MARKER_PROFILE.outer.startDeg,
+        BADGE_MARKER_PROFILE.outer.endDeg,
+        BADGE_MARKER_PROFILE.outer.innerRadius,
+        BADGE_PROFILE.outerRadius,
+        markerGapWidth
+    );
+
+    const innerMarker = splitMarkerVertical(
+        BADGE_CENTER,
+        BADGE_MARKER_PROFILE.inner.startDeg,
+        BADGE_MARKER_PROFILE.inner.endDeg,
+        BADGE_MARKER_PROFILE.inner.innerRadius,
+        BADGE_MARKER_PROFILE.inner.outerRadius,
+        markerGapWidth
+    );
+
+    return `
+                <path d="${outerMarker.leftPath}" fill="black" />
+                <path d="${outerMarker.rightPath}" fill="black" />
+                <path d="${innerMarker.leftPath}" fill="black" />
+                <path d="${innerMarker.rightPath}" fill="black" />
+    `;
+}
+
+function renderDividerLines() {
+    return Array.from({ length: 12 }, (_, i) => {
+        if (i === 0) {
+            return "";
+        }
+
+        const angle = i * 30;
+
+        const innerA = polar(BADGE_CENTER, angle, BADGE_PROFILE.blackRingRadius);
+        const innerB = polar(BADGE_CENTER, angle, BADGE_PROFILE.gapInnerRadius);
+
+        const outerA = polar(BADGE_CENTER, angle, BADGE_PROFILE.gapOuterRadius);
+        const outerB = polar(BADGE_CENTER, angle, BADGE_PROFILE.lineOuterRadius);
+
+        return `
+            <line
+                x1="${innerA.x}" y1="${innerA.y}"
+                x2="${innerB.x}" y2="${innerB.y}"
+                stroke="black"
+                stroke-width="${BADGE_PROFILE.strokeWidth}"
+                stroke-linecap="butt"
+            />
+            <line
+                x1="${outerA.x}" y1="${outerA.y}"
+                x2="${outerB.x}" y2="${outerB.y}"
+                stroke="black"
+                stroke-width="${BADGE_PROFILE.strokeWidth}"
+                stroke-linecap="butt"
+            />
+        `;
+    }).join("");
+}
+
+function renderMonthDigits() {
+    return BADGE_MONTH_LABEL_ORDER.map((num, i) => {
+        const angle = i * 30;
+        const p = polar(BADGE_CENTER, angle, BADGE_PROFILE.monthNumberRadius);
+
+        return renderBadgeDigits(num, {
+            cx: p.x,
+            cy: p.y,
+            height: BADGE_PROFILE.monthDigitHeight,
+            gap: BADGE_PROFILE.monthDigitGap,
+            rotation: angle,
+            rotateOriginX: p.x,
+            rotateOriginY: p.y
+        });
+    }).join("");
+}
+
+return { renderMarkerPaths: renderMarkerPaths, renderDividerLines: renderDividerLines, renderMonthDigits: renderMonthDigits };
+
+})();
+
+// ---- src/plate/lab-renderer/badge/renderer.js ----
+const __m_src_plate_lab_renderer_badge_renderer_js = (() => {
+const { renderYearDigits: renderYearDigitPaths } = __m_src_plate_lab_renderer_badge_digits_js;
+const { renderDividerLines, renderMarkerPaths, renderMonthDigits } = __m_src_plate_lab_renderer_badge_parts_js;
+const { BADGE_CENTER, BADGE_PROFILE, tuevColorForYear } = __m_src_plate_lab_renderer_badge_profile_js;
+
+const { tuevColorForYear: __reexport_tuevColorForYear } = __m_src_plate_lab_renderer_badge_profile_js;
+
+function getBadgeBlurStyle(blurred) {
+    return blurred
+        ? "transition: filter 0.5s ease, opacity 0.5s ease; filter: blur(3px); opacity: 0.65;"
+        : "transition: filter 0.5s ease, opacity 0.5s ease; filter: blur(0); opacity: 1;";
+}
+
+function renderYearDigits(value) {
+    return renderYearDigitPaths(value, {
+        cx: BADGE_CENTER.x,
+        cy: BADGE_CENTER.y,
+        height: BADGE_PROFILE.yearDigitHeight,
+        gap: BADGE_PROFILE.yearDigitGap
+    });
+}
+
+function renderBadge(year, rotation, blurred, size = 250) {
+    const yearShort = String(year).slice(-2);
+    const color = tuevColorForYear(year);
+    const blurStyle = getBadgeBlurStyle(blurred);
+
+    return `
+        <svg
+            viewBox="0 0 300 300"
+            width="${size}"
+            height="${size}"
+            style="${blurStyle}"
+        >
+            <g transform="rotate(${rotation} 150 150)">
+                <circle cx="${BADGE_CENTER.x}" cy="${BADGE_CENTER.y}" r="${BADGE_PROFILE.outerRadius}" fill="${color}" />
+
+                ${renderMarkerPaths()}
+
+                ${renderDividerLines()}
+                ${renderMonthDigits()}
+
+                <circle cx="${BADGE_CENTER.x}" cy="${BADGE_CENTER.y}" r="${BADGE_PROFILE.blackRingRadius}" fill="black" />
+                <circle cx="${BADGE_CENTER.x}" cy="${BADGE_CENTER.y}" r="${BADGE_PROFILE.centerRadius}" fill="${color}" />
+
+                ${renderYearDigits(yearShort)}
+
+                <circle
+                    cx="${BADGE_CENTER.x}"
+                    cy="${BADGE_CENTER.y}"
+                    r="${BADGE_PROFILE.outerRadius}"
+                    fill="none"
+                    stroke="black"
+                    stroke-width="${BADGE_PROFILE.strokeWidth}"
+                />
+            </g>
+        </svg>
+    `;
+}
+
+return { tuevColorForYear: __reexport_tuevColorForYear, renderBadge: renderBadge };
+
+})();
+
+// ---- src/plate/lab-renderer/hu-badge-marker.js ----
+const __m_src_plate_lab_renderer_hu_badge_marker_js = (() => {
+// Kennzeichen Physical Lab b327 / HU badge marker bridge
+// Lab-only experiment: render the existing full TÜV badge SVG into the 35-mm HU seal slot.
+
+const { renderBadge } = __m_src_plate_lab_renderer_badge_renderer_js;
+const { escapeSvgAttrOrEmpty: escapeAttr } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+
+function renderFullHuBadgeMarker({ geometry, badge = {} }) {
+  const hu = geometry.hu || geometry;
+  const diameter = Number(hu.diameter) || Number(hu.radius) * 2 || 35;
+  const cx = Number(hu.cx ?? geometry.cx);
+  const cy = Number(hu.cy ?? geometry.cy);
+  const x = cx - diameter / 2;
+  const y = cy - diameter / 2;
+  const year = Number.isFinite(Number(badge.year)) ? Number(badge.year) : new Date().getFullYear();
+  const rotation = Number.isFinite(Number(badge.rotation)) ? Number(badge.rotation) : 0;
+  const rawSvg = renderBadge(year, rotation, false, 300);
+  const nestedSvg = rawSvg.replace(/<svg[^>]*>/, `<svg x="${format(x)}" y="${format(y)}" width="${format(diameter)}" height="${format(diameter)}" viewBox="0 0 300 300" class="hu-badge-svg" data-hu-year="${escapeAttr(year)}" data-hu-rotation="${escapeAttr(rotation)}" preserveAspectRatio="xMidYMid meet">`);
+  return `<g class="seal-slot seal-slot-hu seal-slot-hu-full-badge" data-hu-badge-renderer="full">${nestedSvg}</g>`;
+}
+
+function resolveHuBadgeOptions(options = {}) {
+  if (options.huBadgeRenderer !== "full") return null;
+  const year = Number(options.huYear);
+  return {
+    renderer: "full",
+    year: Number.isFinite(year) ? year : new Date().getFullYear(),
+    month: Number.isFinite(Number(options.huMonth)) ? Number(options.huMonth) : null,
+    rotation: Number.isFinite(Number(options.huRotation)) ? Number(options.huRotation) : 0
+  };
+}
+
+function format(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toFixed(3).replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1") : "0";
+}
+
+return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions: resolveHuBadgeOptions };
+
+})();
+
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
 // Kennzeichen Physical Lab b297 / seal slot marker rendering helpers
@@ -3115,6 +3741,7 @@ const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
 const { escapeSvgAttrOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+const { renderFullHuBadgeMarker } = __m_src_plate_lab_renderer_hu_badge_marker_js;
 
 function renderChangePlateWMarker({ seal, geometry }) {
   const wGeometry = geometry.hu;
@@ -3126,7 +3753,11 @@ function renderChangePlateWMarker({ seal, geometry }) {
   </g>`;
 }
 
-function renderHuSealMarker({ seal, geometry }) {
+function renderHuSealMarker({ seal, geometry, huBadge = null }) {
+  if (huBadge?.renderer === "full") {
+    return renderFullHuBadgeMarker({ geometry, badge: huBadge });
+  }
+
   return `
   <g class="seal-slot seal-slot-hu" data-seal-row="${escapeText(seal.rowKey || "top")}">
     <circle cx="${geometry.hu.cx ?? geometry.cx}" cy="${geometry.hu.cy}" r="${geometry.hu.radius}" fill="#1ea5ff" stroke="#111" stroke-width="1.25"/>
@@ -3319,14 +3950,14 @@ const { getItemsOfType } = __m_src_plate_lab_renderer_plate_sequence_width_utils
 
 
 
-function renderSeals({ content, rules }) {
+function renderSeals({ content, rules }, options = {}) {
   const sealItems = getItemsOfType(content, "seals");
   if (!sealItems.length) return "";
-  const parts = sealItems.map((seal) => renderSealItem(rules, seal)).filter(Boolean).join("\n");
+  const parts = sealItems.map((seal) => renderSealItem(rules, seal, options)).filter(Boolean).join("\n");
   return `<g class="layer layer-seals">${parts}</g>`;
 }
 
-function renderSealItem(rules, seal) {
+function renderSealItem(rules, seal, options = {}) {
   const geometry = getEffectiveSealGeometry(rules, seal);
   const markerPlan = createSealMarkerPlan({ rules, seal, geometry });
   const parts = [];
@@ -3334,7 +3965,7 @@ function renderSealItem(rules, seal) {
     parts.push(renderChangePlateWMarker({ seal, geometry }));
   }
   if (markerPlan.renderHu) {
-    parts.push(renderHuSealMarker({ seal, geometry }));
+    parts.push(renderHuSealMarker({ seal, geometry, huBadge: options.huBadge }));
   }
   if (markerPlan.renderAuthority) {
     parts.push(renderAuthoritySealMarker({ seal, geometry }));
@@ -3453,7 +4084,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b305 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b327 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -3462,6 +4093,7 @@ const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
 const { positiveNumber } = __m_src_plate_lab_renderer_plate_number_utils_js;
 const { getFirstItemOfType, getItemsOfType, sumValues } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
 const { escapeSvgTextOrEmpty: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
+const { renderFullHuBadgeMarker } = __m_src_plate_lab_renderer_hu_badge_marker_js;
 
 
 const DEFAULT_CHANGE_PLATE = Object.freeze({
@@ -3476,7 +4108,7 @@ const DEFAULT_CHANGE_PLATE = Object.freeze({
   supplementLabelBaselineY: 100
 });
 
-function renderChangePlateSupplement({ content, metrics, rules }) {
+function renderChangePlateSupplement({ content, metrics, rules }, options = {}) {
   if (!metrics?.changePlateEnabled) return "";
   const items = content.filter((item) => String(item.type || "").startsWith("change-plate-"));
   if (!items.length) return "";
@@ -3488,10 +4120,21 @@ function renderChangePlateSupplement({ content, metrics, rules }) {
 <g class="layer layer-change-plate" data-change-plate="true">
   ${frame ? `<rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="${rules.outerCornerRadius}" fill="#111"/>
   <rect x="${frame.x + rules.innerInset}" y="${frame.y + rules.innerInset}" width="${frame.width - rules.innerInset * 2}" height="${frame.height - rules.innerInset * 2}" rx="${rules.innerCornerRadius}" fill="#f4f3ee"/>` : ""}
-  ${seal ? `<g class="change-plate-supplement-hu"><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter / 2}" fill="#1ea5ff" stroke="#111" stroke-width="1.1"/><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter * 0.34}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.7" stroke-dasharray="1.2 1.6"/><text x="${seal.cx}" y="${seal.cy + 2.8}" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.8" font-weight="700" fill="#111">HU</text></g>` : ""}
+  ${seal ? renderChangePlateHuMarker(seal, options.huBadge) : ""}
   ${vehicleChars.map((char) => `<text x="${char.x}" y="${char.baselineY}" text-anchor="middle" font-family="'${char.fontFamily}', Arial Narrow, sans-serif" font-size="${char.fontSize}" textLength="${char.targetWidth}" lengthAdjust="spacingAndGlyphs" font-weight="400" fill="${metrics.textColor || '#080808'}">${escapeText(char.text)}</text>`).join("\n  ")}
   ${label ? `<text x="${label.x}" y="${label.baselineY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${label.fontSize}" font-weight="400" fill="#111">${escapeText(label.text)}</text>` : ""}
 </g>`.trim();
+}
+
+function renderChangePlateHuMarker(seal, huBadge = null) {
+  if (huBadge?.renderer === "full") {
+    return renderFullHuBadgeMarker({
+      geometry: { cx: seal.cx, cy: seal.cy, diameter: seal.diameter },
+      badge: huBadge
+    });
+  }
+
+  return `<g class="change-plate-supplement-hu"><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter / 2}" fill="#1ea5ff" stroke="#111" stroke-width="1.1"/><circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.diameter * 0.34}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="0.7" stroke-dasharray="1.2 1.6"/><text x="${seal.cx}" y="${seal.cy + 2.8}" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.8" font-weight="700" fill="#111">HU</text></g>`;
 }
 
 function createChangePlateSupplementItems({ x, width, height, split, changePlate, rules }) {
@@ -3548,7 +4191,7 @@ return { renderChangePlateSupplement: renderChangePlateSupplement, createChangeP
 
 // ---- src/plate/lab-renderer/plate-render-shell.js ----
 const __m_src_plate_lab_renderer_plate_render_shell_js = (() => {
-// Kennzeichen Physical Lab b312 / SVG render shell component
+// Kennzeichen Physical Lab b327 / SVG render shell component
 // Owns final SVG layer composition, canvas expansion and purely visual text/reference layers.
 // It must not calculate physical layout positions; it only renders the solved model.
 
@@ -3559,6 +4202,7 @@ const { renderSeasonField } = __m_src_plate_lab_renderer_season_field_js;
 const { renderChangePlateSupplement } = __m_src_plate_lab_renderer_change_plate_supplement_renderer_js;
 const { escapeSvgAttr: escapeAttr, escapeSvgText: escapeText } = __m_src_plate_lab_renderer_svg_escape_utils_js;
 const { getItemsOfType } = __m_src_plate_lab_renderer_plate_sequence_width_utils_js;
+const { resolveHuBadgeOptions } = __m_src_plate_lab_renderer_hu_badge_marker_js;
 
 const DEFAULT_TEXT_COLOR = "#080808";
 
@@ -3572,6 +4216,7 @@ function renderPlateSvgDocument(model, options = {}) {
   const showText = options.showText !== false;
   const layers = [];
   const debugRenderers = options.debugRenderers || {};
+  const huBadge = resolveHuBadgeOptions(options);
 
   layers.push(renderPlateBody(model));
 
@@ -3582,8 +4227,8 @@ function renderPlateSvgDocument(model, options = {}) {
     layers.push(renderOptionalLayer(debugRenderers.renderGrid, model));
   }
   if (showSeals && ["seals", "text", "horizontal", "complete"].includes(stage)) {
-    layers.push(renderSeals(model, options));
-    const changePlateSupplement = renderChangePlateSupplement(model);
+    layers.push(renderSeals(model, { ...options, huBadge }));
+    const changePlateSupplement = renderChangePlateSupplement(model, { ...options, huBadge });
     if (changePlateSupplement) layers.push(changePlateSupplement);
   }
   if (["seals", "text", "horizontal", "complete"].includes(stage)) {
@@ -7255,7 +7900,7 @@ return { CANONICAL_GL_MIDDLE_FONT_FAMILY: CANONICAL_GL_MIDDLE_FONT_FAMILY, CANON
 
 // ---- src/plate/lab-renderer-adapter.js ----
 const __m_src_plate_lab_renderer_adapter_js = (() => {
-// TÜV Reminder Card b325 / direct Card plate renderer integration adapter
+// TÜV Reminder Card b327 / direct Card plate renderer integration adapter
 //
 // This module is imported by the active Card renderer boundary in renderer.js.
 // No legacy toggle or fallback is planned; rollback remains the previous ZIP.
@@ -7369,9 +8014,11 @@ function createLabRendererOptions(options = {}) {
         showGrid: options.debug === true,
         showSeals: true,
         showText: true,
+        huBadgeRenderer: "full",
         huYear: options.huYear,
         huMonth: options.huMonth,
-        huRotation: options.huRotation
+        huRotation: options.huRotation,
+        changePlate: options.changePlate
     };
 }
 

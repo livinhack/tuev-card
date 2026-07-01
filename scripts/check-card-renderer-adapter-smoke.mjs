@@ -89,6 +89,8 @@ const svg = adapterModule.renderLicensePlate("B VM 146");
 assert(typeof svg === "string" && svg.startsWith("<svg"), "Adapter SVG smoke case must return an SVG string.");
 assert(svg.includes('data-card-renderer="physical-lab"'), "Adapter SVG must be marked as active physical Lab Card renderer output.");
 assert(svg.includes('class="tuev-plate tuev-plate-physical physical-plate-svg"'), "Adapter SVG must keep Card-facing SVG class marker.");
+assert(svg.includes('data-hu-badge-renderer="full"'), "Card renderer SVG must use the full HU badge renderer by default.");
+assert(!svg.includes('fill="#1ea5ff"'), "Card renderer SVG must not emit the old blue HU placeholder by default.");
 assert(!svg.includes("debug-dimensions"), "Adapter SVG smoke output must not include debug module markers.");
 
 if (!process.exitCode) {
