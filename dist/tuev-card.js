@@ -1,4 +1,4 @@
-// TÜV Card bundled b353
+// TÜV Card bundled b354
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -666,7 +666,7 @@ return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED
 
 // ---- src/utils/html-escape.js ----
 const __m_src_utils_html_escape_js = (() => {
-// TÜV Reminder Card b353 / shared HTML escaping helpers
+// TÜV Reminder Card b354 / shared HTML escaping helpers
 // Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
 // separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
 
@@ -3771,7 +3771,7 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b353 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b354 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
@@ -3974,7 +3974,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b353 / seal component helpers
+// Kennzeichen Physical Lab b354 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -4120,7 +4120,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b353 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b354 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -11040,7 +11040,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b353
+// TÜV Card source entry b354
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -11205,7 +11205,6 @@ class TuevCard extends HTMLElement {
         this.innerHTML = `
             <ha-card style="display:block;width:100%;overflow:hidden;position:relative;">
                 ${this.renderPreviewScaledContent(cardContent, layoutContext)}
-                ${this.renderPreviewDiagnostics(layoutContext)}
             </ha-card>
         `;
 
@@ -11500,61 +11499,6 @@ class TuevCard extends HTMLElement {
 
         this._previewVisibleWidth = visibleWidth;
         return visibleWidth;
-    }
-
-    renderPreviewDiagnostics(layoutContext) {
-        if (!layoutContext?.previewContext) {
-            return "";
-        }
-
-        const format = (value) => {
-            if (typeof value === "number") {
-                return Number.isFinite(value) ? String(Math.round(value * 1000) / 1000) : "n/a";
-            }
-
-            if (typeof value === "boolean") {
-                return value ? "true" : "false";
-            }
-
-            return value == null ? "n/a" : String(value);
-        };
-
-        const rows = [
-            ["b", "b353"],
-            ["reason", layoutContext.debugReason],
-            ["plate", this.config?.plate_style || "plate"],
-            ["cols", layoutContext.requestedColumns],
-            ["measured", layoutContext.measuredWidth],
-            ["rawVisible", layoutContext.rawVisibleWidth],
-            ["outer", layoutContext.outerVisiblePreviewWidth],
-            ["safety", layoutContext.previewScaleSafetyPx],
-            ["visible", layoutContext.visiblePreviewWidth],
-            ["sim", layoutContext.simulatedWidth],
-            ["layout", layoutContext.layoutWidth],
-            ["scaled", layoutContext.previewScaled],
-            ["scale", layoutContext.scale]
-        ];
-
-        return `
-            <div
-                data-preview-layout-diagnostics
-                style="
-                    position: absolute;
-                    right: 8px;
-                    bottom: 8px;
-                    z-index: 5;
-                    max-width: calc(100% - 16px);
-                    padding: 6px 8px;
-                    border-radius: 8px;
-                    background: rgba(0, 0, 0, 0.78);
-                    color: #fff;
-                    font: 10px/1.35 monospace;
-                    pointer-events: none;
-                    white-space: pre;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-                "
-            >${rows.map(([key, value]) => `${key}: ${format(value)}`).join("\n")}</div>
-        `;
     }
 
     renderPreviewScaledContent(content, layoutContext) {

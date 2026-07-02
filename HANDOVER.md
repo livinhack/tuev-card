@@ -1,17 +1,17 @@
-# Handover – b353 Editor Preview Inner Width Scale Fix
+# Handover – b354 Editor Preview Scale Cleanup
 
-Current stand: **b353**.
+Current stand: **b354**.
 
-b353 is a targeted follow-up to the b352 editor-preview diagnostics. The screenshot showed `scaled: true` with `scale: 0.653`, but the right edge was still clipped. Therefore the remaining issue was not the old bypass anymore; the scale target was still too wide because it used the outer preview pane width instead of the inner usable width.
+b354 is a targeted follow-up to the b352 editor-preview diagnostics. The b353 screenshot confirmed `scaled: true` with a safer inner-width scale target and no obvious right-edge clipping. b354 is the cleanup checkpoint that keeps the scale fix and removes the temporary diagnostics.
 
-## Changed in b353
+## Changed in b354
 
-- Added `getPreviewScaleSafetyPx()`.
-- Scale calculation now uses `outerVisiblePreviewWidth - previewScaleSafetyPx`.
-- `outerVisiblePreviewWidth` is capped by the measured card width when available.
-- The outer scale wrapper keeps the visible preview width; the inner simulated layout scales to the safer usable width.
-- Diagnostic overlay remains for this test build and now shows `outer` and `safety`.
-- Added `check:card-editor-preview-inner-width-scale`.
+- Kept `getPreviewScaleSafetyPx()`.
+- Kept scale calculation on `outerVisiblePreviewWidth - previewScaleSafetyPx`.
+- Kept `outerVisiblePreviewWidth` capped by measured card width when available.
+- Kept the outer scale wrapper on visible preview width while the inner simulated layout scales to the safer usable width.
+- Removed the temporary preview diagnostic overlay.
+- Updated `check:card-editor-preview-inner-width-scale` to verify the scale fix stays and diagnostics are gone.
 
 ## Preserved
 
@@ -31,7 +31,7 @@ b353 is a targeted follow-up to the b352 editor-preview diagnostics. The screens
 
 No plate geometry changed. Do not continue broad number-plate renderer cleanup in this step. Reminder integration remains a later phase.
 
-Historical b338/b353 note: Sortierlogik remains on the b337 rollback path, and group Farben continue to move with their groups.
+Historical b338/b354 note: Sortierlogik remains on the b337 rollback path, and group Farben continue to move with their groups.
 
-Historical b344/b353 note: Final Release Audit status remains preserved.
+Historical b344/b354 note: Final Release Audit status remains preserved.
 Reminder-ZIP integration remains a later End-to-End step after the Card-side preview issue is resolved.
