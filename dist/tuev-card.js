@@ -1,4 +1,4 @@
-// TÜV Card bundled b350
+// TÜV Card bundled b351
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -666,7 +666,7 @@ return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED
 
 // ---- src/utils/html-escape.js ----
 const __m_src_utils_html_escape_js = (() => {
-// TÜV Reminder Card b350 / shared HTML escaping helpers
+// TÜV Reminder Card b351 / shared HTML escaping helpers
 // Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
 // separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
 
@@ -3771,7 +3771,7 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b350 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b351 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
@@ -3974,7 +3974,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b350 / seal component helpers
+// Kennzeichen Physical Lab b351 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -4120,7 +4120,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b350 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b351 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -11373,25 +11373,34 @@ class TuevCard extends HTMLElement {
 
         const visiblePreviewWidth = rawVisibleWidth;
         const scale = Math.min(1, Math.max(0.05, visiblePreviewWidth / simulatedWidth));
+        const shouldScalePreview = simulatedWidth > visiblePreviewWidth + 4;
 
-        if (scale >= 0.995 && visiblePreviewWidth >= simulatedWidth - 4) {
+        // In the Home Assistant editor preview the internal layout may be
+        // simulated wider than the visible preview pane so the column decision
+        // resembles the final dashboard. Whenever that simulated width is
+        // larger than the actually visible preview width, the scale wrapper is
+        // mandatory. Do not let measuredWidth from wider HA dialog ancestors
+        // bypass the scale path.
+        if (shouldScalePreview) {
             return {
                 measuredWidth,
-                layoutWidth: measuredWidth,
+                layoutWidth: simulatedWidth,
+                visiblePreviewWidth,
                 requestedColumns: previewSimulation.requestedColumns || requestedColumns,
                 previewContext,
-                previewScaled: false,
-                scale: 1
+                previewScaled: true,
+                scale
             };
         }
 
         return {
             measuredWidth,
-            layoutWidth: simulatedWidth,
+            layoutWidth: visiblePreviewWidth,
+            visiblePreviewWidth,
             requestedColumns: previewSimulation.requestedColumns || requestedColumns,
             previewContext,
-            previewScaled: true,
-            scale
+            previewScaled: false,
+            scale: 1
         };
     }
 
@@ -11476,7 +11485,8 @@ class TuevCard extends HTMLElement {
                 style="
                     height: ${height};
                     overflow: hidden;
-                    width: 100%;
+                    width: ${layoutContext.visiblePreviewWidth ? `${layoutContext.visiblePreviewWidth}px` : "100%"};
+                    max-width: 100%;
                     scrollbar-gutter: stable;
                     background: var(--card-background-color, #1c1c1c);
                     box-shadow: inset -1px 0 0 var(--divider-color, rgba(255, 255, 255, 0.14));

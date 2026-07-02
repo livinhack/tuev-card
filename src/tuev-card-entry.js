@@ -2,7 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b350";
+import { escapeHtml } from "./utils/html-escape.js?v=b351";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b350";
-import { TuevCardEditor } from "./editor/editor.js?v=b350";
+} from "./plate/renderer.js?v=b351";
+import { TuevCardEditor } from "./editor/editor.js?v=b351";
 
 window.customCards = window.customCards || [];
 
@@ -342,25 +342,34 @@ class TuevCard extends HTMLElement {
 
         const visiblePreviewWidth = rawVisibleWidth;
         const scale = Math.min(1, Math.max(0.05, visiblePreviewWidth / simulatedWidth));
+        const shouldScalePreview = simulatedWidth > visiblePreviewWidth + 4;
 
-        if (scale >= 0.995 && visiblePreviewWidth >= simulatedWidth - 4) {
+        // In the Home Assistant editor preview the internal layout may be
+        // simulated wider than the visible preview pane so the column decision
+        // resembles the final dashboard. Whenever that simulated width is
+        // larger than the actually visible preview width, the scale wrapper is
+        // mandatory. Do not let measuredWidth from wider HA dialog ancestors
+        // bypass the scale path.
+        if (shouldScalePreview) {
             return {
                 measuredWidth,
-                layoutWidth: measuredWidth,
+                layoutWidth: simulatedWidth,
+                visiblePreviewWidth,
                 requestedColumns: previewSimulation.requestedColumns || requestedColumns,
                 previewContext,
-                previewScaled: false,
-                scale: 1
+                previewScaled: true,
+                scale
             };
         }
 
         return {
             measuredWidth,
-            layoutWidth: simulatedWidth,
+            layoutWidth: visiblePreviewWidth,
+            visiblePreviewWidth,
             requestedColumns: previewSimulation.requestedColumns || requestedColumns,
             previewContext,
-            previewScaled: true,
-            scale
+            previewScaled: false,
+            scale: 1
         };
     }
 
@@ -445,7 +454,8 @@ class TuevCard extends HTMLElement {
                 style="
                     height: ${height};
                     overflow: hidden;
-                    width: 100%;
+                    width: ${layoutContext.visiblePreviewWidth ? `${layoutContext.visiblePreviewWidth}px` : "100%"};
+                    max-width: 100%;
                     scrollbar-gutter: stable;
                     background: var(--card-background-color, #1c1c1c);
                     box-shadow: inset -1px 0 0 var(--divider-color, rgba(255, 255, 255, 0.14));

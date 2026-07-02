@@ -1,4 +1,4 @@
-// Kennzeichen Physical Lab b350 / seal component helpers
+// Kennzeichen Physical Lab b351 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 import { getEffectiveSealGeometry, getSealGeometry } from "./seal-geometry-plan.js";

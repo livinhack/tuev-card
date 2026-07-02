@@ -36,9 +36,9 @@ const card = read(cardPath);
 const adapter = read(adapterPath);
 const renderer = read(rendererPath);
 
-assert(editor.includes('from "../plate/renderer.js?v=b350"'), "Editor must consume the b350 public renderer cache boundary.");
-assert(card.includes('from "./plate/renderer.js?v=b350"'), "Card entry must consume the b350 public renderer cache boundary.");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b350"'), "Public renderer entry must delegate to the b350 adapter cache boundary.");
+assert(editor.includes('from "../plate/renderer.js?v=b351"'), "Editor must consume the b351 public renderer cache boundary.");
+assert(card.includes('from "./plate/renderer.js?v=b351"'), "Card entry must consume the b351 public renderer cache boundary.");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b351"'), "Public renderer entry must delegate to the b351 adapter cache boundary.");
 
 
 for (const forbidden of [
