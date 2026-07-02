@@ -1,6 +1,6 @@
-# b351 Editor Preview Force Scale Contract
+# b352 Editor Preview Force Scale Contract
 
-b351 is a targeted follow-up to b350 for the Home Assistant card editor preview.
+b352 is a targeted follow-up to b350 for the Home Assistant card editor preview.
 
 ## Goal
 

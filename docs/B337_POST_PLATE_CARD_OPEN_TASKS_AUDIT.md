@@ -61,3 +61,5 @@ When the current Reminder ZIP is provided:
 - Reminder integration is documented as later work;
 - the font-binary release note remains visible;
 - the b336 final smoke checkpoint doc remains present as history.
+
+b352 note: No plate geometry changed; do not continue broad number-plate renderer cleanup in this diagnostic step. Reminder integration remains a later phase.

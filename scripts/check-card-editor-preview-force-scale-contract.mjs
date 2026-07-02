@@ -14,7 +14,7 @@ const assert = (condition, message) => {
 const card = read('src/tuev-card-entry.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert(pkg.version.includes('b351'), 'package version must identify b351.');
+assert(pkg.version.includes('b352'), 'package version must identify b352.');
 assert(card.includes('const rawVisibleWidth = this.getPreviewVisibleWidth();'), 'layout context must read raw visible preview width separately.');
 assert(!card.includes('this.getPreviewVisibleWidth() || measuredWidth'), 'visible preview width must never fall back to measured ancestor width.');
 assert(card.includes('const shouldScalePreview = simulatedWidth > visiblePreviewWidth + 4;'), 'preview must detect simulated width overflow against the visible pane.');

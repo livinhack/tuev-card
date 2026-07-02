@@ -1,8 +1,8 @@
-// TÜV Card source entry b126
+// TÜV Card source entry b352
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b351";
+import { escapeHtml } from "./utils/html-escape.js?v=b352";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b351";
-import { TuevCardEditor } from "./editor/editor.js?v=b351";
+} from "./plate/renderer.js?v=b352";
+import { TuevCardEditor } from "./editor/editor.js?v=b352";
 
 window.customCards = window.customCards || [];
 
@@ -172,8 +172,9 @@ class TuevCard extends HTMLElement {
         const cardContent = this.renderSections(hass, sections, layoutContext);
 
         this.innerHTML = `
-            <ha-card style="display:block;width:100%;overflow:hidden;">
+            <ha-card style="display:block;width:100%;overflow:hidden;position:relative;">
                 ${this.renderPreviewScaledContent(cardContent, layoutContext)}
+                ${this.renderPreviewDiagnostics(layoutContext)}
             </ha-card>
         `;
 
@@ -336,7 +337,11 @@ class TuevCard extends HTMLElement {
                 requestedColumns: previewSimulation.requestedColumns || requestedColumns,
                 previewContext,
                 previewScaled: false,
-                scale: 1
+                scale: 1,
+                simulatedWidth,
+                rawVisibleWidth,
+                visiblePreviewWidth: 0,
+                debugReason: "no-visible-width"
             };
         }
 
@@ -355,10 +360,14 @@ class TuevCard extends HTMLElement {
                 measuredWidth,
                 layoutWidth: simulatedWidth,
                 visiblePreviewWidth,
+                rawVisibleWidth,
+                simulatedWidth,
+                shouldScalePreview,
                 requestedColumns: previewSimulation.requestedColumns || requestedColumns,
                 previewContext,
                 previewScaled: true,
-                scale
+                scale,
+                debugReason: "forced-scale"
             };
         }
 
@@ -366,10 +375,14 @@ class TuevCard extends HTMLElement {
             measuredWidth,
             layoutWidth: visiblePreviewWidth,
             visiblePreviewWidth,
+            rawVisibleWidth,
+            simulatedWidth,
+            shouldScalePreview,
             requestedColumns: previewSimulation.requestedColumns || requestedColumns,
             previewContext,
             previewScaled: false,
-            scale: 1
+            scale: 1,
+            debugReason: "visible-fits"
         };
     }
 
@@ -437,6 +450,59 @@ class TuevCard extends HTMLElement {
 
         this._previewVisibleWidth = visibleWidth;
         return visibleWidth;
+    }
+
+    renderPreviewDiagnostics(layoutContext) {
+        if (!layoutContext?.previewContext) {
+            return "";
+        }
+
+        const format = (value) => {
+            if (typeof value === "number") {
+                return Number.isFinite(value) ? String(Math.round(value * 1000) / 1000) : "n/a";
+            }
+
+            if (typeof value === "boolean") {
+                return value ? "true" : "false";
+            }
+
+            return value == null ? "n/a" : String(value);
+        };
+
+        const rows = [
+            ["b", "b352"],
+            ["reason", layoutContext.debugReason],
+            ["plate", this.config?.plate_style || "plate"],
+            ["cols", layoutContext.requestedColumns],
+            ["measured", layoutContext.measuredWidth],
+            ["rawVisible", layoutContext.rawVisibleWidth],
+            ["visible", layoutContext.visiblePreviewWidth],
+            ["sim", layoutContext.simulatedWidth],
+            ["layout", layoutContext.layoutWidth],
+            ["scaled", layoutContext.previewScaled],
+            ["scale", layoutContext.scale]
+        ];
+
+        return `
+            <div
+                data-preview-layout-diagnostics
+                style="
+                    position: absolute;
+                    right: 8px;
+                    bottom: 8px;
+                    z-index: 5;
+                    max-width: calc(100% - 16px);
+                    padding: 6px 8px;
+                    border-radius: 8px;
+                    background: rgba(0, 0, 0, 0.78);
+                    color: #fff;
+                    font: 10px/1.35 monospace;
+                    pointer-events: none;
+                    white-space: pre;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+                "
+            >${rows.map(([key, value]) => `${key}: ${format(value)}`).join("\n")}</div>
+        `;
     }
 
     renderPreviewScaledContent(content, layoutContext) {

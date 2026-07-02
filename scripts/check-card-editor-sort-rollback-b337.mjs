@@ -7,7 +7,7 @@ function read(path) {
 
 function assert(condition, message) {
   if (!condition) {
-    console.error(`b351 sort rollback check failed: ${message}`);
+    console.error(`b352 sort rollback check failed: ${message}`);
     process.exit(1);
   }
 }
@@ -18,12 +18,12 @@ const renderer = read("src/plate/renderer.js");
 const groups = read("src/card/groups.js");
 const plateBody = read("src/plate/lab-renderer/plate-body.js");
 
-assert(editor.includes('from "../plate/renderer.js?v=b351"'), "editor cache marker must be b351");
-assert(card.includes('from "./plate/renderer.js?v=b351"'), "card cache marker must be b351");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b351"'), "public renderer cache marker must be b351");
-assert(groups.includes('./entities.js?v=b351'), "groups helper cache marker must be b351");
+assert(editor.includes('from "../plate/renderer.js?v=b352"'), "editor cache marker must be b352");
+assert(card.includes('from "./plate/renderer.js?v=b352"'), "card cache marker must be b352");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b352"'), "public renderer cache marker must be b352");
+assert(groups.includes('./entities.js?v=b352'), "groups helper cache marker must be b352");
 
-assert(!editor.includes('getSortedUngroupedDraftEntityIds'), "b338/b351 visible ungrouped draft re-sort helper must be removed");
+assert(!editor.includes('getSortedUngroupedDraftEntityIds'), "b338/b352 visible ungrouped draft re-sort helper must be removed");
 assert(editor.includes('const selectedEntityIds = this._draftEntityIds.filter(Boolean);'), "render must use b337 draft entity order");
 assert(editor.includes('if (this._config.sort === nextSort) {') && editor.includes('this.fireConfigChanged();'), "ungrouped sort must use b337 config-only flow");
 assert(!editor.includes('this._draftEntityIds = this.getSortedUngroupedDraftEntityIds'), "ungrouped sort must not rewrite draft entity order");
@@ -35,4 +35,4 @@ assert(!editor.includes('checkPlateFontAvailable') && !editor.includes('ensurePl
 assert(editor.includes('color: group.color || getGroupAccentColor(group, groupIndex)'), "group color materialization fix must stay active");
 assert(plateBody.includes('data-plate-frame="true"'), "Euro-field frame overlay fix must stay active");
 
-console.log('✓ b351 sort rollback to b337 with b351 font/frame fixes preserved');
+console.log('✓ b352 sort rollback to b337 with b352 font/frame fixes preserved');

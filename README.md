@@ -1,53 +1,62 @@
-# TÜV Reminder Card b351
+# TÜV Reminder Card b352
 
-Full/Card handover ZIP for **b351 Editor Preview Force Scale Contract**.
+Full/Card handover ZIP for **b352 Editor Preview Layout Diagnostics**.
 
-b351 builds on b350 and tightens the editor-preview scaling rule: if the simulated four-column preview is wider than the actually visible Home Assistant editor preview pane, the scaled preview path must stay active and the wrapper must be bounded to the visible preview width.
+b352 is a diagnostic build on top of b351. It does **not** try another layout fix. Instead, it shows the live editor-preview layout values directly inside the preview so the remaining clipping/scale problem can be diagnosed from a screenshot.
 
-## Current stand
+## Current status
 
-- Current Card stand: **b351**
-- Based on: b350 Editor Preview Visible Width Bypass Fix
-- Scope: Editor preview scale/wrapper contract only
+- Current Card stand: **b352**
+- Purpose: diagnostic only
+- Base: b351 Editor Preview Force Scale Contract
+- Reminder integration remains a later End-to-End step.
 
-## Changed in b351
+## Changed in b352
 
-- `getLayoutContext()` explicitly detects `shouldScalePreview = simulatedWidth > visiblePreviewWidth + 4`.
-- Simulated editor preview overflow now forces `previewScaled: true`.
-- The scaled preview context exposes `visiblePreviewWidth`.
-- The scaled preview outer wrapper uses `visiblePreviewWidth` and `max-width: 100%` so a too-wide HA editor host cannot expose only a clipped slice.
-- New release check: `check:card-editor-preview-force-scale-contract`.
+- Added a small overlay in the Home Assistant editor preview with:
+  - `reason`
+  - `plate`
+  - `cols`
+  - `measured`
+  - `rawVisible`
+  - `visible`
+  - `sim`
+  - `layout`
+  - `scaled`
+  - `scale`
+- The overlay appears only in editor preview context.
+- The existing b351 scale contract remains unchanged.
+- Cache/version markers were advanced to b352.
 
 ## Not changed
 
-- no plate geometry
-- no HU logic
-- no change-plate geometry
-- no sorting logic
-- no popup experiment
-- no Reminder integration
+- keine Kennzeichen-Geometrie
+- keine HU-Logik
+- keine Wechselkennzeichen-Geometrie
+- keine Sortierlogik
+- keine Reminder-Integration
+- kein Popup-Experiment
+- kein neuer Layout-Fix
 
-## Checks
+## Test instruction
 
-Run:
+Install/build b352 and open the editor preview in the problematic state. Please send a screenshot that includes the small diagnostic overlay. The relevant values are especially:
 
-```bash
-npm run check
-npm run build
-```
+- `measured`
+- `rawVisible`
+- `visible`
+- `sim`
+- `layout`
+- `scaled`
+- `scale`
+- `reason`
 
-ChatGPT ZIPs do not include TTF binaries. A local GitHub/HACS build must include the GL fonts in `fonts/` so they are copied to `dist/fonts/`.
+## Font note
 
-## Guardrail
+The ChatGPT ZIP does not include TTF binaries. A local GitHub/HACS release build must include the GL font files under `fonts/` so `npm run build` can copy them to `dist/fonts/`.
 
-No plate geometry changed. Keine Kennzeichen-Geometrie. Reminder integration remains later.
+No plate geometry changed. Reminder integration remains a later phase.
 
-## Preserved editor fixes
+Historical b338/b352 note: Kennzeichen grafisch darstellen remains the editor option that gates graphical/text plate rendering. Sortierfunktionen and group color behavior remain preserved from the earlier b337/b340 path.
 
-Kennzeichen grafisch darstellen remains the user-facing switch for graphical vs text plates. Sortier controls keep the b337 config flow. Gruppen-Farben remain preserved when groups are moved.
-
-## Final Release Audit note
-
-b351 keeps the Card Final Release Audit status while applying only the editor preview force-scale contract.
-
-ChatGPT-ZIPs enthalten keine TTF-Binaries. Keine Kennzeichen-Geometrie. Keine Reminder-Integration.
+b352 also preserves the prior Card Final Release Audit status. ChatGPT-ZIPs enthalten keine TTF-Binaries. Nicht-Ziele: keine Kennzeichen-Geometrie, keine Reminder-Integration.
