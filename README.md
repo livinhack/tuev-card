@@ -1,43 +1,42 @@
-# TÜV Reminder Card b347
+# TÜV Reminder Card b348
 
-Full/Card handover ZIP for **b347 Card Editor Text Preview Scrollbar/Grid Stability Fix**.
+Full/Card handover ZIP for **b348 Editor Popup Rollback / Text Preview Stability**.
 
-This stand fixes a Windows-only audit-script path-normalization issue from b345. Runtime Card behavior is unchanged.
+b348 keeps the b347 fix for the editor text-mode preview jitter, but rolls the floating-panel outside-click handling back to the safer b344-style deferred click path because the pointerdown-capture experiment could make the editor page hang and break outside-click closing.
 
-See `HANDOVER.md` and `docs/B347_WINDOWS_PATH_AUDIT_FIX.md`.
+## Status
 
-## Font-/HACS-Hinweis
+- Current Card stand: **b348**
+- Plate renderer remains Card-side prepared/frozen until later Reminder integration.
+- GL fonts are expected as bundled release assets under `fonts/` / `dist/fonts/`.
 
-Die ChatGPT-Übergabe-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein, insbesondere:
+## Changed in b348
 
-- `fonts/GL-Nummernschild-Mtl.ttf`
-- `fonts/GL-Nummernschild-Eng.ttf`
+- removed document-level `pointerdown` capture close handler from the editor
+- removed the added popup `keydown` listener from that experiment
+- restored deferred click outside-close behavior
+- kept b347 text-preview scrollbar/grid stability
 
-Beim lokalen Release-Build kopiert `scripts/build-bundle.mjs` vorhandene Fontdateien nach `dist/fonts/`.
-
-## Scope
-
-No plate geometry changed in b347. Reminder integration remains a later phase.
-
-## Übernommene Card-/Editor-Fixes
-
-Die früheren Fixes bleiben in b347 erhalten: Die Option **Kennzeichen grafisch darstellen** steuert weiterhin grafische Kennzeichen vs. Textanzeige; Sortierfunktionen bleiben auf dem b337-Config-Fluss; Gruppen-Farben bleiben beim Verschieben erhalten.
-
-## b347 Final Release Audit Status
-
-b347 keeps the Final Release Audit boundary from the previous release-audit stand and only adds the Windows path audit fix.
-
-ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die lokalen GL-Fontdateien vorhanden sein.
-
-Nicht-Ziele in b347:
+## Not changed
 
 - keine Kennzeichen-Geometrie
-- keine Reminder-Integration
 - keine HU-Logik
+- keine Wechselkennzeichen-Geometrie
 - keine Sortierlogik
+- keine Reminder-Integration
 - keine neuen Features
 
 
-## b347 Editor Text Preview Stability
+## Font / HACS Hinweis
 
-b347 fixes the remaining editor-preview jitter seen only when graphical license plates are disabled. It stabilizes scrollbar-gutter sized preview-width changes, adds text-preview height hysteresis, shortens delayed width refreshes in text preview mode, and fixes the text plate fallback box so it cannot expand the preview grid. No renderer geometry, HU logic, sorting, or Reminder integration changed.
+Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein, damit `npm run build` sie nach `dist/fonts/` kopieren kann.
+
+
+## Editor option status
+
+Die Option **Kennzeichen grafisch darstellen** bleibt wirksam: an = grafischer Renderer, aus = Textanzeige.
+
+
+## Final Release Audit
+
+b348 behält den Final Release Audit Status bei; dieser Stand ist ein gezielter Editor-Popup-Rollback ohne neue Features.

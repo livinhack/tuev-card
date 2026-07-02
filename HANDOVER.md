@@ -1,63 +1,57 @@
-# Handover – b347 Card Editor Text Preview Scrollbar/Grid Stability Fix
+# Handover – b348 Editor Popup Rollback / Text Preview Stability
 
-Current stand: **b347**.
+Current stand: **b348**.
 
-b347 builds on **b346 Windows Path Audit Fix** and fixes the remaining editor-preview jitter that occurs only when graphical license plates are disabled.
+b348 builds on b347. The text-mode editor preview jitter fix remains, but the popup outside-click implementation from b345/b347 is rolled back to the safer b344-style deferred click close path.
 
-## Change in b347
+## Reason
 
-- Fixed path normalization in audit scripts that compared imported/source file paths against allowlists.
-- Replaced the incorrect double-backslash normalization with single-backslash normalization in the affected scripts.
-- This makes `check:renderer-legacy-audit` recognize the allowed blue placeholder fallback files on Windows too.
+User reported that after the jitter fix the browser could hang on the editor page and floating/hover panels again failed to close reliably via outside click. The risky change was the document-level `pointerdown` capture handler with immediate close.
 
-## Important
+## Change in b348
 
-The old blue HU/debug placeholder is still only allowed in the documented fallback/debug files. Productive Full-HU rendering remains unchanged.
+- remove `pointerdown` capture listener for floating-panel outside close
+- remove the extra `keydown` listener from that popup experiment
+- keep the original document `click` capture listener
+- restore deferred `setTimeout(..., 0)` close behavior
+- keep b347 text-preview scrollbar/grid stability
 
-## Not changed
+## Checks
 
-- no license plate geometry
-- no HU logic
-- no change-plate geometry
-- no sort logic
-- no popup behavior
-- no font logic
+Run:
+
+```bash
+npm run check
+npm run build
+```
+
+## Non-goals
+
+- no plate geometry change
+- no HU logic change
+- no sorting change
 - no Reminder integration
-- no new features
-
-## Validation
-
-- Lab: `npm run check` passed
-- Full/Card: `npm run check` passed
-- Full/Card: `npm run build` passed
-
-## ZIPs
-
-- `plate-physical-lab-b347-windows-path-audit-fix.zip`
-- `tuev-card-full-b347-windows-path-audit-fix-handover.zip`
-
-## Scope confirmation
-
-No plate geometry changed in b347. Reminder integration remains a later phase.
-
-## Übernommene Card-/Editor-Fixes
-
-Die früheren Sortier- und Farben-Fixes bleiben in b347 erhalten: Sortierfunktionen bleiben auf dem b337-Config-Fluss, und Gruppen-Farben werden beim Verschieben materialisiert/mitgenommen.
-
-## b347 Final Release Audit Status
-
-b347 keeps the Final Release Audit boundary and only fixes Windows path normalization in audit scripts.
-
-Reminder-ZIP analysis and real End-to-End integration remain the next later phase.
+- no renderer rewrite
 
 
-## b347 change
+## Font / HACS Hinweis
 
-- Stabilized editor-preview text plate mode against scrollbar/grid feedback loops.
-- Added stable scrollbar gutter reservation to the scaled preview wrapper.
-- Cached preview visible width and ignored scrollbar-gutter sized oscillations.
-- Added wider text-preview height hysteresis.
-- Shortened delayed width refreshes in text preview mode.
-- Fixed text fallback plate box width/height so it cannot expand the preview grid.
+Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein, damit `npm run build` sie nach `dist/fonts/` kopieren kann.
 
-No license-plate geometry, HU logic, sorting logic, popup logic, or Reminder integration changed.
+
+No plate geometry changed. Do not continue broad number-plate renderer cleanup in this step; later Reminder integration remains separate.
+
+
+## Preserved earlier fixes
+
+Sortierfunktionen bleiben auf dem b337-Config-Fluss. Gruppen-Farben werden beim Verschieben weiterhin materialisiert/mitgenommen.
+
+
+## Final Release Audit
+
+b348 behält den Final Release Audit Status bei; dieser Stand ist ein gezielter Editor-Popup-Rollback ohne neue Features.
+
+
+## Later Reminder End-to-End phase
+
+Die Reminder-Integration bleibt ein späterer End-to-End-Schritt nach Lieferung des aktuellen Reminder-ZIP.

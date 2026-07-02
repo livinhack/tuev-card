@@ -2,7 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b347";
+import { escapeHtml } from "./utils/html-escape.js?v=b348";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b347";
-import { TuevCardEditor } from "./editor/editor.js?v=b347";
+} from "./plate/renderer.js?v=b348";
+import { TuevCardEditor } from "./editor/editor.js?v=b348";
 
 window.customCards = window.customCards || [];
 

@@ -15,7 +15,7 @@ const card = read('src/tuev-card-entry.js');
 const parts = read('src/card/render-parts.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert(pkg.version.includes('b347'), 'package version must identify b347.');
+assert(pkg.version.includes('b348'), 'package version must identify b348.');
 assert(card.includes('scrollbar-gutter: stable both-edges'), 'scaled editor preview wrapper must reserve a stable scrollbar gutter.');
 assert(card.includes('Math.abs(previousWidth - visibleWidth) < 24'), 'preview visible width must ignore scrollbar-gutter sized oscillations.');
 assert(card.includes('this._previewVisibleWidth = visibleWidth'), 'preview visible width must be cached after stable changes.');
