@@ -1,9 +1,10 @@
-// TÜV Card source entry b354
+// TÜV Card source entry b355
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b354";
+import { escapeHtml } from "./utils/html-escape.js?v=b355";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
+import { getReminderPlateData } from "./card/reminder-attributes.js?v=b355";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
 import { getSharedPlateLayout } from "./card/plate-layout.js?v=b136";
@@ -20,8 +21,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b354";
-import { TuevCardEditor } from "./editor/editor.js?v=b354";
+} from "./plate/renderer.js?v=b355";
+import { TuevCardEditor } from "./editor/editor.js?v=b355";
 
 window.customCards = window.customCards || [];
 
@@ -740,7 +741,8 @@ class TuevCard extends HTMLElement {
                 hass,
                 tileWidth: layout.tileWidth,
                 isGraphicalPlateAvailable: graphicalPlateEnabled,
-                getLicensePlateMetrics
+                getLicensePlateMetrics,
+                getPlateData: getReminderPlateData
             });
             const grid = `
                 <div style="
@@ -938,7 +940,8 @@ class TuevCard extends HTMLElement {
         const attr = entity.attributes;
 
         const vehicleName = attr.vehicle_name || attr.friendly_name || "Vehicle";
-        const plate = attr.plate || "";
+        const plateData = getReminderPlateData(attr);
+        const plate = plateData.plate || "";
         const month = Number(attr.month || 1);
         const year = Number(attr.year || new Date().getFullYear());
         const status = attr.status || entity.state || "";
@@ -998,6 +1001,7 @@ class TuevCard extends HTMLElement {
             plate,
             plateLayout,
             renderPlate: () => renderLicensePlate(plate, {
+                ...plateData.rendererOptions,
                 compact,
                 preview: previewPlateTuning,
                 maxWidth: plateLayout.maxWidth,

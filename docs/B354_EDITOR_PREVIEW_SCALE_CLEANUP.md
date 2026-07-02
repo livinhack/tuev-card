@@ -1,6 +1,6 @@
-# b354 – Editor Preview Scale Cleanup
+# b355 – Editor Preview Scale Cleanup
 
-b354 keeps the b353 editor-preview inner-width scale fix and removes the temporary diagnostic overlay.
+b355 keeps the b353 editor-preview inner-width scale fix and removes the temporary diagnostic overlay.
 
 ## Result
 

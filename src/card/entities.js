@@ -64,7 +64,7 @@ export function getEntityLabel(hass, entityId) {
     }
 
     const name = getVehicleName(entity, entityId);
-    const plate = entity.attributes?.plate || "";
+    const plate = entity.attributes?.plate_display || entity.attributes?.plate || "";
 
     return plate
         ? `${name} (${plate})`
@@ -109,7 +109,7 @@ export function sortEntityIds(entityIds, sort, hass) {
         }
 
         if (sort === "plate") {
-            return compareText(attrA.plate || "", attrB.plate || "");
+            return compareText(attrA.plate_display || attrA.plate || "", attrB.plate_display || attrB.plate || "");
         }
 
         if (sort === "due_date") {

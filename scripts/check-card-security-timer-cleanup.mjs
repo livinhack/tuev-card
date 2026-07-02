@@ -7,7 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => readFileSync(resolve(root, relativePath), "utf8");
 
 function fail(message) {
-  console.error(`b354 security/timer cleanup check failed: ${message}`);
+  console.error(`b355 security/timer cleanup check failed: ${message}`);
   process.exitCode = 1;
 }
 
@@ -23,9 +23,9 @@ const timing = read("src/card/ui-state.js");
 const pkg = read("package.json");
 
 assert(existsSync(resolve(root, "src/utils/html-escape.js")), "shared src/utils/html-escape.js must exist");
-assert(entry.includes('import { escapeHtml } from "./utils/html-escape.js?v=b354"'), "Card entry must import shared HTML escape helper");
-assert(cardParts.includes('import { escapeHtml } from "../utils/html-escape.js?v=b354"'), "Card render-parts must import shared HTML escape helper");
-assert(editor.includes('import { escapeHtml } from "../utils/html-escape.js?v=b354"'), "Editor must import shared HTML escape helper instead of owning another HTML escape formula");
+assert(entry.includes('import { escapeHtml } from "./utils/html-escape.js?v=b355"'), "Card entry must import shared HTML escape helper");
+assert(cardParts.includes('import { escapeHtml } from "../utils/html-escape.js?v=b355"'), "Card render-parts must import shared HTML escape helper");
+assert(editor.includes('import { escapeHtml } from "../utils/html-escape.js?v=b355"'), "Editor must import shared HTML escape helper instead of owning another HTML escape formula");
 assert(entry.includes("${escapeHtml(section.title)}"), "Group title must be escaped in Card section heading");
 assert(cardParts.includes("${escapeHtml(vehicleName)}"), "Vehicle name must be escaped in Card header");
 assert(cardParts.includes("${escapeHtml(plate)}"), "Text plate must be escaped in Card header");
@@ -50,10 +50,10 @@ assert(entry.includes("this.clearManagedTimeouts();"), "disconnectedCallback mus
 assert(adapter.includes('import { escapeSvgAttr as escapeAttr } from "./lab-renderer/svg-escape-utils.js"'), "Adapter must reuse the shared SVG attribute escape helper");
 assert(!adapter.includes("function escapeAttr(value)"), "Adapter must not keep its local escapeAttr copy");
 
-assert(pkg.includes('"version": "0.1.1-b354"'), "package version must be b354");
+assert(pkg.includes('"version": "0.1.1-b355"'), "package version must be b355");
 
 if (!process.exitCode) {
-  console.log("b354 security/timer cleanup OK: dead font timer removed, HTML escaping shared, confirm timers named/managed, adapter SVG escaping reused.");
+  console.log("b355 security/timer cleanup OK: dead font timer removed, HTML escaping shared, confirm timers named/managed, adapter SVG escaping reused.");
 }
 
 if (process.exitCode) process.exit(process.exitCode);

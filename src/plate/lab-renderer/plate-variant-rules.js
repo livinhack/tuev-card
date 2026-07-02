@@ -17,7 +17,7 @@ export const PLATE_TEXT_COLORS_MM = Object.freeze({
     label: "Green plate · RAL 6001 approximation",
     color: "#287233",
     frameColor: "#287233",
-    note: "Project approximation for German green plates: green text and frame/border on otherwise normal white reflective plate geometry. Intended for standard plates, not combined with H/E or season."
+    note: "Project approximation for German green plates: green text and frame/border on otherwise normal white reflective plate geometry. H/E combinations remain controlled by Reminder data; seasonal fields can be rendered when supplied."
   }
 });
 

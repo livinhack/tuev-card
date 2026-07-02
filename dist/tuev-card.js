@@ -1,4 +1,4 @@
-// TÜV Card bundled b354
+// TÜV Card bundled b355
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -275,7 +275,7 @@ function getEntityLabel(hass, entityId) {
     }
 
     const name = getVehicleName(entity, entityId);
-    const plate = entity.attributes?.plate || "";
+    const plate = entity.attributes?.plate_display || entity.attributes?.plate || "";
 
     return plate
         ? `${name} (${plate})`
@@ -320,7 +320,7 @@ function sortEntityIds(entityIds, sort, hass) {
         }
 
         if (sort === "plate") {
-            return compareText(attrA.plate || "", attrB.plate || "");
+            return compareText(attrA.plate_display || attrA.plate || "", attrB.plate_display || attrB.plate || "");
         }
 
         if (sort === "due_date") {
@@ -666,7 +666,7 @@ return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED
 
 // ---- src/utils/html-escape.js ----
 const __m_src_utils_html_escape_js = (() => {
-// TÜV Reminder Card b354 / shared HTML escaping helpers
+// TÜV Reminder Card b355 / shared HTML escaping helpers
 // Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
 // separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
 
@@ -679,6 +679,130 @@ function escapeHtml(value) {
 }
 
 return { escapeHtml: escapeHtml };
+
+})();
+
+// ---- src/card/reminder-attributes.js ----
+const __m_src_card_reminder_attributes_js = (() => {
+function asBoolean(value) {
+    return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function cleanText(value) {
+    return String(value || "").trim().replace(/\s+/g, " ").toUpperCase();
+}
+
+function cleanCompactText(value) {
+    return cleanText(value).replace(/\s+/g, "");
+}
+
+function normalizeSuffix(value) {
+    const suffix = cleanCompactText(value);
+    if (suffix === "H" || suffix === "E" || suffix === "HE" || suffix === "EH") {
+        return suffix === "EH" ? "HE" : suffix;
+    }
+    return "";
+}
+
+function getReminderPlateSuffix(attr = {}) {
+    const suffixH = asBoolean(attr.plate_suffix_h);
+    const suffixE = asBoolean(attr.plate_suffix_e);
+
+    if (suffixH || suffixE) {
+        return `${suffixH ? "H" : ""}${suffixE ? "E" : ""}`;
+    }
+
+    return normalizeSuffix(attr.plate_suffix);
+}
+
+function composeDisplayPlate(basePlate, suffix) {
+    const base = cleanText(basePlate);
+    const normalizedSuffix = normalizeSuffix(suffix);
+
+    if (!base || !normalizedSuffix) {
+        return base;
+    }
+
+    return base.endsWith(normalizedSuffix) ? base : `${base}${normalizedSuffix}`;
+}
+
+function mapReminderPlateFormat(value) {
+    const key = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
+
+    if (["two_line", "twoline", "twoLine"].includes(key)) {
+        return "twoLine";
+    }
+
+    if (["small_two_line", "reduced_two_line", "reducedtwoline", "reduced", "verkleinert_two_line"].includes(key)) {
+        return "reducedTwoLine";
+    }
+
+    if (["motorcycle", "motorcycle_plate", "kraftrad"].includes(key)) {
+        return "motorcycle";
+    }
+
+    return "oneLine";
+}
+
+function getReminderPlateData(attr = {}) {
+    const suffix = getReminderPlateSuffix(attr);
+    const plateBase = cleanText(attr.plate_base || attr.plate || "");
+    const plateDisplay = cleanText(attr.plate_display || composeDisplayPlate(plateBase, suffix) || attr.plate || "");
+    const plateKind = String(attr.plate_kind || "").trim().toLowerCase();
+    const changeEnabled = asBoolean(attr.change_plate_enabled) || plateKind === "change";
+    const changeCommonText = cleanText(attr.change_plate_common_text || "");
+    const changeVehicleDigit = cleanCompactText(attr.change_plate_vehicle_digit || attr.change_plate_vehicle_text || "");
+    const changeVehicleText = changeVehicleDigit && suffix && !changeVehicleDigit.endsWith(suffix)
+        ? `${changeVehicleDigit}${suffix}`
+        : changeVehicleDigit;
+    const seasonal = asBoolean(attr.seasonal);
+    const seasonStartMonth = Number(attr.season_start_month);
+    const seasonEndMonth = Number(attr.season_end_month);
+    const plateColorMode = String(attr.plate_color_mode || "").trim().toLowerCase() === "green"
+        ? "green"
+        : "standard";
+    const labPlateFormat = mapReminderPlateFormat(attr.plate_format);
+
+    return {
+        plate: plateDisplay || plateBase,
+        plateBase,
+        plateDisplay: plateDisplay || plateBase,
+        suffix,
+        suffixH: suffix.includes("H"),
+        suffixE: suffix.includes("E"),
+        plateColorMode,
+        seasonal,
+        seasonStartMonth: Number.isFinite(seasonStartMonth) ? seasonStartMonth : null,
+        seasonEndMonth: Number.isFinite(seasonEndMonth) ? seasonEndMonth : null,
+        changeEnabled,
+        changeCommonText,
+        changeVehicleDigit,
+        changeVehicleText,
+        plateFormat: attr.plate_format || "single_line",
+        labPlateFormat,
+        rendererOptions: {
+            plateFormat: labPlateFormat,
+            visualStyle: {
+                plateColorMode
+            },
+            season: {
+                enabled: seasonal,
+                from: Number.isFinite(seasonStartMonth) ? seasonStartMonth : null,
+                to: Number.isFinite(seasonEndMonth) ? seasonEndMonth : null
+            },
+            changePlate: {
+                enabled: changeEnabled,
+                commonText: changeCommonText,
+                vehicleText: changeVehicleText
+            }
+        }
+    };
+}
+
+return { getReminderPlateSuffix: getReminderPlateSuffix, mapReminderPlateFormat: mapReminderPlateFormat, getReminderPlateData: getReminderPlateData };
 
 })();
 
@@ -815,10 +939,17 @@ function getPlateMaxWidth(tileWidth) {
     return Math.max(84, Math.floor(tileWidth - 2));
 }
 
-function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics) {
-    const widestScaleBasisWidth = entityIds.reduce((widestWidth, entityId) => {
-        const plate = hass.states[entityId]?.attributes?.plate || "";
-        const metrics = getLicensePlateMetrics(plate);
+function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics, getPlateData = null) {
+    const plateEntries = entityIds.map((entityId) => {
+        const attr = hass.states[entityId]?.attributes || {};
+        const plateData = typeof getPlateData === "function"
+            ? getPlateData(attr)
+            : { plate: attr.plate || "", rendererOptions: {} };
+        return plateData;
+    });
+
+    const widestScaleBasisWidth = plateEntries.reduce((widestWidth, plateData) => {
+        const metrics = getLicensePlateMetrics(plateData.plate, plateData.rendererOptions || {});
         const scaleBasisWidth = metrics.scaleBasisWidth || metrics.width || 0;
 
         return Math.max(widestWidth, scaleBasisWidth);
@@ -829,9 +960,8 @@ function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics) 
     }
 
     const rawScale = Math.min(1, maxWidth / widestScaleBasisWidth);
-    const baseHeight = getLicensePlateMetrics(entityIds
-        .map((entityId) => hass.states[entityId]?.attributes?.plate || "")
-        .find(Boolean) || "0").height || 38;
+    const firstPlateData = plateEntries.find((plateData) => plateData.plate) || { plate: "0", rendererOptions: {} };
+    const baseHeight = getLicensePlateMetrics(firstPlateData.plate, firstPlateData.rendererOptions || {}).height || 38;
 
     // Snap the shared visible plate height to even pixels. The law-based
     // renderer uses a 520 mm standard-width reference for scaling, so very
@@ -847,14 +977,15 @@ function getSharedPlateLayout({
     hass,
     tileWidth,
     isGraphicalPlateAvailable,
-    getLicensePlateMetrics
+    getLicensePlateMetrics,
+    getPlateData = null
 }) {
     if (!isGraphicalPlateAvailable) {
         return null;
     }
 
     const maxWidth = getPlateMaxWidth(tileWidth);
-    const scale = getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics);
+    const scale = getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics, getPlateData);
 
     return {
         maxWidth,
@@ -1976,7 +2107,7 @@ const PLATE_TEXT_COLORS_MM = Object.freeze({
     label: "Green plate · RAL 6001 approximation",
     color: "#287233",
     frameColor: "#287233",
-    note: "Project approximation for German green plates: green text and frame/border on otherwise normal white reflective plate geometry. Intended for standard plates, not combined with H/E or season."
+    note: "Project approximation for German green plates: green text and frame/border on otherwise normal white reflective plate geometry. H/E combinations remain controlled by Reminder data; seasonal fields can be rendered when supplied."
   }
 });
 
@@ -3771,7 +3902,7 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b354 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b355 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
@@ -3974,7 +4105,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b354 / seal component helpers
+// Kennzeichen Physical Lab b355 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -4120,7 +4251,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b354 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b355 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -4354,11 +4485,7 @@ const __m_src_plate_lab_renderer_plate_visual_style_js = (() => {
 const { PLATE_TEXT_COLORS_MM } = __m_src_plate_lab_renderer_plate_variant_rules_js;
 
 function resolveSeasonForVisualStyle(season, visualStyle) {
-  if (visualStyle?.key !== "green") return season;
-  return {
-    ...(season || {}),
-    enabled: false
-  };
+  return season;
 }
 
 function resolveVisualStyle(visualStyle = {}) {
@@ -8066,6 +8193,9 @@ function createLabRendererOptions(options = {}) {
         huYear: options.huYear,
         huMonth: options.huMonth,
         huRotation: options.huRotation,
+        plateFormat: options.plateFormat,
+        visualStyle: options.visualStyle,
+        season: options.season,
         changePlate: options.changePlate
     };
 }
@@ -8083,7 +8213,7 @@ function renderEmbeddedFontDefs() {
 function addLabRendererCardSvgAttributes(svg, { displayWidth, displayHeight, model }) {
     return svg.replace(
         /<svg\s+class="physical-plate-svg"/,
-        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
+        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-plate-format="${escapeAttr(model.metrics.plateFormat)}" data-plate-color-mode="${escapeAttr(model.metrics.plateColorMode)}" data-season-enabled="${model.metrics.seasonEnabled === true ? "true" : "false"}" data-change-plate="${model.metrics.changePlateEnabled === true ? "true" : "false"}" data-change-plate-vehicle-text="${escapeAttr(model.metrics.changePlateVehicleText || "")}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
     );
 }
 
@@ -11040,12 +11170,13 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b354
+// TÜV Card source entry b355
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
 const { escapeHtml } = __m_src_utils_html_escape_js;
 const { findFirstTuevEntity } = __m_src_card_entities_js;
+const { getReminderPlateData } = __m_src_card_reminder_attributes_js;
 const { getAllEntityIdsFromConfig, getEntitySections } = __m_src_card_groups_js;
 const { calculateAutomaticBadgeSize, calculateLayoutInfo } = __m_src_card_layout_js;
 const { getSharedPlateLayout } = __m_src_card_plate_layout_js;
@@ -11771,7 +11902,8 @@ class TuevCard extends HTMLElement {
                 hass,
                 tileWidth: layout.tileWidth,
                 isGraphicalPlateAvailable: graphicalPlateEnabled,
-                getLicensePlateMetrics
+                getLicensePlateMetrics,
+                getPlateData: getReminderPlateData
             });
             const grid = `
                 <div style="
@@ -11969,7 +12101,8 @@ class TuevCard extends HTMLElement {
         const attr = entity.attributes;
 
         const vehicleName = attr.vehicle_name || attr.friendly_name || "Vehicle";
-        const plate = attr.plate || "";
+        const plateData = getReminderPlateData(attr);
+        const plate = plateData.plate || "";
         const month = Number(attr.month || 1);
         const year = Number(attr.year || new Date().getFullYear());
         const status = attr.status || entity.state || "";
@@ -12029,6 +12162,7 @@ class TuevCard extends HTMLElement {
             plate,
             plateLayout,
             renderPlate: () => renderLicensePlate(plate, {
+                ...plateData.rendererOptions,
                 compact,
                 preview: previewPlateTuning,
                 maxWidth: plateLayout.maxWidth,

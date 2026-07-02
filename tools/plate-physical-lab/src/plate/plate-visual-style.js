@@ -3,11 +3,7 @@
 import { PLATE_TEXT_COLORS_MM } from "./plate-variant-rules.js";
 
 export function resolveSeasonForVisualStyle(season, visualStyle) {
-  if (visualStyle?.key !== "green") return season;
-  return {
-    ...(season || {}),
-    enabled: false
-  };
+  return season;
 }
 
 export function resolveVisualStyle(visualStyle = {}) {

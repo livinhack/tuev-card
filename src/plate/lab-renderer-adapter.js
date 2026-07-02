@@ -142,6 +142,9 @@ function createLabRendererOptions(options = {}) {
         huYear: options.huYear,
         huMonth: options.huMonth,
         huRotation: options.huRotation,
+        plateFormat: options.plateFormat,
+        visualStyle: options.visualStyle,
+        season: options.season,
         changePlate: options.changePlate
     };
 }
@@ -159,6 +162,6 @@ function renderEmbeddedFontDefs() {
 function addLabRendererCardSvgAttributes(svg, { displayWidth, displayHeight, model }) {
     return svg.replace(
         /<svg\s+class="physical-plate-svg"/,
-        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
+        `<svg class="tuev-plate tuev-plate-physical physical-plate-svg" width="${displayWidth}" height="${displayHeight}" data-card-renderer="physical-lab" data-font-mode="${escapeAttr(model.metrics.fontMode)}" data-plate-format="${escapeAttr(model.metrics.plateFormat)}" data-plate-color-mode="${escapeAttr(model.metrics.plateColorMode)}" data-season-enabled="${model.metrics.seasonEnabled === true ? "true" : "false"}" data-change-plate="${model.metrics.changePlateEnabled === true ? "true" : "false"}" data-change-plate-vehicle-text="${escapeAttr(model.metrics.changePlateVehicleText || "")}" data-seal-column-rule="${escapeAttr(model.metrics.sealColumnRule)}"`
     );
 }

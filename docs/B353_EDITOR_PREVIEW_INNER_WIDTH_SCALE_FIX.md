@@ -1,6 +1,6 @@
-# b354 Editor Preview Scale Cleanup
+# b355 Editor Preview Scale Cleanup
 
-b354 follows the b352 diagnostics screenshot. The diagnostic values showed that `previewScaled=true` and `scale` were active, but the visible right edge was still clipped. The remaining issue was that the scale target used the outer preview pane width, while the usable content width is smaller because of the reserved scrollbar gutter and right edge polish.
+b355 follows the b352 diagnostics screenshot. The diagnostic values showed that `previewScaled=true` and `scale` were active, but the visible right edge was still clipped. The remaining issue was that the scale target used the outer preview pane width, while the usable content width is smaller because of the reserved scrollbar gutter and right edge polish.
 
 ## Change
 

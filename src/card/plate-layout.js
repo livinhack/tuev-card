@@ -16,10 +16,17 @@ export function getPlateMaxWidth(tileWidth) {
     return Math.max(84, Math.floor(tileWidth - 2));
 }
 
-export function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics) {
-    const widestScaleBasisWidth = entityIds.reduce((widestWidth, entityId) => {
-        const plate = hass.states[entityId]?.attributes?.plate || "";
-        const metrics = getLicensePlateMetrics(plate);
+export function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics, getPlateData = null) {
+    const plateEntries = entityIds.map((entityId) => {
+        const attr = hass.states[entityId]?.attributes || {};
+        const plateData = typeof getPlateData === "function"
+            ? getPlateData(attr)
+            : { plate: attr.plate || "", rendererOptions: {} };
+        return plateData;
+    });
+
+    const widestScaleBasisWidth = plateEntries.reduce((widestWidth, plateData) => {
+        const metrics = getLicensePlateMetrics(plateData.plate, plateData.rendererOptions || {});
         const scaleBasisWidth = metrics.scaleBasisWidth || metrics.width || 0;
 
         return Math.max(widestWidth, scaleBasisWidth);
@@ -30,9 +37,8 @@ export function getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMe
     }
 
     const rawScale = Math.min(1, maxWidth / widestScaleBasisWidth);
-    const baseHeight = getLicensePlateMetrics(entityIds
-        .map((entityId) => hass.states[entityId]?.attributes?.plate || "")
-        .find(Boolean) || "0").height || 38;
+    const firstPlateData = plateEntries.find((plateData) => plateData.plate) || { plate: "0", rendererOptions: {} };
+    const baseHeight = getLicensePlateMetrics(firstPlateData.plate, firstPlateData.rendererOptions || {}).height || 38;
 
     // Snap the shared visible plate height to even pixels. The law-based
     // renderer uses a 520 mm standard-width reference for scaling, so very
@@ -48,14 +54,15 @@ export function getSharedPlateLayout({
     hass,
     tileWidth,
     isGraphicalPlateAvailable,
-    getLicensePlateMetrics
+    getLicensePlateMetrics,
+    getPlateData = null
 }) {
     if (!isGraphicalPlateAvailable) {
         return null;
     }
 
     const maxWidth = getPlateMaxWidth(tileWidth);
-    const scale = getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics);
+    const scale = getSharedPlateScale(entityIds, hass, maxWidth, getLicensePlateMetrics, getPlateData);
 
     return {
         maxWidth,
