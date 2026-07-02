@@ -1,6 +1,6 @@
-# b348 – Card Editor Text Preview Scrollbar/Grid Stability
+# b349 – Card Editor Text Preview Scrollbar/Grid Stability
 
-b348 builds on b346 and targets the remaining editor-preview jitter that appears only when **Kennzeichen grafisch darstellen** is disabled.
+b349 builds on b346 and targets the remaining editor-preview jitter that appears only when **Kennzeichen grafisch darstellen** is disabled.
 
 ## Diagnosis
 

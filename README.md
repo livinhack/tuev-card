@@ -1,21 +1,23 @@
-# TÜV Reminder Card b348
+# TÜV Reminder Card b349
 
-Full/Card handover ZIP for **b348 Editor Popup Rollback / Text Preview Stability**.
+Full/Card handover ZIP for **b349 Editor Preview Scroll Edge Polish**.
 
-b348 keeps the b347 fix for the editor text-mode preview jitter, but rolls the floating-panel outside-click handling back to the safer b344-style deferred click path because the pointerdown-capture experiment could make the editor page hang and break outside-click closing.
+b349 keeps the b347/b348 text-mode editor preview stability fix and the b348 popup rollback. It only polishes the right edge of the stabilized editor preview so the permanent scrollbar/gutter area has a clear visual boundary.
 
-## Status
+## Current status
 
-- Current Card stand: **b348**
-- Plate renderer remains Card-side prepared/frozen until later Reminder integration.
-- GL fonts are expected as bundled release assets under `fonts/` / `dist/fonts/`.
+- Current Card stand: **b349**
+- Based on: **b348 Editor Popup Rollback / Text Preview Stability**
+- Scope: Editor-preview visual edge polish only.
+- Reminder integration remains a later end-to-end step.
 
-## Changed in b348
+## Changed in b349
 
-- removed document-level `pointerdown` capture close handler from the editor
-- removed the added popup `keydown` listener from that experiment
-- restored deferred click outside-close behavior
-- kept b347 text-preview scrollbar/grid stability
+- The scaled editor preview wrapper now reserves a stable scrollbar gutter without the previous `both-edges` ghost gutter.
+- The preview wrapper paints its own card-background edge.
+- A subtle inset right border gives the stabilized preview a clearer visual end next to the Home Assistant editor scrollbar/grey background.
+- Existing text-mode jitter stabilization remains unchanged.
+- Popup outside-click handling remains on the safer b344/b348 deferred click path.
 
 ## Not changed
 
@@ -24,19 +26,33 @@ b348 keeps the b347 fix for the editor text-mode preview jitter, but rolls the f
 - keine Wechselkennzeichen-Geometrie
 - keine Sortierlogik
 - keine Reminder-Integration
-- keine neuen Features
+- kein grafischer Renderer-Umbau
+- kein neues Popup-Experiment
 
+## Checks
 
-## Font / HACS Hinweis
+Run:
 
-Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein, damit `npm run build` sie nach `dist/fonts/` kopieren kann.
+```bash
+npm run check
+npm run build
+```
 
+Expected:
 
-## Editor option status
+- JavaScript check passes.
+- Release asset check passes when local GL font binaries exist in `fonts/`.
+- Card/Lab renderer boundary checks pass.
+- Text-preview scrollbar stability check also validates the b349 right-edge polish.
 
-Die Option **Kennzeichen grafisch darstellen** bleibt wirksam: an = grafischer Renderer, aus = Textanzeige.
+## Font note
 
+The release must include the GL font binaries as TTF files in `fonts/` and `dist/fonts/` when built locally. ChatGPT-generated ZIPs may omit binary font files; the local build script copies existing font binaries into `dist/fonts/`.
 
-## Final Release Audit
+## Preserved earlier editor fixes
 
-b348 behält den Final Release Audit Status bei; dieser Stand ist ein gezielter Editor-Popup-Rollback ohne neue Features.
+b349 preserves the earlier **Kennzeichen grafisch darstellen** option fix: the checkbox controls text vs. graphical plate rendering, while the preview edge polish only changes the editor preview wrapper. The b337 sort rollback, group color preservation when moving groups, and b348 popup rollback remain unchanged.
+
+## Final Release Audit note
+
+b349 keeps the Final Release Audit status from the previous release-audit checkpoint; this build only polishes the editor preview edge. ChatGPT-ZIPs enthalten keine TTF-Binaries. A local GitHub/HACS release must include the GL TTF files before building.

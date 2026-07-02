@@ -1,8 +1,8 @@
-# b348 – Card Editor Preview Columns / Popup Stability Fix
+# b349 – Card Editor Preview Columns / Popup Stability Fix
 
 ## Zweck
 
-b348 ist ein gezielter Card-/Editor-Fix nach b344. Der Nummernschildrenderer bleibt eingefroren; es geht nur um Preview-/Editmodus-Stabilität und Floating-Panel-Bedienung.
+b349 ist ein gezielter Card-/Editor-Fix nach b344. Der Nummernschildrenderer bleibt eingefroren; es geht nur um Preview-/Editmodus-Stabilität und Floating-Panel-Bedienung.
 
 ## Änderungen
 

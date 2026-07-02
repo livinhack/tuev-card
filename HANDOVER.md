@@ -1,57 +1,63 @@
-# Handover – b348 Editor Popup Rollback / Text Preview Stability
+# Handover – b349 Editor Preview Scroll Edge Polish
 
-Current stand: **b348**.
+Current stand: **b349**.
 
-b348 builds on b347. The text-mode editor preview jitter fix remains, but the popup outside-click implementation from b345/b347 is rolled back to the safer b344-style deferred click close path.
+b349 builds on b348. The text-mode editor preview jitter fix remains, and the popup outside-click rollback remains. This step only cleans up the visual right edge of the stabilized editor preview scrollbar/gutter area.
 
-## Reason
+## Change in b349
 
-User reported that after the jitter fix the browser could hang on the editor page and floating/hover panels again failed to close reliably via outside click. The risky change was the document-level `pointerdown` capture handler with immediate close.
+- `src/tuev-card-entry.js`
+  - `data-preview-scale-outer` now uses `scrollbar-gutter: stable;` instead of `stable both-edges`.
+  - The preview wrapper paints a card-background edge.
+  - The preview wrapper draws a subtle inset right border using `var(--divider-color)`.
+  - Right-side border radii are preserved so the preview edge does not look like an unbounded grey strip.
 
-## Change in b348
+- `scripts/check-card-editor-text-preview-scrollbar-stability.mjs`
+  - Updated to require the b349 edge polish and to reject the old `stable both-edges` style.
 
-- remove `pointerdown` capture listener for floating-panel outside close
-- remove the extra `keydown` listener from that popup experiment
-- keep the original document `click` capture listener
-- restore deferred `setTimeout(..., 0)` close behavior
-- keep b347 text-preview scrollbar/grid stability
+## Kept from b348
 
-## Checks
+- Popup outside-click handling remains on the safer b344-style deferred `click` capture path.
+- No `pointerdown` capture experiment is restored.
+- No new `keydown` popup listener is restored.
 
-Run:
+## Kept from b347
 
-```bash
-npm run check
-npm run build
-```
+- Text-mode editor preview width/height hysteresis.
+- Stable scrollbar reservation to avoid the permanent text-mode preview jitter.
+- Fixed text plate fallback line box.
 
-## Non-goals
+## Not changed
 
-- no plate geometry change
-- no HU logic change
-- no sorting change
-- no Reminder integration
-- no renderer rewrite
+- keine Kennzeichen-Geometrie
+- keine HU-Logik
+- keine Wechselkennzeichen-Geometrie
+- keine Sortierlogik
+- keine Reminder-Integration
+- kein grafischer Renderer-Umbau
+- kein Legacy-/Umschalter
 
+## Validation
 
-## Font / HACS Hinweis
+- `npm run check`
+- `npm run build`
 
-Die ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal im Release vorhanden sein, damit `npm run build` sie nach `dist/fonts/` kopieren kann.
+Both passed in this handover build.
 
+## Next recommended manual test
 
-No plate geometry changed. Do not continue broad number-plate renderer cleanup in this step; later Reminder integration remains separate.
+In the Home Assistant card editor:
 
+1. Open the editor.
+2. Toggle **Kennzeichen grafisch darstellen** off.
+3. Confirm the permanent text-mode jitter stays gone.
+4. Confirm the right preview edge/scrollbar area now looks visually bounded.
+5. Confirm floating panels still close on outside click and the editor page does not hang.
 
-## Preserved earlier fixes
+## Preserved earlier editor behaviour
 
-Sortierfunktionen bleiben auf dem b337-Config-Fluss. Gruppen-Farben werden beim Verschieben weiterhin materialisiert/mitgenommen.
+b349 preserves the earlier editor fixes: **Kennzeichen grafisch darstellen** still gates graphical plate rendering, Sortier controls keep the b337 config flow, and Gruppen-Farben continue to travel with moved groups. The b348 popup rollback remains active.
 
+## Final Release Audit / later Reminder boundary
 
-## Final Release Audit
-
-b348 behält den Final Release Audit Status bei; dieser Stand ist ein gezielter Editor-Popup-Rollback ohne neue Features.
-
-
-## Later Reminder End-to-End phase
-
-Die Reminder-Integration bleibt ein späterer End-to-End-Schritt nach Lieferung des aktuellen Reminder-ZIP.
+b349 keeps the Final Release Audit status. The later Reminder-ZIP integration remains a separate End-to-End step after the Card-side editor/preview polish is confirmed.

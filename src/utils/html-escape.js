@@ -1,4 +1,4 @@
-// TÜV Reminder Card b348 / shared HTML escaping helpers
+// TÜV Reminder Card b349 / shared HTML escaping helpers
 // Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
 // separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
 

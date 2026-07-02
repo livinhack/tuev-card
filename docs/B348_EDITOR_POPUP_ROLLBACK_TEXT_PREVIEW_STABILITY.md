@@ -1,6 +1,6 @@
-# b348 – Editor Popup Rollback / Text Preview Stability
+# b349 – Editor Popup Rollback / Text Preview Stability
 
-b348 keeps the b347 text-preview scrollbar/grid stability fix but rolls the floating-panel outside-click implementation back to the safer b344-style deferred `click` capture path.
+b349 keeps the b347 text-preview scrollbar/grid stability fix but rolls the floating-panel outside-click implementation back to the safer b344-style deferred `click` capture path.
 
 ## Why
 

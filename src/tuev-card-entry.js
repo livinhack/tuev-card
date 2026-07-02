@@ -2,7 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b348";
+import { escapeHtml } from "./utils/html-escape.js?v=b349";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b348";
-import { TuevCardEditor } from "./editor/editor.js?v=b348";
+} from "./plate/renderer.js?v=b349";
+import { TuevCardEditor } from "./editor/editor.js?v=b349";
 
 window.customCards = window.customCards || [];
 
@@ -433,7 +433,11 @@ class TuevCard extends HTMLElement {
                     height: ${height};
                     overflow: hidden;
                     width: 100%;
-                    scrollbar-gutter: stable both-edges;
+                    scrollbar-gutter: stable;
+                    background: var(--card-background-color, #1c1c1c);
+                    box-shadow: inset -1px 0 0 var(--divider-color, rgba(255, 255, 255, 0.14));
+                    border-top-right-radius: var(--ha-card-border-radius, 12px);
+                    border-bottom-right-radius: var(--ha-card-border-radius, 12px);
                     contain: layout paint;
                 "
             >
