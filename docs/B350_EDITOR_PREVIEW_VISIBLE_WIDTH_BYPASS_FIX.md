@@ -1,4 +1,4 @@
-# b352 Editor Preview Visible Width Bypass Fix
+# b353 Editor Preview Visible Width Bypass Fix
 
 Fixes the Home Assistant editor preview clipping/jitter root cause identified after b349.
 

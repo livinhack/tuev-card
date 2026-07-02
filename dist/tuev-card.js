@@ -1,4 +1,4 @@
-// TÜV Card bundled b352
+// TÜV Card bundled b353
 // This file is generated from the modular source files. Do not edit manually.
 
 // ---- src/translations/en.js ----
@@ -666,7 +666,7 @@ return { ALLOWED_SORTS: ALLOWED_SORTS, ALLOWED_COLUMNS: ALLOWED_COLUMNS, ALLOWED
 
 // ---- src/utils/html-escape.js ----
 const __m_src_utils_html_escape_js = (() => {
-// TÜV Reminder Card b352 / shared HTML escaping helpers
+// TÜV Reminder Card b353 / shared HTML escaping helpers
 // Centralises escaping for Card/Editor HTML-string rendering. SVG escaping stays
 // separate in plate/lab-renderer/svg-escape-utils.js because the contexts differ.
 
@@ -3771,7 +3771,7 @@ return { renderFullHuBadgeMarker: renderFullHuBadgeMarker, resolveHuBadgeOptions
 
 // ---- src/plate/lab-renderer/seal-slot-marker.js ----
 const __m_src_plate_lab_renderer_seal_slot_marker_js = (() => {
-// Kennzeichen Physical Lab b352 / seal slot marker rendering helpers
+// Kennzeichen Physical Lab b353 / seal slot marker rendering helpers
 // Draws concrete seal-slot marker SVGs. Geometry and slot decisions are
 // resolved by seal-components.js and change-plate-slot-plan.js.
 
@@ -3974,7 +3974,7 @@ return { shrinkVariablesToFit: shrinkVariablesToFit, growVariablesToFit: growVar
 
 // ---- src/plate/lab-renderer/seal-components.js ----
 const __m_src_plate_lab_renderer_seal_components_js = (() => {
-// Kennzeichen Physical Lab b352 / seal component helpers
+// Kennzeichen Physical Lab b353 / seal component helpers
 // Thin wrapper around seal geometry, marker selection plan, and marker SVG rendering.
 
 const { getEffectiveSealGeometry, getSealGeometry } = __m_src_plate_lab_renderer_seal_geometry_plan_js;
@@ -4120,7 +4120,7 @@ return { normalizeSeasonMonth: normalizeSeasonMonth, getSeasonFieldLayout: getSe
 
 // ---- src/plate/lab-renderer/change-plate-supplement-renderer.js ----
 const __m_src_plate_lab_renderer_change_plate_supplement_renderer_js = (() => {
-// Kennzeichen Physical Lab b352 / Wechselkennzeichen supplement renderer
+// Kennzeichen Physical Lab b353 / Wechselkennzeichen supplement renderer
 // Owns the separate vehicle-specific Wechselteil only. Main plate seal/W
 // decisions stay in the already solved base model; this module renders and
 // builds only the attached supplementary plate frame, HU marker, vehicle mark
@@ -11040,7 +11040,7 @@ return { TuevCardEditor: TuevCardEditor };
 
 // ---- src/tuev-card-entry.js ----
 const __m_src_tuev_card_entry_js = (() => {
-// TÜV Card source entry b352
+// TÜV Card source entry b353
 
 const { localize } = __m_src_translations_index_js;
 const { normalizeCardConfig } = __m_src_card_config_js;
@@ -11376,22 +11376,28 @@ class TuevCard extends HTMLElement {
             };
         }
 
-        const visiblePreviewWidth = rawVisibleWidth;
+        const outerVisiblePreviewWidth = measuredWidth > 0
+            ? Math.min(rawVisibleWidth, measuredWidth)
+            : rawVisibleWidth;
+        const previewScaleSafetyPx = this.getPreviewScaleSafetyPx();
+        const visiblePreviewWidth = Math.max(120, outerVisiblePreviewWidth - previewScaleSafetyPx);
         const scale = Math.min(1, Math.max(0.05, visiblePreviewWidth / simulatedWidth));
         const shouldScalePreview = simulatedWidth > visiblePreviewWidth + 4;
 
         // In the Home Assistant editor preview the internal layout may be
         // simulated wider than the visible preview pane so the column decision
-        // resembles the final dashboard. Whenever that simulated width is
-        // larger than the actually visible preview width, the scale wrapper is
-        // mandatory. Do not let measuredWidth from wider HA dialog ancestors
-        // bypass the scale path.
+        // resembles the final dashboard. The scale target must use the inner
+        // usable preview width, not the outer pane width: scrollbar gutter,
+        // borders and a small safety gap otherwise clip the right edge even
+        // when previewScaled=true.
         if (shouldScalePreview) {
             return {
                 measuredWidth,
                 layoutWidth: simulatedWidth,
                 visiblePreviewWidth,
                 rawVisibleWidth,
+                outerVisiblePreviewWidth,
+                previewScaleSafetyPx,
                 simulatedWidth,
                 shouldScalePreview,
                 requestedColumns: previewSimulation.requestedColumns || requestedColumns,
@@ -11407,6 +11413,8 @@ class TuevCard extends HTMLElement {
             layoutWidth: visiblePreviewWidth,
             visiblePreviewWidth,
             rawVisibleWidth,
+            outerVisiblePreviewWidth,
+            previewScaleSafetyPx,
             simulatedWidth,
             shouldScalePreview,
             requestedColumns: previewSimulation.requestedColumns || requestedColumns,
@@ -11439,6 +11447,17 @@ class TuevCard extends HTMLElement {
             width: 720,
             requestedColumns: "4"
         };
+    }
+
+    getPreviewScaleSafetyPx() {
+        // The visible preview pane width includes the reserved scrollbar gutter
+        // and the polished right edge from b347-b349. CSS transforms are
+        // clipped by that inner scroll box, so the scale target needs a small
+        // deterministic inset. Keeping this as a named helper avoids another
+        // hard-coded magic subtraction in getLayoutContext().
+        const scrollbarReserve = 18;
+        const edgeReserve = 8;
+        return scrollbarReserve + edgeReserve;
     }
 
     getPreviewVisibleWidth() {
@@ -11501,12 +11520,14 @@ class TuevCard extends HTMLElement {
         };
 
         const rows = [
-            ["b", "b352"],
+            ["b", "b353"],
             ["reason", layoutContext.debugReason],
             ["plate", this.config?.plate_style || "plate"],
             ["cols", layoutContext.requestedColumns],
             ["measured", layoutContext.measuredWidth],
             ["rawVisible", layoutContext.rawVisibleWidth],
+            ["outer", layoutContext.outerVisiblePreviewWidth],
+            ["safety", layoutContext.previewScaleSafetyPx],
             ["visible", layoutContext.visiblePreviewWidth],
             ["sim", layoutContext.simulatedWidth],
             ["layout", layoutContext.layoutWidth],
@@ -11551,7 +11572,7 @@ class TuevCard extends HTMLElement {
                 style="
                     height: ${height};
                     overflow: hidden;
-                    width: ${layoutContext.visiblePreviewWidth ? `${layoutContext.visiblePreviewWidth}px` : "100%"};
+                    width: ${layoutContext.outerVisiblePreviewWidth ? `${layoutContext.outerVisiblePreviewWidth}px` : (layoutContext.visiblePreviewWidth ? `${layoutContext.visiblePreviewWidth}px` : "100%")};
                     max-width: 100%;
                     scrollbar-gutter: stable;
                     background: var(--card-background-color, #1c1c1c);

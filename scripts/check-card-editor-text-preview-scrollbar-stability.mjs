@@ -15,9 +15,9 @@ const card = read('src/tuev-card-entry.js');
 const parts = read('src/card/render-parts.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert(pkg.version.includes('b352'), 'package version must identify b352.');
+assert(pkg.version.includes('b353'), 'package version must identify b353.');
 assert(card.includes('scrollbar-gutter: stable;'), 'scaled editor preview wrapper must reserve a stable scrollbar gutter without both-edge ghost gutters.');
-assert(!card.includes('scrollbar-gutter: stable both-edges'), 'scaled editor preview wrapper must not reserve a left ghost gutter after b352 edge polish.');
+assert(!card.includes('scrollbar-gutter: stable both-edges'), 'scaled editor preview wrapper must not reserve a left ghost gutter after b353 edge polish.');
 assert(card.includes('box-shadow: inset -1px 0 0 var(--divider-color'), 'scaled editor preview wrapper must draw a clear right edge.');
 assert(card.includes('background: var(--card-background-color'), 'scaled editor preview wrapper must cover the reserved edge with the card background.');
 assert(card.includes('const rawVisibleWidth = this.getPreviewVisibleWidth();'), 'layout context must use raw visible preview width before scale decisions.');

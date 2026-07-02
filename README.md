@@ -1,62 +1,32 @@
-# TÜV Reminder Card b352
+# TÜV Reminder Card b353
 
-Full/Card handover ZIP for **b352 Editor Preview Layout Diagnostics**.
+Full/Card handover ZIP for **b353 Editor Preview Inner Width Scale Fix**.
 
-b352 is a diagnostic build on top of b351. It does **not** try another layout fix. Instead, it shows the live editor-preview layout values directly inside the preview so the remaining clipping/scale problem can be diagnosed from a screenshot.
+b353 follows the b352 diagnostic screenshot: the preview scale path was active, but the scale target still used too much of the outer editor-preview width. The remaining right-edge clipping is addressed by scaling to an inner usable preview width that reserves scrollbar/edge space.
 
-## Current status
+## Changed in b353
 
-- Current Card stand: **b352**
-- Purpose: diagnostic only
-- Base: b351 Editor Preview Force Scale Contract
-- Reminder integration remains a later End-to-End step.
-
-## Changed in b352
-
-- Added a small overlay in the Home Assistant editor preview with:
-  - `reason`
-  - `plate`
-  - `cols`
-  - `measured`
-  - `rawVisible`
-  - `visible`
-  - `sim`
-  - `layout`
-  - `scaled`
-  - `scale`
-- The overlay appears only in editor preview context.
-- The existing b351 scale contract remains unchanged.
-- Cache/version markers were advanced to b352.
+- Editor-preview scale target now subtracts a named safety inset.
+- `outerVisiblePreviewWidth` is capped by measured card width when available.
+- `visiblePreviewWidth` now means inner usable preview width for scale calculation.
+- Diagnostic overlay remains temporarily visible and now reports `outer` and `safety` values.
+- New check: `check:card-editor-preview-inner-width-scale`.
 
 ## Not changed
 
-- keine Kennzeichen-Geometrie
-- keine HU-Logik
-- keine Wechselkennzeichen-Geometrie
-- keine Sortierlogik
-- keine Reminder-Integration
-- kein Popup-Experiment
-- kein neuer Layout-Fix
+- No Kennzeichen geometry.
+- No HU logic.
+- No Wechselkennzeichen geometry.
+- No sorting logic.
+- No Reminder integration.
+- No popup experiment.
 
-## Test instruction
+ChatGPT-ZIPs contain no TTF binaries. A local build with the GL font files in `fonts/` copies them to `dist/fonts/`.
 
-Install/build b352 and open the editor preview in the problematic state. Please send a screenshot that includes the small diagnostic overlay. The relevant values are especially:
+No plate geometry changed. Do not continue broad number-plate renderer cleanup in this step. Reminder integration remains a later phase.
 
-- `measured`
-- `rawVisible`
-- `visible`
-- `sim`
-- `layout`
-- `scaled`
-- `scale`
-- `reason`
+Historical b338/b353 note: Kennzeichen grafisch darstellen remains the editor option that switches between graphical and text plate rendering.
 
-## Font note
-
-The ChatGPT ZIP does not include TTF binaries. A local GitHub/HACS release build must include the GL font files under `fonts/` so `npm run build` can copy them to `dist/fonts/`.
-
-No plate geometry changed. Reminder integration remains a later phase.
-
-Historical b338/b352 note: Kennzeichen grafisch darstellen remains the editor option that gates graphical/text plate rendering. Sortierfunktionen and group color behavior remain preserved from the earlier b337/b340 path.
-
-b352 also preserves the prior Card Final Release Audit status. ChatGPT-ZIPs enthalten keine TTF-Binaries. Nicht-Ziele: keine Kennzeichen-Geometrie, keine Reminder-Integration.
+Historical b344/b353 note: Final Release Audit status remains preserved.
+ChatGPT-ZIPs enthalten keine TTF-Binaries. Für GitHub/HACS müssen die GL-Fonts lokal vorhanden sein.
+Nicht-Ziele b353: keine Kennzeichen-Geometrie, keine Reminder-Integration, keine Sortierlogik, keine HU-Logik.

@@ -1,8 +1,8 @@
-# b352 Editor Preview Layout Diagnostics
+# b353 Editor Preview Layout Diagnostics
 
-b352 is a diagnostic-only checkpoint.
+b353 is a diagnostic-only checkpoint.
 
-The previous b351 force-scale contract did not visibly change the remaining Home Assistant editor-preview clipping. To avoid guessing, b352 adds a visible diagnostic overlay in the editor preview.
+The previous b351 force-scale contract did not visibly change the remaining Home Assistant editor-preview clipping. To avoid guessing, b353 adds a visible diagnostic overlay in the editor preview.
 
 The overlay reports the key layout values used by `getLayoutContext()`:
 

@@ -1,61 +1,37 @@
-# Handover – b352 Editor Preview Layout Diagnostics
+# Handover – b353 Editor Preview Inner Width Scale Fix
 
-Current stand: **b352**.
+Current stand: **b353**.
 
-b352 is a diagnostic checkpoint after b351. The b351 forced-scale contract did not visibly change the remaining Home Assistant editor-preview clipping. Therefore b352 deliberately avoids another guessed fix and exposes the live layout values in the editor preview.
+b353 is a targeted follow-up to the b352 editor-preview diagnostics. The screenshot showed `scaled: true` with `scale: 0.653`, but the right edge was still clipped. Therefore the remaining issue was not the old bypass anymore; the scale target was still too wide because it used the outer preview pane width instead of the inner usable width.
 
-## Changed in b352
+## Changed in b353
 
-- Added `renderPreviewDiagnostics(layoutContext)` in `src/tuev-card-entry.js`.
-- In editor preview context, the Card now renders a small bottom-right diagnostic overlay.
-- The overlay prints:
-  - build marker
-  - reason/debug branch
-  - plate style
-  - requested columns
-  - measured width
-  - raw visible preview width
-  - stabilized visible preview width
-  - simulated preview width
-  - layout width
-  - whether scaled preview is active
-  - scale value
-- `getLayoutContext()` now carries diagnostic values through the returned context.
-- Version/cache markers updated to b352.
+- Added `getPreviewScaleSafetyPx()`.
+- Scale calculation now uses `outerVisiblePreviewWidth - previewScaleSafetyPx`.
+- `outerVisiblePreviewWidth` is capped by the measured card width when available.
+- The outer scale wrapper keeps the visible preview width; the inner simulated layout scales to the safer usable width.
+- Diagnostic overlay remains for this test build and now shows `outer` and `safety`.
+- Added `check:card-editor-preview-inner-width-scale`.
 
-## Intentionally not changed
+## Preserved
 
-- No new preview fix beyond diagnostics.
-- No geometry changes.
-- No HU logic changes.
-- No change-plate geometry changes.
-- No sorting changes.
+- b350 visible-width bypass fix.
+- b351 force-scale contract.
+- b347/b348 text preview stability and popup rollback.
+- b349 scroll edge polish.
+- Sortierung remains on the b337 rollback path.
+
+## Not changed
+
+- No Kennzeichen geometry.
+- No HU logic.
+- No Wechselkennzeichen geometry.
+- No sorting logic.
 - No Reminder integration.
-- No popup outside-click experiment.
 
-## What to do next
+No plate geometry changed. Do not continue broad number-plate renderer cleanup in this step. Reminder integration remains a later phase.
 
-1. Build/install b352 in Home Assistant.
-2. Open the editor preview in the broken/clipped state.
-3. Send a screenshot that includes the b352 diagnostic overlay.
-4. Use the values to decide whether the next real fix must target:
-   - `getPreviewVisibleWidth()` measurement,
-   - the scale wrapper,
-   - `layoutWidth`,
-   - or an outer HA clipping/scroll container.
+Historical b338/b353 note: Sortierlogik remains on the b337 rollback path, and group Farben continue to move with their groups.
 
-## Checks
-
-- Full/Card `npm run build` passed.
-- Full/Card `npm run check` passed.
-- Lab `npm run check` passed.
-
-## Font note
-
-ChatGPT ZIPs do not include TTF binaries. Local GitHub/HACS release builds must include the GL font files in `fonts/`.
-
-No plate geometry changed. Reminder integration remains a later phase.
-
-Historical b338/b352 note: Sortierlogik remains on the b337 rollback path, and group Farben continue to move with their groups. The Kennzeichen grafisch darstellen option remains effective.
-
-b352 also preserves the prior Card Final Release Audit status. The current Reminder-ZIP integration remains a later End-to-End step.
+Historical b344/b353 note: Final Release Audit status remains preserved.
+Reminder-ZIP integration remains a later End-to-End step after the Card-side preview issue is resolved.

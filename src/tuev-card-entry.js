@@ -1,8 +1,8 @@
-// TÜV Card source entry b352
+// TÜV Card source entry b353
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b352";
+import { escapeHtml } from "./utils/html-escape.js?v=b353";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b352";
-import { TuevCardEditor } from "./editor/editor.js?v=b352";
+} from "./plate/renderer.js?v=b353";
+import { TuevCardEditor } from "./editor/editor.js?v=b353";
 
 window.customCards = window.customCards || [];
 
@@ -345,22 +345,28 @@ class TuevCard extends HTMLElement {
             };
         }
 
-        const visiblePreviewWidth = rawVisibleWidth;
+        const outerVisiblePreviewWidth = measuredWidth > 0
+            ? Math.min(rawVisibleWidth, measuredWidth)
+            : rawVisibleWidth;
+        const previewScaleSafetyPx = this.getPreviewScaleSafetyPx();
+        const visiblePreviewWidth = Math.max(120, outerVisiblePreviewWidth - previewScaleSafetyPx);
         const scale = Math.min(1, Math.max(0.05, visiblePreviewWidth / simulatedWidth));
         const shouldScalePreview = simulatedWidth > visiblePreviewWidth + 4;
 
         // In the Home Assistant editor preview the internal layout may be
         // simulated wider than the visible preview pane so the column decision
-        // resembles the final dashboard. Whenever that simulated width is
-        // larger than the actually visible preview width, the scale wrapper is
-        // mandatory. Do not let measuredWidth from wider HA dialog ancestors
-        // bypass the scale path.
+        // resembles the final dashboard. The scale target must use the inner
+        // usable preview width, not the outer pane width: scrollbar gutter,
+        // borders and a small safety gap otherwise clip the right edge even
+        // when previewScaled=true.
         if (shouldScalePreview) {
             return {
                 measuredWidth,
                 layoutWidth: simulatedWidth,
                 visiblePreviewWidth,
                 rawVisibleWidth,
+                outerVisiblePreviewWidth,
+                previewScaleSafetyPx,
                 simulatedWidth,
                 shouldScalePreview,
                 requestedColumns: previewSimulation.requestedColumns || requestedColumns,
@@ -376,6 +382,8 @@ class TuevCard extends HTMLElement {
             layoutWidth: visiblePreviewWidth,
             visiblePreviewWidth,
             rawVisibleWidth,
+            outerVisiblePreviewWidth,
+            previewScaleSafetyPx,
             simulatedWidth,
             shouldScalePreview,
             requestedColumns: previewSimulation.requestedColumns || requestedColumns,
@@ -408,6 +416,17 @@ class TuevCard extends HTMLElement {
             width: 720,
             requestedColumns: "4"
         };
+    }
+
+    getPreviewScaleSafetyPx() {
+        // The visible preview pane width includes the reserved scrollbar gutter
+        // and the polished right edge from b347-b349. CSS transforms are
+        // clipped by that inner scroll box, so the scale target needs a small
+        // deterministic inset. Keeping this as a named helper avoids another
+        // hard-coded magic subtraction in getLayoutContext().
+        const scrollbarReserve = 18;
+        const edgeReserve = 8;
+        return scrollbarReserve + edgeReserve;
     }
 
     getPreviewVisibleWidth() {
@@ -470,12 +489,14 @@ class TuevCard extends HTMLElement {
         };
 
         const rows = [
-            ["b", "b352"],
+            ["b", "b353"],
             ["reason", layoutContext.debugReason],
             ["plate", this.config?.plate_style || "plate"],
             ["cols", layoutContext.requestedColumns],
             ["measured", layoutContext.measuredWidth],
             ["rawVisible", layoutContext.rawVisibleWidth],
+            ["outer", layoutContext.outerVisiblePreviewWidth],
+            ["safety", layoutContext.previewScaleSafetyPx],
             ["visible", layoutContext.visiblePreviewWidth],
             ["sim", layoutContext.simulatedWidth],
             ["layout", layoutContext.layoutWidth],
@@ -520,7 +541,7 @@ class TuevCard extends HTMLElement {
                 style="
                     height: ${height};
                     overflow: hidden;
-                    width: ${layoutContext.visiblePreviewWidth ? `${layoutContext.visiblePreviewWidth}px` : "100%"};
+                    width: ${layoutContext.outerVisiblePreviewWidth ? `${layoutContext.outerVisiblePreviewWidth}px` : (layoutContext.visiblePreviewWidth ? `${layoutContext.visiblePreviewWidth}px` : "100%")};
                     max-width: 100%;
                     scrollbar-gutter: stable;
                     background: var(--card-background-color, #1c1c1c);
