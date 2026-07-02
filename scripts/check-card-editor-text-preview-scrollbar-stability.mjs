@@ -15,11 +15,15 @@ const card = read('src/tuev-card-entry.js');
 const parts = read('src/card/render-parts.js');
 const pkg = JSON.parse(read('package.json'));
 
-assert(pkg.version.includes('b349'), 'package version must identify b349.');
+assert(pkg.version.includes('b350'), 'package version must identify b350.');
 assert(card.includes('scrollbar-gutter: stable;'), 'scaled editor preview wrapper must reserve a stable scrollbar gutter without both-edge ghost gutters.');
-assert(!card.includes('scrollbar-gutter: stable both-edges'), 'scaled editor preview wrapper must not reserve a left ghost gutter after b349 edge polish.');
+assert(!card.includes('scrollbar-gutter: stable both-edges'), 'scaled editor preview wrapper must not reserve a left ghost gutter after b350 edge polish.');
 assert(card.includes('box-shadow: inset -1px 0 0 var(--divider-color'), 'scaled editor preview wrapper must draw a clear right edge.');
 assert(card.includes('background: var(--card-background-color'), 'scaled editor preview wrapper must cover the reserved edge with the card background.');
+assert(card.includes('const rawVisibleWidth = this.getPreviewVisibleWidth();'), 'layout context must use raw visible preview width before scale decisions.');
+assert(!card.includes('this.getPreviewVisibleWidth() || measuredWidth'), 'visible preview width must not fall back to measuredWidth from wider ancestors.');
+assert(card.includes('visiblePreviewWidth >= simulatedWidth - 4'), 'preview scale bypass must use visiblePreviewWidth.');
+assert(!card.includes('scale >= 0.995 && measuredWidth >= simulatedWidth - 4'), 'preview scale bypass must not use measuredWidth.');
 assert(card.includes('Math.abs(previousWidth - visibleWidth) < 24'), 'preview visible width must ignore scrollbar-gutter sized oscillations.');
 assert(card.includes('this._previewVisibleWidth = visibleWidth'), 'preview visible width must be cached after stable changes.');
 assert(card.includes('const textPlatePreview = this.isEditorPreviewContext() && this.config?.plate_style !== "plate"'), 'card must explicitly detect text-plate editor preview mode.');

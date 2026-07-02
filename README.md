@@ -1,33 +1,30 @@
-# TÜV Reminder Card b349
+# TÜV Reminder Card b350
 
-Full/Card handover ZIP for **b349 Editor Preview Scroll Edge Polish**.
+Full/Card handover ZIP for **b350 Editor Preview Visible Width Bypass Fix**.
 
-b349 keeps the b347/b348 text-mode editor preview stability fix and the b348 popup rollback. It only polishes the right edge of the stabilized editor preview so the permanent scrollbar/gutter area has a clear visual boundary.
+b350 builds on b349 and fixes the root cause of the editor preview clipping/jitter: the preview scale bypass could use a too-wide Home Assistant editor dialog ancestor as `measuredWidth`.
 
-## Current status
+## Current stand
 
-- Current Card stand: **b349**
-- Based on: **b348 Editor Popup Rollback / Text Preview Stability**
-- Scope: Editor-preview visual edge polish only.
-- Reminder integration remains a later end-to-end step.
+- Current Card stand: **b350**
+- Based on: b349 Editor Preview Scroll Edge Polish
+- Scope: Editor preview width/scale decision only
 
-## Changed in b349
+## Changed in b350
 
-- The scaled editor preview wrapper now reserves a stable scrollbar gutter without the previous `both-edges` ghost gutter.
-- The preview wrapper paints its own card-background edge.
-- A subtle inset right border gives the stabilized preview a clearer visual end next to the Home Assistant editor scrollbar/grey background.
-- Existing text-mode jitter stabilization remains unchanged.
-- Popup outside-click handling remains on the safer b344/b348 deferred click path.
+- `getLayoutContext()` no longer uses `this.getPreviewVisibleWidth() || measuredWidth`.
+- A first render where the visible preview width is still `0` gets a safe fallback using the simulated preview width.
+- The scale-bypass condition now checks `visiblePreviewWidth`, not `measuredWidth`.
+- Existing width refreshes can then correct the preview after the first measurable frame.
 
 ## Not changed
 
-- keine Kennzeichen-Geometrie
-- keine HU-Logik
-- keine Wechselkennzeichen-Geometrie
-- keine Sortierlogik
-- keine Reminder-Integration
-- kein grafischer Renderer-Umbau
-- kein neues Popup-Experiment
+- no plate geometry
+- no HU logic
+- no change-plate geometry
+- no sorting logic
+- no popup experiment
+- no Reminder integration
 
 ## Checks
 
@@ -38,21 +35,26 @@ npm run check
 npm run build
 ```
 
-Expected:
+ChatGPT ZIPs do not include TTF binaries. A local GitHub/HACS build must include the GL fonts in `fonts/` so they are copied to `dist/fonts/`.
 
-- JavaScript check passes.
-- Release asset check passes when local GL font binaries exist in `fonts/`.
-- Card/Lab renderer boundary checks pass.
-- Text-preview scrollbar stability check also validates the b349 right-edge polish.
 
-## Font note
+## Guardrail
 
-The release must include the GL font binaries as TTF files in `fonts/` and `dist/fonts/` when built locally. ChatGPT-generated ZIPs may omit binary font files; the local build script copies existing font binaries into `dist/fonts/`.
+- keine Kennzeichen-Geometrie
+- Reminder integration remains later.
 
-## Preserved earlier editor fixes
 
-b349 preserves the earlier **Kennzeichen grafisch darstellen** option fix: the checkbox controls text vs. graphical plate rendering, while the preview edge polish only changes the editor preview wrapper. The b337 sort rollback, group color preservation when moving groups, and b348 popup rollback remain unchanged.
+## Preserved editor fixes
 
-## Final Release Audit note
+- Kennzeichen grafisch darstellen remains the user-facing switch for graphical vs text plates.
+- Sortier controls keep the b337 config flow.
+- Gruppen-Farben remain preserved when groups are moved.
 
-b349 keeps the Final Release Audit status from the previous release-audit checkpoint; this build only polishes the editor preview edge. ChatGPT-ZIPs enthalten keine TTF-Binaries. A local GitHub/HACS release must include the GL TTF files before building.
+
+## Final Release Audit / guardrails
+
+This b350 handover keeps the Final Release Audit status while applying only the editor preview visible-width bypass fix.
+
+- ChatGPT-ZIPs enthalten keine TTF-Binaries.
+- keine Kennzeichen-Geometrie
+- keine Reminder-Integration

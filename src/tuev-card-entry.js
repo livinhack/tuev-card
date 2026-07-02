@@ -2,7 +2,7 @@
 
 import { localize } from "./translations/index.js?v=b136";
 import { normalizeCardConfig } from "./card/config.js?v=b136";
-import { escapeHtml } from "./utils/html-escape.js?v=b349";
+import { escapeHtml } from "./utils/html-escape.js?v=b350";
 import { findFirstTuevEntity } from "./card/entities.js?v=b136";
 import { getAllEntityIdsFromConfig, getEntitySections } from "./card/groups.js?v=b136";
 import { calculateAutomaticBadgeSize, calculateLayoutInfo } from "./card/layout.js?v=b136";
@@ -20,8 +20,8 @@ import {
 import {
     getLicensePlateMetrics,
     renderLicensePlate
-} from "./plate/renderer.js?v=b349";
-import { TuevCardEditor } from "./editor/editor.js?v=b349";
+} from "./plate/renderer.js?v=b350";
+import { TuevCardEditor } from "./editor/editor.js?v=b350";
 
 window.customCards = window.customCards || [];
 
@@ -327,10 +327,23 @@ class TuevCard extends HTMLElement {
         }
 
         const simulatedWidth = previewSimulation.width;
-        const visiblePreviewWidth = this.getPreviewVisibleWidth() || measuredWidth;
+        const rawVisibleWidth = this.getPreviewVisibleWidth();
+
+        if (rawVisibleWidth === 0) {
+            return {
+                measuredWidth,
+                layoutWidth: simulatedWidth,
+                requestedColumns: previewSimulation.requestedColumns || requestedColumns,
+                previewContext,
+                previewScaled: false,
+                scale: 1
+            };
+        }
+
+        const visiblePreviewWidth = rawVisibleWidth;
         const scale = Math.min(1, Math.max(0.05, visiblePreviewWidth / simulatedWidth));
 
-        if (scale >= 0.995 && measuredWidth >= simulatedWidth - 4) {
+        if (scale >= 0.995 && visiblePreviewWidth >= simulatedWidth - 4) {
             return {
                 measuredWidth,
                 layoutWidth: measuredWidth,

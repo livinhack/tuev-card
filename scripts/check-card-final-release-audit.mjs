@@ -7,7 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => readFileSync(resolve(root, relativePath), "utf8");
 
 function fail(message) {
-  console.error(`b349 final release audit check failed: ${message}`);
+  console.error(`b350 final release audit check failed: ${message}`);
   process.exitCode = 1;
 }
 
@@ -25,32 +25,32 @@ const renderer = read("src/plate/renderer.js");
 const font = read("src/plate/font.js");
 const dist = read("dist/tuev-card.js");
 
-assert(pkg.includes('"version": "0.1.1-b349"'), "package version must be b349");
+assert(pkg.includes('"version": "0.1.1-b350"'), "package version must be b350");
 assert(pkg.includes('"check:card-final-release-audit"'), "package check script must include final release audit");
 assert(pkg.includes('npm run check:card-final-release-audit'), "npm run check must execute final release audit");
 assert(existsSync(releaseDocPath), "docs/B347_CARD_FINAL_RELEASE_AUDIT.md must exist");
 
-assert(readme.includes("b349") && /Final Release Audit/i.test(readme), "README must identify b349 as Final Release Audit");
-assert(handover.includes("b349") && /Final Release Audit/i.test(handover), "HANDOVER must identify b349 as Final Release Audit");
+assert(readme.includes("b350") && /Final Release Audit/i.test(readme), "README must identify b350 as Final Release Audit");
+assert(handover.includes("b350") && /Final Release Audit/i.test(handover), "HANDOVER must identify b350 as Final Release Audit");
 assert(readme.includes("ChatGPT-ZIPs enthalten keine TTF-Binaries"), "README must keep the ChatGPT font-binary note");
 assert(handover.includes("Reminder-ZIP") && handover.includes("End-to-End"), "HANDOVER must keep Reminder integration as a later End-to-End step");
-assert(/keine Kennzeichen-Geometrie/i.test(readme) && /keine Reminder-Integration/i.test(readme), "README must explicitly state the b349 non-goals");
+assert(/keine Kennzeichen-Geometrie/i.test(readme) && /keine Reminder-Integration/i.test(readme), "README must explicitly state the b350 non-goals");
 
-assert(card.includes('from "./plate/renderer.js?v=b349"'), "Card runtime must use b349 public renderer cache marker");
-assert(editor.includes('from "../plate/renderer.js?v=b349"'), "Editor must use b349 public renderer cache marker");
-assert(renderer.includes('from "./lab-renderer-adapter.js?v=b349"'), "Public renderer must use b349 adapter cache marker");
-assert(card.includes('from "./utils/html-escape.js?v=b349"'), "Card entry must keep shared HTML escaping with b349 cache marker");
-assert(editor.includes('from "../utils/html-escape.js?v=b349"'), "Editor must keep shared HTML escaping with b349 cache marker");
+assert(card.includes('from "./plate/renderer.js?v=b350"'), "Card runtime must use b350 public renderer cache marker");
+assert(editor.includes('from "../plate/renderer.js?v=b350"'), "Editor must use b350 public renderer cache marker");
+assert(renderer.includes('from "./lab-renderer-adapter.js?v=b350"'), "Public renderer must use b350 adapter cache marker");
+assert(card.includes('from "./utils/html-escape.js?v=b350"'), "Card entry must keep shared HTML escaping with b350 cache marker");
+assert(editor.includes('from "../utils/html-escape.js?v=b350"'), "Editor must keep shared HTML escaping with b350 cache marker");
 
 assert(!card.includes("_plateFontRefreshTimer"), "dead font refresh timer must stay removed");
 assert(!card.includes("setInterval"), "Card entry must not reintroduce font polling intervals");
 assert(font.includes("/hacsfiles/tuev-card/fonts/GL-Nummernschild-Mtl.ttf"), "Font helper must still point to HACS font asset path");
 assert(font.includes("/hacsfiles/tuev-card/fonts/GL-Nummernschild-Eng.ttf"), "Font helper must still point to HACS font asset path");
 
-assert(dist.includes("b349"), "dist bundle must be rebuilt with b349 markers");
+assert(dist.includes("b350"), "dist bundle must be rebuilt with b350 markers");
 
 if (!process.exitCode) {
-  console.log("b349 final release audit OK: docs, cache markers, font notes, security cleanup, and later Reminder boundary are release-ready.");
+  console.log("b350 final release audit OK: docs, cache markers, font notes, security cleanup, and later Reminder boundary are release-ready.");
 }
 
 if (process.exitCode) process.exit(process.exitCode);

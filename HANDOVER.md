@@ -1,63 +1,52 @@
-# Handover – b349 Editor Preview Scroll Edge Polish
+# Handover – b350 Editor Preview Visible Width Bypass Fix
 
-Current stand: **b349**.
+Current stand: **b350**.
 
-b349 builds on b348. The text-mode editor preview jitter fix remains, and the popup outside-click rollback remains. This step only cleans up the visual right edge of the stabilized editor preview scrollbar/gutter area.
+b350 builds on b349 and addresses the concrete root cause found in the editor preview: `getLayoutContext()` could bypass preview scaling because it used a too-wide `measuredWidth` from HA editor ancestors when `getPreviewVisibleWidth()` returned `0` during first render.
 
-## Change in b349
+## Change
 
-- `src/tuev-card-entry.js`
-  - `data-preview-scale-outer` now uses `scrollbar-gutter: stable;` instead of `stable both-edges`.
-  - The preview wrapper paints a card-background edge.
-  - The preview wrapper draws a subtle inset right border using `var(--divider-color)`.
-  - Right-side border radii are preserved so the preview edge does not look like an unbounded grey strip.
+- `rawVisibleWidth = this.getPreviewVisibleWidth()` is kept separate from measured card/ancestor width.
+- `rawVisibleWidth === 0` uses a safe simulated-width fallback instead of falling back to an oversized ancestor width.
+- The preview scale-bypass guard now uses `visiblePreviewWidth >= simulatedWidth - 4`.
+- The older `measuredWidth >= simulatedWidth - 4` bypass is rejected by checks.
 
-- `scripts/check-card-editor-text-preview-scrollbar-stability.mjs`
-  - Updated to require the b349 edge polish and to reject the old `stable both-edges` style.
+## Preserved from previous stands
 
-## Kept from b348
-
-- Popup outside-click handling remains on the safer b344-style deferred `click` capture path.
-- No `pointerdown` capture experiment is restored.
-- No new `keydown` popup listener is restored.
-
-## Kept from b347
-
-- Text-mode editor preview width/height hysteresis.
-- Stable scrollbar reservation to avoid the permanent text-mode preview jitter.
-- Fixed text plate fallback line box.
+- b347/b348 text-preview scrollbar stability remains.
+- b348 popup rollback remains.
+- b349 preview edge polish remains.
+- b337 sort rollback remains.
 
 ## Not changed
 
-- keine Kennzeichen-Geometrie
-- keine HU-Logik
-- keine Wechselkennzeichen-Geometrie
-- keine Sortierlogik
-- keine Reminder-Integration
-- kein grafischer Renderer-Umbau
-- kein Legacy-/Umschalter
+- no Kennzeichen geometry
+- no HU logic
+- no Wechselkennzeichen geometry
+- no Sortierlogik
+- no Reminder integration
 
-## Validation
+## Checks
 
 - `npm run check`
 - `npm run build`
 
-Both passed in this handover build.
+If b350 is confirmed in Home Assistant, this should replace b349 as the current Card-side editor-preview stability checkpoint before the Reminder ZIP integration.
 
-## Next recommended manual test
 
-In the Home Assistant card editor:
+## Guardrail
 
-1. Open the editor.
-2. Toggle **Kennzeichen grafisch darstellen** off.
-3. Confirm the permanent text-mode jitter stays gone.
-4. Confirm the right preview edge/scrollbar area now looks visually bounded.
-5. Confirm floating panels still close on outside click and the editor page does not hang.
+- keine Kennzeichen-Geometrie
+- Reminder integration remains later.
 
-## Preserved earlier editor behaviour
 
-b349 preserves the earlier editor fixes: **Kennzeichen grafisch darstellen** still gates graphical plate rendering, Sortier controls keep the b337 config flow, and Gruppen-Farben continue to travel with moved groups. The b348 popup rollback remains active.
+## Preserved editor fixes
 
-## Final Release Audit / later Reminder boundary
+- Sortier controls keep the b337 config-only flow.
+- Gruppen-Farben travel with moved groups.
+- Kennzeichen grafisch darstellen remains the text/graphic switch.
 
-b349 keeps the Final Release Audit status. The later Reminder-ZIP integration remains a separate End-to-End step after the Card-side editor/preview polish is confirmed.
+
+## Final Release Audit / later integration
+
+b350 keeps the Final Release Audit status after the editor preview visible-width bypass fix. The current Reminder-ZIP integration remains a later End-to-End step.

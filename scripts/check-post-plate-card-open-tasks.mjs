@@ -32,16 +32,16 @@ const editor = read("src/editor/editor.js");
 const renderer = read("src/plate/renderer.js");
 const adapter = read("src/plate/lab-renderer-adapter.js");
 
-assert(readme.includes("b349"), "README must identify the current b349 stand.");
-assert(handover.includes("b349"), "HANDOVER must identify the current b349 stand.");
+assert(readme.includes("b350"), "README must identify the current b350 stand.");
+assert(handover.includes("b350"), "HANDOVER must identify the current b350 stand.");
 assert(doc.includes("prepared/frozen") || doc.includes("prepared/frozen"), "b337 doc must explicitly mark the plate renderer as prepared/frozen.");
 assert(/Reminder integration/i.test(doc), "b337 doc must keep later Reminder integration explicit.");
 assert(/HACS\/font\/release/i.test(doc) || /font/i.test(doc), "b337 doc must keep font/HACS release readiness explicit.");
 assert(/b336/.test(b336Doc), "b336 final plate smoke checkpoint doc must remain available as history.");
 
-assert(card.includes('./plate/renderer.js?v=b349'), "Card runtime must use the b349 public renderer cache marker.");
-assert(editor.includes('../plate/renderer.js?v=b349'), "Editor must use the b349 public renderer cache marker.");
-assert(renderer.includes('./lab-renderer-adapter.js?v=b349'), "Public renderer entry must delegate to the b349 adapter cache marker.");
+assert(card.includes('./plate/renderer.js?v=b350'), "Card runtime must use the b350 public renderer cache marker.");
+assert(editor.includes('../plate/renderer.js?v=b350'), "Editor must use the b350 public renderer cache marker.");
+assert(renderer.includes('./lab-renderer-adapter.js?v=b350'), "Public renderer entry must delegate to the b350 adapter cache marker.");
 assert(adapter.includes('huBadgeRenderer: "full"'), "Card adapter must keep Full-HU badge enabled after the post-plate audit.");
 assert(adapter.includes("changePlate: options.changePlate"), "Card adapter must keep Wechselkennzeichen vehicle data pass-through after the post-plate audit.");
 
@@ -51,6 +51,6 @@ for (const source of [readme, handover, doc]) {
 }
 
 if (!process.exitCode) {
-  console.log("Post-plate Card open-tasks audit OK: b349 markers, frozen/prepared plate status, remaining Card buckets, font note, and later Reminder integration are documented.");
+  console.log("Post-plate Card open-tasks audit OK: b350 markers, frozen/prepared plate status, remaining Card buckets, font note, and later Reminder integration are documented.");
 }
 if (process.exitCode) process.exit(process.exitCode);

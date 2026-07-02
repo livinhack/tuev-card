@@ -111,3 +111,7 @@ b247 note: Corrected Kraftrad Wechselkennzeichen W/authority swap so the 45-mm a
 
 
 b248 note: Kraftrad Wechselkennzeichen W is centered in the 35-mm HU/W slot and Lab-only random Wechselkennzeichen presets were added. Card runtime code is unchanged; no font binaries are included in the chat ZIP.
+
+
+## b350
+Editor preview visible-width bypass fix. No license-relevant asset changes.
